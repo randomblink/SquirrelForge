@@ -12,7 +12,10 @@ final class MemoryServiceProvider implements ServiceProviderInterface
 {
     public function register(ContainerInterface $container): void
     {
-        $container->singleton(MemoryStoreInterface::class, InMemoryStore::class);
+        $container->singleton(
+            MemoryStoreInterface::class,
+            static fn (ContainerInterface $c): MemoryStoreInterface => MemoryStoreResolver::resolve($c)
+        );
     }
 
     public function boot(ContainerInterface $container): void

@@ -104,8 +104,10 @@ no 31) reserved for future layers; that is not a defect.
 | src/Events/CallbackEventListener.php |  |  |
 | src/Observability/ArrayLogger.php |  |  |
 | src/Observability/ObservabilityServiceProvider.php |  |  |
-| src/Memory/InMemoryStore.php |  |  |
-| src/Memory/MemoryServiceProvider.php |  |  |
+| src/Memory/InMemoryStore.php | Present | Default `MemoryStoreInterface`; lost on process exit. Still the default when no persistent path is configured. |
+| src/Memory/FileMemoryStore.php | Present | Added 2026-07-03; JSON-file-backed `MemoryStoreInterface` so memory records survive across separate process invocations. Re-reads/re-writes the whole file per call rather than caching, to stay correct across multiple instances pointed at the same path. |
+| src/Memory/MemoryStoreResolver.php | Present | Added 2026-07-03; resolves `memory.store_path` (Configuration) or `SQUIRRELFORGE_MEMORY_STORE_PATH` (env) to pick `FileMemoryStore`, defaulting to `InMemoryStore` when neither is set -- same precedence pattern as `LlmClientResolver`. |
+| src/Memory/MemoryServiceProvider.php | Present | Binds `MemoryStoreInterface` via `MemoryStoreResolver` as of 2026-07-03 (previously hardcoded to `InMemoryStore`). |
 | src/Workflow/WorkflowEngine.php |  |  |
 | src/Workflow/WorkflowServiceProvider.php |  |  |
 | src/Agent/AgentRegistry.php | Present | |
@@ -355,6 +357,31 @@ outside the root. Covered by two new tests in
 `testRefusesDeleteThroughASymlinkedFileEscapingRoot` (plus
 `testStillCreatesNestedDirectoriesWithNoSymlinksInvolved`, confirming the
 new ancestry walk doesn't break ordinary multi-level directory creation).
+
+2026-07-03 (follow-up): Gave the Agent pipeline persistent memory. Added
+`FileMemoryStore` (`src/Memory/FileMemoryStore.php`), a
+`MemoryStoreInterface` implementation backed by a single JSON file rather
+than the in-process array `InMemoryStore` uses -- records now survive
+across separate runs of the application instead of vanishing the moment
+the process exits. Added `MemoryStoreResolver`
+(`src/Memory/MemoryStoreResolver.php`), which picks `FileMemoryStore` when
+a path is configured (`memory.store_path` via `ConfigurationInterface`, or
+`SQUIRRELFORGE_MEMORY_STORE_PATH` env, Configuration taking precedence --
+the same resolution order `LlmClientResolver` already uses for the
+Anthropic API key) and falls back to `InMemoryStore` otherwise, so this is
+backward compatible and opt-in: with neither set, memory behaves exactly
+as it did before. `MemoryServiceProvider::register()` now binds
+`MemoryStoreInterface` through this resolver instead of hardcoding
+`InMemoryStore::class`. Covered by
+`tests/Memory/FileMemoryStoreTest.php` (real temp file: store/retrieve,
+persistence confirmed across two separate `FileMemoryStore` instances
+pointed at the same path, search-by-criteria, update, delete, `boot()`
+creating the parent directory, health reporting) and
+`tests/Memory/MemoryStoreResolverTest.php` (no config/env ->
+`InMemoryStore`; Configuration key set, env var set, and Configuration
+taking precedence over env -> `FileMemoryStore`, using the real
+`Container`/`Configuration` classes rather than fakes, since both are
+simple enough to use directly).
 
 Review order:
 
