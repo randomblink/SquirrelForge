@@ -88,6 +88,7 @@ no 31) reserved for future layers; that is not a defect.
 | src/Contracts/KnowledgeProviderInterface.php |  |  |
 | src/Contracts/LlmClientInterface.php | Present | Added 2026-07-02; provider-agnostic chat-completion contract. |
 | src/Llm/AnthropicClient.php | Present | Added 2026-07-02; cURL-based Anthropic Messages API implementation. |
+| src/Llm/LlmClientResolver.php | Present | Added 2026-07-03; extracted from `AgentServiceProvider` so any module can resolve an LLM client the same way. |
 | src/Container/Container.php |  |  |
 | src/Core/Application.php |  |  |
 | src/Core/Configuration.php |  |  |
@@ -103,7 +104,8 @@ no 31) reserved for future layers; that is not a defect.
 | src/Workflow/WorkflowEngine.php |  |  |
 | src/Workflow/WorkflowServiceProvider.php |  |  |
 | src/Agent/AgentRegistry.php | Present | |
-| src/Agent/AgentServiceProvider.php | Present | Now boots and registers all 8 role agents plus the orchestrator. |
+| src/Agent/AgentServiceProvider.php | Present | Registers only `AgentRegistry`/`AgentOrchestrator` infrastructure as of 2026-07-03; no longer constructs role agents itself. |
+| src/Agent/AgentPipelineModule.php | Present | Added 2026-07-03; a `ModuleInterface` that registers the 8 role agents + orchestrator into `AgentRegistry`, loaded via `ModuleLoader` in `Kernel::boot()` instead of being hardcoded in a provider. |
 | src/Agent/AgentOrchestrator.php | Present | Added 2026-07-02; runs the Architect->...->Release handoff sequence. |
 | src/Agent/CallbackAgent.php | Present | Generic closure-backed agent, useful for ad hoc/test agents. |
 | src/Agent/Roles/AbstractRoleAgent.php | Present | Added 2026-07-02; shared plumbing for pipeline role agents. |
@@ -118,7 +120,7 @@ no 31) reserved for future layers; that is not a defect.
 | src/Tools/ToolRegistry.php | Present | |
 | src/Tools/ToolServiceProvider.php | Present | |
 | src/Modules/ModuleInterface.php | Present | |
-| src/Modules/ModuleLoader.php | Present | |
+| src/Modules/ModuleLoader.php | Present | Now actually invoked, by `Kernel::loadModules()` (2026-07-03); previously nothing called it. |
 | src/Modules/ModuleRegistry.php | Present | |
 | src/Modules/ModuleServiceProvider.php | Present | |
 | src/Core/Bootstrapper.php | Present | |
@@ -156,7 +158,7 @@ been refreshed to reflect what is actually still open.
 
 | Missing Item | Priority | Notes |
 |---|---:|---|
-| Module auto-discovery of role agents | Medium | Role agents are registered directly in `AgentServiceProvider::boot()`. `12_AGENT/BOOTSTRAP.md` step 4 implies discovery should ultimately go through `14_ENGINE/PROJECT-LOADER.md` / `ModuleLoader`. |
+| True filesystem module auto-discovery | Low | As of 2026-07-03, role-agent registration goes through `AgentPipelineModule` + `ModuleLoader` (see `Kernel::loadModules()`) instead of being hardcoded in a service provider's `boot()`. The module list passed to `ModuleLoader::load()` is still an explicit array in `Kernel.php`, though -- nothing scans a directory for modules yet. Revisit if/when third-party or plugin-style modules need to be discovered without editing `Kernel.php`. |
 | Developer/Release agents still pure data-aggregators | Medium | Architect, Planner, Reviewer, Security, Performance, and Documentation now call an injected LLM to fill in judgment fields the caller didn't supply (see `src/Agent/Roles/AbstractRoleAgent::reason()`). Developer and Release intentionally were not given this: Developer would otherwise mean an LLM autonomously writing/editing project files with no tool-use or review loop, and Release is meant to be a pure gate-check. Revisit if/when real tool-use (file edits, test execution) is wired in. |
 | Only Anthropic supported | Low | `src/Llm/AnthropicClient.php` is the only `LlmClientInterface` implementation. Add another implementation (e.g. OpenAI) if multi-provider support is ever needed; agents only depend on the interface. |
 
@@ -225,6 +227,19 @@ describes the working PHP runtime, test suite, and CI instead of
 "architecture and framework development phase"; and "License" now notes
 that `LICENSE` exists but is still empty rather than implying no file
 exists at all.
+
+2026-07-03 (follow-up): Moved role-agent registration out of
+`AgentServiceProvider::boot()` and into `AgentPipelineModule`
+(`src/Agent/AgentPipelineModule.php`), a `ModuleInterface` loaded through
+`ModuleLoader` from a new `Kernel::loadModules()` step. `ModuleLoader`
+already existed but nothing ever called it; it's now actually wired in.
+`AgentServiceProvider` reverted to only registering `AgentRegistry`/
+`AgentOrchestrator` infrastructure, restoring its original intent ("agents
+are discovered and registered by modules"). Extracted the LLM-client
+resolution logic into `src/Llm/LlmClientResolver.php` so it isn't tied to
+one specific provider. This is module-based registration, not filesystem
+auto-discovery -- the module list is still an explicit array in
+`Kernel.php` (see Section 5).
 
 Review order:
 

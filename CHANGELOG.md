@@ -26,6 +26,8 @@ All notable changes to SquirrelForge are recorded here.
 - `.github/workflows/tests.yml`: runs `composer test` on every push/PR to `main` across a PHP 8.2/8.3/8.4 matrix.
 - Tests status badge on `README.md`.
 - `README.md` for `00_CORE`, `30_LEARNING`, `32_OPTIMIZATION`, and `35_RESILIENCE` -- the four numbered layers that didn't have one. Every numbered layer now has a README.
+- `AgentPipelineModule` (`src/Agent/AgentPipelineModule.php`): a `ModuleInterface` that registers the eight role agents and the orchestrator into `AgentRegistry`, loaded through `ModuleLoader` from a new `Kernel::loadModules()` step instead of being hardcoded in a service provider.
+- `src/Llm/LlmClientResolver.php`: extracted the `ANTHROPIC_API_KEY`/`ConfigurationInterface` resolution logic out of `AgentServiceProvider` so any module can resolve an LLM client the same way.
 
 ### Fixed
 
@@ -35,5 +37,5 @@ All notable changes to SquirrelForge are recorded here.
 
 ### Changed
 
-- `AgentServiceProvider` now registers and boots the eight role agents and the orchestrator instead of leaving agent registration to future modules.
-- `AgentServiceProvider` now also builds an `AnthropicClient` when `ANTHROPIC_API_KEY` (env) or `llm.anthropic.api_key` (via `ConfigurationInterface`) is set, and passes it to every role agent; with neither set, every agent stays fully deterministic (no behavior change, fully backward compatible).
+- `AgentServiceProvider` now only registers the `AgentRegistry`/`AgentOrchestrator` infrastructure; it no longer constructs role agents itself. Role-agent registration (and the `AnthropicClient` built from `ANTHROPIC_API_KEY`/`llm.anthropic.api_key`, with neither set every agent staying fully deterministic) now happens in `AgentPipelineModule`.
+- `Kernel::boot()` now resolves `ModuleLoader` after all providers have registered and booted, and loads `AgentPipelineModule` through it -- `ModuleLoader` existed before but was never actually invoked.

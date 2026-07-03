@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace SquirrelForge\Core;
 
+use SquirrelForge\Agent\AgentPipelineModule;
 use SquirrelForge\Agent\AgentServiceProvider;
 use SquirrelForge\Contracts\EventBusInterface;
 use SquirrelForge\Events\Event;
 use SquirrelForge\Memory\MemoryServiceProvider;
+use SquirrelForge\Modules\ModuleLoader;
 use SquirrelForge\Modules\ModuleServiceProvider;
 use SquirrelForge\Core\CoreRuntimeServiceProvider;
 use SquirrelForge\Observability\ObservabilityServiceProvider;
@@ -42,6 +44,8 @@ final class Kernel
 
         $this->app->boot();
 
+        $this->loadModules();
+
         $this->events()->dispatch(new Event(
             uniqid('evt_', true),
             'SystemBooted',
@@ -57,5 +61,24 @@ final class Kernel
     public function events(): EventBusInterface
     {
         return $this->app->events();
+    }
+
+    /**
+     * Load application modules once every core provider has registered and
+     * booted. This is the single place modules get plugged in -- explicit,
+     * not filesystem auto-discovery -- so capability registration (like the
+     * Agent role pipeline) doesn't have to be hardcoded inside a core
+     * service provider's boot().
+     */
+    private function loadModules(): void
+    {
+        $container = $this->app->container();
+
+        /** @var ModuleLoader $moduleLoader */
+        $moduleLoader = $container->make(ModuleLoader::class);
+
+        $moduleLoader->load([
+            new AgentPipelineModule(),
+        ], $container);
     }
 }
