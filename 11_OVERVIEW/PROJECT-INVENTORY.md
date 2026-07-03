@@ -166,7 +166,6 @@ been refreshed to reflect what is actually still open.
 |---|---:|---|
 | Only Anthropic supported | Low | `src/Llm/AnthropicClient.php` is the only `LlmClientInterface` implementation. Add another implementation (e.g. OpenAI) if multi-provider support is ever needed; agents only depend on the interface. |
 | No version bump beyond CHANGELOG.md | Low | Real release actions finalize `CHANGELOG.md` but don't bump a version field, since this project doesn't have one defined (no `version` key in `composer.json`). |
-| Symlink-based write escape (narrow) | Low | `LocalFileSystem::write()`/`delete()` reject absolute paths and `..` segments before touching disk, but (unlike `read()`) don't `realpath()`-verify the final target, so a pre-existing symlink inside the root pointing outside it could redirect a write. Requires an attacker to already have write access inside the root to plant such a symlink, which is a narrow/low residual risk given `src/` is otherwise trusted, reviewed code. |
 
 ---
 
@@ -339,6 +338,23 @@ alongside `CHANGELOG.md`. Covered by a new
 `tests/ReleaseAgentToolUseTest.php`; the existing tests in that file were
 updated since the working-tree check is now always the first
 `CommandRunnerInterface` call the agent makes.
+
+2026-07-03 (follow-up): Closed the symlink-based write-escape gap
+previously noted above and in Section 5. `LocalFileSystem::write()` and
+`::delete()` now realpath()-verify containment the same way `read()`
+already did -- `write()` walks up from the target to the nearest
+*existing* ancestor directory (the target itself, and any directories
+`mkdir()` would still need to create, may not exist yet, so `realpath()`
+can't be used on the target path directly) and confirms that ancestor
+resolves inside the root; `delete()` confirms the target itself resolves
+inside the root before unlinking it. Either check catches a pre-existing
+symlink anywhere in the path that would otherwise redirect the operation
+outside the root. Covered by two new tests in
+`tests/Tools/LocalFileSystemTest.php`:
+`testRefusesWriteThroughASymlinkedDirectoryEscapingRoot` and
+`testRefusesDeleteThroughASymlinkedFileEscapingRoot` (plus
+`testStillCreatesNestedDirectoriesWithNoSymlinksInvolved`, confirming the
+new ancestry walk doesn't break ordinary multi-level directory creation).
 
 Review order:
 

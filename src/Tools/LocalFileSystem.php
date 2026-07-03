@@ -16,6 +16,12 @@ use SquirrelForge\Contracts\FileSystemInterface;
  * LLM-generated path string contains. This is what makes it safe to give a
  * role agent real write access -- the containment is enforced here, not by
  * trusting the caller.
+ *
+ * write() and delete() additionally realpath()-verify containment (of the
+ * nearest existing ancestor directory, since the target itself may not
+ * exist yet), the same way read() already did -- this closes a narrow gap
+ * where a pre-existing symlink inside the root pointing outside it could
+ * otherwise redirect a write or delete past the textual ".." check above.
  */
 final class LocalFileSystem implements FileSystemInterface
 {
@@ -43,6 +49,7 @@ final class LocalFileSystem implements FileSystemInterface
     public function write(string $relativePath, string $contents): void
     {
         $path = $this->resolveForWrite($relativePath);
+        $this->assertAncestryIsContained($relativePath, $path);
 
         $directory = dirname($path);
 
@@ -63,11 +70,18 @@ final class LocalFileSystem implements FileSystemInterface
             return;
         }
 
-        if (!is_file($path)) {
+        $realRoot = realpath($this->root);
+        $real = realpath($path);
+
+        if ($real === false || $realRoot === false || !$this->isWithin($real, $realRoot)) {
+            throw new RuntimeException(sprintf('Refusing to delete path outside project root: "%s".', $relativePath));
+        }
+
+        if (!is_file($real)) {
             throw new RuntimeException(sprintf('Refusing to delete non-file path "%s".', $relativePath));
         }
 
-        if (!unlink($path)) {
+        if (!unlink($real)) {
             throw new RuntimeException(sprintf('Unable to delete "%s".', $relativePath));
         }
     }
@@ -120,5 +134,47 @@ final class LocalFileSystem implements FileSystemInterface
     private function isWithin(string $path, string $root): bool
     {
         return $path === $root || str_starts_with($path, rtrim($root, '/') . '/');
+    }
+
+    /**
+     * Verifies that the nearest *existing* ancestor directory of $path --
+     * the deepest directory component that's actually on disk today -- is
+     * really inside the root once symlinks are resolved. The target itself
+     * (and any not-yet-created intermediate directories) may not exist, so
+     * realpath() can't be used on $path directly; but any symlink that
+     * could redirect the eventual write must already exist as a directory
+     * somewhere along the path, and this walk is guaranteed to find it
+     * (bounded by $this->root, which the constructor already confirmed
+     * exists).
+     */
+    private function assertAncestryIsContained(string $relativePath, string $path): void
+    {
+        $realRoot = realpath($this->root);
+
+        if ($realRoot === false) {
+            throw new RuntimeException('LocalFileSystem root could not be resolved.');
+        }
+
+        $ancestor = dirname($path);
+
+        while (!is_dir($ancestor)) {
+            $parent = dirname($ancestor);
+
+            if ($parent === $ancestor) {
+                throw new RuntimeException(
+                    sprintf('Unable to resolve an existing ancestor directory for "%s".', $relativePath)
+                );
+            }
+
+            $ancestor = $parent;
+        }
+
+        $realAncestor = realpath($ancestor);
+
+        if ($realAncestor === false || !$this->isWithin($realAncestor, $realRoot)) {
+            throw new RuntimeException(
+                sprintf('Refusing path whose ancestor escapes the project root via a symlink: "%s".', $relativePath)
+            );
+        }
     }
 }

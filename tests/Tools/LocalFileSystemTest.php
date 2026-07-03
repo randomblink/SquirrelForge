@@ -105,6 +105,61 @@ final class LocalFileSystemTest extends TestCase
         $fs->read('does-not-exist.txt');
     }
 
+    public function testRefusesWriteThroughASymlinkedDirectoryEscapingRoot(): void
+    {
+        $outside = sys_get_temp_dir() . '/sf_lfs_outside_' . uniqid('', true);
+        mkdir($outside, 0775, true);
+
+        try {
+            symlink($outside, $this->root . '/escape-link');
+
+            $fs = new LocalFileSystem($this->root);
+
+            $this->expectException(\RuntimeException::class);
+
+            // Textually this is contained (no ".." segment), but
+            // "escape-link" resolves outside the root, so this must still
+            // be refused.
+            $fs->write('escape-link/payload.txt', 'nope');
+        } finally {
+            $this->assertFileDoesNotExist($outside . '/payload.txt');
+            $this->removeDirectory($outside);
+        }
+    }
+
+    public function testRefusesDeleteThroughASymlinkedFileEscapingRoot(): void
+    {
+        $outside = sys_get_temp_dir() . '/sf_lfs_outside_' . uniqid('', true);
+        mkdir($outside, 0775, true);
+        file_put_contents($outside . '/keep-me.txt', 'important');
+
+        try {
+            symlink($outside . '/keep-me.txt', $this->root . '/escape-link.txt');
+
+            $fs = new LocalFileSystem($this->root);
+
+            $this->expectException(\RuntimeException::class);
+
+            $fs->delete('escape-link.txt');
+        } finally {
+            $this->assertFileExists($outside . '/keep-me.txt');
+            $this->removeDirectory($outside);
+        }
+    }
+
+    public function testStillCreatesNestedDirectoriesWithNoSymlinksInvolved(): void
+    {
+        $fs = new LocalFileSystem($this->root);
+
+        // Guards against the ancestry check being over-eager and rejecting
+        // ordinary multi-level directory creation that involves no symlink
+        // at all.
+        $fs->write('a/b/c/d/deep.txt', 'deep');
+
+        $this->assertTrue($fs->exists('a/b/c/d/deep.txt'));
+        $this->assertSame('deep', $fs->read('a/b/c/d/deep.txt'));
+    }
+
     private function removeDirectory(string $directory): void
     {
         if (!is_dir($directory)) {
