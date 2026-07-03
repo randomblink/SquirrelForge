@@ -4,6 +4,11 @@ declare(strict_types=1);
 
 namespace SquirrelForge\Agent\Roles;
 
+use InvalidArgumentException;
+use SquirrelForge\Contracts\FileSystemInterface;
+use SquirrelForge\Contracts\LlmClientInterface;
+use Throwable;
+
 /**
  * Implements the Agent Developer role from `16_AGENTS/AGENT-DEVELOPER.md`.
  *
@@ -11,9 +16,27 @@ namespace SquirrelForge\Agent\Roles;
  * is only "Complete" (and only then does it hand off to the Reviewer) once
  * every completed task reports "Complete"; any "Blocked" task blocks the
  * whole pipeline rather than silently proceeding.
+ *
+ * By default this agent only reports on task results the caller supplies
+ * via context field "tasks_completed" -- it does not touch disk. When a
+ * `FileSystemInterface` is injected (alongside an LLM), and the caller does
+ * NOT supply "tasks_completed" explicitly, it will ask the LLM to propose
+ * file changes for the plan and apply them directly through that
+ * FileSystemInterface, which enforces path containment within its root.
+ * Any file change that fails to apply forces the owning task (or the whole
+ * batch, if it can't be attributed) to "Blocked" rather than reporting
+ * false success.
  */
 final class DeveloperAgent extends AbstractRoleAgent
 {
+    public function __construct(
+        ?LlmClientInterface $llm = null,
+        private readonly ?FileSystemInterface $fileSystem = null,
+        string $version = '1.0.0'
+    ) {
+        parent::__construct($llm, $version);
+    }
+
     public function stage(): string
     {
         return 'developer';
@@ -31,13 +54,24 @@ final class DeveloperAgent extends AbstractRoleAgent
 
     protected function process(array $context): array
     {
-        $this->requireHistory($context, 'planner');
+        $planner = $this->requireHistory($context, 'planner');
 
-        $tasks = $context['tasks_completed'] ?? [];
+        $fileChanges = [];
+
+        if (array_key_exists('tasks_completed', $context)) {
+            $tasks = $context['tasks_completed'];
+        } elseif ($this->fileSystem !== null) {
+            ['tasks' => $tasks, 'file_changes' => $fileChanges] = $this->implementViaFileSystem($planner);
+        } else {
+            throw new InvalidArgumentException(
+                'DeveloperAgent requires context field "tasks_completed", or an injected ' .
+                'FileSystemInterface (plus an LLM client) to implement the plan directly.'
+            );
+        }
 
         if ($tasks === []) {
-            throw new \InvalidArgumentException(
-                'DeveloperAgent requires context field "tasks_completed".'
+            throw new InvalidArgumentException(
+                'DeveloperAgent produced no task results; nothing to report.'
             );
         }
 
@@ -65,9 +99,77 @@ final class DeveloperAgent extends AbstractRoleAgent
         return [
             'implementation' => [
                 'tasks' => $tasks,
+                'file_changes' => $fileChanges,
             ],
             'status' => $status,
             'next_stage' => $status === 'Complete' ? 'reviewer' : null,
         ];
+    }
+
+    /**
+     * @param array<string, mixed> $planner
+     * @return array{tasks: array<int, array<string, mixed>>, file_changes: array<int, array<string, mixed>>}
+     */
+    private function implementViaFileSystem(array $planner): array
+    {
+        $reasoned = $this->reason(
+            'Read the execution plan and implement it directly. Return "file_changes" as an ' .
+            'array of objects {path, action, content}: "action" is one of create, update, ' .
+            'delete ("content" required for create/update, omitted for delete); "path" must ' .
+            'be relative to the project root, never absolute and never containing "..". ' .
+            'Return "tasks_completed" as an array of objects {task, output, status} mirroring ' .
+            'each plan phase, where "status" is one of Complete, In Progress, Blocked.',
+            ['tasks_completed', 'file_changes'],
+            ['plan' => $planner['plan'] ?? []]
+        );
+
+        $requestedChanges = $reasoned['file_changes'] ?? [];
+        $appliedChanges = [];
+
+        foreach ($requestedChanges as $change) {
+            $appliedChanges[] = $this->applyFileChange($change);
+        }
+
+        $tasks = $reasoned['tasks_completed'] ?? [];
+        $hasFailedChange = array_filter(
+            $appliedChanges,
+            static fn (array $applied): bool => $applied['applied'] === false
+        ) !== [];
+
+        if ($hasFailedChange) {
+            $tasks = $tasks !== []
+                ? array_map(static fn (array $task): array => [...$task, 'status' => 'Blocked'], $tasks)
+                : [['task' => 'Apply file changes', 'output' => null, 'status' => 'Blocked']];
+        }
+
+        return ['tasks' => $tasks, 'file_changes' => $appliedChanges];
+    }
+
+    /**
+     * @param array<string, mixed> $change
+     * @return array<string, mixed>
+     */
+    private function applyFileChange(array $change): array
+    {
+        $path = $change['path'] ?? null;
+        $action = $change['action'] ?? null;
+
+        if (!is_string($path) || $path === '') {
+            return ['path' => $path, 'action' => $action, 'applied' => false, 'error' => 'Missing or invalid path.'];
+        }
+
+        try {
+            match ($action) {
+                'create', 'update' => $this->fileSystem->write($path, (string) ($change['content'] ?? '')),
+                'delete' => $this->fileSystem->delete($path),
+                default => throw new InvalidArgumentException(
+                    sprintf('Unknown file change action "%s".', is_string($action) ? $action : 'null')
+                ),
+            };
+
+            return ['path' => $path, 'action' => $action, 'applied' => true];
+        } catch (Throwable $e) {
+            return ['path' => $path, 'action' => $action, 'applied' => false, 'error' => $e->getMessage()];
+        }
     }
 }

@@ -13,26 +13,34 @@ use SquirrelForge\Agent\Roles\ReleaseAgent;
 use SquirrelForge\Agent\Roles\ReviewerAgent;
 use SquirrelForge\Agent\Roles\SecurityAgent;
 use SquirrelForge\Contracts\AgentInterface;
+use SquirrelForge\Contracts\CommandRunnerInterface;
 use SquirrelForge\Contracts\ContainerInterface;
+use SquirrelForge\Contracts\FileSystemInterface;
 use SquirrelForge\Contracts\LlmClientInterface;
 use SquirrelForge\Llm\LlmClientResolver;
 use SquirrelForge\Modules\AbstractModule;
+use SquirrelForge\Tools\LocalFileSystem;
+use SquirrelForge\Tools\ReleaseActionsPolicy;
+use SquirrelForge\Tools\ShellCommandRunner;
 
 /**
  * Registers the Architect -> Planner -> Developer -> Reviewer -> Security ->
  * Performance -> Documentation -> Release role agent pipeline, plus the
  * orchestrator, into `AgentRegistry`.
  *
- * This is loaded through `ModuleLoader` (see `Kernel::boot()`) rather than
- * being hardcoded inside `AgentServiceProvider::boot()`, per
- * `12_AGENT/BOOTSTRAP.md`: capability registration is project
- * initialization, not core service wiring. `AgentServiceProvider` only
- * registers the `AgentRegistry`/`AgentOrchestrator` infrastructure those
- * agents get registered into.
+ * This is loaded through `ModuleLoader`, discovered by `ModuleDiscovery`
+ * scanning `src/` (see `Kernel::loadModules()`) rather than being hardcoded
+ * inside `AgentServiceProvider::boot()`, per `12_AGENT/BOOTSTRAP.md`:
+ * capability registration is project initialization, not core service
+ * wiring. `AgentServiceProvider` only registers the
+ * `AgentRegistry`/`AgentOrchestrator` infrastructure those agents get
+ * registered into.
  *
- * Note: this is module-based registration, not filesystem auto-discovery.
- * The module list is still an explicit array in `Kernel::boot()`; nothing
- * in SquirrelForge yet scans a directory for modules to load.
+ * Also wires the real tool-use dependencies for Developer (file writes)
+ * and Release (git actions): a `LocalFileSystem` rooted at the project
+ * directory and a `ShellCommandRunner` restricted to an allowlist of
+ * binaries. Whether Release is actually allowed to run those actions is a
+ * separate opt-in (`ReleaseActionsPolicy`) from having an LLM configured.
  */
 final class AgentPipelineModule extends AbstractModule
 {
@@ -57,8 +65,11 @@ final class AgentPipelineModule extends AbstractModule
         $registry = $container->make(AgentRegistry::class);
 
         $llm = LlmClientResolver::resolve($container);
+        $fileSystem = new LocalFileSystem($this->projectRoot());
+        $commandRunner = new ShellCommandRunner($this->projectRoot());
+        $actionsEnabled = ReleaseActionsPolicy::isEnabled($container);
 
-        foreach ($this->pipelineAgents($llm) as $agent) {
+        foreach ($this->pipelineAgents($llm, $fileSystem, $commandRunner, $actionsEnabled) as $agent) {
             $agent->boot();
             $registry->register($agent);
         }
@@ -70,22 +81,33 @@ final class AgentPipelineModule extends AbstractModule
     }
 
     /**
-     * Each agent receives the same (possibly null) LLM client. Agents that
-     * don't need to reason (Developer, Release) simply never call it.
-     *
      * @return array<int, AgentInterface>
      */
-    private function pipelineAgents(?LlmClientInterface $llm): array
-    {
+    private function pipelineAgents(
+        ?LlmClientInterface $llm,
+        FileSystemInterface $fileSystem,
+        CommandRunnerInterface $commandRunner,
+        bool $actionsEnabled
+    ): array {
         return [
             new ArchitectAgent($llm),
             new PlannerAgent($llm),
-            new DeveloperAgent($llm),
+            new DeveloperAgent($llm, $fileSystem),
             new ReviewerAgent($llm),
             new SecurityAgent($llm),
             new PerformanceAgent($llm),
             new DocumentationAgent($llm),
-            new ReleaseAgent($llm),
+            new ReleaseAgent($llm, $fileSystem, $commandRunner, $actionsEnabled),
         ];
+    }
+
+    /**
+     * Absolute path to the project root (one level above `src/`), used as
+     * the containment root for file writes and the working directory for
+     * shell commands.
+     */
+    private function projectRoot(): string
+    {
+        return dirname(__DIR__, 2);
     }
 }

@@ -87,8 +87,13 @@ no 31) reserved for future layers; that is not a defect.
 | src/Contracts/MemoryStoreInterface.php |  |  |
 | src/Contracts/KnowledgeProviderInterface.php |  |  |
 | src/Contracts/LlmClientInterface.php | Present | Added 2026-07-02; provider-agnostic chat-completion contract. |
+| src/Contracts/FileSystemInterface.php | Present | Added 2026-07-03; path-contained read/write/delete contract used by Developer and Release for real tool-use. |
+| src/Contracts/CommandRunnerInterface.php | Present | Added 2026-07-03; argv-array (never shell-string) process execution contract, used by Release. |
 | src/Llm/AnthropicClient.php | Present | Added 2026-07-02; cURL-based Anthropic Messages API implementation. |
 | src/Llm/LlmClientResolver.php | Present | Added 2026-07-03; extracted from `AgentServiceProvider` so any module can resolve an LLM client the same way. |
+| src/Tools/LocalFileSystem.php | Present | Added 2026-07-03; `FileSystemInterface` rooted at the project directory. Rejects absolute paths and any `..` path segment before touching disk. |
+| src/Tools/ShellCommandRunner.php | Present | Added 2026-07-03; `CommandRunnerInterface` restricted to an allowlist (`git`, `composer`, `phpunit`), executed via `proc_open()` with an argv array so no shell interpolation ever happens. |
+| src/Tools/ReleaseActionsPolicy.php | Present | Added 2026-07-03; resolves whether real release actions (commit/tag/push) are enabled, via `SQUIRRELFORGE_ENABLE_RELEASE_ACTIONS` (env) or `release.actions_enabled` (Configuration) -- deliberately separate from the LLM API key. |
 | src/Container/Container.php |  |  |
 | src/Core/Application.php |  |  |
 | src/Core/Configuration.php |  |  |
@@ -111,12 +116,12 @@ no 31) reserved for future layers; that is not a defect.
 | src/Agent/Roles/AbstractRoleAgent.php | Present | Added 2026-07-02; shared plumbing for pipeline role agents. |
 | src/Agent/Roles/ArchitectAgent.php | Present | Added 2026-07-02. |
 | src/Agent/Roles/PlannerAgent.php | Present | Added 2026-07-02. |
-| src/Agent/Roles/DeveloperAgent.php | Present | Added 2026-07-02. |
+| src/Agent/Roles/DeveloperAgent.php | Present | Added 2026-07-02. As of 2026-07-03, when `tasks_completed` isn't explicitly supplied and a `FileSystemInterface` + LLM are injected, writes/deletes files directly per the LLM's proposed `file_changes`. A failed write forces the owning task to `Blocked` rather than reporting false success. |
 | src/Agent/Roles/ReviewerAgent.php | Present | Added 2026-07-02. |
 | src/Agent/Roles/SecurityAgent.php | Present | Added 2026-07-02. |
 | src/Agent/Roles/PerformanceAgent.php | Present | Added 2026-07-02. |
 | src/Agent/Roles/DocumentationAgent.php | Present | Added 2026-07-02. |
-| src/Agent/Roles/ReleaseAgent.php | Present | Added 2026-07-02. |
+| src/Agent/Roles/ReleaseAgent.php | Present | Added 2026-07-02. As of 2026-07-03, when the gate-check passes, `release_version` is supplied, and `ReleaseActionsPolicy::isEnabled()` is true, finalizes CHANGELOG.md and runs `git add`/`commit`/`tag`/`push`/`push --tags`, stopping at the first failed step and downgrading status to `Hold`. Off by default. |
 | src/Tools/ToolRegistry.php | Present | |
 | src/Tools/ToolServiceProvider.php | Present | |
 | src/Modules/ModuleInterface.php | Present | |
@@ -159,8 +164,10 @@ been refreshed to reflect what is actually still open.
 
 | Missing Item | Priority | Notes |
 |---|---:|---|
-| Developer/Release agents still pure data-aggregators | Medium | Architect, Planner, Reviewer, Security, Performance, and Documentation now call an injected LLM to fill in judgment fields the caller didn't supply (see `src/Agent/Roles/AbstractRoleAgent::reason()`). Developer and Release intentionally were not given this: Developer would otherwise mean an LLM autonomously writing/editing project files with no tool-use or review loop, and Release is meant to be a pure gate-check. Revisit if/when real tool-use (file edits, test execution) is wired in. |
 | Only Anthropic supported | Low | `src/Llm/AnthropicClient.php` is the only `LlmClientInterface` implementation. Add another implementation (e.g. OpenAI) if multi-provider support is ever needed; agents only depend on the interface. |
+| No pre-flight working-tree check before release actions | Low | `ReleaseAgent`'s real release actions (see Section 3) don't verify the git working tree was clean before running; any other already-uncommitted changes get swept into the release commit alongside CHANGELOG.md. |
+| No version bump beyond CHANGELOG.md | Low | Real release actions finalize `CHANGELOG.md` but don't bump a version field, since this project doesn't have one defined (no `version` key in `composer.json`). |
+| Symlink-based write escape (narrow) | Low | `LocalFileSystem::write()`/`delete()` reject absolute paths and `..` segments before touching disk, but (unlike `read()`) don't `realpath()`-verify the final target, so a pre-existing symlink inside the root pointing outside it could redirect a write. Requires an attacker to already have write access inside the root to plant such a symlink, which is a narrow/low residual risk given `src/` is otherwise trusted, reviewed code. |
 
 ---
 
@@ -260,6 +267,62 @@ trusted, reviewed code, same as it always has been. Covered by
 (`tests/Fixtures/DiscoveryModules/`) exercising: a plain class that
 doesn't implement `ModuleInterface`, an abstract implementation, and one
 whose constructor requires an argument -- all correctly skipped.
+
+2026-07-03 (follow-up): Gave `DeveloperAgent` and `ReleaseAgent` real
+tool-use, per an explicit decision to go with full capability for both
+rather than a read-only or approval-gated middle ground.
+
+**Developer** (`src/Agent/Roles/DeveloperAgent.php`): when the caller does
+NOT supply context field `tasks_completed` explicitly, and both an LLM and
+a `FileSystemInterface` are injected, it asks the LLM to implement the
+plan directly, returning `file_changes` (create/update/delete with a
+relative path) alongside `tasks_completed`. Each file change is applied
+through `FileSystemInterface`, which enforces path containment (rejects
+absolute paths and `..` segments) -- see `src/Tools/LocalFileSystem.php`.
+Any file change that fails to apply forces its owning task (or the whole
+batch, if it can't be attributed) to `Blocked` rather than reporting false
+success. Supplying `tasks_completed` explicitly still works exactly as
+before and never touches the file system.
+
+**Release** (`src/Agent/Roles/ReleaseAgent.php`): its gate-check (Approved/
+Warning/Complete across review, security, performance, documentation)
+still always runs first and never has side effects on its own. Real
+release actions -- finalizing `CHANGELOG.md`, then `git add`, `commit`,
+`tag`, `push`, `push --tags` via `CommandRunnerInterface` -- only run when
+ALL of: the gate-check passed, `release_version` was supplied, and
+`ReleaseActionsPolicy::isEnabled()` is true. That policy is a **separate,
+explicit opt-in** (`SQUIRRELFORGE_ENABLE_RELEASE_ACTIONS=1` env, or
+`release.actions_enabled` via `ConfigurationInterface`) from having an LLM
+configured -- setting `ANTHROPIC_API_KEY` alone can never trigger a real
+git push. Any failed step stops the sequence immediately (no push after a
+failed commit, no tag after a failed commit) and downgrades the reported
+status from `Ready` to `Hold`.
+
+Both new capabilities are backed by `src/Tools/LocalFileSystem.php`
+(path-contained read/write/delete) and `src/Tools/ShellCommandRunner.php`
+(executes an allowlist of binaries -- `git`, `composer`, `phpunit` -- via
+`proc_open()` with an argv array, never a shell string, so nothing in an
+LLM-generated argument can be interpreted as shell syntax). Both tools are
+always constructed and injected by `AgentPipelineModule` regardless of
+whether an LLM or the release-actions flag is set; the flags are what gate
+whether they're actually used, not whether they exist.
+
+Test coverage: `tests/Tools/LocalFileSystemTest.php` (real temp directory:
+write/read/delete, path traversal and absolute-path rejection, a
+legitimate filename containing ".." as a substring is still allowed),
+`tests/Tools/ShellCommandRunnerTest.php` (allowlisted `git --version`
+succeeds; a disallowed binary, including one disguised behind a path,
+throws), `tests/DeveloperAgentToolUseTest.php`, and
+`tests/ReleaseAgentToolUseTest.php` (both using in-memory
+`FakeFileSystem`/`FakeCommandRunner` test doubles in `tests/Support/`, so
+no real disk or process is touched by those two suites).
+
+**If you enable `SQUIRRELFORGE_ENABLE_RELEASE_ACTIONS`, test it against a
+disposable branch or repo first** -- this code has been reviewed and
+traced by hand, and its unit tests (using fakes) pass the logic they
+exercise, but it has not been exercised end-to-end against a real git
+remote, since no PHP runtime was available in the environment this was
+built from.
 
 Review order:
 

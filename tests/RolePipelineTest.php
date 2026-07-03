@@ -21,6 +21,12 @@ final class RolePipelineTest extends TestCase
         // ANTHROPIC_API_KEY making this suite depend on network access.
         putenv('ANTHROPIC_API_KEY');
 
+        // None of these tests supply "release_version", so ReleaseAgent
+        // never attempts real actions regardless of this flag -- cleared
+        // anyway so the suite can never depend on (or be surprised by) the
+        // ambient environment.
+        putenv('SQUIRRELFORGE_ENABLE_RELEASE_ACTIONS');
+
         $kernel = new Kernel();
         $app = $kernel->boot();
 
