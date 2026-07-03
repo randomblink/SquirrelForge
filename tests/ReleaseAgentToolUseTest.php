@@ -88,12 +88,41 @@ final class ReleaseAgentToolUseTest extends TestCase
         $this->assertStringContainsString('## [v1.2.0] -', $fileSystem->files['CHANGELOG.md']);
         $this->assertStringContainsString('- thing', $fileSystem->files['CHANGELOG.md']);
 
-        $this->assertCount(5, $commandRunner->calls);
-        $this->assertSame(['git', 'add', 'CHANGELOG.md'], $commandRunner->calls[0]);
-        $this->assertSame(['git', 'commit', '-m', 'Release v1.2.0'], $commandRunner->calls[1]);
-        $this->assertSame(['git', 'tag', 'v1.2.0'], $commandRunner->calls[2]);
-        $this->assertSame(['git', 'push'], $commandRunner->calls[3]);
-        $this->assertSame(['git', 'push', '--tags'], $commandRunner->calls[4]);
+        $this->assertCount(6, $commandRunner->calls);
+        $this->assertSame(['git', 'status', '--porcelain'], $commandRunner->calls[0]);
+        $this->assertSame(['git', 'add', 'CHANGELOG.md'], $commandRunner->calls[1]);
+        $this->assertSame(['git', 'commit', '-m', 'Release v1.2.0'], $commandRunner->calls[2]);
+        $this->assertSame(['git', 'tag', 'v1.2.0'], $commandRunner->calls[3]);
+        $this->assertSame(['git', 'push'], $commandRunner->calls[4]);
+        $this->assertSame(['git', 'push', '--tags'], $commandRunner->calls[5]);
+    }
+
+    public function testAbortsWithoutRunningAnyOtherCommandWhenWorkingTreeIsDirty(): void
+    {
+        $fileSystem = new FakeFileSystem(['CHANGELOG.md' => "# Changelog\n\n## Unreleased\n\n- thing\n"]);
+        $commandRunner = new FakeCommandRunner();
+        $commandRunner->respondTo(
+            ['git', 'status', '--porcelain'],
+            ['exitCode' => 0, 'output' => " M some/unrelated/file.php\n", 'error' => '']
+        );
+
+        $agent = new ReleaseAgent(null, $fileSystem, $commandRunner, true);
+        $agent->boot();
+
+        $result = $agent->execute([
+            'stage' => 'release',
+            'history' => $this->passingHistory(),
+            'release_version' => '1.2.0',
+        ]);
+
+        $this->assertSame('Hold', $result['status']);
+        $this->assertSame('Failed', $result['release']['actions']['status']);
+        $this->assertContains('release_actions', $result['release']['outstanding']);
+        // Only the working-tree check itself ran; CHANGELOG.md was never
+        // touched, and no add/commit/tag/push was attempted.
+        $this->assertCount(1, $commandRunner->calls);
+        $this->assertSame(['git', 'status', '--porcelain'], $commandRunner->calls[0]);
+        $this->assertSame("# Changelog\n\n## Unreleased\n\n- thing\n", $fileSystem->files['CHANGELOG.md']);
     }
 
     public function testStopsAtFirstFailedStepAndDowngradesToHold(): void
@@ -117,8 +146,9 @@ final class ReleaseAgentToolUseTest extends TestCase
         $this->assertSame('Hold', $result['status']);
         $this->assertSame('Failed', $result['release']['actions']['status']);
         $this->assertContains('release_actions', $result['release']['outstanding']);
-        // git add succeeded, git commit failed -> tag/push never attempted.
-        $this->assertCount(2, $commandRunner->calls);
+        // git status (clean) and git add succeeded, git commit failed ->
+        // tag/push never attempted.
+        $this->assertCount(3, $commandRunner->calls);
     }
 
     public function testMissingChangelogUnreleasedSectionFailsWithoutRunningAnyCommand(): void
@@ -137,6 +167,9 @@ final class ReleaseAgentToolUseTest extends TestCase
 
         $this->assertSame('Hold', $result['status']);
         $this->assertSame('Failed', $result['release']['actions']['status']);
-        $this->assertSame([], $commandRunner->calls);
+        // The working tree check itself still runs (and passes, since it's
+        // clean); only the changelog-parsing step fails.
+        $this->assertCount(1, $commandRunner->calls);
+        $this->assertSame(['git', 'status', '--porcelain'], $commandRunner->calls[0]);
     }
 }

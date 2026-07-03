@@ -30,11 +30,12 @@ use Throwable;
  * (no push after a failed commit, no tag after a failed commit, etc.) and
  * downgrades the reported status to "Hold".
  *
- * Known limitation: this does not verify the working tree was clean
- * before it started, so any other already-uncommitted changes would be
- * swept into the release commit alongside CHANGELOG.md. It also only
- * finalizes CHANGELOG.md -- it does not bump a version file, since this
- * project doesn't have one defined yet.
+ * Before touching anything, it verifies the git working tree is clean
+ * (`git status --porcelain` reports nothing) so an unrelated
+ * uncommitted change can't get swept into the release commit alongside
+ * CHANGELOG.md; a dirty tree aborts the whole sequence with no other
+ * command run. It only finalizes CHANGELOG.md -- it does not bump a
+ * version file, since this project doesn't have one defined yet.
  */
 final class ReleaseAgent extends AbstractRoleAgent
 {
@@ -127,6 +128,9 @@ final class ReleaseAgent extends AbstractRoleAgent
         $steps = [];
 
         try {
+            $this->assertWorkingTreeIsClean();
+            $steps[] = ['step' => 'working tree check', 'ok' => true];
+
             $this->finalizeChangelog($tagName);
             $steps[] = ['step' => 'finalize CHANGELOG.md', 'ok' => true];
 
@@ -159,6 +163,25 @@ final class ReleaseAgent extends AbstractRoleAgent
             'git push' => ['git', 'push'],
             'git push --tags' => ['git', 'push', '--tags'],
         ];
+    }
+
+    private function assertWorkingTreeIsClean(): void
+    {
+        $result = $this->commandRunner->run(['git', 'status', '--porcelain']);
+
+        if ($result['exitCode'] !== 0) {
+            throw new RuntimeException(
+                'Unable to verify the git working tree status: ' . trim($result['error'])
+            );
+        }
+
+        if (trim($result['output']) !== '') {
+            throw new RuntimeException(
+                'Working tree is not clean; refusing to run release actions so unrelated '
+                . 'uncommitted changes aren\'t swept into the release commit: '
+                . trim($result['output'])
+            );
+        }
     }
 
     private function finalizeChangelog(string $tagName): void

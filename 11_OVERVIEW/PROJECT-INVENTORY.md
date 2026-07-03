@@ -165,7 +165,6 @@ been refreshed to reflect what is actually still open.
 | Missing Item | Priority | Notes |
 |---|---:|---|
 | Only Anthropic supported | Low | `src/Llm/AnthropicClient.php` is the only `LlmClientInterface` implementation. Add another implementation (e.g. OpenAI) if multi-provider support is ever needed; agents only depend on the interface. |
-| No pre-flight working-tree check before release actions | Low | `ReleaseAgent`'s real release actions (see Section 3) don't verify the git working tree was clean before running; any other already-uncommitted changes get swept into the release commit alongside CHANGELOG.md. |
 | No version bump beyond CHANGELOG.md | Low | Real release actions finalize `CHANGELOG.md` but don't bump a version field, since this project doesn't have one defined (no `version` key in `composer.json`). |
 | Symlink-based write escape (narrow) | Low | `LocalFileSystem::write()`/`delete()` reject absolute paths and `..` segments before touching disk, but (unlike `read()`) don't `realpath()`-verify the final target, so a pre-existing symlink inside the root pointing outside it could redirect a write. Requires an attacker to already have write access inside the root to plant such a symlink, which is a narrow/low residual risk given `src/` is otherwise trusted, reviewed code. |
 
@@ -287,9 +286,10 @@ before and never touches the file system.
 **Release** (`src/Agent/Roles/ReleaseAgent.php`): its gate-check (Approved/
 Warning/Complete across review, security, performance, documentation)
 still always runs first and never has side effects on its own. Real
-release actions -- finalizing `CHANGELOG.md`, then `git add`, `commit`,
-`tag`, `push`, `push --tags` via `CommandRunnerInterface` -- only run when
-ALL of: the gate-check passed, `release_version` was supplied, and
+release actions -- first a pre-flight `git status --porcelain` clean-tree
+check, then finalizing `CHANGELOG.md`, then `git add`, `commit`, `tag`,
+`push`, `push --tags` via `CommandRunnerInterface` -- only run when ALL of:
+the gate-check passed, `release_version` was supplied, and
 `ReleaseActionsPolicy::isEnabled()` is true. That policy is a **separate,
 explicit opt-in** (`SQUIRRELFORGE_ENABLE_RELEASE_ACTIONS=1` env, or
 `release.actions_enabled` via `ConfigurationInterface`) from having an LLM
@@ -323,6 +323,22 @@ traced by hand, and its unit tests (using fakes) pass the logic they
 exercise, but it has not been exercised end-to-end against a real git
 remote, since no PHP runtime was available in the environment this was
 built from.
+
+2026-07-03 (follow-up): Added a pre-flight working-tree check to
+`ReleaseAgent`'s real release actions, closing the gap noted above and
+previously listed in Section 5. Before finalizing `CHANGELOG.md`,
+`assertWorkingTreeIsClean()` runs `git status --porcelain` via
+`CommandRunnerInterface`; any output at all (anything other than a clean
+tree) aborts the entire release-actions sequence immediately -- no file is
+written, no command beyond the status check itself runs, and the reported
+status downgrades to `Hold` with `release_actions` added to
+`outstanding`, exactly like any other failed step. This prevents an
+unrelated uncommitted change from being swept into the release commit
+alongside `CHANGELOG.md`. Covered by a new
+`testAbortsWithoutRunningAnyOtherCommandWhenWorkingTreeIsDirty` test in
+`tests/ReleaseAgentToolUseTest.php`; the existing tests in that file were
+updated since the working-tree check is now always the first
+`CommandRunnerInterface` call the agent makes.
 
 Review order:
 
