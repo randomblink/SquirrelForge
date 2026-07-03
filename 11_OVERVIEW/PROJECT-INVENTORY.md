@@ -33,7 +33,7 @@ no 31) reserved for future layers; that is not a defect.
 
 | Directory | README | Status | Notes |
 |---|---:|---|---|
-| 00_CORE | No | Present | Has `SYSTEM-ORCHESTRATOR.md` but no `README.md`. |
+| 00_CORE | Yes | Present | README.md added 2026-07-03. |
 | 01_RULES | Yes | Present | |
 | 02_WORKFLOWS | Yes | Present | |
 | 03_CHECKLISTS | Yes | Present | |
@@ -56,11 +56,11 @@ no 31) reserved for future layers; that is not a defect.
 | 27_OBSERVABILITY | Yes | Present | |
 | 28_RUNTIME-CONFIG | Yes | Present | |
 | 29_TESTING | Yes | Present | |
-| 30_LEARNING | No | Present | Missing `README.md`. |
-| 32_OPTIMIZATION | No | Present | Missing `README.md`. |
+| 30_LEARNING | Yes | Present | README.md added 2026-07-03. |
+| 32_OPTIMIZATION | Yes | Present | README.md added 2026-07-03. |
 | 33_AUTOMATION | Yes | Present | |
 | 34_AIDRIVER | Yes | Present | |
-| 35_RESILIENCE | No | Present | Missing `README.md`. |
+| 35_RESILIENCE | Yes | Present | README.md added 2026-07-03. |
 | 36_COMMUNICATION | Yes | Present | |
 | 37_STORAGE | Yes | Present | |
 | 38_WORDPRESS | Yes | Present | |
@@ -156,7 +156,6 @@ been refreshed to reflect what is actually still open.
 
 | Missing Item | Priority | Notes |
 |---|---:|---|
-| README.md for 00_CORE, 30_LEARNING, 32_OPTIMIZATION, 35_RESILIENCE | Low | Every other numbered layer has one; these four don't. |
 | Module auto-discovery of role agents | Medium | Role agents are registered directly in `AgentServiceProvider::boot()`. `12_AGENT/BOOTSTRAP.md` step 4 implies discovery should ultimately go through `14_ENGINE/PROJECT-LOADER.md` / `ModuleLoader`. |
 | Developer/Release agents still pure data-aggregators | Medium | Architect, Planner, Reviewer, Security, Performance, and Documentation now call an injected LLM to fill in judgment fields the caller didn't supply (see `src/Agent/Roles/AbstractRoleAgent::reason()`). Developer and Release intentionally were not given this: Developer would otherwise mean an LLM autonomously writing/editing project files with no tool-use or review loop, and Release is meant to be a pure gate-check. Revisit if/when real tool-use (file edits, test execution) is wired in. |
 | README.md is stale (pre-restructure) | Medium | The root `README.md`'s "Architecture" table and "Repository Structure" tree still list the old `01_INPUT`/`02_VALIDATION`/.../`34_RESPONSE` layout from before the 2026-07-02 restructure, not the actual `01_RULES`/`02_WORKFLOWS`/.../`38_WORDPRESS` tree (see Section 2). Not fixed as part of the CI change to keep that change focused; fix alongside other doc-accuracy work. |
@@ -210,6 +209,12 @@ PHP installed (8.5.7) and passed cleanly: 105 tests, 236 assertions, 0
 failures. Added `.github/workflows/tests.yml` (PHP 8.2/8.3/8.4 matrix) so
 this is checked automatically on every push and pull request going
 forward, plus a status badge on `README.md`.
+
+2026-07-03 (follow-up): Added `README.md` for the four numbered layers
+that didn't have one -- `00_CORE`, `30_LEARNING`, `32_OPTIMIZATION`,
+`35_RESILIENCE` -- matching the Component Roster format used by the other
+layer READMEs (see e.g. `33_AUTOMATION/README.md`). Every numbered layer
+now has a README.
 
 Review order:
 
