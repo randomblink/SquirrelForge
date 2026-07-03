@@ -32,10 +32,28 @@ final class DocumentationAgent extends AbstractRoleAgent
 
     protected function process(array $context): array
     {
+        $architect = $this->requireHistory($context, 'architect');
         $this->requireHistory($context, 'performance');
 
-        $updates = $context['documentation_updates'] ?? [];
-        $checklist = $context['documentation_checklist'] ?? [];
+        if (array_key_exists('documentation_updates', $context)) {
+            $updates = $context['documentation_updates'];
+            $checklist = $context['documentation_checklist'] ?? [];
+        } else {
+            $reasoned = $this->reason(
+                'Given the architecture blueprint and implementation, determine which ' .
+                'documentation needs to be created or updated, per the checklist in ' .
+                '16_AGENTS/AGENT-DOCUMENTATION.md. "updates" is a list of doc files/topics; ' .
+                '"checklist" must contain boolean keys "readme", "changelog", "release_notes".',
+                ['updates', 'checklist'],
+                [
+                    'blueprint' => $architect['blueprint'] ?? [],
+                    'implementation' => $context['history']['developer']['implementation'] ?? [],
+                ]
+            );
+
+            $updates = $reasoned['updates'] ?? [];
+            $checklist = $reasoned['checklist'] ?? [];
+        }
 
         $missing = array_values(array_filter(
             self::REQUIRED_CHECKLIST_ITEMS,

@@ -19,6 +19,10 @@ All notable changes to SquirrelForge are recorded here.
 - Eight pipeline role agents (`src/Agent/Roles/`: Architect, Planner, Developer, Reviewer, Security, Performance, Documentation, Release) implementing the roles specified in `16_AGENTS/`.
 - `AgentOrchestrator` (`src/Agent/AgentOrchestrator.php`) coordinating the Architect -> Planner -> Developer -> Reviewer -> Security -> Performance -> Documentation -> Release handoff sequence.
 - `tests/RolePipelineTest.php` covering the pipeline's happy path and its stop/hold conditions.
+- `LlmClientInterface` (`src/Contracts/LlmClientInterface.php`) and `AnthropicClient` (`src/Llm/AnthropicClient.php`), a cURL-based Anthropic Messages API client with no new Composer dependency.
+- `AbstractRoleAgent::reason()`: lets a role agent ask an injected LLM to fill in judgment fields the caller didn't explicitly supply, with explicit context values always taking precedence over the model's answer.
+- Real LLM reasoning wired into Architect, Planner, Reviewer, Security, Performance, and Documentation agents (architecture blueprint fields, execution phases, review issues, security/performance findings, documentation updates respectively).
+- `tests/Support/FakeLlmClient.php` and `tests/LlmReasoningTest.php` covering: no LLM call when fields are explicit, LLM used only for missing fields, explicit values overriding LLM guesses, and errors on invalid/incomplete LLM JSON responses.
 
 ### Fixed
 
@@ -28,3 +32,4 @@ All notable changes to SquirrelForge are recorded here.
 ### Changed
 
 - `AgentServiceProvider` now registers and boots the eight role agents and the orchestrator instead of leaving agent registration to future modules.
+- `AgentServiceProvider` now also builds an `AnthropicClient` when `ANTHROPIC_API_KEY` (env) or `llm.anthropic.api_key` (via `ConfigurationInterface`) is set, and passes it to every role agent; with neither set, every agent stays fully deterministic (no behavior change, fully backward compatible).

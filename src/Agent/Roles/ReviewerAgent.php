@@ -30,9 +30,22 @@ final class ReviewerAgent extends AbstractRoleAgent
 
     protected function process(array $context): array
     {
-        $this->requireHistory($context, 'developer');
+        $developer = $this->requireHistory($context, 'developer');
 
-        $issues = $context['issues'] ?? [];
+        if (array_key_exists('issues', $context)) {
+            $issues = $context['issues'];
+        } else {
+            $reasoned = $this->reason(
+                'Review the completed implementation against the checklist in ' .
+                '16_AGENTS/AGENT-REVIEWER.md (completeness, quality, compliance, risk). ' .
+                'List any issues found; return an empty array if none.',
+                ['issues'],
+                ['implementation' => $developer['implementation'] ?? []]
+            );
+
+            $issues = $reasoned['issues'] ?? [];
+        }
+
         $status = $issues === [] ? 'Approved' : 'Revision Required';
 
         return [

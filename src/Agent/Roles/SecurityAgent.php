@@ -30,9 +30,27 @@ final class SecurityAgent extends AbstractRoleAgent
 
     protected function process(array $context): array
     {
-        $this->requireHistory($context, 'reviewer');
+        $reviewer = $this->requireHistory($context, 'reviewer');
 
-        $findings = $context['security_findings'] ?? [];
+        if (array_key_exists('security_findings', $context)) {
+            $findings = $context['security_findings'];
+        } else {
+            $reasoned = $this->reason(
+                'Review the approved implementation for security issues per the checklist ' .
+                'in 16_AGENTS/AGENT-SECURITY.md (authentication, input validation, output ' .
+                'escaping, WordPress security, data protection). Each finding needs a ' .
+                '"severity" (one of: critical, high, medium, low) and a "summary". ' .
+                'Return an empty array if you find nothing.',
+                ['findings'],
+                [
+                    'implementation' => $context['history']['developer']['implementation'] ?? [],
+                    'review' => $reviewer['review'] ?? [],
+                ]
+            );
+
+            $findings = $reasoned['findings'] ?? [];
+        }
+
         $hasCritical = false;
 
         foreach ($findings as $finding) {

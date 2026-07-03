@@ -86,6 +86,8 @@ no 31) reserved for future layers; that is not a defect.
 | src/Contracts/ToolInterface.php |  |  |
 | src/Contracts/MemoryStoreInterface.php |  |  |
 | src/Contracts/KnowledgeProviderInterface.php |  |  |
+| src/Contracts/LlmClientInterface.php | Present | Added 2026-07-02; provider-agnostic chat-completion contract. |
+| src/Llm/AnthropicClient.php | Present | Added 2026-07-02; cURL-based Anthropic Messages API implementation. |
 | src/Container/Container.php |  |  |
 | src/Core/Application.php |  |  |
 | src/Core/Configuration.php |  |  |
@@ -155,9 +157,10 @@ been refreshed to reflect what is actually still open.
 | Missing Item | Priority | Notes |
 |---|---:|---|
 | README.md for 00_CORE, 30_LEARNING, 32_OPTIMIZATION, 35_RESILIENCE | Low | Every other numbered layer has one; these four don't. |
-| Real reasoning behind role agents | High | `src/Agent/Roles/*` are deterministic: they validate and pass through the data they're given (per the goal, blueprint, findings, etc. supplied in context) rather than making judgment calls themselves. Wiring an actual LLM/tool-use step behind `supports()`/`process()` is the next real milestone. |
 | Module auto-discovery of role agents | Medium | Role agents are registered directly in `AgentServiceProvider::boot()`. `12_AGENT/BOOTSTRAP.md` step 4 implies discovery should ultimately go through `14_ENGINE/PROJECT-LOADER.md` / `ModuleLoader`. |
-| Automated CI run of `composer test` | Medium | No PHP runtime was available in the environment this update was made from, so the new `tests/RolePipelineTest.php` was written and manually traced through by hand but has not actually been executed. Run `composer test` locally before relying on it. |
+| Automated CI run of `composer test` | Medium | No PHP runtime was available in the environment this update was made from, so the tests were written and manually traced through by hand but have not actually been executed. Run `composer test` locally before relying on them. |
+| Developer/Release agents still pure data-aggregators | Medium | Architect, Planner, Reviewer, Security, Performance, and Documentation now call an injected LLM to fill in judgment fields the caller didn't supply (see `src/Agent/Roles/AbstractRoleAgent::reason()`). Developer and Release intentionally were not given this: Developer would otherwise mean an LLM autonomously writing/editing project files with no tool-use or review loop, and Release is meant to be a pure gate-check. Revisit if/when real tool-use (file edits, test execution) is wired in. |
+| Only Anthropic supported | Low | `src/Llm/AnthropicClient.php` is the only `LlmClientInterface` implementation. Add another implementation (e.g. OpenAI) if multi-provider support is ever needed; agents only depend on the interface. |
 
 ---
 
@@ -169,8 +172,8 @@ been refreshed to reflect what is actually still open.
 | Contracts | Stable; no changes needed for the role-agent work. |
 | Runtime Core | Present (Kernel, Application, Container, Bootstrapper, HealthManager, LifecycleManager). |
 | Registries | Agent, Tool, Module, Workflow registries all present. `AgentRegistry` now holds 8 role agents plus the orchestrator after boot. |
-| Missing Infrastructure | Only doc polish and the "real reasoning" gap above remain (see Section 5). |
-| Ready for Testing | Yes, pending someone running `composer test` with an actual PHP install to confirm `tests/RolePipelineTest.php` passes. |
+| Missing Infrastructure | Only doc polish and the items in Section 5 remain. |
+| Ready for Testing | Yes, pending someone running `composer test` with an actual PHP install to confirm the test suite passes. |
 
 ## Final Notes
 
@@ -182,6 +185,26 @@ and handoff sequence documented in `16_AGENTS/`. Added
 `tests/RolePipelineTest.php` covering the happy path and each stage's
 stop/hold condition.
 
+2026-07-02 (same day, follow-up): Added `LlmClientInterface` and an
+`AnthropicClient` implementation, plus a `reason()` helper on
+`AbstractRoleAgent`. Architect, Planner, Reviewer, Security, Performance,
+and Documentation now consult an injected LLM to fill in judgment fields
+the caller didn't explicitly supply (architecture blueprint fields,
+execution phases, review issues, security/performance findings,
+documentation updates) -- explicit context values always win over the
+model's answer, and reasoning is skipped entirely if nothing is missing or
+no LLM client is configured. `AgentServiceProvider` builds an
+`AnthropicClient` automatically when `ANTHROPIC_API_KEY` (env) or
+`llm.anthropic.api_key` (via `ConfigurationInterface`) is set; otherwise
+every agent stays fully deterministic, so this is opt-in and backward
+compatible. Added `tests/Support/FakeLlmClient.php` and
+`tests/LlmReasoningTest.php` covering: no LLM call when fields are
+explicit, LLM used only for missing fields, explicit values overriding LLM
+guesses, and errors on invalid/incomplete LLM JSON responses.
+
+Developer and Release were deliberately left as pure data-aggregators
+(see Section 5) -- they don't call the LLM.
+
 Review order:
 
 1. README.md
@@ -191,10 +214,12 @@ Review order:
 5. src/Contracts
 6. src/Core
 7. Registries: Agent, Tool, Module, Workflow
-8. src/Agent/Roles and AgentOrchestrator
+8. src/Agent/Roles, AgentOrchestrator, src/Llm
 9. Missing pieces section (Section 5)
 
 Best next step after this: run `composer install && composer test` on a
-machine with PHP 8.2+ to confirm the role pipeline actually boots and
-passes, then start replacing the deterministic role-agent logic with real
-reasoning/tool-use per role.
+machine with PHP 8.2+ to confirm everything actually boots and passes,
+set `ANTHROPIC_API_KEY` and try a real run through `AgentOrchestrator` to
+see the reasoning in action, then decide whether Developer/Release should
+ever get real tool-use (file edits, running tests) rather than staying
+pure aggregators.

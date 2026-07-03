@@ -30,9 +30,21 @@ final class PlannerAgent extends AbstractRoleAgent
     protected function process(array $context): array
     {
         // A blueprint must have been produced before planning can begin.
-        $this->requireHistory($context, 'architect');
+        $architect = $this->requireHistory($context, 'architect');
 
         $phases = $context['phases'] ?? [];
+
+        if ($phases === []) {
+            $reasoned = $this->reason(
+                'Read the architecture blueprint and break the work into an ordered ' .
+                'Execution Plan of phases, per the model in 16_AGENTS/AGENT-PLANNER.md. ' .
+                'Each phase object needs: phase, task, agent, dependencies (array), validation, status.',
+                ['phases'],
+                ['blueprint' => $architect['blueprint'] ?? []]
+            );
+
+            $phases = $reasoned['phases'] ?? [];
+        }
 
         $plan = array_map(
             static function (array $phase): array {
@@ -50,7 +62,8 @@ final class PlannerAgent extends AbstractRoleAgent
 
         if ($plan === []) {
             throw new \InvalidArgumentException(
-                'PlannerAgent requires at least one phase in context field "phases".'
+                'PlannerAgent requires at least one phase, either via context field ' .
+                '"phases" or an LLM client able to propose them.'
             );
         }
 

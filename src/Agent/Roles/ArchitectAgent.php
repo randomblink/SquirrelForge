@@ -28,19 +28,58 @@ final class ArchitectAgent extends AbstractRoleAgent
         return 'Designs the structure, architecture, and technical direction for a requested solution.';
     }
 
+    /**
+     * Maps each Architecture Blueprint field to the context key a caller
+     * would use to supply it explicitly.
+     */
+    private const FIELD_MAP = [
+        'project_type' => 'project_type',
+        'components' => 'components',
+        'dependencies' => 'dependencies',
+        'risks' => 'risks',
+        'primary_workflow' => 'primary_workflow',
+        'supporting_workflows' => 'supporting_workflows',
+        'output' => 'expected_output',
+    ];
+
     protected function process(array $context): array
     {
         $goal = $this->requireField($context, 'goal');
 
+        $values = [];
+        $missing = [];
+
+        foreach (self::FIELD_MAP as $blueprintKey => $contextKey) {
+            if (array_key_exists($contextKey, $context) && $context[$contextKey] !== null) {
+                $values[$blueprintKey] = $context[$contextKey];
+            } else {
+                $missing[] = $blueprintKey;
+            }
+        }
+
+        if ($missing !== []) {
+            $reasoned = $this->reason(
+                'Read the goal and any known fields, then determine the architecture ' .
+                'blueprint fields the caller did not already supply, per the Architecture ' .
+                'Blueprint model in 16_AGENTS/AGENT-ARCHITECT.md.',
+                $missing,
+                ['goal' => $goal, 'known_fields' => $values]
+            );
+
+            foreach ($missing as $blueprintKey) {
+                $values[$blueprintKey] = $reasoned[$blueprintKey] ?? $this->defaultFor($blueprintKey);
+            }
+        }
+
         $blueprint = [
             'goal' => $goal,
-            'project_type' => $context['project_type'] ?? 'Other',
-            'components' => $context['components'] ?? [],
-            'dependencies' => $context['dependencies'] ?? [],
-            'risks' => $context['risks'] ?? [],
-            'primary_workflow' => $context['primary_workflow'] ?? null,
-            'supporting_workflows' => $context['supporting_workflows'] ?? [],
-            'output' => $context['expected_output'] ?? null,
+            'project_type' => $values['project_type'],
+            'components' => $values['components'],
+            'dependencies' => $values['dependencies'],
+            'risks' => $values['risks'],
+            'primary_workflow' => $values['primary_workflow'],
+            'supporting_workflows' => $values['supporting_workflows'],
+            'output' => $values['output'],
         ];
 
         return [
@@ -48,5 +87,14 @@ final class ArchitectAgent extends AbstractRoleAgent
             'status' => 'Complete',
             'next_stage' => 'planner',
         ];
+    }
+
+    private function defaultFor(string $blueprintKey): mixed
+    {
+        return match ($blueprintKey) {
+            'components', 'dependencies', 'risks', 'supporting_workflows' => [],
+            'project_type' => 'Other',
+            default => null,
+        };
     }
 }

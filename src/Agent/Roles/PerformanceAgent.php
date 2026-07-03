@@ -29,9 +29,26 @@ final class PerformanceAgent extends AbstractRoleAgent
 
     protected function process(array $context): array
     {
-        $this->requireHistory($context, 'security');
+        $security = $this->requireHistory($context, 'security');
 
-        $findings = $context['performance_findings'] ?? [];
+        if (array_key_exists('performance_findings', $context)) {
+            $findings = $context['performance_findings'];
+        } else {
+            $reasoned = $this->reason(
+                'Review the approved implementation for performance issues per the ' .
+                'checklist in 16_AGENTS/AGENT-PERFORMANCE.md (execution, database, assets, ' .
+                'memory, scalability). Each finding needs a "severity" (one of: critical, ' .
+                'high, medium, low) and a "summary". Return an empty array if you find nothing.',
+                ['findings'],
+                [
+                    'implementation' => $context['history']['developer']['implementation'] ?? [],
+                    'security' => $security['security'] ?? [],
+                ]
+            );
+
+            $findings = $reasoned['findings'] ?? [];
+        }
+
         $hasCritical = false;
 
         foreach ($findings as $finding) {

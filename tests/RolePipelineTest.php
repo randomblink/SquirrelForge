@@ -16,6 +16,11 @@ final class RolePipelineTest extends TestCase
 
     protected function setUp(): void
     {
+        // These tests always supply every field explicitly, so no agent
+        // should ever need to reason -- but guard against an ambient
+        // ANTHROPIC_API_KEY making this suite depend on network access.
+        putenv('ANTHROPIC_API_KEY');
+
         $kernel = new Kernel();
         $app = $kernel->boot();
 
