@@ -18,32 +18,52 @@ Use it to confirm:
 
 | File | Status | Notes |
 |---|---:|---|
-| README.md |  |  |
-| ARCHITECTURE.md |  |  |
-| CONTRIBUTING.md |  |  |
-| PROJECT-INVENTORY.md |  |  |
+| README.md | Present | |
+| ARCHITECTURE.md | Present | Broken links and an unclosed code fence fixed 2026-07-02. |
+| CONTRIBUTING.md | Present | |
+| PROJECT-INVENTORY.md | Present | This file; refreshed 2026-07-02 to match the post-restructure tree. |
 
 ---
 
 ## 2. Documentation Layers
 
-| Directory | README | Manager File | Status | Notes |
-|---|---:|---:|---|---|
-| 00_CORE |  |  |  |  |
-| 01_INPUT |  |  |  |  |
-| 02_VALIDATION |  |  |  |  |
-| 03_REASONING |  |  |  |  |
-| 04_PLANNING |  |  |  |  |
-| 05_WORKFLOW |  |  |  |  |
-| 20_EXECUTION |  |  |  |  |
-| 21_TOOLS |  |  |  |  |
-| 22_KNOWLEDGE |  |  |  |  |
-| 23_MEMORY |  |  |  |  |
-| 27_LEARNING |  |  |  |  |
-| 31_OBSERVABILITY |  |  |  |  |
-| 32_SECURITY |  |  |  |  |
-| 33_GOVERNANCE |  |  |  |  |
-| 34_RESPONSE |  |  |  |  |
+This table reflects the actual numbered top-level directories after the
+2026-07-02 restructure. The numbering has intentional gaps (e.g. no 04-10,
+no 31) reserved for future layers; that is not a defect.
+
+| Directory | README | Status | Notes |
+|---|---:|---|---|
+| 00_CORE | No | Present | Has `SYSTEM-ORCHESTRATOR.md` but no `README.md`. |
+| 01_RULES | Yes | Present | |
+| 02_WORKFLOWS | Yes | Present | |
+| 03_CHECKLISTS | Yes | Present | |
+| 11_OVERVIEW | Yes | Present | This directory. |
+| 12_AGENT | Yes | Present | |
+| 13_SKILLS | Yes | Present | |
+| 14_ENGINE | Yes | Present | |
+| 15_TEMPLATES | Yes | Present | |
+| 16_AGENTS | Yes | Present | Role specs now backed by `src/Agent/Roles/`. |
+| 17_COORDINATION | Yes | Present | |
+| 18_MEMORY | Yes | Present | |
+| 19_REASONING | Yes | Present | |
+| 20_EXECUTION | Yes | Present | |
+| 21_CONFIGURATION | Yes | Present | |
+| 22_INTERFACES | Yes | Present | |
+| 23_GOVERNANCE | Yes | Present | |
+| 24_SECURITY | Yes | Present | |
+| 25_KNOWLEDGE | Yes | Present | |
+| 26_INTEGRATIONS | Yes | Present | |
+| 27_OBSERVABILITY | Yes | Present | |
+| 28_RUNTIME-CONFIG | Yes | Present | |
+| 29_TESTING | Yes | Present | |
+| 30_LEARNING | No | Present | Missing `README.md`. |
+| 32_OPTIMIZATION | No | Present | Missing `README.md`. |
+| 33_AUTOMATION | Yes | Present | |
+| 34_AIDRIVER | Yes | Present | |
+| 35_RESILIENCE | No | Present | Missing `README.md`. |
+| 36_COMMUNICATION | Yes | Present | |
+| 37_STORAGE | Yes | Present | |
+| 38_WORDPRESS | Yes | Present | |
 
 ---
 
@@ -80,13 +100,29 @@ Use it to confirm:
 | src/Memory/MemoryServiceProvider.php |  |  |
 | src/Workflow/WorkflowEngine.php |  |  |
 | src/Workflow/WorkflowServiceProvider.php |  |  |
-| src/Agent/AgentRegistry.php |  |  |
-| src/Agent/AgentServiceProvider.php |  |  |
-| src/Tools/ToolRegistry.php |  |  |
-| src/Tools/ToolServiceProvider.php |  |  |
-| src/Modules/ModuleInterface.php |  |  |
-| src/Modules/ModuleRegistry.php |  |  |
-| src/Modules/ModuleServiceProvider.php |  |  |
+| src/Agent/AgentRegistry.php | Present | |
+| src/Agent/AgentServiceProvider.php | Present | Now boots and registers all 8 role agents plus the orchestrator. |
+| src/Agent/AgentOrchestrator.php | Present | Added 2026-07-02; runs the Architect->...->Release handoff sequence. |
+| src/Agent/CallbackAgent.php | Present | Generic closure-backed agent, useful for ad hoc/test agents. |
+| src/Agent/Roles/AbstractRoleAgent.php | Present | Added 2026-07-02; shared plumbing for pipeline role agents. |
+| src/Agent/Roles/ArchitectAgent.php | Present | Added 2026-07-02. |
+| src/Agent/Roles/PlannerAgent.php | Present | Added 2026-07-02. |
+| src/Agent/Roles/DeveloperAgent.php | Present | Added 2026-07-02. |
+| src/Agent/Roles/ReviewerAgent.php | Present | Added 2026-07-02. |
+| src/Agent/Roles/SecurityAgent.php | Present | Added 2026-07-02. |
+| src/Agent/Roles/PerformanceAgent.php | Present | Added 2026-07-02. |
+| src/Agent/Roles/DocumentationAgent.php | Present | Added 2026-07-02. |
+| src/Agent/Roles/ReleaseAgent.php | Present | Added 2026-07-02. |
+| src/Tools/ToolRegistry.php | Present | |
+| src/Tools/ToolServiceProvider.php | Present | |
+| src/Modules/ModuleInterface.php | Present | |
+| src/Modules/ModuleLoader.php | Present | |
+| src/Modules/ModuleRegistry.php | Present | |
+| src/Modules/ModuleServiceProvider.php | Present | |
+| src/Core/Bootstrapper.php | Present | |
+| src/Core/HealthManager.php | Present | |
+| src/Core/LifecycleManager.php | Present | |
+| src/Core/CoreRuntimeServiceProvider.php | Present | |
 
 ---
 
@@ -111,14 +147,17 @@ Use this checklist when reviewing the Agent.
 
 ## 5. Missing Pieces
 
+The items below (ModuleLoader, Bootstrapper, HealthManager, LifecycleManager,
+Composer autoload, a basic runtime boot test) were previously listed here as
+missing. They now all exist in the tree — see Section 3 — so this list has
+been refreshed to reflect what is actually still open.
+
 | Missing Item | Priority | Notes |
 |---|---:|---|
-| ModuleLoader | High | Needed for loading modules automatically. |
-| Bootstrapper | High | Needed for controlled startup sequence. |
-| HealthManager | High | Needed for checking system status. |
-| LifecycleManager | Medium | Needed for shutdown/reload events. |
-| Composer autoload setup | High | Needed before running PHP classes easily. |
-| Basic runtime test | High | Needed to confirm the framework boots. |
+| README.md for 00_CORE, 30_LEARNING, 32_OPTIMIZATION, 35_RESILIENCE | Low | Every other numbered layer has one; these four don't. |
+| Real reasoning behind role agents | High | `src/Agent/Roles/*` are deterministic: they validate and pass through the data they're given (per the goal, blueprint, findings, etc. supplied in context) rather than making judgment calls themselves. Wiring an actual LLM/tool-use step behind `supports()`/`process()` is the next real milestone. |
+| Module auto-discovery of role agents | Medium | Role agents are registered directly in `AgentServiceProvider::boot()`. `12_AGENT/BOOTSTRAP.md` step 4 implies discovery should ultimately go through `14_ENGINE/PROJECT-LOADER.md` / `ModuleLoader`. |
+| Automated CI run of `composer test` | Medium | No PHP runtime was available in the environment this update was made from, so the new `tests/RolePipelineTest.php` was written and manually traced through by hand but has not actually been executed. Run `composer test` locally before relying on it. |
 
 ---
 
@@ -126,27 +165,36 @@ Use this checklist when reviewing the Agent.
 
 | Area | Result |
 |---|---|
-| Documentation |  |
-| Contracts |  |
-| Runtime Core |  |
-| Registries |  |
-| Missing Infrastructure |  |
-| Ready for Testing |  |
+| Documentation | Refreshed 2026-07-02; ARCHITECTURE.md links and formatting fixed; this inventory brought in line with the actual tree. |
+| Contracts | Stable; no changes needed for the role-agent work. |
+| Runtime Core | Present (Kernel, Application, Container, Bootstrapper, HealthManager, LifecycleManager). |
+| Registries | Agent, Tool, Module, Workflow registries all present. `AgentRegistry` now holds 8 role agents plus the orchestrator after boot. |
+| Missing Infrastructure | Only doc polish and the "real reasoning" gap above remain (see Section 5). |
+| Ready for Testing | Yes, pending someone running `composer test` with an actual PHP install to confirm `tests/RolePipelineTest.php` passes. |
 
 ## Final Notes
 
-Add review notes here.
+2026-07-02: Implemented the eight pipeline role agents (`ArchitectAgent`,
+`PlannerAgent`, `DeveloperAgent`, `ReviewerAgent`, `SecurityAgent`,
+`PerformanceAgent`, `DocumentationAgent`, `ReleaseAgent`) plus
+`AgentOrchestrator`, wired into `AgentServiceProvider`, matching the roles
+and handoff sequence documented in `16_AGENTS/`. Added
+`tests/RolePipelineTest.php` covering the happy path and each stage's
+stop/hold condition.
 
-Then review it in this order:
+Review order:
 
-README.md
-ARCHITECTURE.md
-00_CORE/SYSTEM-ORCHESTRATOR.md
-Each numbered layer README
-Each manager file
-src/Contracts
-src/Core
-Registries: Agent, Tool, Module, Workflow
-Missing pieces section
+1. README.md
+2. ARCHITECTURE.md
+3. 00_CORE/SYSTEM-ORCHESTRATOR.md
+4. Each numbered layer README
+5. src/Contracts
+6. src/Core
+7. Registries: Agent, Tool, Module, Workflow
+8. src/Agent/Roles and AgentOrchestrator
+9. Missing pieces section (Section 5)
 
-Best next step after this: create a simple Agent Boot Test so you can confirm the framework actually runs.
+Best next step after this: run `composer install && composer test` on a
+machine with PHP 8.2+ to confirm the role pipeline actually boots and
+passes, then start replacing the deterministic role-agent logic with real
+reasoning/tool-use per role.

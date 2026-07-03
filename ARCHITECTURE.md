@@ -50,29 +50,33 @@ Learning
 Memory
    ↓
 Response
-System Rule
+```
+
+## System Rule
 
 No component should act alone.
 
 Every important action must be:
 
-validated
-reasoned through
-executed through an approved workflow
-observed
-logged
-recoverable
-explainable
-governed
-Key Documents
-00_CORE/SYSTEM-ORCHESTRATOR.md
-31_OBSERVABILITY/OBSERVABILITY-MANAGER.md
-27_LEARNING/LEARNING-MANAGER.md
-20_EXECUTION/ACTION-DISPATCHER.md
-Completion Criteria
+- validated
+- reasoned through
+- executed through an approved workflow
+- observed
+- logged
+- recoverable
+- explainable
+- governed
+
+## Key Documents
+
+- `00_CORE/SYSTEM-ORCHESTRATOR.md`
+- `27_OBSERVABILITY/OBSERVABILITY-MANAGER.md`
+- `30_LEARNING/LEARNING-MANAGER.md`
+- `20_EXECUTION/ACTION-DISPATCHER.md`
+
+## Completion Criteria
 
 This file is complete when it explains the whole system at a high level and points readers to the deeper layer documents.
-
 
 After this, the next step is:
 
