@@ -22,6 +22,7 @@ Use it to confirm:
 | ARCHITECTURE.md | Present | Broken links and an unclosed code fence fixed 2026-07-02. |
 | CONTRIBUTING.md | Present | |
 | PROJECT-INVENTORY.md | Present | This file; refreshed 2026-07-02 to match the post-restructure tree. |
+| VERSION | Present | Added 2026-07-03; bare semver (no "v" prefix), starts at `0.1.0`. Bumped by `ReleaseAgent`'s real release actions alongside `CHANGELOG.md`. |
 
 ---
 
@@ -123,7 +124,7 @@ no 31) reserved for future layers; that is not a defect.
 | src/Agent/Roles/SecurityAgent.php | Present | Added 2026-07-02. |
 | src/Agent/Roles/PerformanceAgent.php | Present | Added 2026-07-02. |
 | src/Agent/Roles/DocumentationAgent.php | Present | Added 2026-07-02. |
-| src/Agent/Roles/ReleaseAgent.php | Present | Added 2026-07-02. As of 2026-07-03, when the gate-check passes, `release_version` is supplied, and `ReleaseActionsPolicy::isEnabled()` is true, finalizes CHANGELOG.md and runs `git add`/`commit`/`tag`/`push`/`push --tags`, stopping at the first failed step and downgrading status to `Hold`. Off by default. |
+| src/Agent/Roles/ReleaseAgent.php | Present | Added 2026-07-02. As of 2026-07-03, when the gate-check passes, `release_version` is supplied, and `ReleaseActionsPolicy::isEnabled()` is true, checks the working tree is clean, finalizes CHANGELOG.md, bumps the root VERSION file, and runs `git add`/`commit`/`tag`/`push`/`push --tags`, stopping at the first failed step and downgrading status to `Hold`. Off by default. |
 | src/Tools/ToolRegistry.php | Present | |
 | src/Tools/ToolServiceProvider.php | Present | |
 | src/Modules/ModuleInterface.php | Present | |
@@ -167,7 +168,6 @@ been refreshed to reflect what is actually still open.
 | Missing Item | Priority | Notes |
 |---|---:|---|
 | Only Anthropic supported | Low | `src/Llm/AnthropicClient.php` is the only `LlmClientInterface` implementation. Add another implementation (e.g. OpenAI) if multi-provider support is ever needed; agents only depend on the interface. |
-| No version bump beyond CHANGELOG.md | Low | Real release actions finalize `CHANGELOG.md` but don't bump a version field, since this project doesn't have one defined (no `version` key in `composer.json`). |
 
 ---
 
@@ -288,8 +288,9 @@ before and never touches the file system.
 Warning/Complete across review, security, performance, documentation)
 still always runs first and never has side effects on its own. Real
 release actions -- first a pre-flight `git status --porcelain` clean-tree
-check, then finalizing `CHANGELOG.md`, then `git add`, `commit`, `tag`,
-`push`, `push --tags` via `CommandRunnerInterface` -- only run when ALL of:
+check, then finalizing `CHANGELOG.md`, then bumping the root `VERSION`
+file, then `git add`, `commit`, `tag`, `push`, `push --tags` via
+`CommandRunnerInterface` -- only run when ALL of:
 the gate-check passed, `release_version` was supplied, and
 `ReleaseActionsPolicy::isEnabled()` is true. That policy is a **separate,
 explicit opt-in** (`SQUIRRELFORGE_ENABLE_RELEASE_ACTIONS=1` env, or
@@ -382,6 +383,22 @@ creating the parent directory, health reporting) and
 taking precedence over env -> `FileMemoryStore`, using the real
 `Container`/`Configuration` classes rather than fakes, since both are
 simple enough to use directly).
+
+2026-07-03 (follow-up): Closed the last remaining item in Section 5.
+Added a root `VERSION` file (bare semver, no `v` prefix, starting at
+`0.1.0`). `ReleaseAgent`'s real release actions now bump it as part of
+the same sequence that finalizes `CHANGELOG.md`: after
+`finalizeChangelog()` and before the `git` commands run,
+`bumpVersionFile()` overwrites `VERSION` with the release version (the
+tag name with its `v` prefix stripped); the `git add` step now stages
+both `CHANGELOG.md` and `VERSION` so they land in the same release
+commit. Like `finalizeChangelog()`, this doesn't validate that the new
+version is actually greater than what's currently in the file -- same
+level of trust already extended to the caller-supplied tag name. Updated
+`tests/ReleaseAgentToolUseTest.php`: the happy-path test now asserts
+`VERSION`'s contents and that `git add` includes it; the working-tree-dirty
+and missing-changelog-section tests now also assert `VERSION` was never
+written, since both failures happen before `bumpVersionFile()` would run.
 
 Review order:
 

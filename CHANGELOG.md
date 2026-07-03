@@ -38,6 +38,7 @@ All notable changes to SquirrelForge are recorded here.
 - `LocalFileSystem::write()`/`::delete()` now `realpath()`-verify containment (of the nearest existing ancestor directory for `write()`, of the target itself for `delete()`), closing a narrow symlink-based write/delete escape that the textual `..`-segment check alone didn't catch. Covered by two new tests in `tests/Tools/LocalFileSystemTest.php`.
 - `FileMemoryStore` (`src/Memory/FileMemoryStore.php`): a JSON-file-backed `MemoryStoreInterface` implementation so memory records survive across separate process invocations, unlike `InMemoryStore`. `MemoryStoreResolver` (`src/Memory/MemoryStoreResolver.php`) picks it when `memory.store_path` (Configuration) or `SQUIRRELFORGE_MEMORY_STORE_PATH` (env) is set, defaulting to `InMemoryStore` otherwise -- opt-in and backward compatible. `MemoryServiceProvider` now binds `MemoryStoreInterface` through this resolver.
 - `tests/Memory/FileMemoryStoreTest.php` and `tests/Memory/MemoryStoreResolverTest.php` covering the new persistent store (including persistence across two separate instances pointed at the same file) and its resolution precedence.
+- Root `VERSION` file (bare semver, no `v` prefix, starting at `0.1.0`). `ReleaseAgent`'s real release actions now bump it alongside finalizing `CHANGELOG.md`, and `git add` now stages both files together. Updated `tests/ReleaseAgentToolUseTest.php` accordingly.
 
 ### Fixed
 

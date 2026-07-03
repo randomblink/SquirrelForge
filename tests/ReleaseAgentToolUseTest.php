@@ -87,10 +87,11 @@ final class ReleaseAgentToolUseTest extends TestCase
         $this->assertSame('v1.2.0', $result['release']['actions']['tag']);
         $this->assertStringContainsString('## [v1.2.0] -', $fileSystem->files['CHANGELOG.md']);
         $this->assertStringContainsString('- thing', $fileSystem->files['CHANGELOG.md']);
+        $this->assertSame("1.2.0\n", $fileSystem->files['VERSION']);
 
         $this->assertCount(6, $commandRunner->calls);
         $this->assertSame(['git', 'status', '--porcelain'], $commandRunner->calls[0]);
-        $this->assertSame(['git', 'add', 'CHANGELOG.md'], $commandRunner->calls[1]);
+        $this->assertSame(['git', 'add', 'CHANGELOG.md', 'VERSION'], $commandRunner->calls[1]);
         $this->assertSame(['git', 'commit', '-m', 'Release v1.2.0'], $commandRunner->calls[2]);
         $this->assertSame(['git', 'tag', 'v1.2.0'], $commandRunner->calls[3]);
         $this->assertSame(['git', 'push'], $commandRunner->calls[4]);
@@ -123,6 +124,7 @@ final class ReleaseAgentToolUseTest extends TestCase
         $this->assertCount(1, $commandRunner->calls);
         $this->assertSame(['git', 'status', '--porcelain'], $commandRunner->calls[0]);
         $this->assertSame("# Changelog\n\n## Unreleased\n\n- thing\n", $fileSystem->files['CHANGELOG.md']);
+        $this->assertArrayNotHasKey('VERSION', $fileSystem->files);
     }
 
     public function testStopsAtFirstFailedStepAndDowngradesToHold(): void
@@ -171,5 +173,6 @@ final class ReleaseAgentToolUseTest extends TestCase
         // clean); only the changelog-parsing step fails.
         $this->assertCount(1, $commandRunner->calls);
         $this->assertSame(['git', 'status', '--porcelain'], $commandRunner->calls[0]);
+        $this->assertArrayNotHasKey('VERSION', $fileSystem->files);
     }
 }

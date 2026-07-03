@@ -34,8 +34,9 @@ use Throwable;
  * (`git status --porcelain` reports nothing) so an unrelated
  * uncommitted change can't get swept into the release commit alongside
  * CHANGELOG.md; a dirty tree aborts the whole sequence with no other
- * command run. It only finalizes CHANGELOG.md -- it does not bump a
- * version file, since this project doesn't have one defined yet.
+ * command run. It finalizes CHANGELOG.md and overwrites the root VERSION
+ * file with the bare version number (no "v" prefix), then adds, commits,
+ * tags, and pushes both files together.
  */
 final class ReleaseAgent extends AbstractRoleAgent
 {
@@ -134,6 +135,9 @@ final class ReleaseAgent extends AbstractRoleAgent
             $this->finalizeChangelog($tagName);
             $steps[] = ['step' => 'finalize CHANGELOG.md', 'ok' => true];
 
+            $this->bumpVersionFile($tagName);
+            $steps[] = ['step' => 'bump VERSION', 'ok' => true];
+
             foreach ($this->releaseCommands($tagName) as $stepName => $command) {
                 $result = $this->commandRunner->run($command);
                 $steps[] = ['step' => $stepName, 'ok' => $result['exitCode'] === 0, ...$result];
@@ -157,7 +161,7 @@ final class ReleaseAgent extends AbstractRoleAgent
     private function releaseCommands(string $tagName): array
     {
         return [
-            'git add' => ['git', 'add', 'CHANGELOG.md'],
+            'git add' => ['git', 'add', 'CHANGELOG.md', 'VERSION'],
             'git commit' => ['git', 'commit', '-m', "Release {$tagName}"],
             'git tag' => ['git', 'tag', $tagName],
             'git push' => ['git', 'push'],
@@ -202,5 +206,17 @@ final class ReleaseAgent extends AbstractRoleAgent
         }
 
         $this->fileSystem->write('CHANGELOG.md', $updated);
+    }
+
+    /**
+     * Overwrites the root VERSION file with the bare version number (no
+     * "v" prefix, matching common convention for a plain VERSION file).
+     * Doesn't validate that the new version is actually greater than
+     * whatever VERSION currently holds -- same level of trust the caller
+     * already gets for CHANGELOG content and the tag name itself.
+     */
+    private function bumpVersionFile(string $tagName): void
+    {
+        $this->fileSystem->write('VERSION', ltrim($tagName, 'v') . "\n");
     }
 }
