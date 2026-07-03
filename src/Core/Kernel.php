@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace SquirrelForge\Core;
 
-use SquirrelForge\Agent\AgentPipelineModule;
 use SquirrelForge\Agent\AgentServiceProvider;
 use SquirrelForge\Contracts\EventBusInterface;
+use SquirrelForge\Contracts\LoggerInterface;
 use SquirrelForge\Events\Event;
 use SquirrelForge\Memory\MemoryServiceProvider;
+use SquirrelForge\Modules\ModuleDiscovery;
 use SquirrelForge\Modules\ModuleLoader;
 use SquirrelForge\Modules\ModuleServiceProvider;
 use SquirrelForge\Core\CoreRuntimeServiceProvider;
@@ -65,10 +66,15 @@ final class Kernel
 
     /**
      * Load application modules once every core provider has registered and
-     * booted. This is the single place modules get plugged in -- explicit,
-     * not filesystem auto-discovery -- so capability registration (like the
-     * Agent role pipeline) doesn't have to be hardcoded inside a core
-     * service provider's boot().
+     * booted.
+     *
+     * Modules are found by scanning `src/` for classes named `*Module.php`
+     * that implement `ModuleInterface` (see `ModuleDiscovery`) -- real
+     * filesystem auto-discovery, not a hardcoded list. Adding a new module
+     * anywhere under `src/` is enough to have it loaded; nothing here needs
+     * to change. This is how capability registration (like the Agent role
+     * pipeline, via `AgentPipelineModule`) stays out of core service
+     * providers' `boot()` methods.
      */
     private function loadModules(): void
     {
@@ -77,8 +83,28 @@ final class Kernel
         /** @var ModuleLoader $moduleLoader */
         $moduleLoader = $container->make(ModuleLoader::class);
 
-        $moduleLoader->load([
-            new AgentPipelineModule(),
-        ], $container);
+        $discovery = new ModuleDiscovery();
+        $modules = $discovery->discover($this->sourceRoot(), 'SquirrelForge');
+
+        $moduleLoader->load($modules, $container);
+
+        if ($container->has(LoggerInterface::class)) {
+            /** @var LoggerInterface $logger */
+            $logger = $container->make(LoggerInterface::class);
+
+            foreach ($discovery->errors() as $error) {
+                $logger->warning('Module discovery skipped a candidate.', ['error' => $error]);
+            }
+        }
+    }
+
+    /**
+     * Absolute path to the src/ directory (this file lives at
+     * src/Core/Kernel.php), used as the root for module discovery. It maps
+     * to the "SquirrelForge" PSR-4 namespace prefix in composer.json.
+     */
+    private function sourceRoot(): string
+    {
+        return dirname(__DIR__);
     }
 }

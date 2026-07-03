@@ -28,6 +28,8 @@ All notable changes to SquirrelForge are recorded here.
 - `README.md` for `00_CORE`, `30_LEARNING`, `32_OPTIMIZATION`, and `35_RESILIENCE` -- the four numbered layers that didn't have one. Every numbered layer now has a README.
 - `AgentPipelineModule` (`src/Agent/AgentPipelineModule.php`): a `ModuleInterface` that registers the eight role agents and the orchestrator into `AgentRegistry`, loaded through `ModuleLoader` from a new `Kernel::loadModules()` step instead of being hardcoded in a service provider.
 - `src/Llm/LlmClientResolver.php`: extracted the `ANTHROPIC_API_KEY`/`ConfigurationInterface` resolution logic out of `AgentServiceProvider` so any module can resolve an LLM client the same way.
+- `ModuleDiscovery` (`src/Modules/ModuleDiscovery.php`): real filesystem auto-discovery. Recursively scans a directory for `*Module.php` files, derives each candidate's PSR-4 class name, and instantiates every concrete `ModuleInterface` implementation with a zero-argument constructor found there. Never `require`s files directly -- resolves classes via `class_exists()` through Composer's autoloader, and collects (never throws) errors from any one broken candidate so it can't take down boot.
+- `tests/Modules/ModuleDiscoveryTest.php` and `tests/Fixtures/DiscoveryModules/` covering: only concrete, constructor-free `ModuleInterface` implementations are discovered; a non-implementing class, an abstract implementation, and a constructor-requiring implementation are all correctly skipped; a nonexistent directory returns no modules; an explicit exclude list is honored.
 
 ### Fixed
 
@@ -38,4 +40,4 @@ All notable changes to SquirrelForge are recorded here.
 ### Changed
 
 - `AgentServiceProvider` now only registers the `AgentRegistry`/`AgentOrchestrator` infrastructure; it no longer constructs role agents itself. Role-agent registration (and the `AnthropicClient` built from `ANTHROPIC_API_KEY`/`llm.anthropic.api_key`, with neither set every agent staying fully deterministic) now happens in `AgentPipelineModule`.
-- `Kernel::boot()` now resolves `ModuleLoader` after all providers have registered and booted, and loads `AgentPipelineModule` through it -- `ModuleLoader` existed before but was never actually invoked.
+- `Kernel::boot()` now resolves `ModuleLoader` after all providers have registered and booted, and loads whatever `ModuleDiscovery` finds under `src/` through it -- `ModuleLoader` existed before but was never actually invoked, and the module list is no longer a hardcoded array in `Kernel.php`. Any discovery errors are logged as warnings via `LoggerInterface` rather than failing boot.

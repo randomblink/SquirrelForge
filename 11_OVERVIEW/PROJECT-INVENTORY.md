@@ -121,6 +121,7 @@ no 31) reserved for future layers; that is not a defect.
 | src/Tools/ToolServiceProvider.php | Present | |
 | src/Modules/ModuleInterface.php | Present | |
 | src/Modules/ModuleLoader.php | Present | Now actually invoked, by `Kernel::loadModules()` (2026-07-03); previously nothing called it. |
+| src/Modules/ModuleDiscovery.php | Present | Added 2026-07-03; scans a directory for `*Module.php` files implementing `ModuleInterface` with a zero-arg constructor and returns instances -- real filesystem auto-discovery, replacing the explicit module array previously in `Kernel.php`. |
 | src/Modules/ModuleRegistry.php | Present | |
 | src/Modules/ModuleServiceProvider.php | Present | |
 | src/Core/Bootstrapper.php | Present | |
@@ -158,7 +159,6 @@ been refreshed to reflect what is actually still open.
 
 | Missing Item | Priority | Notes |
 |---|---:|---|
-| True filesystem module auto-discovery | Low | As of 2026-07-03, role-agent registration goes through `AgentPipelineModule` + `ModuleLoader` (see `Kernel::loadModules()`) instead of being hardcoded in a service provider's `boot()`. The module list passed to `ModuleLoader::load()` is still an explicit array in `Kernel.php`, though -- nothing scans a directory for modules yet. Revisit if/when third-party or plugin-style modules need to be discovered without editing `Kernel.php`. |
 | Developer/Release agents still pure data-aggregators | Medium | Architect, Planner, Reviewer, Security, Performance, and Documentation now call an injected LLM to fill in judgment fields the caller didn't supply (see `src/Agent/Roles/AbstractRoleAgent::reason()`). Developer and Release intentionally were not given this: Developer would otherwise mean an LLM autonomously writing/editing project files with no tool-use or review loop, and Release is meant to be a pure gate-check. Revisit if/when real tool-use (file edits, test execution) is wired in. |
 | Only Anthropic supported | Low | `src/Llm/AnthropicClient.php` is the only `LlmClientInterface` implementation. Add another implementation (e.g. OpenAI) if multi-provider support is ever needed; agents only depend on the interface. |
 
@@ -240,6 +240,26 @@ resolution logic into `src/Llm/LlmClientResolver.php` so it isn't tied to
 one specific provider. This is module-based registration, not filesystem
 auto-discovery -- the module list is still an explicit array in
 `Kernel.php` (see Section 5).
+
+2026-07-03 (follow-up): Added `ModuleDiscovery` (`src/Modules/ModuleDiscovery.php`)
+and wired it into `Kernel::loadModules()`, replacing the explicit
+`[new AgentPipelineModule()]` array with a real recursive scan of `src/`
+for classes named `*Module.php` that implement `ModuleInterface` with a
+zero-argument constructor. This is now true filesystem auto-discovery:
+adding a new module anywhere under `src/` is enough for `Kernel::boot()`
+to load it, with no edit to `Kernel.php` needed. `ModuleDiscovery` never
+`require`s files directly -- it computes the PSR-4 class name a candidate
+file would define and lets Composer's autoloader resolve it via
+`class_exists()`, so a broken candidate file only affects itself
+(collected via `ModuleDiscovery::errors()` and logged as warnings by
+`Kernel`, never thrown). Scope and trust boundary: only `src/` is scanned,
+never `vendor/`; a discovered module gets exactly the same container
+access a manually-registered module always had, so `src/` must remain
+trusted, reviewed code, same as it always has been. Covered by
+`tests/Modules/ModuleDiscoveryTest.php` against a fixture directory
+(`tests/Fixtures/DiscoveryModules/`) exercising: a plain class that
+doesn't implement `ModuleInterface`, an abstract implementation, and one
+whose constructor requires an argument -- all correctly skipped.
 
 Review order:
 
