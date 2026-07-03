@@ -26,5 +26,8 @@ build/
 # Composer
 composer.lock
 
+# PHPUnit
+.phpunit.result.cache
+
 # npm
 package-lock.json
