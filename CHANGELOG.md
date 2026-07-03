@@ -31,6 +31,7 @@ All notable changes to SquirrelForge are recorded here.
 
 - `ARCHITECTURE.md`: closed an unclosed code fence that was suppressing all Markdown formatting past "Primary Flow", and corrected stale directory references (`31_OBSERVABILITY` -> `27_OBSERVABILITY`, `27_LEARNING` -> `30_LEARNING`).
 - `11_OVERVIEW/PROJECT-INVENTORY.md`: refreshed to match the actual post-restructure directory tree and runtime source files; previous "Missing Pieces" list was stale (the listed items already existed).
+- `README.md`: "Architecture" table and "Repository Structure" tree were still describing the pre-restructure layout (`01_INPUT`, `02_VALIDATION`, ... `34_RESPONSE`); now list the actual `01_RULES`, `02_WORKFLOWS`, ... `38_WORDPRESS` layers. "Roadmap" and "Status" no longer describe the project as pre-implementation now that `src/`, `tests/`, and CI exist. "License" now notes that `LICENSE` exists but is empty, rather than implying no file exists.
 
 ### Changed
 

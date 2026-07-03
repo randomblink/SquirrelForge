@@ -18,7 +18,7 @@ Use it to confirm:
 
 | File | Status | Notes |
 |---|---:|---|
-| README.md | Present | |
+| README.md | Present | Architecture table, Repository Structure tree, Roadmap, License, and Status sections refreshed 2026-07-03 to match the actual post-restructure tree and implementation state. |
 | ARCHITECTURE.md | Present | Broken links and an unclosed code fence fixed 2026-07-02. |
 | CONTRIBUTING.md | Present | |
 | PROJECT-INVENTORY.md | Present | This file; refreshed 2026-07-02 to match the post-restructure tree. |
@@ -158,7 +158,6 @@ been refreshed to reflect what is actually still open.
 |---|---:|---|
 | Module auto-discovery of role agents | Medium | Role agents are registered directly in `AgentServiceProvider::boot()`. `12_AGENT/BOOTSTRAP.md` step 4 implies discovery should ultimately go through `14_ENGINE/PROJECT-LOADER.md` / `ModuleLoader`. |
 | Developer/Release agents still pure data-aggregators | Medium | Architect, Planner, Reviewer, Security, Performance, and Documentation now call an injected LLM to fill in judgment fields the caller didn't supply (see `src/Agent/Roles/AbstractRoleAgent::reason()`). Developer and Release intentionally were not given this: Developer would otherwise mean an LLM autonomously writing/editing project files with no tool-use or review loop, and Release is meant to be a pure gate-check. Revisit if/when real tool-use (file edits, test execution) is wired in. |
-| README.md is stale (pre-restructure) | Medium | The root `README.md`'s "Architecture" table and "Repository Structure" tree still list the old `01_INPUT`/`02_VALIDATION`/.../`34_RESPONSE` layout from before the 2026-07-02 restructure, not the actual `01_RULES`/`02_WORKFLOWS`/.../`38_WORDPRESS` tree (see Section 2). Not fixed as part of the CI change to keep that change focused; fix alongside other doc-accuracy work. |
 | Only Anthropic supported | Low | `src/Llm/AnthropicClient.php` is the only `LlmClientInterface` implementation. Add another implementation (e.g. OpenAI) if multi-provider support is ever needed; agents only depend on the interface. |
 
 ---
@@ -215,6 +214,17 @@ that didn't have one -- `00_CORE`, `30_LEARNING`, `32_OPTIMIZATION`,
 `35_RESILIENCE` -- matching the Component Roster format used by the other
 layer READMEs (see e.g. `33_AUTOMATION/README.md`). Every numbered layer
 now has a README.
+
+2026-07-03 (follow-up): Fixed the root `README.md`, which was still
+describing the pre-restructure directory layout (`01_INPUT`,
+`02_VALIDATION`, ... `34_RESPONSE`). The "Architecture" table and
+"Repository Structure" tree now list the actual `01_RULES`,
+`02_WORKFLOWS`, ... `38_WORDPRESS` layers; "Roadmap" reflects that the
+Agent role pipeline is implemented rather than only planned; "Status"
+describes the working PHP runtime, test suite, and CI instead of
+"architecture and framework development phase"; and "License" now notes
+that `LICENSE` exists but is still empty rather than implying no file
+exists at all.
 
 Review order:
 
