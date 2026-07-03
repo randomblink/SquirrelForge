@@ -5,7 +5,7 @@ Status: Draft
 Owner: Release Maintainers
 Depends On: `23_GOVERNANCE/VERSIONING.md`
 Used By: Contributors and releases
-Last Updated: 2026-07-01
+Last Updated: 2026-07-03
 
 All notable changes to SquirrelForge are recorded here.
 
@@ -23,6 +23,8 @@ All notable changes to SquirrelForge are recorded here.
 - `AbstractRoleAgent::reason()`: lets a role agent ask an injected LLM to fill in judgment fields the caller didn't explicitly supply, with explicit context values always taking precedence over the model's answer.
 - Real LLM reasoning wired into Architect, Planner, Reviewer, Security, Performance, and Documentation agents (architecture blueprint fields, execution phases, review issues, security/performance findings, documentation updates respectively).
 - `tests/Support/FakeLlmClient.php` and `tests/LlmReasoningTest.php` covering: no LLM call when fields are explicit, LLM used only for missing fields, explicit values overriding LLM guesses, and errors on invalid/incomplete LLM JSON responses.
+- `.github/workflows/tests.yml`: runs `composer test` on every push/PR to `main` across a PHP 8.2/8.3/8.4 matrix.
+- Tests status badge on `README.md`.
 
 ### Fixed
 

@@ -1,5 +1,7 @@
 # SquirrelForge
 
+[![Tests](https://github.com/randomblink/SquirrelForge/actions/workflows/tests.yml/badge.svg)](https://github.com/randomblink/SquirrelForge/actions/workflows/tests.yml)
+
 A modular, explainable, observable AI agent architecture.
 
 ## Overview

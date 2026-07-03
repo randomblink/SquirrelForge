@@ -158,8 +158,8 @@ been refreshed to reflect what is actually still open.
 |---|---:|---|
 | README.md for 00_CORE, 30_LEARNING, 32_OPTIMIZATION, 35_RESILIENCE | Low | Every other numbered layer has one; these four don't. |
 | Module auto-discovery of role agents | Medium | Role agents are registered directly in `AgentServiceProvider::boot()`. `12_AGENT/BOOTSTRAP.md` step 4 implies discovery should ultimately go through `14_ENGINE/PROJECT-LOADER.md` / `ModuleLoader`. |
-| Automated CI run of `composer test` | Medium | No PHP runtime was available in the environment this update was made from, so the tests were written and manually traced through by hand but have not actually been executed. Run `composer test` locally before relying on them. |
 | Developer/Release agents still pure data-aggregators | Medium | Architect, Planner, Reviewer, Security, Performance, and Documentation now call an injected LLM to fill in judgment fields the caller didn't supply (see `src/Agent/Roles/AbstractRoleAgent::reason()`). Developer and Release intentionally were not given this: Developer would otherwise mean an LLM autonomously writing/editing project files with no tool-use or review loop, and Release is meant to be a pure gate-check. Revisit if/when real tool-use (file edits, test execution) is wired in. |
+| README.md is stale (pre-restructure) | Medium | The root `README.md`'s "Architecture" table and "Repository Structure" tree still list the old `01_INPUT`/`02_VALIDATION`/.../`34_RESPONSE` layout from before the 2026-07-02 restructure, not the actual `01_RULES`/`02_WORKFLOWS`/.../`38_WORDPRESS` tree (see Section 2). Not fixed as part of the CI change to keep that change focused; fix alongside other doc-accuracy work. |
 | Only Anthropic supported | Low | `src/Llm/AnthropicClient.php` is the only `LlmClientInterface` implementation. Add another implementation (e.g. OpenAI) if multi-provider support is ever needed; agents only depend on the interface. |
 
 ---
@@ -173,7 +173,7 @@ been refreshed to reflect what is actually still open.
 | Runtime Core | Present (Kernel, Application, Container, Bootstrapper, HealthManager, LifecycleManager). |
 | Registries | Agent, Tool, Module, Workflow registries all present. `AgentRegistry` now holds 8 role agents plus the orchestrator after boot. |
 | Missing Infrastructure | Only doc polish and the items in Section 5 remain. |
-| Ready for Testing | Yes, pending someone running `composer test` with an actual PHP install to confirm the test suite passes. |
+| Ready for Testing | Confirmed 2026-07-03: `composer test` passes on PHP 8.5.7 -- 105 tests, 236 assertions, 0 failures. Now enforced on every push/PR via `.github/workflows/tests.yml`. |
 
 ## Final Notes
 
@@ -204,6 +204,12 @@ guesses, and errors on invalid/incomplete LLM JSON responses.
 
 Developer and Release were deliberately left as pure data-aggregators
 (see Section 5) -- they don't call the LLM.
+
+2026-07-03: `composer test` was run for the first time on a machine with
+PHP installed (8.5.7) and passed cleanly: 105 tests, 236 assertions, 0
+failures. Added `.github/workflows/tests.yml` (PHP 8.2/8.3/8.4 matrix) so
+this is checked automatically on every push and pull request going
+forward, plus a status badge on `README.md`.
 
 Review order:
 
