@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace SquirrelForge\Agent\Roles;
 
 use InvalidArgumentException;
+use SquirrelForge\Agent\Roles\Support\FileChangeApplier;
 use SquirrelForge\Contracts\FileSystemInterface;
 use SquirrelForge\Contracts\LlmClientInterface;
-use Throwable;
 
 /**
  * Implements the Agent Developer role from `16_AGENTS/AGENT-DEVELOPER.md`.
@@ -26,15 +26,22 @@ use Throwable;
  * Any file change that fails to apply forces the owning task (or the whole
  * batch, if it can't be attributed) to "Blocked" rather than reporting
  * false success.
+ *
+ * The actual write/delete-per-change logic lives in `FileChangeApplier`
+ * (constructed only when a `FileSystemInterface` is injected).
  */
 final class DeveloperAgent extends AbstractRoleAgent
 {
+    private readonly ?FileChangeApplier $fileChangeApplier;
+
     public function __construct(
         ?LlmClientInterface $llm = null,
-        private readonly ?FileSystemInterface $fileSystem = null,
+        ?FileSystemInterface $fileSystem = null,
         string $version = '1.0.0'
     ) {
         parent::__construct($llm, $version);
+
+        $this->fileChangeApplier = $fileSystem !== null ? new FileChangeApplier($fileSystem) : null;
     }
 
     public function stage(): string
@@ -60,7 +67,7 @@ final class DeveloperAgent extends AbstractRoleAgent
 
         if (array_key_exists('tasks_completed', $context)) {
             $tasks = $context['tasks_completed'];
-        } elseif ($this->fileSystem !== null) {
+        } elseif ($this->fileChangeApplier !== null) {
             ['tasks' => $tasks, 'file_changes' => $fileChanges] = $this->implementViaFileSystem($planner);
         } else {
             throw new InvalidArgumentException(
@@ -124,11 +131,7 @@ final class DeveloperAgent extends AbstractRoleAgent
         );
 
         $requestedChanges = $reasoned['file_changes'] ?? [];
-        $appliedChanges = [];
-
-        foreach ($requestedChanges as $change) {
-            $appliedChanges[] = $this->applyFileChange($change);
-        }
+        $appliedChanges = $this->fileChangeApplier->applyAll($requestedChanges);
 
         $tasks = $reasoned['tasks_completed'] ?? [];
         $hasFailedChange = array_filter(
@@ -143,33 +146,5 @@ final class DeveloperAgent extends AbstractRoleAgent
         }
 
         return ['tasks' => $tasks, 'file_changes' => $appliedChanges];
-    }
-
-    /**
-     * @param array<string, mixed> $change
-     * @return array<string, mixed>
-     */
-    private function applyFileChange(array $change): array
-    {
-        $path = $change['path'] ?? null;
-        $action = $change['action'] ?? null;
-
-        if (!is_string($path) || $path === '') {
-            return ['path' => $path, 'action' => $action, 'applied' => false, 'error' => 'Missing or invalid path.'];
-        }
-
-        try {
-            match ($action) {
-                'create', 'update' => $this->fileSystem->write($path, (string) ($change['content'] ?? '')),
-                'delete' => $this->fileSystem->delete($path),
-                default => throw new InvalidArgumentException(
-                    sprintf('Unknown file change action "%s".', is_string($action) ? $action : 'null')
-                ),
-            };
-
-            return ['path' => $path, 'action' => $action, 'applied' => true];
-        } catch (Throwable $e) {
-            return ['path' => $path, 'action' => $action, 'applied' => false, 'error' => $e->getMessage()];
-        }
     }
 }

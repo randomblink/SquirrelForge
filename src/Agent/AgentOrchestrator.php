@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace SquirrelForge\Agent;
 
-use DateTimeImmutable;
 use RuntimeException;
+use SquirrelForge\Agent\Support\BootableHealthCheck;
 use SquirrelForge\Contracts\AgentInterface;
 
 /**
@@ -18,7 +18,7 @@ use SquirrelForge\Contracts\AgentInterface;
  */
 final class AgentOrchestrator implements AgentInterface
 {
-    private bool $booted = false;
+    use BootableHealthCheck;
 
     public function __construct(
         private readonly AgentRegistry $registry,
@@ -26,26 +26,14 @@ final class AgentOrchestrator implements AgentInterface
     ) {
     }
 
-    public function boot(): void
-    {
-        $this->booted = true;
-    }
-
-    public function isHealthy(): bool
-    {
-        return $this->booted;
-    }
-
-    public function health(): array
+    /**
+     * @return array<string, mixed>
+     */
+    protected function healthDetails(): array
     {
         return [
-            'status' => $this->booted ? 'healthy' : 'unhealthy',
-            'component' => self::class,
-            'timestamp' => (new DateTimeImmutable())->format(DATE_ATOM),
-            'details' => [
-                'id' => $this->getId(),
-                'managed_agents' => count($this->registry->all()),
-            ],
+            'id' => $this->getId(),
+            'managed_agents' => count($this->registry->all()),
         ];
     }
 
@@ -143,12 +131,7 @@ final class AgentOrchestrator implements AgentInterface
      */
     public function assertPipelineComplete(): void
     {
-        $expected = [
-            'architect', 'planner', 'developer', 'reviewer',
-            'security', 'performance', 'documentation', 'release',
-        ];
-
-        foreach ($expected as $stage) {
+        foreach (PipelineStages::ALL as $stage) {
             if ($this->registry->findFor(['stage' => $stage]) === null) {
                 throw new RuntimeException(sprintf('No agent registered for required stage "%s".', $stage));
             }

@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace SquirrelForge\Agent;
 
 use Closure;
-use DateTimeImmutable;
+use SquirrelForge\Agent\Support\BootableHealthCheck;
 use SquirrelForge\Contracts\AgentInterface;
 
 final class CallbackAgent implements AgentInterface
 {
-    private bool $booted = false;
+    use BootableHealthCheck;
 
     public function __construct(
         private readonly string $id,
@@ -23,26 +23,14 @@ final class CallbackAgent implements AgentInterface
     ) {
     }
 
-    public function boot(): void
-    {
-        $this->booted = true;
-    }
-
-    public function isHealthy(): bool
-    {
-        return $this->booted;
-    }
-
-    public function health(): array
+    /**
+     * @return array<string, mixed>
+     */
+    protected function healthDetails(): array
     {
         return [
-            'status' => $this->booted ? 'healthy' : 'unhealthy',
-            'component' => self::class,
-            'timestamp' => (new DateTimeImmutable())->format(DATE_ATOM),
-            'details' => [
-                'id' => $this->id,
-                'name' => $this->name,
-            ],
+            'id' => $this->id,
+            'name' => $this->name,
         ];
     }
 

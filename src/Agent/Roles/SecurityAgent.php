@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace SquirrelForge\Agent\Roles;
 
+use SquirrelForge\Agent\Roles\Support\FindingsEvaluator;
+
 /**
  * Implements the Agent Security role from `16_AGENTS/AGENT-SECURITY.md`.
  *
@@ -51,20 +53,7 @@ final class SecurityAgent extends AbstractRoleAgent
             $findings = $reasoned['findings'] ?? [];
         }
 
-        $hasCritical = false;
-
-        foreach ($findings as $finding) {
-            if (($finding['severity'] ?? null) === 'critical') {
-                $hasCritical = true;
-                break;
-            }
-        }
-
-        $status = match (true) {
-            $hasCritical => 'Failed',
-            $findings !== [] => 'Warning',
-            default => 'Approved',
-        };
+        $status = FindingsEvaluator::evaluate($findings);
 
         return [
             'security' => [

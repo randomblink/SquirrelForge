@@ -114,17 +114,24 @@ no 31) reserved for future layers; that is not a defect.
 | src/Agent/AgentRegistry.php | Present | |
 | src/Agent/AgentServiceProvider.php | Present | Registers only `AgentRegistry`/`AgentOrchestrator` infrastructure as of 2026-07-03; no longer constructs role agents itself. |
 | src/Agent/AgentPipelineModule.php | Present | Added 2026-07-03; a `ModuleInterface` that registers the 8 role agents + orchestrator into `AgentRegistry`, loaded via `ModuleLoader` in `Kernel::boot()` instead of being hardcoded in a provider. |
-| src/Agent/AgentOrchestrator.php | Present | Added 2026-07-02; runs the Architect->...->Release handoff sequence. |
-| src/Agent/CallbackAgent.php | Present | Generic closure-backed agent, useful for ad hoc/test agents. |
-| src/Agent/Roles/AbstractRoleAgent.php | Present | Added 2026-07-02; shared plumbing for pipeline role agents. |
+| src/Agent/AgentOrchestrator.php | Present | Added 2026-07-02; runs the Architect->...->Release handoff sequence. As of 2026-07-03, shares boot/health boilerplate via `Support\BootableHealthCheck` and reads its hardcoded stage list from `PipelineStages::ALL`. |
+| src/Agent/CallbackAgent.php | Present | Generic closure-backed agent, useful for ad hoc/test agents. As of 2026-07-03, shares boot/health boilerplate via `Support\BootableHealthCheck`. |
+| src/Agent/PipelineStages.php | Present | Added 2026-07-03; the canonical ordered 8-stage list, extracted out of `AgentOrchestrator::assertPipelineComplete()`, which previously hardcoded it inline. |
+| src/Agent/Support/BootableHealthCheck.php | Present | Added 2026-07-03; a trait providing `boot()`/`isHealthy()`/`health()`, extracted out of identical hand-duplicated code in `AbstractRoleAgent`, `AgentOrchestrator`, and `CallbackAgent` (a trait, not a base class, since all three implement `AgentInterface` directly). Using classes only need to provide `healthDetails()`. |
+| src/Agent/Roles/AbstractRoleAgent.php | Present | Added 2026-07-02; shared plumbing for pipeline role agents. As of 2026-07-03, composes `Support\BootableHealthCheck`, `Support\ContextGuards`, and `SquirrelForge\Llm\Reasoner` rather than implementing all of that inline. |
+| src/Agent/Roles/Support/ContextGuards.php | Present | Added 2026-07-03; a trait providing `requireField()`/`requireHistory()`, extracted out of `AbstractRoleAgent`. |
+| src/Agent/Roles/Support/ReleaseActionsRunner.php | Present | Added 2026-07-03; the real, side-effecting half of the Release stage (working-tree check, CHANGELOG.md/VERSION finalization, git commands), extracted out of `ReleaseAgent`. Constructed only when both a `FileSystemInterface` and `CommandRunnerInterface` are injected. |
+| src/Agent/Roles/Support/FileChangeApplier.php | Present | Added 2026-07-03; applies a batch of LLM-proposed file changes through a `FileSystemInterface`, extracted out of `DeveloperAgent`. |
+| src/Agent/Roles/Support/FindingsEvaluator.php | Present | Added 2026-07-03; the critical/warning/approved severity rule shared identically by `SecurityAgent` and `PerformanceAgent` (previously duplicated inline in both). |
 | src/Agent/Roles/ArchitectAgent.php | Present | Added 2026-07-02. |
 | src/Agent/Roles/PlannerAgent.php | Present | Added 2026-07-02. |
-| src/Agent/Roles/DeveloperAgent.php | Present | Added 2026-07-02. As of 2026-07-03, when `tasks_completed` isn't explicitly supplied and a `FileSystemInterface` + LLM are injected, writes/deletes files directly per the LLM's proposed `file_changes`. A failed write forces the owning task to `Blocked` rather than reporting false success. |
+| src/Agent/Roles/DeveloperAgent.php | Present | Added 2026-07-02. As of 2026-07-03, when `tasks_completed` isn't explicitly supplied and a `FileSystemInterface` + LLM are injected, writes/deletes files directly per the LLM's proposed `file_changes` via `Roles\Support\FileChangeApplier`. A failed write forces the owning task to `Blocked` rather than reporting false success. |
 | src/Agent/Roles/ReviewerAgent.php | Present | Added 2026-07-02. |
-| src/Agent/Roles/SecurityAgent.php | Present | Added 2026-07-02. |
-| src/Agent/Roles/PerformanceAgent.php | Present | Added 2026-07-02. |
+| src/Agent/Roles/SecurityAgent.php | Present | Added 2026-07-02. As of 2026-07-03, delegates its critical/warning/approved outcome to `Roles\Support\FindingsEvaluator`. |
+| src/Agent/Roles/PerformanceAgent.php | Present | Added 2026-07-02. As of 2026-07-03, delegates its critical/warning/approved outcome to `Roles\Support\FindingsEvaluator`. |
 | src/Agent/Roles/DocumentationAgent.php | Present | Added 2026-07-02. |
-| src/Agent/Roles/ReleaseAgent.php | Present | Added 2026-07-02. As of 2026-07-03, when the gate-check passes, `release_version` is supplied, and `ReleaseActionsPolicy::isEnabled()` is true, checks the working tree is clean, finalizes CHANGELOG.md, bumps the root VERSION file, and runs `git add`/`commit`/`tag`/`push`/`push --tags`, stopping at the first failed step and downgrading status to `Hold`. Off by default. |
+| src/Agent/Roles/ReleaseAgent.php | Present | Added 2026-07-02. As of 2026-07-03, when the gate-check passes, `release_version` is supplied, and `ReleaseActionsPolicy::isEnabled()` is true, delegates to `Roles\Support\ReleaseActionsRunner` (working-tree check, CHANGELOG.md/VERSION finalization, `git add`/`commit`/`tag`/`push`/`push --tags`), stopping at the first failed step and downgrading status to `Hold`. Off by default. |
+| src/Llm/Reasoner.php | Present | Added 2026-07-03; prompt building, JSON parsing/validation, and code-fence stripping for `AbstractRoleAgent::reason()`, extracted out of that class. Constructed only when an LLM client is injected. |
 | src/Tools/ToolRegistry.php | Present | |
 | src/Tools/ToolServiceProvider.php | Present | |
 | src/Modules/ModuleInterface.php | Present | |
@@ -399,6 +406,54 @@ level of trust already extended to the caller-supplied tag name. Updated
 `VERSION`'s contents and that `git add` includes it; the working-tree-dirty
 and missing-changelog-section tests now also assert `VERSION` was never
 written, since both failures happen before `bumpVersionFile()` would run.
+
+2026-07-03 (follow-up): Reorganized `src/Agent/` into smaller, named,
+single-responsibility pieces. This was a pure extraction -- no behavior
+change, no public constructor signature change -- prompted by the
+directory having grown to 14 files with real duplication (identical
+boot/health boilerplate hand-copied into three unrelated classes;
+identical critical/warning/approved severity logic hand-copied into two
+role agents) and two files (`ReleaseAgent`, `AbstractRoleAgent`) mixing a
+pure/deterministic concern with a side-effecting or infrastructural one.
+
+New pieces: `src/Agent/Support/BootableHealthCheck.php` (trait: `boot()`/
+`isHealthy()`/`health()`, used by `AbstractRoleAgent`, `AgentOrchestrator`,
+and `CallbackAgent` -- a trait rather than a base class since all three
+implement `AgentInterface` directly and can't share this through
+inheritance); `src/Agent/PipelineStages.php` (the canonical ordered
+8-stage list, previously hardcoded inline in
+`AgentOrchestrator::assertPipelineComplete()`);
+`src/Agent/Roles/Support/ContextGuards.php` (trait: `requireField()`/
+`requireHistory()`, used only by `AbstractRoleAgent`);
+`src/Llm/Reasoner.php` (prompt building, JSON parsing/validation, and
+code-fence stripping for `reason()`, constructed by `AbstractRoleAgent`
+only when an LLM client is injected -- note it takes both a display name
+for the system prompt and the caller's class name for error messages,
+since the original code used two different strings for those two
+purposes); `src/Agent/Roles/Support/ReleaseActionsRunner.php` (the real,
+side-effecting half of the Release stage -- working-tree check,
+CHANGELOG.md/VERSION finalization, git commands -- so `ReleaseAgent`
+itself keeps only the pure gate-check); `src/Agent/Roles/Support/
+FileChangeApplier.php` (per-file-change apply logic out of
+`DeveloperAgent`); `src/Agent/Roles/Support/FindingsEvaluator.php` (the
+severity rule shared identically by `SecurityAgent` and
+`PerformanceAgent`).
+
+`ArchitectAgent`, `PlannerAgent`, `ReviewerAgent`, `DocumentationAgent`,
+`AgentRegistry`, `AgentServiceProvider`, and `AgentPipelineModule` were
+untouched. `DeveloperAgent` and `ReleaseAgent`'s public constructors kept
+identical parameter order, types, and defaults, so `AgentPipelineModule`
+and every existing test construct them exactly as before.
+
+No PHP runtime was available to actually run the suite for this pass (as
+throughout this project), so verification was: brace/paren-balance checks
+on every new/edited file, a full manual line-by-line trace against the
+prior commit, and an independent second-pass review (a fresh review of
+the diff against the test suite's exact assertions, run separately from
+the implementation work) that reached the same conclusion -- no
+behavior change found. **Please still run `composer test` to confirm
+the full suite passes**, per the project's standing practice of treating
+this as unconfirmed until a real PHP run happens.
 
 Review order:
 

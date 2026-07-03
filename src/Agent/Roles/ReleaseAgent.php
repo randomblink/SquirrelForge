@@ -4,12 +4,10 @@ declare(strict_types=1);
 
 namespace SquirrelForge\Agent\Roles;
 
-use DateTimeImmutable;
-use RuntimeException;
+use SquirrelForge\Agent\Roles\Support\ReleaseActionsRunner;
 use SquirrelForge\Contracts\CommandRunnerInterface;
 use SquirrelForge\Contracts\FileSystemInterface;
 use SquirrelForge\Contracts\LlmClientInterface;
-use Throwable;
 
 /**
  * Implements the Agent Release role from `16_AGENTS/AGENT-RELEASE.md`.
@@ -30,24 +28,28 @@ use Throwable;
  * (no push after a failed commit, no tag after a failed commit, etc.) and
  * downgrades the reported status to "Hold".
  *
- * Before touching anything, it verifies the git working tree is clean
- * (`git status --porcelain` reports nothing) so an unrelated
- * uncommitted change can't get swept into the release commit alongside
- * CHANGELOG.md; a dirty tree aborts the whole sequence with no other
- * command run. It finalizes CHANGELOG.md and overwrites the root VERSION
- * file with the bare version number (no "v" prefix), then adds, commits,
- * tags, and pushes both files together.
+ * The actual working-tree check, CHANGELOG.md/VERSION finalization, and
+ * git commands live in `ReleaseActionsRunner` (constructed only when both
+ * a `FileSystemInterface` and `CommandRunnerInterface` are injected); this
+ * class keeps only the gate-check and the decision of whether/when to
+ * delegate to it.
  */
 final class ReleaseAgent extends AbstractRoleAgent
 {
+    private readonly ?ReleaseActionsRunner $releaseActions;
+
     public function __construct(
         ?LlmClientInterface $llm = null,
-        private readonly ?FileSystemInterface $fileSystem = null,
-        private readonly ?CommandRunnerInterface $commandRunner = null,
+        ?FileSystemInterface $fileSystem = null,
+        ?CommandRunnerInterface $commandRunner = null,
         private readonly bool $actionsEnabled = false,
         string $version = '1.0.0'
     ) {
         parent::__construct($llm, $version);
+
+        $this->releaseActions = ($fileSystem !== null && $commandRunner !== null)
+            ? new ReleaseActionsRunner($fileSystem, $commandRunner)
+            : null;
     }
 
     public function stage(): string
@@ -115,9 +117,7 @@ final class ReleaseAgent extends AbstractRoleAgent
 
     private function canPerformActions(): bool
     {
-        return $this->actionsEnabled
-            && $this->fileSystem !== null
-            && $this->commandRunner !== null;
+        return $this->actionsEnabled && $this->releaseActions !== null;
     }
 
     /**
@@ -125,98 +125,6 @@ final class ReleaseAgent extends AbstractRoleAgent
      */
     private function performReleaseActions(string $releaseVersion): array
     {
-        $tagName = str_starts_with($releaseVersion, 'v') ? $releaseVersion : "v{$releaseVersion}";
-        $steps = [];
-
-        try {
-            $this->assertWorkingTreeIsClean();
-            $steps[] = ['step' => 'working tree check', 'ok' => true];
-
-            $this->finalizeChangelog($tagName);
-            $steps[] = ['step' => 'finalize CHANGELOG.md', 'ok' => true];
-
-            $this->bumpVersionFile($tagName);
-            $steps[] = ['step' => 'bump VERSION', 'ok' => true];
-
-            foreach ($this->releaseCommands($tagName) as $stepName => $command) {
-                $result = $this->commandRunner->run($command);
-                $steps[] = ['step' => $stepName, 'ok' => $result['exitCode'] === 0, ...$result];
-
-                if ($result['exitCode'] !== 0) {
-                    return ['status' => 'Failed', 'tag' => $tagName, 'steps' => $steps];
-                }
-            }
-
-            return ['status' => 'Ready', 'tag' => $tagName, 'steps' => $steps];
-        } catch (Throwable $e) {
-            $steps[] = ['step' => 'exception', 'ok' => false, 'error' => $e->getMessage()];
-
-            return ['status' => 'Failed', 'tag' => $tagName, 'steps' => $steps];
-        }
-    }
-
-    /**
-     * @return array<string, array<int, string>>
-     */
-    private function releaseCommands(string $tagName): array
-    {
-        return [
-            'git add' => ['git', 'add', 'CHANGELOG.md', 'VERSION'],
-            'git commit' => ['git', 'commit', '-m', "Release {$tagName}"],
-            'git tag' => ['git', 'tag', $tagName],
-            'git push' => ['git', 'push'],
-            'git push --tags' => ['git', 'push', '--tags'],
-        ];
-    }
-
-    private function assertWorkingTreeIsClean(): void
-    {
-        $result = $this->commandRunner->run(['git', 'status', '--porcelain']);
-
-        if ($result['exitCode'] !== 0) {
-            throw new RuntimeException(
-                'Unable to verify the git working tree status: ' . trim($result['error'])
-            );
-        }
-
-        if (trim($result['output']) !== '') {
-            throw new RuntimeException(
-                'Working tree is not clean; refusing to run release actions so unrelated '
-                . 'uncommitted changes aren\'t swept into the release commit: '
-                . trim($result['output'])
-            );
-        }
-    }
-
-    private function finalizeChangelog(string $tagName): void
-    {
-        $contents = $this->fileSystem->read('CHANGELOG.md');
-
-        if (!str_contains($contents, '## Unreleased')) {
-            throw new RuntimeException('CHANGELOG.md has no "## Unreleased" section to finalize.');
-        }
-
-        $date = (new DateTimeImmutable())->format('Y-m-d');
-        $replacement = "## Unreleased\n\n## [{$tagName}] - {$date}";
-
-        $updated = preg_replace('/^## Unreleased/m', $replacement, $contents, 1);
-
-        if ($updated === null) {
-            throw new RuntimeException('Failed to finalize CHANGELOG.md.');
-        }
-
-        $this->fileSystem->write('CHANGELOG.md', $updated);
-    }
-
-    /**
-     * Overwrites the root VERSION file with the bare version number (no
-     * "v" prefix, matching common convention for a plain VERSION file).
-     * Doesn't validate that the new version is actually greater than
-     * whatever VERSION currently holds -- same level of trust the caller
-     * already gets for CHANGELOG content and the tag name itself.
-     */
-    private function bumpVersionFile(string $tagName): void
-    {
-        $this->fileSystem->write('VERSION', ltrim($tagName, 'v') . "\n");
+        return $this->releaseActions->run($releaseVersion);
     }
 }
