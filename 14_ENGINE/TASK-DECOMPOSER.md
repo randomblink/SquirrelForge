@@ -3,54 +3,131 @@
 Version: 1.0.0
 Status: Stable
 Owner: Engine Maintainers
-Depends On: `14_ENGINE/GOAL-PLANNER.md`, `14_ENGINE/DEPENDENCY-ANALYZER.md`
-Used By: `14_ENGINE/ENGINE-OVERVIEW.md`
-Last Updated: 2026-07-01
+Depends On: `14_ENGINE/GOAL-PLANNER.md`, `14_ENGINE/CONTEXT-MANAGER.md`, `19_REASONING`
+Used By: Dependency Analyzer, Execution Planner, Workflow Selector, Task Router
+Last Updated: 2026-07-04
 
 ## Purpose
 
-The Task Decomposer breaks a structured goal from the `Goal Planner` into a series of small, ordered, and independently verifiable tasks. Each task has clear boundaries, inputs, outputs, and completion criteria.
+The Task Decomposer converts a structured goal into bounded, ordered, independently understandable tasks that can be analyzed, planned, routed, executed, validated, recovered, and reported.
+
+It defines task boundaries. It does not execute tasks or mark them complete.
+
+---
 
 ## Responsibilities
 
--   Consume the `Goal Definition` from the `Goal Planner`.
--   Break the primary goal into a sequence of concrete, executable tasks.
--   For each task, define its specific inputs, expected outputs, and verifiable completion criteria.
--   Identify task-level dependencies, risks, and required permissions.
--   Assign a validation owner for each task's output.
--   Designate key tasks as checkpoints for recovery.
--   Pass the list of structured `Task Definitions` to the `Dependency Analyzer`.
+The Task Decomposer must:
+
+- convert the primary goal into concrete task units,
+- preserve the goal's acceptance criteria and scope,
+- separate required tasks from optional tasks,
+- identify task inputs and expected outputs,
+- identify dependencies between tasks,
+- identify tasks that require supporting workflows,
+- identify domain context required by each task,
+- identify permission-sensitive or high-risk tasks,
+- identify validation points,
+- identify useful checkpoints and recovery boundaries,
+- avoid unnecessary fragmentation,
+- and pass the task graph to dependency analysis and execution planning.
+
+---
 
 ## Decomposition Process
 
-1.  **Receive Goal:** Ingest the structured `Goal Definition` from the `Goal Planner`.
-2.  **Identify Major Steps:** Break the goal into high-level phases or work areas.
-3.  **Decompose into Tasks:** For each phase, create a list of small, concrete tasks.
-4.  **Define Task Boundaries:** For each task, specify its inputs, outputs, completion criteria, and dependencies.
-5.  **Assess Task Attributes:** Assign risk, permissions, and validation ownership for each task.
-6.  **Emit Task List:** Produce a list of `Task Definition` records.
-7.  **Forward for Analysis:** Pass the task list to the `Dependency Analyzer`.
+1. Receive the structured goal record.
+2. Read active project and context records.
+3. Identify major work areas required by the acceptance criteria.
+4. Break each work area into concrete tasks with one clear outcome.
+5. Identify inputs, outputs, dependencies, and ordering constraints.
+6. Mark optional work separately from required work.
+7. Identify active domain context for each task.
+8. Identify permission, security, production, or destructive risk.
+9. Identify validation requirements and evidence owner.
+10. Identify checkpoint or rollback boundaries when needed.
+11. Review the task graph for missing work, duplication, and circular dependency.
+12. Pass the task graph to Dependency Analyzer and Execution Planner.
 
-## Task Definition
+---
+
+## Task Model
 
 | Field | Description |
 |---|---|
-| **Task ID** | A unique identifier for this specific task. |
-| **Goal ID** | The identifier of the parent goal for traceability. |
-| **Description** | A clear statement of what must be done. |
-| **Inputs** | The specific artifacts or data required to start the task. |
-| **Expected Outputs** | The specific artifacts or data the task must produce. |
-| **Completion Criteria** | A measurable, verifiable definition of "done" for this task. |
-| **Dependencies** | A list of other `Task IDs` that must be completed first. |
-| **Domain Context** | The operational domain (e.g., `WordPress`, `Core`) required for execution. |
-| **Risk** | The estimated risk associated with this specific task (e.g., `Low`, `Medium`, `High`). |
-| **Permissions Required** | The specific permissions needed to execute the task (e.g., `file:write`). |
-| **Validation Owner** | The component or role responsible for validating the task's output. |
-| **Is Checkpoint** | `true` if the successful completion of this task represents a safe recovery point. |
+| Task ID | Stable unique task identifier. |
+| Task Name | Short task label. |
+| Description | Exact outcome the task must produce. |
+| Required | Whether the task is required for the primary goal. |
+| Inputs | Files, context, decisions, or artifacts required. |
+| Expected Output | Artifact, state change, decision, or evidence the task should produce. |
+| Dependencies | Prior tasks, decisions, files, or conditions required. |
+| Active Domain | Domain context required for the task, if any. |
+| Workflow | Primary or supporting workflow associated with the task. |
+| Risk | Task-specific risk level and material risk factors. |
+| Permissions | Required permission boundary. |
+| Validation | Required validation and evidence owner. |
+| Checkpoint | Recovery or rollback checkpoint requirement. |
+| Status | State compatible with `14_ENGINE/STATE-MANAGER.md`. |
+
+---
+
+## Task Size Rule
+
+A task should normally have:
+
+- one clear outcome,
+- one accountable owner at a time,
+- understandable inputs,
+- a verifiable output,
+- and a defined completion condition.
+
+Do not split work into artificial micro-tasks that add coordination overhead without improving ownership, safety, validation, or recovery.
+
+Do not combine unrelated outcomes into one task merely to reduce task count.
+
+---
+
+## Dependency Rule
+
+The Task Decomposer identifies candidate dependencies, but the Dependency Analyzer owns deeper dependency validation and cycle detection.
+
+Dependencies must be explicit when one task requires another task's output, permission, decision, checkpoint, or validation result.
+
+---
+
+## Parallel Work Rule
+
+Tasks may be eligible for parallel work only when:
+
+- they have no unresolved dependency relationship,
+- they do not mutate the same state unsafely,
+- ownership boundaries are clear,
+- coordination requirements are defined,
+- and validation can distinguish their outputs.
+
+Parallelism must not be inferred solely because tasks appear different.
+
+---
+
+## Domain Rule
+
+Domain context is assigned per task when required.
+
+For WordPress-specific tasks, relevant `38_WORDPRESS` context and WordPress rules must be available downstream.
+
+General tasks must not be labeled WordPress-specific merely because the repository supports WordPress work.
+
+---
+
+## Completion Boundary Rule
+
+The Task Decomposer must define what evidence would allow each task to be considered complete, but completion state is controlled by execution and validation evidence through the State Manager.
+
+A task definition must not pre-claim successful execution or validation.
+
+---
 
 ## Rule
 
-1.  **Verifiable Tasks:** Every task must have explicit, non-ambiguous `Completion Criteria`.
-2.  **Small Units of Work:** Tasks should be decomposed to the smallest practical unit of work that can be independently executed and validated.
-3.  **No Ambiguity:** The decomposer must not proceed if the parent goal is ambiguous. It should rely on the `Goal Planner` to handle clarification.
-4.  **Parallelism Rules:** Tasks that have no dependencies on each other may be marked as eligible for parallel execution by the `Execution Planner`.
+> Decompose goals into the smallest useful tasks that improve ownership, dependency clarity, validation, or recovery. Every task must have a clear outcome, explicit dependencies, and a verifiable completion boundary.

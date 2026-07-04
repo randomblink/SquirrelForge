@@ -3,63 +3,148 @@
 Version: 1.0.0
 Status: Stable
 Owner: Engine Maintainers
-Depends On: `14_ENGINE/STATE-MANAGER.md`, `16_AGENTS/AGENT-SPECIALIZATION.md`
-Used By: Coordination
-Last Updated: 2026-07-01
+Depends On: Execution Plan, Workflow Selector, `16_AGENTS`, `17_COORDINATION`, `22_INTERFACES`
+Used By: Coordination, Execution Planner, Execution Layer
+Last Updated: 2026-07-04
 
-Routes each ready task to the workflow and agent capable of satisfying its requirements. Routing must honor dependencies, permissions, ownership, capacity, and task priority. It must also emit a traceable routing record and handle rerouting when conditions change.
+## Purpose
 
----
+The Task Router assigns each ready task to the workflow, agent, capability, and execution path able to satisfy its requirements within active rules, dependencies, permissions, capacity, and priority.
 
-## Responsibilities
-
--   Receive a task from the `State Manager` that is ready for execution.
--   Resolve the best-fit agent and workflow for the task.
--   Verify agent capabilities, specialization, and availability.
--   Enforce task dependencies and priority order.
--   Assign task ownership to a specific agent.
--   Notify the `State Manager` to transition the task to `In Progress` once routed.
--   Handle rerouting requests when a task is blocked or requires different skills.
+The Task Router creates routing decisions. It does not execute the task itself.
 
 ---
 
 ## Routing Inputs
 
--   **Task Definition:** The specific goal, requirements, and completion criteria.
--   **Task Dependencies:** A list of other tasks that must be completed first.
--   **Task Priority:** The urgency of the task relative to others.
--   **Required Capabilities:** The skills or specializations needed, as defined in `16_AGENTS/AGENT-SPECIALIZATION.md`.
--   **Agent Availability:** The current status and capacity of candidate agents.
--   **Workflow Catalog:** The list of available, validated workflows.
+The router should evaluate:
+
+- task identifier,
+- parent goal and workflow,
+- task type,
+- required capability,
+- active domain,
+- dependencies,
+- dependency status,
+- priority,
+- risk level,
+- required permissions,
+- required tools and interfaces,
+- candidate agents,
+- agent capability and availability,
+- coordination constraints,
+- validation requirements,
+- and recovery requirements.
+
+Unknown availability or capability must not be treated as confirmed.
 
 ---
 
 ## Routing Process
 
-1.  **Receive Task:** Ingest a task from the `State Manager` with a status of `Not Started` or `Pending Rerouting`.
-2.  **Analyze Requirements:** Identify the core capabilities and constraints from the task definition.
-3.  **Filter Candidates:** Select agents and workflows that match the required capabilities.
-4.  **Evaluate Fitness:** Score candidates based on specialization, priority, and capacity.
-5.  **Select Best Fit:** Choose the highest-scoring agent and workflow.
-6.  **Assign Ownership:** Formally assign the task to the selected agent.
-7.  **Emit Record:** Publish a `Routing Decision` record.
-8.  **Update State:** Notify the `State Manager` that the task has been routed, triggering a transition to `In Progress`.
+1. Receive a task from the execution plan.
+2. Confirm that required predecessor dependencies are satisfied.
+3. Confirm that the task belongs to the selected workflow or an approved supporting workflow.
+4. Identify required skills, domain knowledge, tools, permissions, and validation.
+5. Find candidate agents or execution owners.
+6. Reject candidates that lack required capability, permission, interface access, or availability.
+7. Apply ownership, priority, capacity, and coordination rules.
+8. Select one task owner.
+9. Record the route and handoff context.
+10. Send the routed task to Coordination or the approved execution boundary.
+11. Track routing state until accepted, rerouted, blocked, cancelled, or completed.
 
 ---
 
-## Ownership and Rerouting
+## Routing Record
 
--   **Ownership:** A task is owned by exactly one agent at a time. Ownership is not transferred until a formal handoff or rerouting event occurs.
--   **Rerouting Conditions:** A task must be returned to the Task Router for rerouting if:
-    -   The assigned agent reports it cannot complete the task.
-    -   A validation gate fails and requires a different skill set to remediate.
-    -   The task is explicitly escalated or delegated.
+Each material routing decision should record:
+
+- task ID,
+- workflow ID or workflow instance ID,
+- selected owner,
+- required capabilities,
+- required domain context,
+- required tools or interfaces,
+- required permissions,
+- priority,
+- dependency status,
+- validation requirements,
+- routing rationale,
+- routing timestamp or sequence,
+- and routing status.
 
 ---
 
-## Rules
+## Routing States
 
-1.  **State-Driven:** The Task Router must only act on tasks provided by the `State Manager`.
-2.  **Specialization Enforcement:** A task must only be routed to an agent whose registered specializations match the task's requirements.
-3.  **Dependency Enforcement:** A task must not be routed for execution until all of its declared dependencies are `Complete`.
-4.  **Traceability:** Every routing decision, including reroutes, must produce an immutable routing record.
+| State | Meaning |
+|---|---|
+| `PENDING` | Task exists but is not ready for routing. |
+| `READY` | Dependencies are satisfied and routing may begin. |
+| `ROUTED` | One owner and execution path have been selected. |
+| `ACCEPTED` | The selected owner accepted the task. |
+| `BLOCKED` | A dependency, permission, capability, tool, or context requirement prevents routing. |
+| `REROUTE_REQUIRED` | The selected route is no longer valid. |
+| `CANCELLED` | The task was cancelled by lifecycle or governance control. |
+| `COMPLETED` | The routed task completed and produced required completion evidence. |
+
+---
+
+## Ownership Rule
+
+One agent or execution owner owns a task at a time.
+
+Parallel work must be decomposed into separate tasks with explicit dependencies or coordination rules.
+
+A handoff must include enough context for the receiving owner to understand:
+
+- the goal,
+- task scope,
+- relevant project context,
+- active rules,
+- expected artifact,
+- acceptance criteria,
+- dependencies,
+- risks,
+- and required validation.
+
+---
+
+## Domain Rule
+
+The Task Router must route domain-specific tasks to owners with the required domain context.
+
+For WordPress tasks, relevant `38_WORDPRESS` references and WordPress rules must be available to the selected owner.
+
+WordPress capability must not be assumed for unrelated tasks or for agents that have not been assigned that capability.
+
+---
+
+## Rerouting Rule
+
+Rerouting is required when:
+
+- the assigned owner becomes unavailable,
+- a required tool or interface is unavailable,
+- a permission boundary changes,
+- a dependency fails,
+- new evidence changes the task classification,
+- validation reveals that the selected capability is insufficient,
+- or recovery changes the safe execution path.
+
+Rerouting must preserve task history and must not erase the failed or superseded route.
+
+---
+
+## Completion Rule
+
+The Task Router may mark a task `COMPLETED` only after the responsible execution and validation components provide the required completion evidence.
+
+A route being accepted or executed is not itself proof of completion.
+
+---
+
+## Rule
+
+> Route each ready task to one capable, permitted, available owner through a traceable execution path. Preserve routing history and reroute when the original path is no longer valid.

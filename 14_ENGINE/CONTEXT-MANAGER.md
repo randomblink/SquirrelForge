@@ -1,69 +1,133 @@
-# Agent Engine: Context Manager
+# SquirrelForge Context Manager
 
 Version: 1.0.0
 Status: Stable
 Owner: Engine Maintainers
-Depends On: See component references
-Used By: See layer README
+Depends On: `14_ENGINE/PROJECT-LOADER.md`, `14_ENGINE/STATE-MANAGER.md`, `12_AGENT/COLLECTION-MANIFEST.md`
+Used By: Engine, Workflow Selector, Task Router, Reasoning, Execution Planning, Reporting
 Last Updated: 2026-07-04
 
 ## Purpose
 
-The Context Manager is responsible for loading, maintaining, and unloading the information required to complete the current task. It ensures the agent has precisely the right context while minimizing cognitive load and preventing context contamination.
+The Context Manager loads, maintains, prunes, and passes the information required for the active request, workflow, task, and validation path.
+
+It keeps the agent focused on relevant evidence while preserving enough continuity to avoid losing state, overwriting work, or making decisions from stale assumptions.
 
 ---
 
 ## Responsibilities
 
--   Maintain the active project context (from the `Project Loader`).
--   Track the active workflow and task state.
--   Preserve task-specific information (e.g., user clarifications).
--   Load domain-specific knowledge and rules only when required by the task.
--   Prune stale or irrelevant context to maintain focus.
--   Provide a traceable record of the context used for a decision.
+The Context Manager must:
+
+- maintain verified project context from the Project Loader,
+- maintain active lifecycle and task state from the State Manager,
+- load mandatory general rules,
+- load project-specific instructions,
+- load selected workflow documents,
+- load relevant checklists and validation references,
+- load domain-specific context only when the active request requires that domain,
+- track user clarifications and acceptance criteria,
+- distinguish verified evidence from memory and assumptions,
+- pass relevant context to supporting skills, workflows, or agents,
+- prune inactive context when it is no longer needed,
+- and preserve the state required for recovery and accurate reporting.
 
 ---
 
-## Context Loading Priority
+## Context Loading Order
 
-Context is assembled with the following priority order, where higher-priority items override lower-priority ones in case of conflict:
+At the start of a task, the Context Manager loads information in this priority:
 
-1.  **Current Task Evidence:** Facts, files, and outputs directly related to the immediate step being executed.
-2.  **Current Task Definition:** The specific request, its goals, and any user clarifications.
-3.  **Active Workflow State:** The state of the primary workflow executing the task.
-4.  **Domain-Specific Knowledge:** Rules and documents loaded by a domain-specific manager (e.g., `38_WORDPRESS/KNOWLEDGE-MANAGER.md`) relevant to the task's domain.
-5.  **Project Context:** The broader project state provided by the `Project Loader`.
-6.  **Core System Rules:** Universal behaviors and constraints, such as `01_RULES/AGENT-BEHAVIOR.md`.
+1. **Current User Request** — goal, constraints, acceptance criteria, and explicit permissions.
+2. **System and Agent Context** — active bootstrap state, agent profile, and collection manifest.
+3. **Mandatory General Rules** — general behavior, safety, permissions, and completion rules.
+4. **Verified Project Context** — Project Loader output, repository state, configuration, runtime profile, and known limitations.
+5. **Active State** — lifecycle phase, selected workflow, task state, routing state, blockers, and validation state.
+6. **Applicable Workflow and Checklists** — primary workflow, supporting workflows, quality gates, and completion checks.
+7. **Applicable Domain Context** — domain rules and references only when the request touches that domain.
+8. **Relevant Memory and Knowledge** — prior decisions, reusable knowledge, and project history, treated as supporting context.
+9. **Task-Specific Supporting Context** — selected skills, tools, interfaces, templates, and output requirements.
 
 ---
 
-## Context States
+## Domain Loading Rule
 
-| State | Description |
-|---|---|
-| `Loading` | The Context Manager is assembling the required information for a new task. |
-| `Active` | The context is loaded and is being used by an agent for execution. |
-| `Stale` | The context is no longer relevant to the current step and is pending pruning. |
-| `Pruning` | The Context Manager is actively removing stale information. |
-| `Unloaded` | The context for a completed task has been archived and removed from active memory. |
+Domain context is loaded by need, not habit.
+
+For WordPress work, load:
+
+- `01_RULES/WORDPRESS-RULES.md`,
+- relevant `38_WORDPRESS` references,
+- and applicable WordPress validation expectations.
+
+For non-WordPress work, do not automatically load WordPress rules or WordPress handbooks.
+
+---
+
+## Evidence Priority
+
+When context sources disagree, evaluate them in this order:
+
+1. Current user request and explicit constraints
+2. Mandatory system, safety, and permission rules
+3. Current repository or runtime evidence
+4. Project configuration and local instructions
+5. Active workflow and validation requirements
+6. Authoritative domain references
+7. Project memory and prior decisions
+8. General reusable knowledge
+9. Assumptions
+
+Assumptions must be labeled or resolved before they become execution dependencies.
+
+---
+
+## Context Record
+
+The Context Manager should maintain a record containing:
+
+- request summary,
+- active goal,
+- acceptance criteria,
+- verified project context,
+- active domain context,
+- loaded rules,
+- loaded workflow references,
+- loaded checklists,
+- active state summary,
+- relevant memory,
+- assumptions,
+- unknowns,
+- limitations,
+- and context expiry or pruning notes.
 
 ---
 
 ## Context Pruning
 
-To maintain focus and manage token limits, context that is no longer relevant to the current step must be unloaded. Pruning is triggered when:
+To maintain focus, context that is no longer relevant should be pruned after:
 
-- A major workflow phase is completed.
-- A task is fully validated and finished.
-- The agent's focus shifts to a different domain or skill.
-- The project itself is marked as complete.
+- a major lifecycle phase completes,
+- a workflow route changes,
+- a task is validated and finished,
+- a domain is no longer active,
+- a supporting workflow completes,
+- or the project is marked complete.
+
+The State Manager record, decision record, validation evidence, and recovery-relevant context must remain available until the lifecycle is safely completed or retained according to policy.
 
 ---
 
-## Rules
+## Staleness Rule
 
-1.  **Evidence Overrides Memory:** Information derived from direct observation of the current task's state (e.g., file contents, command output) must always take precedence over historical memory or general knowledge.
-2.  **Domain-Specific Loading:** Domain-specific rules (e.g., WordPress standards) must not be loaded into the global context. They must be loaded on-demand by a relevant domain manager (like `38_WORDPRESS/KNOWLEDGE-MANAGER.md`) when a task requires that specific specialization.
-3.  **Minimum Necessary Context:** Load only the minimum context necessary to complete the current step while preserving enough information to maintain continuity throughout the entire task.
-4.  **Staleness Invalidation:** Context from a previous task or workflow step is considered stale and must not be used for a new task unless explicitly re-validated and loaded.
-5.  **Traceability:** The set of active context documents and sources used for any significant agent decision must be recorded for audit and traceability.
+Memory, documentation, and knowledge can become stale.
+
+The Context Manager must prefer current repository state, runtime evidence, and verified user requirements over older memory or earlier plans.
+
+If stale context is detected, record the conflict and route it to reasoning, validation, or cleanup instead of silently trusting it.
+
+---
+
+## Rule
+
+> Load the minimum sufficient context for the active step, preserve evidence needed for continuity and recovery, and load domain-specific references only when the active request requires that domain.

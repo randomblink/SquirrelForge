@@ -3,60 +3,161 @@
 Version: 1.0.0
 Status: Stable
 Owner: Engine Maintainers
-Depends On: `14_ENGINE/VALIDATION.md`
-Used By: `14_ENGINE/ENGINE-OVERVIEW.md`
+Depends On: `11_OVERVIEW/LIFECYCLE.md`, `14_ENGINE/PROJECT-LOADER.md`, `14_ENGINE/WORKFLOW-SELECTOR.md`, `14_ENGINE/TASK-ROUTER.md`
+Used By: Engine, Coordination, Execution, Validation, Reporting
 Last Updated: 2026-07-04
 
 ## Purpose
 
-The State Manager is the authoritative source for a task's lifecycle state. It tracks progress, manages state transitions, and coordinates with other engine components like the `Validation` coordinator to move a task from creation to completion.
+The State Manager tracks the current planning and routing state for an active SquirrelForge request.
+
+It preserves enough lifecycle, workflow, task, routing, validation, blocker, and recovery context for work to resume, report accurately, or return to the earliest responsible phase after a failed gate.
+
+The State Manager records state. It does not execute actions, validate tests, or rewrite history.
+
+---
 
 ## Responsibilities
 
--   Maintain the definitive status for every task (`Not Started`, `In Progress`, etc.).
--   Transition a task's status based on events from other engine components.
--   Invoke the `Validation` component when a task is ready for review.
--   Update a task's status based on the `Passed` or `Failed` outcome from validation.
--   Ensure that a task cannot be marked `Complete` until all required gates have passed.
--   Produce a traceable record of all state transitions.
+The State Manager must:
 
-## State Model
+- record the active request and goal,
+- record the active lifecycle phase,
+- record project loading state,
+- record selected workflow state,
+- track milestones and tasks,
+- track dependency status,
+- track routing status,
+- track owner handoffs,
+- track blockers and blocked reasons,
+- track validation requirements and evidence status,
+- track recovery requirements,
+- preserve context between workflow stages,
+- prevent false completion state,
+- and expose a concise current-state summary for reporting.
+
+---
+
+## State Record
+
+A useful state record should include:
 
 | Field | Description |
 |---|---|
-| Workflow | Active workflow being executed |
-| Task | Current task |
-| Status | `Not Started` / `In Progress` / `Pending Validation` / `Blocked` / `Complete` |
-| ValidationResult | `Not Run` / `Passed` / `Failed` |
-| Next Step | Recommended action after completion |
+| Request ID | Active request identifier. |
+| Goal ID | Structured goal identifier. |
+| Lifecycle Phase | Current lifecycle phase from intake through retention. |
+| Project State | Project loading and readiness state. |
+| Workflow | Selected primary workflow and supporting workflows. |
+| Milestone | Current milestone or milestone group. |
+| Task | Current task or active task set. |
+| Dependencies | Required predecessor tasks and their status. |
+| Routing | Routing state and current owner. |
+| Permissions | Permission status for planned actions. |
+| Validation | Required validation and current evidence status. |
+| Blockers | Active blockers, reasons, and responsible phase. |
+| Recovery | Recovery or rollback state when required. |
+| Next Step | Next required lifecycle action. |
+| Limitations | Known unavailable tools, missing context, or unverified claims. |
 
-## State Transitions
+---
 
-The State Manager orchestrates the following lifecycle for a task:
+## Lifecycle State Values
 
-1.  **Creation:** A new task is created with the status `Not Started`.
-2.  **Execution:** The `Task Router` assigns the task, and its status becomes `In Progress`.
-3.  **Validation Handoff:** Once the agent completes its work, it notifies the State Manager. The status transitions to `Pending Validation`, and the State Manager invokes the `14_ENGINE/VALIDATION.md` component.
-4.  **Validation Success:** If the `Validation` component returns a `Passed` result, the State Manager sets `ValidationResult` to `Passed` and transitions the task status to `Complete`.
-5.  **Validation Failure:** If the `Validation` component returns a `Failed` result, the State Manager sets `ValidationResult` to `Failed` and transitions the task status back to `In Progress` for remediation.
-6.  **Blocking:** If an external dependency prevents progress at any point, the status can be set to `Blocked`.
+| State | Meaning |
+|---|---|
+| `REQUESTED` | Request received but not yet normalized. |
+| `BOOTSTRAPPING` | Agent bootstrap and required context loading are active. |
+| `INTAKE` | Goal, constraints, acceptance criteria, and permissions are being captured. |
+| `CONTEXT_LOADING` | Project, rules, workflows, domain references, and memory are being loaded. |
+| `ROUTING` | Workflow and task routing are being selected. |
+| `REASONING` | Risk, rule, strategy, and dependency review are active. |
+| `PLANNING` | Ordered work plan and validation path are being prepared. |
+| `PERMISSION_REVIEW` | Planned actions are checked against active boundaries. |
+| `EXECUTION_HANDOFF` | Planned tasks are handed to execution or coordination. |
+| `VALIDATION` | Required validation and testing evidence is being produced or reviewed. |
+| `REVIEW` | Result is compared against rules and acceptance criteria. |
+| `REPORTING` | Final or interim report is being prepared. |
+| `OBSERVABILITY_RECORDING` | Relevant events, diagnostics, and audit records are being recorded. |
+| `MEMORY_UPDATE` | Allowed memory or learning records are being stored. |
+| `RETENTION` | Records are retained or archived according to policy. |
+| `COMPLETE` | Work is complete with required evidence or clearly reported limitations. |
+| `BLOCKED` | A required condition prevents progress. |
+| `RECOVERY_REQUIRED` | Unsafe or incomplete state requires recovery before continuation. |
+| `FAILED` | Work failed and no safe continuation path is currently available. |
 
-```text
-               ┌──────────────────┐
-               │ In Progress      ├<───────────┐
-               └───────┬──────────┘            │
-                       │ (Work Complete)       │ (Failed)
-                       ▼                       │
-┌──────────────────────┴───────────────┐       │
-│ Pending Validation (Invoke VALIDATION) │───────┘
-└──────────────────────┬───────────────┘
-                       │ (Passed)
-                       ▼
-               ┌─────────┴────────┐
-               │ Complete         │
-               └──────────────────┘
-```
+---
+
+## Task State Values
+
+| State | Meaning |
+|---|---|
+| `NOT_STARTED` | Task exists but work has not begun. |
+| `READY` | Dependencies are satisfied and task may be routed. |
+| `ROUTED` | A task owner or execution path has been selected. |
+| `IN_PROGRESS` | Work has begun. |
+| `WAITING` | Task is waiting on dependency, permission, tool, or user input. |
+| `BLOCKED` | Task cannot proceed until a blocker is resolved. |
+| `VALIDATION_PENDING` | Work exists but validation evidence is not complete. |
+| `VALIDATION_FAILED` | Validation failed and repair is required. |
+| `COMPLETED` | Task is complete with required evidence. |
+| `CANCELLED` | Task was cancelled by lifecycle, governance, or scope control. |
+
+---
+
+## Validation State Values
+
+| State | Meaning |
+|---|---|
+| `NOT_REQUIRED` | No validation is required for this item. |
+| `REQUIRED` | Validation is required but not started. |
+| `PENDING` | Validation is underway or waiting for evidence. |
+| `PASSED` | Required validation evidence passed. |
+| `FAILED` | Validation evidence failed. |
+| `UNAVAILABLE` | Validation could not be performed and must be disclosed. |
+| `WAIVED` | Validation was intentionally waived by an approved governance or permission decision. |
+
+---
+
+## Transition Rules
+
+- A task may move to `IN_PROGRESS` only after required dependencies are satisfied or explicitly waived.
+- A task may move to `COMPLETED` only after required validation evidence exists or unavailable validation is explicitly reported.
+- A lifecycle phase may not skip a required gate.
+- A failed validation returns work to the earliest responsible phase.
+- A blocker must identify the blocked condition, responsible phase, and next safe action.
+- Recovery state must preserve the failed or interrupted state rather than overwriting it.
+- Completion state must not erase limitations, failed checks, or unavailable validation.
+
+---
+
+## Single Ownership Rule
+
+One owner may hold a task at a time.
+
+Parallel work must be represented as separate tasks with explicit dependencies, routing records, and ownership boundaries.
+
+---
+
+## Reporting Rule
+
+The State Manager must support accurate progress reporting.
+
+A current-state report should be able to answer:
+
+- what request is active,
+- what phase is active,
+- what workflow is selected,
+- what task is current,
+- what changed,
+- what is blocked,
+- what validation is required,
+- what evidence exists,
+- what remains uncertain,
+- and what the next safe step is.
+
+---
 
 ## Rule
 
-A task **must not** be marked `Complete` until its `ValidationResult` is `Passed`. The State Manager is the sole authority for changing a task's status.
+> State must reflect verified progress, blockers, validation evidence, and limitations. A task or lifecycle phase cannot be marked complete merely because execution was attempted.
