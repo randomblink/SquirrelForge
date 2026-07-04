@@ -3,37 +3,109 @@
 Version: 1.0.0
 Status: Stable
 Owner: Engine Maintainers
-Depends On: Skill Catalog, Workflow Selector, Agent API
-Used By: Bootstrap and Task Router
-Last Updated: 2026-07-01
+Depends On: `12_AGENT/COLLECTION-MANIFEST.md`, Skill Catalog, Workflow Selector, Agent API
+Used By: Bootstrap, Task Router, Project Loader, and agent hosts
+Last Updated: 2026-07-04
 
-## Routing Table
+## Purpose
 
-| Request | Primary Skill | Primary Workflow | Lead Agent | Required Verification |
+The Capability Router maps an incoming request to the correct source layers, workflow, specialist agent, domain knowledge, tools, and validation requirements.
+
+It prevents the agent from choosing capabilities by habit or loading unrelated domain rules.
+
+---
+
+## Routing Principle
+
+> Route by requested outcome, affected domain, risk, and required evidence.
+
+A request should have one primary route. Supporting routes may be added only when they represent distinct quality, safety, lifecycle, recovery, or domain needs.
+
+---
+
+## Primary Routing Table
+
+| Request Type | Primary Source Layers | Primary Workflow | Lead Agent | Required Verification |
 |---|---|---|---|---|
-| Plan a project | Project Planner | Feature Development | Architect / Planner | Architecture and project checklist |
-| Build a plugin | Plugin Developer | Plugin Development | Developer | Unit, integration, security, smoke |
-| Build a theme | Theme Developer | Theme Development | Developer | Accessibility, system, smoke |
-| Add a feature | Relevant implementation skill | Feature Development | Developer | Risk-based unit and integration tests |
-| Fix a defect | Bug Fixer | Bug Fix | Developer | Reproduction and regression test |
-| Review code | Code Reviewer | Code Review | Reviewer | Review checklist and validation |
-| Audit security | Security Auditor | Security Review | Security Agent | Security findings and retest evidence |
-| Improve performance | Performance Optimizer | Performance Optimization | Performance Agent | Before/after measurement and regression |
-| Review accessibility | Accessibility Reviewer | Accessibility Review | Reviewer | Accessibility evidence and retest |
-| Add tests | Testing | Testing | Developer / Reviewer | Test report |
-| Write documentation | Documentation Writer | Documentation | Documentation Agent | Accuracy, links, metadata, accessibility |
-| Prepare release | Deployment Assistant | Release | Release Agent | Smoke, regression, quality gates, rollback readiness |
+| Plan a project | `14_ENGINE`, `19_REASONING`, `02_WORKFLOWS`, `03_CHECKLISTS` | Project Planning | Architect / Planner | Architecture and project checklist |
+| Clean documentation | `README.md`, `ARCHITECTURE.md`, affected layer READMEs, `23_GOVERNANCE` | Documentation Maintenance | Documentation Agent | Link/reference check and consistency review |
+| Build a plugin | `38_WORDPRESS`, `14_ENGINE`, `20_EXECUTION`, `29_TESTING`, `24_SECURITY` | Plugin Development | Developer | Syntax, unit, integration, security, activation, smoke |
+| Build a theme | `38_WORDPRESS`, `14_ENGINE`, `20_EXECUTION`, `29_TESTING`, `24_SECURITY` | Theme Development | Developer | Accessibility, responsive, template, system, smoke |
+| Build a block | `38_WORDPRESS`, `26_INTEGRATIONS`, `29_TESTING`, `24_SECURITY` | Block Development | Developer | Build, editor, frontend, accessibility, smoke |
+| Add a feature | Relevant domain layer, `14_ENGINE`, `19_REASONING`, `20_EXECUTION`, `29_TESTING` | Feature Development | Developer | Risk-based unit and integration tests |
+| Fix a defect | Relevant domain layer, `20_EXECUTION`, `29_TESTING`, `35_RESILIENCE` | Bug Fix | Developer | Reproduction, fix evidence, regression test |
+| Review code | `16_AGENTS`, `19_REASONING`, `24_SECURITY`, `29_TESTING` | Code Review | Reviewer | Review checklist and validation evidence |
+| Audit security | `24_SECURITY`, relevant domain layer, `23_GOVERNANCE` | Security Review | Security Agent | Findings, severity, remediation, retest evidence |
+| Improve performance | `32_OPTIMIZATION`, relevant domain layer, `27_OBSERVABILITY`, `29_TESTING` | Performance Optimization | Performance Agent | Before/after measurement and regression evidence |
+| Review accessibility | Relevant domain layer, `29_TESTING`, `03_CHECKLISTS` | Accessibility Review | Reviewer | Accessibility evidence and retest |
+| Add tests | `29_TESTING`, relevant domain layer, `20_EXECUTION` | Testing | Developer / Reviewer | Test report and coverage rationale |
+| Write documentation | `36_COMMUNICATION`, `15_TEMPLATES`, relevant source layers | Documentation | Documentation Agent | Accuracy, links, metadata, accessibility |
+| Prepare release | `23_GOVERNANCE`, `02_WORKFLOWS`, `29_TESTING`, `35_RESILIENCE` | Release | Release Agent | Smoke, regression, quality gates, rollback readiness |
+| Recover from failure | `35_RESILIENCE`, `20_EXECUTION`, `27_OBSERVABILITY`, `29_TESTING` | Recovery | Recovery Agent | State review, rollback or repair evidence, validation |
+| Configure automation | `33_AUTOMATION`, `21_CONFIGURATION`, `28_RUNTIME-CONFIG`, `23_GOVERNANCE` | Automation Setup | Automation Agent | Trigger, condition, permission, and audit evidence |
+| Integrate external tool | `26_INTEGRATIONS`, `24_SECURITY`, `21_CONFIGURATION`, `29_TESTING` | Integration Development | Integration Agent | Auth, permission, contract, and failure-mode tests |
+| Optimize agent behavior | `34_AIDRIVER`, `30_LEARNING`, `32_OPTIMIZATION`, `23_GOVERNANCE` | AI Driver / Optimization | AI Driver Agent | Evaluation evidence and rollback path |
+
+---
+
+## Domain Routing
+
+| Domain | Load When | Source |
+|---|---|---|
+| WordPress | The request involves plugins, themes, blocks, WP admin, WP REST, WP database, WP cron, media, WooCommerce, or WordPress deployment. | `38_WORDPRESS` |
+| Security | The request involves permissions, secrets, credentials, auth, data exposure, destructive actions, external access, or production risk. | `24_SECURITY` |
+| Testing | The request changes behavior, fixes a defect, prepares release, or asks for validation. | `29_TESTING` |
+| Governance | The request changes architecture, release rules, quality gates, lifecycle policy, or deprecation state. | `23_GOVERNANCE` |
+| Observability | The request involves logs, metrics, traces, diagnostics, dashboards, alerts, or incident review. | `27_OBSERVABILITY` |
+| Learning | The request involves feedback, evaluation, experience records, or governed improvement. | `30_LEARNING` |
+| Automation | The request involves scheduled, event-driven, rule-driven, or conditional work. | `33_AUTOMATION` |
+| Runtime Config | The request involves profiles, feature flags, secrets, runtime settings, or environment configuration. | `28_RUNTIME-CONFIG` |
+
+---
 
 ## Selection Rules
 
 1. Use one primary workflow based on the requested outcome.
-2. Add supporting workflows only for distinct quality or lifecycle needs.
+2. Add supporting workflows only for distinct quality, safety, lifecycle, recovery, or domain needs.
 3. Route each task to one owning agent and record every handoff.
-4. Increase reasoning depth and test coverage with risk, irreversibility, and interface impact.
-5. If no route fits, return to goal clarification or create a governed capability proposal; do not improvise an undocumented workflow.
+4. Increase reasoning depth and test coverage with risk, irreversibility, production impact, interface impact, and user-data exposure.
+5. Load WordPress references only when the request is WordPress-specific.
+6. Load Security when permissions, secrets, destructive changes, authentication, authorization, or external systems are involved.
+7. Load Testing before claiming a project-changing task is complete.
+8. If no route fits, return to goal clarification or create a governed capability proposal; do not improvise an undocumented workflow.
+
+---
+
+## Risk Escalation
+
+Escalate routing depth when the request involves:
+
+- production systems,
+- database writes,
+- destructive file operations,
+- authentication or authorization,
+- secrets or credentials,
+- deployment,
+- dependency upgrades,
+- schema changes,
+- external APIs,
+- payment or order data,
+- personal or sensitive data,
+- irreversible actions,
+- or incomplete previous work.
+
+Escalation may add Security, Governance, Resilience, Observability, Testing, or manual approval requirements.
+
+---
 
 ## Universal Operating Loop
 
 ```text
-Receive → Understand → Route → Reason → Plan → Execute → Validate → Report → Remember
+Receive → Understand → Classify → Route → Load Context → Reason → Plan → Execute → Validate → Report → Remember
 ```
+
+---
+
+## Rule
+
+> The Capability Router must select capabilities from the current architecture, not from stale layer names or copied domain assumptions.
