@@ -158,9 +158,9 @@ Startup is dependency-ordered and fail-closed. A phase may begin only when its r
 ### 10. AI Driver and Reasoning Initialization
 
 1. Start the AI Driver, Goal Interpreter, Context Builder, Action Selector, Tool Selector, Prompt Compiler, Result Reviewer, Explanation Generator, and AI Safety Gate.
-2. Discover approved model providers and models through the Integration Layer.
+2. The `AI Driver` discovers approved model providers and models through the `26_INTEGRATIONS/LLM-PROVIDERS.md` component.
 3. Load reasoning strategies, decision rules, risk thresholds, and model-routing policy.
-4. Validate provider independence by ensuring that model-specific transformations remain behind the prompt and provider interfaces.
+4. Validate provider independence by ensuring the `AI Driver` uses the `Prompt Compiler` for prompt assembly and the `LLM Providers` for API interaction, keeping core logic provider-agnostic.
 
 ### 11. Workflow and Agent Registration
 
@@ -230,7 +230,7 @@ Response
 | Input Manager | Channel adapter, Message Validator, Conversation Manager | Normalized request with identity and correlation data |
 | Validation | Security Manager and applicable validators | Explicit allow, deny, defer, or clarification decision |
 | Planning | Goal Interpreter and `14_ENGINE` planners | Versioned plan with completion criteria and dependencies |
-| Reasoning | `19_REASONING` and AI Driver | Explainable decision with confidence and risk assessment |
+| Reasoning | `19_REASONING` and `AI Driver` | Explainable decision with confidence and risk assessment, produced after invoking the LLM with a prompt assembled by the `Prompt Compiler`. |
 | Workflow Selection | Workflow Selector | Registered compatible workflow and fallback |
 | Execution | `20_EXECUTION` | Controlled execution with checkpoints and state transitions |
 | Observation | Observability Manager | Complete logs, metrics, trace spans, and audit records |
@@ -244,7 +244,7 @@ Response
 2. Identity, authorization, message structure, content policy, and request limits are evaluated before planning.
 3. The Goal Interpreter converts the request into a structured goal without inventing missing critical intent.
 4. The Context Builder retrieves only authorized, relevant, current memory and knowledge.
-5. Planning decomposes the goal, identifies dependencies, defines checkpoints, and declares completion criteria.
+5. The `AI Driver` invokes the `Prompt Compiler` to assemble the final prompt from the available context. Planning and reasoning then decompose the goal, identify dependencies, and declare completion criteria.
 6. Reasoning evaluates strategies, risk, confidence, tradeoffs, and the need for clarification or approval.
 7. The Workflow Selector chooses a registered workflow or returns `No Compatible Workflow`.
 8. The Automation Validator and Approval Gate apply when the request is automated or policy requires approval.

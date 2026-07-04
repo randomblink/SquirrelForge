@@ -1,88 +1,102 @@
-# SquirrelForge Skill: Create WordPress REST Endpoint
+# SquirrelForge WordPress Create REST Endpoint Skill
 
 ## Purpose
 
-This skill defines how SquirrelForge creates secure WordPress REST API endpoints.
+This Skill defines the controlled workflow for creating a WordPress REST API endpoint.
+
+It coordinates requirements, knowledge selection, architecture, role routing, specialist implementation, security, performance validation, QA, documentation, and release review.
+
+---
+
+## Trigger Conditions
+
+Use this Skill when the request is to:
+
+- create a new custom REST endpoint
+- add a method to an existing REST route
+- expose WordPress data via a controlled API
+
+Do not use this Skill when the task is only to:
+
+- create a full plugin
+- create a shortcode
+- create a simple AJAX handler
 
 ---
 
 ## Required References
 
-Before creating a REST endpoint, consult:
+Before execution, consult:
 
-- `32_WORDPRESS/PIPELINE.md`
-- `32_WORDPRESS/KNOWLEDGE/KNOWLEDGE-MANAGER.md`
-- `32_WORDPRESS/KNOWLEDGE/REST-API.md`
-- `32_WORDPRESS/KNOWLEDGE/SECURITY.md`
-- `32_WORDPRESS/STANDARDS/PHP-STANDARD.md`
-- `32_WORDPRESS/STANDARDS/NAMING-STANDARD.md`
-- `32_WORDPRESS/STANDARDS/TESTING-STANDARD.md`
-- `32_WORDPRESS/SECURITY-VALIDATOR.md`
-
----
-
-## Workflow
-
-1. Identify endpoint purpose.
-2. Define namespace and route.
-3. Define HTTP method.
-4. Define request arguments.
-5. Define validation rules.
-6. Define sanitization rules.
-7. Define permission callback.
-8. Define response schema.
-9. Generate endpoint code.
-10. Validate security.
-11. Create tests.
-12. Produce final report.
+- `38_WORDPRESS/PIPELINE.md`
+- `38_WORDPRESS/KNOWLEDGE/REST-API.md`
+- `38_WORDPRESS/KNOWLEDGE/SECURITY.md`
+- `38_WORDPRESS/ROLES/ROLE-MANAGER.md`
+- `38_WORDPRESS/ROLES/ROLE-ROUTING-MATRIX.md`
+- `38_WORDPRESS/ROLES/REST-ENGINEER.md`
+- `38_WORDPRESS/ROLES/PHP-ENGINEER.md`
+- `38_WORDPRESS/ROLES/SECURITY-ENGINEER.md`
+- `38_WORDPRESS/ROLES/PERFORMANCE-ENGINEER.md`
+- `38_WORDPRESS/ROLES/QA-ENGINEER.md`
+- `38_WORDPRESS/ROLES/DOCUMENTATION-ENGINEER.md`
 
 ---
 
-## Required Planning Output
+## Required Input
 
 ```text
-REST Endpoint Plan
+REST Endpoint Creation Request
 
-Namespace:
-Route:
-Method:
 Purpose:
-Arguments:
-Validation:
-Sanitization:
-Permission Callback:
-Response:
-Errors:
-Testing:
+Consumers:
+Authentication Context:
+Required Endpoints:
+Data Requirements:
+Permission Requirements:
+Performance Constraints:
+Compatibility Requirements:
+Known Constraints:
 ```
-### Security Gates
 
-Every REST endpoint must include:
+### Workflow
 
-- versioned namespace
-- permission callback
-- argument validation
-- argument sanitization
-- escaped output where rendered
-- safe database access
-- no leaked sensitive data
-### Testing Gates
+#### Stage 1 — REST Architecture
 
-Verify:
+Use `REST Engineer` to produce a `REST Engineering Report` (as a plan). The plan must define the namespace, routes, methods, arguments, validation, sanitization, permission callbacks, and response contracts.
 
-- valid request succeeds
-- invalid request fails safely
-- unauthorized request is blocked
-- malformed input is rejected
-- response format is predictable
-- sensitive data is not exposed
+#### Stage 2 — Role Routing
+
+Use `Role Manager` and `ROLE-ROUTING-MATRIX.md` to produce the `WordPress Role Routing Decision`.
+
+#### Stage 3 — Implementation
+
+Use `PHP Engineer` to implement the endpoint registration and callback logic according to the `REST Engineering Report`.
+
+#### Stage 4 — Security Validation
+
+Use `Security Engineer` to audit the endpoint, focusing on the `permission_callback`, argument validation, and sanitization. This is a **blocking gate**.
+
+#### Stage 5 — Performance Validation
+
+Use `Performance Engineer` to analyze the performance impact if the endpoint is high-traffic or performs heavy queries. This is a **blocking gate** when required.
+
+#### Stage 6 — QA Validation
+
+Use `QA Engineer` to execute a test plan verifying the endpoint's functionality, error handling, and security. This is a **blocking gate**.
+
+#### Stage 7 — Documentation
+
+Use `Documentation Engineer` to document the endpoint's route, methods, parameters, and example responses.
+
+### REST Endpoint Final Report
+
+Produce a final report summarizing the status of all stages.
+
+---
+
 ## Rule
 
-SquirrelForge must reject REST endpoints without explicit permission callbacks unless the endpoint is intentionally public and documented.
-
-
-Next file:
-
-```text
-32_WORDPRESS/SKILLS/CREATE-SHORTCODE.md
-```
+1.  **Mandatory `permission_callback`**: The agent must always generate a `permission_callback` for every endpoint. For public, read-only endpoints, it can be `__return_true`, but it must be explicitly defined.
+2.  **Define `args` for Validation**: The agent must generate an `args` array to define, validate, and sanitize all expected parameters.
+3.  **Use `WP_REST_Response` and `WP_Error`**: Generated callbacks must always `return` an instance of `WP_REST_Response` or `WP_Error`, never `echo` and `die()`.
+4.  **Use Versioned Namespaces**: All generated routes must be placed within a versioned namespace (e.g., `my-plugin/v1`).

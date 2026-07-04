@@ -1,54 +1,56 @@
-# SquirrelForge Skill: Create WordPress Shortcode
+# SquirrelForge WordPress Create Shortcode Skill
 
 ## Purpose
 
-This skill defines how SquirrelForge creates safe, reusable WordPress shortcodes.
+This Skill defines the controlled workflow for creating a WordPress shortcode.
+
+It coordinates requirements, knowledge selection, architecture, role routing, specialist implementation, security, performance validation, QA, and documentation.
+
+---
+
+## Trigger Conditions
+
+Use this Skill when the request is to:
+
+- create a new shortcode
+- wrap existing functionality in a shortcode
+
+Do not use this Skill when the task is to:
+
+- create a block
+- create a widget
+- create a full plugin
+
+Use the appropriate specialized Skill instead.
 
 ---
 
 ## Required References
 
-Before creating a shortcode, consult:
+Before execution, consult:
 
-- `32_WORDPRESS/PIPELINE.md`
-- `32_WORDPRESS/KNOWLEDGE/KNOWLEDGE-MANAGER.md`
-- `32_WORDPRESS/KNOWLEDGE/SHORTCODES.md`
-- `32_WORDPRESS/KNOWLEDGE/SECURITY.md`
-- `32_WORDPRESS/STANDARDS/PHP-STANDARD.md`
-- `32_WORDPRESS/STANDARDS/NAMING-STANDARD.md`
-- `32_WORDPRESS/STANDARDS/TESTING-STANDARD.md`
-- `32_WORDPRESS/SECURITY-VALIDATOR.md`
-
----
-
-## Workflow
-
-1. Identify shortcode purpose.
-2. Define shortcode tag.
-3. Define accepted attributes.
-4. Define default values.
-5. Define sanitization.
-6. Define output rendering.
-7. Escape all output.
-8. Register shortcode.
-9. Create tests.
-10. Produce final report.
+- `38_WORDPRESS/PIPELINE.md`
+- `38_WORDPRESS/KNOWLEDGE/SHORTCODES.md`
+- `38_WORDPRESS/KNOWLEDGE/SECURITY.md`
+- `38_WORDPRESS/ROLES/ROLE-MANAGER.md`
+- `38_WORDPRESS/ROLES/ROLE-ROUTING-MATRIX.md`
+- `38_WORDPRESS/ROLES/PHP-ENGINEER.md`
+- `38_WORDPRESS/ROLES/SECURITY-ENGINEER.md`
+- `38_WORDPRESS/ROLES/QA-ENGINEER.md`
+- `38_WORDPRESS/ROLES/DOCUMENTATION-ENGINEER.md`
 
 ---
 
-## Required Planning Output
+## Required Input
 
 ```text
-Shortcode Plan
+Shortcode Creation Request
 
 Tag:
 Purpose:
 Attributes:
-Defaults:
-Sanitization:
-Output:
-Assets:
-Testing:
+Content Support:
+Known Constraints:
 ```
 ### Security Gates
 

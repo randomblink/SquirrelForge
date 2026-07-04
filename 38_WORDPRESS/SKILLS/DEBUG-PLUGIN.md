@@ -1,80 +1,292 @@
-# SquirrelForge Skill: Debug WordPress Plugin
+# SquirrelForge WordPress Debug Plugin Skill
 
 ## Purpose
 
-This skill defines how SquirrelForge diagnoses and fixes WordPress plugin issues.
+This Skill defines the controlled workflow for diagnosing and fixing WordPress plugin issues.
+
+It coordinates requirements, knowledge selection, role routing, specialist implementation, independent validation, QA, documentation, and release review.
+
+---
+
+## Trigger Conditions
+
+Use this Skill when the request is to:
+
+- debug a plugin
+- fix a bug in a plugin
+- diagnose a plugin conflict
+- resolve a plugin-related error
+
+Do not use this Skill when the task is only:
+
+- creating a new plugin
+- reviewing existing plugin code
+- refactoring an existing plugin
+- migrating an existing plugin
+
+Use the appropriate specialized Skill instead.
 
 ---
 
 ## Required References
 
-Before debugging, consult:
+Before execution, consult:
 
-- `32_WORDPRESS/PIPELINE.md`
-- `32_WORDPRESS/KNOWLEDGE/KNOWLEDGE-MANAGER.md`
-- `32_WORDPRESS/KNOWLEDGE/PLUGIN-HANDBOOK.md`
-- `32_WORDPRESS/STANDARDS/PHP-STANDARD.md`
-- `32_WORDPRESS/STANDARDS/JAVASCRIPT-STANDARD.md`
-- `32_WORDPRESS/STANDARDS/ARCHITECTURE-STANDARD.md`
-- `32_WORDPRESS/STANDARDS/TESTING-STANDARD.md`
-- `32_WORDPRESS/SECURITY-VALIDATOR.md`
+- `38_WORDPRESS/PIPELINE.md`
+- `38_WORDPRESS/WORDPRESS-MANAGER.md`
+- `38_WORDPRESS/KNOWLEDGE/KNOWLEDGE-MANAGER.md`
+- `38_WORDPRESS/KNOWLEDGE/PLUGIN-HANDBOOK.md`
+- `38_WORDPRESS/KNOWLEDGE/SECURITY.md`
+- `38_WORDPRESS/STANDARDS/PHP-STANDARD.md`
+- `38_WORDPRESS/STANDARDS/JAVASCRIPT-STANDARD.md`
+- `38_WORDPRESS/STANDARDS/ARCHITECTURE-STANDARD.md`
+- `38_WORDPRESS/STANDARDS/TESTING-STANDARD.md`
+- `38_WORDPRESS/SECURITY-VALIDATOR.md`
+- `38_WORDPRESS/ROLES/ROLE-MANAGER.md`
+- `38_WORDPRESS/ROLES/ROLE-ROUTING-MATRIX.md`
 
----
-
-## Debug Workflow
-
-1. Identify the symptom.
-2. Identify the affected files.
-3. Check recent changes.
-4. Reproduce the issue.
-5. Check PHP errors.
-6. Check JavaScript console errors.
-7. Check WordPress debug logs.
-8. Check hook conflicts.
-9. Check permissions, nonces, and request data.
-10. Check database queries.
-11. Apply the smallest safe fix.
-12. Re-test.
-13. Produce a debug report.
+Additional references must be selected according to the nature of the bug.
 
 ---
 
-## Common Plugin Issues
-
-Check for:
-
-- PHP fatal errors
-- missing required files
-- duplicate class names
-- bad hook callbacks
-- broken activation hooks
-- broken deactivation hooks
-- invalid admin menu callbacks
-- nonce failures
-- capability failures
-- AJAX failures
-- REST endpoint failures
-- missing assets
-- database errors
-- dependency conflicts
-
----
-
-## Debug Report Format
+## Required Input
 
 ```text
-Debug Summary
+Plugin Debugging Request
+
+Plugin Name:
+Symptom:
+Steps to Reproduce:
+Expected Behavior:
+Actual Behavior:
+Environment Details:
+Error Logs:
+Known Constraints:
+```
+
+If steps to reproduce are missing, the first stage must be to define them.
+
+### Workflow
+
+#### Stage 1 — Defect Triage
+
+Use:
+
+`38_WORDPRESS/ROLES/QA-ENGINEER.md`
+
+The `QA Engineer` must:
+
+1.  Reproduce the bug.
+2.  Isolate the issue (e.g., conflict test).
+3.  Create a formal defect report.
+
+Produce:
+
+```text
+QA Defect
+
+ID:
+Title:
+Severity:
+Component:
+Environment:
+Preconditions:
+Steps to Reproduce:
+Expected Result:
+Actual Result:
+Evidence:
+Likely Owner:
+Status:
+```
+
+#### Stage 2 — Role Routing
+
+Use:
+
+`38_WORDPRESS/ROLES/ROLE-MANAGER.md`
+
+and:
+
+`38_WORDPRESS/ROLES/ROLE-ROUTING-MATRIX.md`
+
+The `Role Manager` assigns the defect to the appropriate specialist roles for root cause analysis.
+
+Produce:
+
+```text
+WordPress Role Routing Decision
+
+Task:
+Selected Skill: DEBUG-PLUGIN
+Project Type: Plugin
+Complexity:
+Required Roles:
+Optional Roles:
+Role Sequence:
+Required Gates:
+Conditional Gates:
+Expected Reports:
+Known Risks:
+Routing Status:
+```
+
+#### Stage 3 — Root Cause Analysis
+
+The assigned implementation engineer(s) investigate the root cause.
+
+Possible roles:
+
+- `PHP Engineer`
+- `JavaScript Engineer`
+- `Database Engineer`
+- `REST Engineer`
+- `Block Engineer`
+
+The engineer must:
+
+1.  Analyze logs and evidence.
+2.  Trace code execution.
+3.  Identify the specific line(s) causing the failure.
+4.  Propose the smallest safe fix.
+
+Produce:
+
+```text
+Root Cause Analysis Report
 
 Symptom:
-Cause:
+Root Cause:
 Files Affected:
-Fix Applied:
+Proposed Fix:
 Security Impact:
-Testing Results:
-Remaining Risks:
+Performance Impact:
+Regression Risk:
+```
+
+#### Stage 4 — Fix Implementation
+
+The assigned engineer implements the approved fix.
+
+The fix must adhere to all relevant standards.
+
+#### Stage 5 — Security Validation
+
+Use:
+
+`38_WORDPRESS/ROLES/SECURITY-ENGINEER.md`
+
+The `Security Engineer` must review the fix if it touches:
+
+- permissions
+- sanitization
+- escaping
+- database queries
+- REST/AJAX handlers
+
+A fix that introduces a security vulnerability must be rejected.
+
+#### Stage 6 — Performance Validation
+
+Use:
+
+`38_WORDPRESS/ROLES/PERFORMANCE-ENGINEER.md`
+
+The `Performance Engineer` must review the fix if it affects a performance-sensitive area.
+
+#### Stage 7 — Fix Verification (QA)
+
+Use:
+
+`38_WORDPRESS/ROLES/QA-ENGINEER.md`
+
+The `QA Engineer` must:
+
+1.  Verify that the original bug is resolved.
+2.  Execute a regression test plan to ensure no new bugs were introduced.
+
+The fix is not complete until QA verification passes.
+
+#### Stage 8 — Documentation
+
+Use:
+
+`38_WORDPRESS/ROLES/DOCUMENTATION-ENGINEER.md`
+
+Update applicable documentation:
+
+- `CHANGELOG.md`
+- `README.md` (if known limitations change)
+- Developer documentation (if behavior changes)
+
+#### Stage 9 — Release Preparation
+
+Use:
+
+`38_WORDPRESS/ROLES/RELEASE-ENGINEER.md`
+
+If the fix is part of a release, the `Release Engineer` packages it into a new version, following all release readiness checks.
+
+### Required Handoff Contract
+
+Every role transition must use:
+
+```text
+Role Handoff
+
+From Role:
+To Role:
+Project:
+Task:
+Input:
+Work Completed:
+Output:
+Validation Performed:
+Open Risks:
+Blocking Issues:
+Required Next Action:
+```
+
+### Debugging Final Report
+
+Produce:
+
+```text
+Plugin Debugging Final Report
+
+Plugin:
+Symptom:
+
+Defect Report:
+
+Root Cause Analysis:
+
+Fix Applied:
+
+Security Status:
+
+Performance Status:
+
+QA Status:
+
+Documentation Status:
+
+Release Status:
+
+Final Result:
+
 Next Step:
 ```
 
+### Completion Criteria
+
+The `Debug Plugin` Skill is complete only when:
+
+- the root cause is identified
+- a fix is implemented
+- the fix passes all required validation gates (Security, Performance, QA)
+- documentation is updated
+- the fix is included in a release when applicable
+
 ## Rule
 
-SquirrelForge must prefer the smallest safe fix that resolves the confirmed cause.
+A bug fix must address the identified root cause, not just suppress the symptom. The fix must pass all relevant validation and verification gates before release.

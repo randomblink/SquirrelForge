@@ -1,240 +1,122 @@
-# SquirrelForge WordPress Knowledge: Security
-
-## Knowledge Metadata
-
-| Field | Value |
-|---|---|
-| Domain | WordPress |
-| Topic | Application Security |
-| Applies To | Plugins, themes, blocks, REST endpoints, AJAX handlers, scheduled tasks, and integrations |
-| Primary Authority | WordPress security APIs and SquirrelForge security policy |
-| Security Priority | Critical |
-| Review Trigger | WordPress security changes, new vulnerability classes, or platform policy changes |
+# WordPress Security Principles
 
 ## Purpose
 
-This document defines the authoritative security knowledge that SquirrelForge must apply when designing, generating, reviewing, or approving WordPress code.
-
-Its purpose is to prevent unauthorized access, cross-site request forgery, cross-site scripting, SQL injection, privilege escalation, unsafe file handling, secret exposure, insecure integrations, and other avoidable vulnerabilities.
-
-## Scope
-
-This guidance covers:
-
-- Authentication and authorization boundaries.
-- Capability checks.
-- Nonce creation and verification.
-- Input validation and sanitization.
-- Output escaping.
-- Database access.
-- REST API and AJAX security.
-- File and upload handling.
-- Options and secret handling.
-- Cron and background processing.
-- Error handling and security logging.
-- Dependency and supply-chain awareness.
-
-This document establishes minimum controls. Project-specific policies may add stricter requirements but must not weaken them.
+This document provides a deep dive into the core security principles that SquirrelForge must enforce for all WordPress development. It serves as the primary reference for the `SECURITY-VALIDATOR.md` and guides all architectural and code-generation decisions.
 
 ## Core Principle
 
-Never trust data merely because it came from a user, administrator, database, API, file, browser, scheduled event, or another plugin.
+**Never trust any data.** All data, whether from users, third-party APIs, or even the database, must be considered untrusted until it has been validated, sanitized, and properly escaped for its specific context.
 
-Every protected operation must answer three questions:
+---
 
-1. **Authorization:** Is this identity allowed to perform the action?
-2. **Input Safety:** Is the supplied data valid and sanitized for its intended use?
-3. **Output Safety:** Is the resulting data escaped for its destination context?
+## The Security Trinity
 
-Nonces verify request intent; they do not replace capability checks.
+Every interaction in WordPress can be broken down into three critical security checks:
 
-## Required Practices
+1.  **Permissions (Can you do this?):** Verify the user has the authority to perform the requested action.
+2.  **Validation & Sanitization (Is this data safe?):** Clean and validate all incoming data before using it.
+3.  **Escaping (Can this be displayed safely?):** Secure all outgoing data before rendering it to the screen.
 
-### Authorization and Capabilities
+---
 
-- Use `current_user_can()` before privileged operations.
-- Select the narrowest capability that represents the action.
-- Enforce authorization in the execution handler, not only in the user interface.
-- Never infer permission from a hidden field, URL, menu visibility, or nonce alone.
-- Apply object-level authorization when an operation targets a specific post, user, term, order, or other resource.
+## 1. Permissions & Access Control
 
-### Nonces and Request Integrity
+### Capability Checks
 
-Use nonces for state-changing browser requests.
+- **Function:** `current_user_can( string $capability )`
+- **Rule:** Every administrative action, AJAX handler, REST API endpoint, and form submission that performs a privileged operation **must** be protected by a capability check.
+- **Example:**
+  ```php
+  if ( ! current_user_can( 'manage_options' ) ) {
+      wp_die( 'You do not have sufficient permissions to access this page.' );
+  }
+  ```
 
-- Forms: create with `wp_nonce_field()` and verify with `check_admin_referer()` or `wp_verify_nonce()`.
-- AJAX: create with `wp_create_nonce()` and verify with `check_ajax_referer()`.
-- URLs: create with `wp_nonce_url()` and verify before mutation.
+### Nonces (Cross-Site Request Forgery - CSRF)
 
-Reject missing, expired, or invalid nonces. Nonces must use action names specific to the protected operation.
+- **Purpose:** Nonces ("numbers used once") are security tokens used to verify that a request was initiated by the current user from a legitimate source, not by a malicious third-party site.
+- **Rule:** Any action that changes data on the server (e.g., saving settings, deleting a post, updating a user) **must** be protected by a nonce.
+- **Workflow:**
+    1.  **Create Nonce:** Use `wp_nonce_field()` in forms or `wp_create_nonce()` for URLs/AJAX.
+    2.  **Verify Nonce:** Use `wp_verify_nonce()` to check the submitted nonce. If it fails, the request must be rejected.
+- **Example:**
+  ```php
+  // In the form
+  wp_nonce_field( 'my_plugin_save_settings_action', 'my_plugin_nonce_field' );
 
-### Validation and Sanitization
+  // In the processing logic
+  if ( ! isset( $_POST['my_plugin_nonce_field'] ) || ! wp_verify_nonce( $_POST['my_plugin_nonce_field'], 'my_plugin_save_settings_action' ) ) {
+      exit( 'Invalid nonce.' );
+  }
+  ```
 
-Validate values against business rules before use. Sanitize values according to type before storage or processing.
+---
 
-| Data | Typical Handling |
-|---|---|
-| Plain text | `sanitize_text_field()` |
-| Multiline text | `sanitize_textarea_field()` |
-| Email | `sanitize_email()` plus validity checks |
-| URL for storage | `esc_url_raw()` |
-| Key or slug | `sanitize_key()` |
-| Positive integer | `absint()` |
-| File name | `sanitize_file_name()` |
-| Enumerated value | Strict allowlist comparison |
+## 2. Data Validation & Sanitization
 
-For request superglobals, account for WordPress slashing before sanitization. Sanitization does not replace validation of ranges, ownership, state transitions, or allowed values.
+- **Purpose:** To clean and secure all incoming data before it is used in logic or saved to the database.
+- **Rule:** **Never** use `$_POST`, `$_GET`, or `$_REQUEST` data directly. Always sanitize it first.
+- **Common Sanitization Functions:**
+    - `sanitize_text_field()`: For plain text input. Strips tags and newlines.
+    - `sanitize_textarea_field()`: For textareas. Preserves newlines but strips other tags.
+    - `sanitize_email()`: For email addresses.
+    - `sanitize_key()`: For keys and slugs (lowercase, alphanumeric, dashes).
+    - `absint()` or `(int)`: For positive integers.
+    - `esc_url_raw()`: For URLs that will be stored in the database.
 
-### Output Escaping
+---
 
-Escape late, immediately before output.
+## 3. Data Escaping
 
-| Output Context | Required Handling |
-|---|---|
-| HTML text | `esc_html()` |
-| HTML attribute | `esc_attr()` |
-| URL | `esc_url()` |
-| JavaScript data | `wp_json_encode()` and safe script APIs |
-| Allowed rich HTML | `wp_kses()` or `wp_kses_post()` with an appropriate policy |
+- **Purpose:** To secure data before it is rendered in HTML, attributes, or JavaScript to prevent Cross-Site Scripting (XSS) attacks.
+- **Rule:** **Always** escape data at the point of output.
+- **Common Escaping Functions:**
+    - `esc_html()`: For escaping data to be displayed inside an HTML element (e.g., `<div><?php echo esc_html( $title ); ?></div>`).
+    - `esc_attr()`: For escaping data to be used inside an HTML attribute (e.g., `<input type="text" value="<?php echo esc_attr( $value ); ?>">`).
+    - `esc_url()`: For escaping URLs to be used in `href` or `src` attributes.
+    - `esc_js()`: For escaping text to be used inside inline JavaScript.
+    - `wp_kses_post()`: For escaping rich text content that is allowed to contain a safe subset of HTML (e.g., post content).
 
-Do not use sanitization functions as substitutes for output escaping.
+---
 
-### Database Security
+## Database Security
 
-- Use WordPress data APIs when they satisfy the requirement.
-- Use `$wpdb->prepare()` for dynamic values in custom SQL.
-- Treat identifiers such as table names and sort columns separately; validate them against strict allowlists.
-- Never concatenate untrusted values into SQL.
-- Apply least-privilege database access.
-- Avoid exposing database errors to visitors.
+- **Rule:** All custom database queries **must** use `$wpdb->prepare()` to prevent SQL injection. This method handles the proper escaping of parameters.
+- **Forbidden:** Never build a query by concatenating variables directly into the SQL string.
+- **Correct Usage:**
+  ```php
+  $user_id = 123;
+  $status = 'active';
+  $results = $wpdb->get_results(
+      $wpdb->prepare(
+          "SELECT * FROM {$wpdb->prefix}my_table WHERE user_id = %d AND status = %s",
+          $user_id,
+          $status
+      )
+  );
+  ```
 
-### REST API Security
+---
 
-Every REST route must define:
+## File System Security
 
-- A `permission_callback`.
-- Argument schemas where practical.
-- Validation and sanitization callbacks.
-- Object-level authorization for protected resources.
-- A deliberate response schema that excludes internal or sensitive fields.
+- **File Permissions:** Generated files and directories should have the most restrictive permissions possible.
+- **File Uploads:**
+    - **Never** trust the file name or MIME type sent by the browser.
+    - Use `wp_check_filetype()` to validate file types on the server.
+    - Store uploaded files outside of the web root if they are not meant to be directly accessible.
+    - **Never** allow the upload of executable files (`.php`, `.sh`, etc.).
+- **Path Traversal:** Sanitize all file paths to prevent directory traversal attacks (e.g., `../../..`). Use functions like `wp_normalize_path()`.
 
-Public endpoints must use an explicit public permission callback rather than omitting authorization design.
+---
 
-### AJAX Security
+## Critical Failure Conditions
 
-Every privileged AJAX handler must:
-
-1. Verify the nonce.
-2. Verify the required capability.
-3. Validate and sanitize input.
-4. Perform the authorized operation.
-5. Return a structured response through approved WordPress response helpers.
-
-Unauthenticated AJAX actions must be explicitly justified and rate or abuse controls considered.
-
-### Files and Uploads
-
-- Verify upload authorization.
-- Validate file type and extension using server-side controls.
-- Use WordPress filesystem and upload APIs where appropriate.
-- Generate safe destination paths and file names.
-- Prevent path traversal and executable uploads.
-- Do not trust browser-provided MIME types or names.
-- Protect private files from direct public access.
-
-### Secrets and Sensitive Configuration
-
-- Never commit passwords, API keys, tokens, signing keys, or private certificates.
-- Do not expose secrets in HTML, REST responses, logs, exceptions, or diagnostics.
-- Use approved environment or secret-management facilities.
-- Encrypt sensitive stored values when policy requires it.
-- Provide rotation and revocation procedures.
-
-### Scheduled and Background Work
-
-- Prevent duplicate scheduling.
-- Validate persisted job inputs before execution.
-- Recheck authorization or trusted execution context where appropriate.
-- Apply timeouts, retry limits, idempotency, and failure logging.
-- Remove project-owned schedules during deactivation or uninstall when required.
-
-### Errors, Logging, and Diagnostics
-
-- Show generic failure messages to untrusted users.
-- Restrict detailed diagnostics to authorized development or operational contexts.
-- Log security-relevant failures with timestamp, component, severity, correlation data, and remediation guidance.
-- Redact credentials, tokens, personal information, and sensitive payloads.
-- Preserve evidence required for investigation without exposing it publicly.
-
-## Standard Workflow
-
-1. Identify assets, entry points, identities, trust boundaries, and protected operations.
-2. Classify data and required permissions.
-3. Map each input to validation and sanitization rules.
-4. Map each output to its escaping context.
-5. Verify capability and nonce controls for state changes.
-6. Review database, REST, AJAX, file, cron, and integration behavior.
-7. Scan for committed secrets and unsafe dependencies.
-8. Test authorized, unauthorized, malformed, replayed, and failure cases.
-9. Record findings, severity, affected files, and remediation.
-10. Approve only when critical controls pass or a documented exception is accepted by authorized governance.
-
-## Security Requirements
-
-- Deny protected operations by default.
-- Apply least privilege to users, services, integrations, and data access.
-- Keep security checks close to the protected operation.
-- Use WordPress core security APIs instead of custom cryptography or request-token schemes unless formally reviewed.
-- Preserve backward compatibility only when it does not preserve a known vulnerability.
-- Treat third-party code and external responses as untrusted.
-- Ensure security controls remain observable and auditable.
-- Never weaken controls to simplify implementation or improve apparent performance.
-
-## Validation Checklist
-
-- [ ] Every privileged operation checks an appropriate capability.
-- [ ] Every state-changing browser request verifies a specific nonce.
-- [ ] Every input has explicit validation and sanitization.
-- [ ] Every output is escaped for its exact context.
-- [ ] Dynamic SQL values use safe query preparation.
-- [ ] Dynamic identifiers use strict allowlists.
-- [ ] REST routes define deliberate permission callbacks and argument handling.
-- [ ] AJAX handlers enforce nonce, capability, and input controls.
-- [ ] Uploads validate authorization, type, extension, name, and destination.
-- [ ] File paths cannot escape approved directories.
-- [ ] Secrets are absent from source, output, logs, and diagnostics.
-- [ ] Scheduled work is idempotent, bounded, and removable.
-- [ ] Error messages do not disclose sensitive details.
-- [ ] Security events produce safe, actionable records.
-- [ ] Dependencies and integrations have been reviewed for trust and update risk.
-
-## Common Failure Conditions
-
-SquirrelForge must reject WordPress code that:
-
-- Omits capability checks for privileged actions.
-- Uses nonces as authorization.
-- Omits nonce verification for state-changing browser requests.
-- Trusts or stores raw request input.
-- Outputs unescaped dynamic data.
-- Concatenates untrusted data into SQL.
-- Registers unrestricted REST or AJAX operations without explicit justification.
-- Permits unsafe or executable uploads.
-- Accepts user-controlled file paths without containment checks.
-- Commits or exposes credentials and tokens.
-- Displays stack traces, SQL errors, secrets, or protected paths to visitors.
-- Disables security controls to resolve compatibility or performance problems.
-
-## Related Knowledge
-
-- `SETTINGS-API.md`
-- `../SECURITY-VALIDATOR.md`
-- `../CODING-STANDARDS.md`
-- `../DATABASE.md`
-- `../REST-API.md`
-- `../PLUGIN-HANDBOOK.md`
-- `../THEME-HANDBOOK.md`
-
-## Rule
-
-No WordPress component may be approved until its authorization, request integrity, input handling, output escaping, data access, secret handling, failure behavior, and security observability have passed validation.
+SquirrelForge must reject any code that:
+- Lacks a capability check for a privileged action.
+- Lacks nonce verification for a data-modifying action.
+- Outputs unescaped data.
+- Uses unsanitized input in a query or logic.
+- Performs a raw SQL query with user input.
+- Allows unrestricted file uploads.

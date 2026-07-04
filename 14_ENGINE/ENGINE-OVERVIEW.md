@@ -14,7 +14,7 @@ The SquirrelForge Engine is the orchestration layer that coordinates workflows, 
 ## Core Components
 
 | Component | Responsibility |
-|---|---|
+|---|--- |
 | Project Loader | Initializes the project environment |
 | Workflow Selector | Chooses the correct workflow |
 | Task Router | Routes requests to the proper workflow |
@@ -24,33 +24,31 @@ The SquirrelForge Engine is the orchestration layer that coordinates workflows, 
 | Output Rules | Standardizes completed responses |
 
 ## Execution Flow
+This flow describes the lifecycle of a single user request after the engine has been initialized.
 
 ```text
 User Request
       │
       ▼
-Project Loader
+Goal Planner
       │
       ▼
-Workflow Selector
+Task Decomposer & Dependency Analyzer
       │
       ▼
-Task Router
+Execution Planner
       │
       ▼
-Active Workflow
+Workflow Selector & Task Router
       │
       ▼
-Supporting Workflows (optional)
+Execution (Active Workflow)
       │
       ▼
 Validation
       │
       ▼
 Output Rules
-      │
-      ▼
-Completed Result
 ```
 
 ## Design Principles

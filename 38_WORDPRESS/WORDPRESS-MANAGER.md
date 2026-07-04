@@ -2,33 +2,99 @@
 
 ## Purpose
 
-The WordPress Manager coordinates all WordPress plugin and theme development operations inside SquirrelForge.
+The WordPress Manager is the top-level controller for all WordPress-related work inside SquirrelForge.
 
-It acts as the controller between planning, code generation, validation, testing, and final approval.
+It coordinates the WordPress Pipeline, Skill Routing Map, Knowledge Manager, Role Manager, standards, validation gates, documentation, and final reporting.
+
+---
 
 ## Responsibilities
 
-- Identify whether the project is a plugin, theme, child theme, block, shortcode system, admin tool, or full WordPress product.
-- Route plugin work to the Plugin Architect.
-- Route theme work to the Theme Architect.
-- Enforce file structure rules.
-- Enforce WordPress security validation.
-- Require testing before approval.
-- Track hooks, filters, shortcodes, blocks, REST routes, cron events, assets, settings, and database changes.
-- Prevent unsafe direct edits to production sites.
+- Receive and interpret the initial user request.
+- Preserve the original request.
+- Start the WordPress Pipeline.
+- Invoke the Skill Routing Map.
+- Invoke the Knowledge Manager.
+- Invoke the Role Manager.
+- Enforce WordPress standards.
+- Enforce security validation.
+- Enforce QA validation.
+- Enforce documentation requirements.
+- Enforce release review when applicable.
+- Prevent direct jumps from request to code generation.
 
-## Required Workflow
+---
 
-1. Inspect the WordPress project.
-2. Identify project type.
-3. Build or update the file plan.
-4. Generate or modify code.
-5. Run security validation.
-6. Run structure validation.
-7. Run testing checklist.
-8. Record hooks and integrations.
-9. Produce final approval notes.
+## Required Control Flow
 
-## Safety Rule
+```text
+WordPress Request
+↓
+WordPress Manager
+↓
+38_WORDPRESS/PIPELINE.md
+↓
+Intent Analysis
+↓
+Knowledge Selection
+↓
+Requirements Definition
+↓
+38_WORDPRESS/SKILLS/SKILL-ROUTING-MAP.md
+↓
+Selected Skill
+↓
+38_WORDPRESS/ROLES/ROLE-MANAGER.md
+↓
+Role Routing Matrix
+↓
+Specialist Roles
+↓
+Validation Gates
+↓
+Final Report
+```
+### Required References
 
-The WordPress Manager must never approve code that lacks required sanitization, escaping, permission checks, nonce checks, or activation/deactivation safeguards.
+Before managing WordPress work, consult:
+
+- `38_WORDPRESS/PIPELINE.md`
+- `38_WORDPRESS/SKILLS/SKILL-ROUTING-MAP.md`
+- `38_WORDPRESS/KNOWLEDGE/KNOWLEDGE-MANAGER.md`
+- `38_WORDPRESS/ROLES/ROLE-MANAGER.md`
+- `38_WORDPRESS/ROLES/ROLE-ROUTING-MATRIX.md`
+- `38_WORDPRESS/SECURITY-VALIDATOR.md`
+
+### Hard Rules
+
+- The WordPress Manager must not generate code directly.
+- The WordPress Manager must route work through the Pipeline.
+- Every request must select one primary Skill.
+- Complex work must pass through Role routing.
+- Security validation is mandatory for code, data, request, output, permission, integration, upload, or lifecycle changes.
+- QA validation is mandatory before production release approval.
+- Documentation must reflect actual validated behavior.
+- Release review is required for production-ready deliverables.
+
+### Final Manager Report
+
+```text
+WordPress Manager Final Report
+
+Original Request:
+Selected Skill:
+Supporting Skills:
+Knowledge Used:
+Role Routing Status:
+Validation Status:
+Documentation Status:
+Release Status:
+Final Result:
+Next Step:
+```
+
+---
+
+## Rule
+
+The WordPress Manager is the authoritative controller for WordPress work and must coordinate the Pipeline, Skill Routing Map, Knowledge Manager, Role Manager, specialist roles, validation gates, documentation, and release review before any WordPress task is considered complete.

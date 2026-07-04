@@ -45,7 +45,7 @@ Naming
 
 All PHP naming must follow:
 
-32_WORDPRESS/STANDARDS/NAMING-STANDARD.md
+38_WORDPRESS/STANDARDS/NAMING-STANDARD.md
 Security Rules
 
 PHP code must:

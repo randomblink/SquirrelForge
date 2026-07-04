@@ -1,227 +1,452 @@
-# Skill: Optimize WordPress Performance
+# SquirrelForge WordPress Optimize Performance Skill
 
-Version: 1.0.0  
-Status: Draft  
-Owner: SquirrelForge Maintainers  
-Domain: WordPress  
+## Purpose
 
-## 1. Purpose
+This Skill defines the controlled workflow for diagnosing and improving WordPress performance.
 
-To identify, prioritize, implement, and verify WordPress performance improvements through a repeatable evidence-based process.
+Performance optimization must begin with measurement, identify confirmed bottlenecks, apply targeted changes through the responsible specialist role, and validate results through remeasurement and regression testing.
 
-This skill treats optimization as a controlled engineering exercise. It establishes a baseline, locates measured bottlenecks, applies the smallest safe change, verifies the result, and preserves functional, security, accessibility, and data-integrity requirements.
+Optimization must not weaken security, accessibility, compatibility, data integrity, or functional correctness.
 
-## 2. When to Use
+---
 
-Use this skill when:
+## Trigger Conditions
 
-- A WordPress page, request, job, plugin, theme, or administration screen is slow.
-- Database queries, remote requests, cron jobs, or background tasks consume excessive resources.
-- Assets, images, blocks, or templates delay rendering.
-- A deployment causes a measurable performance regression.
-- Capacity, throughput, latency, or cache behavior requires improvement.
-- A project needs a performance review before release.
+Use this Skill when the request is to:
 
-Do not use this skill to make speculative changes when no performance objective, baseline, or reproducible symptom exists.
+- improve WordPress performance
+- reduce page-generation time
+- reduce database query cost
+- reduce REST API latency
+- optimize AJAX behavior
+- optimize cron workloads
+- reduce PHP execution cost
+- reduce JavaScript execution cost
+- reduce CSS or asset delivery cost
+- improve Block Editor performance
+- investigate a confirmed or suspected performance problem
 
-## 3. Required Inputs
+Do not use this Skill for general refactoring unless performance is the primary goal.
 
-- Project path and WordPress project type.
-- Affected URL, workflow, hook, command, or background task.
-- Target environment and relevant infrastructure constraints.
-- Reproduction steps and representative data volume.
-- Current measurements, when available.
-- Performance objective or acceptance threshold.
-- Allowed change scope and compatibility requirements.
-- Available profiling, monitoring, cache, and database tools.
+---
 
-If production data is involved, access must be authorized and sensitive information must be protected.
+## Required References
 
-## 4. Required Knowledge
+Before execution, consult:
 
-Consult the Knowledge Manager before analysis. Typical references include:
+- `38_WORDPRESS/PIPELINE.md`
+- `38_WORDPRESS/WORDPRESS-MANAGER.md`
+- `38_WORDPRESS/KNOWLEDGE/KNOWLEDGE-MANAGER.md`
+- `38_WORDPRESS/KNOWLEDGE/PERFORMANCE.md`
+- `38_WORDPRESS/KNOWLEDGE/DATABASE.md` when database behavior is involved
+- `38_WORDPRESS/KNOWLEDGE/REST-API.md` when REST behavior is involved
+- `38_WORDPRESS/KNOWLEDGE/CRON.md` when scheduled work is involved
+- `38_WORDPRESS/KNOWLEDGE/BLOCK-EDITOR.md` when editor behavior is involved
+- `38_WORDPRESS/KNOWLEDGE/SECURITY.md`
+- applicable standards in `38_WORDPRESS/STANDARDS/`
+- `33_WORDPRESS_ROLES/ROLE-MANAGER.md`
+- `33_WORDPRESS_ROLES/ROLE-ROUTING-MATRIX.md`
+- `33_WORDPRESS_ROLES/PERFORMANCE-ENGINEER.md`
+- applicable implementation Engineer roles
+- `33_WORDPRESS_ROLES/SECURITY-ENGINEER.md` when security controls may be affected
+- `33_WORDPRESS_ROLES/QA-ENGINEER.md`
+- `33_WORDPRESS_ROLES/DOCUMENTATION-ENGINEER.md` when operational behavior changes
 
-- `../KNOWLEDGE/SECURITY.md`
-- `../DATABASE.md`
-- `../CODING-STANDARDS.md`
-- `../REST-API.md` when API traffic is involved
-- `../STANDARDS/PHP-STANDARD.md`
-- `../STANDARDS/CSS-STANDARD.md`
-- `../STANDARDS/JAVASCRIPT-STANDARD.md` when available
-- `../../02_WORKFLOWS/PERFORMANCE-OPTIMIZATION-WORKFLOW.md`
+---
 
-Security and correctness rules take priority over performance convenience.
+## Required Input
 
-## 5. Performance Optimization Workflow
+```text
+Performance Optimization Request
 
-### Phase 1: Define the Objective
+Project:
+Project Type:
+Component:
+Observed Problem:
+Affected Users:
+Affected Environment:
+Performance Target:
+Traffic Expectations:
+Data Volume:
+Known Bottlenecks:
+Available Measurements:
+Recent Changes:
+Security Constraints:
+Compatibility Requirements:
+Known Risks:
+```
 
-1. Identify the affected user journey or system operation.
-2. Define the performance symptom in measurable terms.
-3. Select the primary metric and target.
-4. Record environmental conditions, data size, cache state, and test method.
-5. Define functional and non-functional behavior that must not change.
+If the performance problem cannot be reproduced or measured, the Skill must distinguish investigation from confirmed optimization work.
 
-Common metrics include:
+---
 
-- Server response time.
-- Largest Contentful Paint and other relevant web-vital measurements.
-- Database query count and duration.
-- Remote request count and duration.
-- PHP execution time and peak memory.
-- Asset count, transfer size, and render-blocking time.
-- Cron duration, queue latency, and throughput.
-- Cache hit rate.
+## Workflow
 
-### Phase 2: Establish a Baseline
+### Stage 1 — Performance Scope
 
-1. Reproduce the issue consistently.
-2. Warm or clear caches according to the test plan.
-3. Run multiple comparable measurements.
-4. Record median and outlier behavior.
-5. Preserve the baseline report before modifying code.
+Define:
 
-Do not compare measurements produced under materially different conditions.
+```text
+Performance Scope
 
-### Phase 3: Profile the Bottleneck
+Project:
+Component:
+Scenario:
+Affected Environment:
+Expected Load:
+Expected Data Volume:
+Observed Problem:
+Target Metric:
+Security Constraints:
+Compatibility Constraints:
+Out of Scope:
+```
 
-Inspect only the paths relevant to the measured symptom.
+### Stage 2 — Role Routing
 
-Review:
+Use:
 
-- Slow, repeated, unbounded, or N+1 database queries.
-- Missing indexes and inefficient query shapes.
-- Large autoloaded options.
-- Repeated computation or repeated option/meta retrieval.
-- Slow hooks and callbacks running outside their required context.
-- Synchronous remote HTTP calls.
-- Duplicate cron scheduling or long-running scheduled work.
-- Unconditional asset loading.
-- Oversized or unoptimized images, fonts, scripts, and styles.
-- Expensive block rendering or template logic.
-- Ineffective cache keys, invalidation, or expiration.
-- Excessive object creation, serialization, or memory retention.
+- `33_WORDPRESS_ROLES/ROLE-MANAGER.md`
+- `33_WORDPRESS_ROLES/ROLE-ROUTING-MATRIX.md`
 
-### Phase 4: Form and Rank Hypotheses
+Standard route:
 
-For each candidate bottleneck, record:
+```text
+Role Manager
+↓
+Performance Engineer
+↓
+Responsible Implementation Engineer
+↓
+Performance Engineer Revalidation
+↓
+Security Engineer when security controls are affected
+↓
+QA Engineer
+↓
+Documentation Engineer when operational behavior changes
+↓
+Release Engineer when part of a release
+```
 
-- Supporting evidence.
-- Expected benefit.
-- Change complexity.
-- Correctness and security risk.
-- Cache invalidation requirements.
-- Compatibility impact.
-- Rollback method.
+Possible implementation owners:
 
-Prioritize high-confidence, high-impact, low-risk changes.
+- PHP Engineer
+- Database Engineer
+- REST Engineer
+- JavaScript Engineer
+- CSS Engineer
+- Block Engineer
 
-### Phase 5: Implement Controlled Changes
+Produce:
 
-1. Apply one logically isolated optimization at a time.
-2. Preserve public behavior and documented interfaces.
-3. Add cache invalidation before introducing caching.
-4. Bound database, API, and batch operations.
-5. Load assets and callbacks only where required.
-6. Add or update regression tests.
-7. Record the exact change and expected effect.
+```text
+WordPress Role Routing Decision
 
-### Phase 6: Verify the Result
+Task:
+Selected Skill: OPTIMIZE-PERFORMANCE
+Project Type:
+Complexity:
+Required Roles:
+Optional Roles:
+Role Sequence:
+Required Gates:
+Conditional Gates:
+Expected Reports:
+Known Risks:
+Routing Status:
+```
 
-1. Repeat the baseline measurement procedure.
-2. Compare the same metric under the same conditions.
-3. Run functional, security, accessibility, and regression tests.
-4. Test cold-cache and warm-cache behavior where relevant.
-5. Verify failure behavior and cache invalidation.
-6. Revert changes that do not produce a meaningful safe improvement.
+### Stage 3 — Baseline Measurement
 
-### Phase 7: Report and Monitor
+The Performance Engineer must establish the baseline before optimization whenever practical.
 
-Publish:
+Record:
 
-- Original symptom and baseline.
-- Root cause and supporting evidence.
-- Changes made.
-- Before-and-after measurements.
-- Test results.
-- Residual risks and unresolved bottlenecks.
-- Monitoring and rollback instructions.
+```text
+Performance Baseline
 
-## 6. Optimization Strategies
+Metric:
+Environment:
+Scenario:
+Traffic Level:
+Data Volume:
+Baseline Result:
+Measurement Method:
+Number of Runs:
+Variance:
+Limitations:
+```
 
-Use only when supported by measurements:
+Possible metrics include:
 
-- Reduce query volume or select only required fields.
-- Add appropriate indexes through a reviewed migration.
-- Cache expensive deterministic results with scoped keys and explicit invalidation.
-- Use object caching, transients, or persistent storage according to data semantics.
-- Batch or defer non-critical work.
-- Prevent duplicate scheduled events.
-- Paginate and bound large result sets.
-- Condition hooks and asset enqueueing by screen, route, block, or feature.
-- Remove duplicate dependencies and unused assets.
-- Optimize image sizes, formats, loading behavior, and responsive markup.
-- Minimize synchronous third-party requests and define timeouts.
-- Precompute stable data when invalidation is reliable.
+- response time
+- server execution time
+- query count
+- slow query duration
+- memory use
+- REST latency
+- response size
+- request count
+- JavaScript execution time
+- bundle size
+- stylesheet size
+- cron duration
+- batch duration
 
-## 7. Guardrails
+### Stage 4 — Bottleneck Identification
 
-The skill must never:
+Identify the confirmed bottleneck.
 
-- Weaken authorization, nonce, validation, sanitization, or escaping controls.
-- Disable required logging, auditing, or error handling to improve a metric.
-- Cache private data under shared or insufficiently scoped keys.
-- Introduce stale-data behavior without an accepted freshness policy.
-- call `flush_rewrite_rules()` on normal requests.
-- Run unbounded queries or migrations in user-facing requests.
-- Claim improvement without comparable measurements.
-- Optimize synthetic benchmarks while degrading the actual user journey.
-- Modify WordPress core.
+Produce:
 
-## 8. Expected Outputs
+```text
+Performance Bottleneck Record
 
-- Performance baseline.
-- Bottleneck and root-cause report.
-- Ranked optimization plan.
-- Implemented changes or a patch proposal.
-- Before-and-after measurements.
-- Regression and safety test results.
-- Monitoring, invalidation, and rollback notes.
+Component:
+Scenario:
+Evidence:
+Metric:
+Baseline:
+Likely Cause:
+Confirmed Cause:
+Responsible Role:
+Expected Improvement:
+Validation Method:
+```
 
-## 9. Quality Checklist
+Do not optimize unrelated code because it appears inefficient.
 
-- [ ] A reproducible symptom and measurable target are defined.
-- [ ] Baseline measurements are preserved.
-- [ ] The bottleneck is supported by profiling evidence.
-- [ ] Changes are isolated and proportionate to the evidence.
-- [ ] Security, accessibility, and correctness remain intact.
-- [ ] Cache ownership, scope, expiration, and invalidation are documented.
-- [ ] Database operations are bounded and safe.
-- [ ] Assets and hooks load only where needed.
-- [ ] Before-and-after measurements use comparable conditions.
-- [ ] Functional and regression tests pass.
-- [ ] Rollback and monitoring instructions exist.
+### Stage 5 — Optimization Plan
 
-## 10. Failure and Recovery
+Produce:
 
-If an optimization causes regression or instability:
+```text
+Performance Optimization Plan
 
-1. Stop further rollout.
-2. Preserve diagnostics and measurements.
-3. Revert the isolated change or disable it through an approved feature control.
-4. Clear or migrate affected caches safely.
-5. Verify restoration against the original baseline and functional tests.
-6. Record the failure and update the optimization hypothesis.
+Problem:
+Confirmed Bottleneck:
+Responsible Engineer:
+Proposed Change:
+Files Affected:
+Expected Impact:
+Security Impact:
+Compatibility Impact:
+Accessibility Impact:
+Regression Risk:
+Measurement Plan:
+Rollback Plan:
+```
 
-## 11. Related Skills
+### Stage 6 — Targeted Implementation
 
-- Code Review
-- Bug Fixing
-- Testing
-- Security Review
-- Database Optimization
-- Deployment
+The responsible Engineer applies the smallest effective optimization.
 
-## 12. Rule
+Examples include:
 
-SquirrelForge must not approve a WordPress performance optimization unless it is supported by comparable measurements, preserves required behavior and controls, and includes verification and rollback evidence.
+- query restructuring
+- removing duplicate queries
+- pagination
+- batching
+- caching
+- cache invalidation
+- reducing repeated calculations
+- reducing unnecessary hooks
+- conditional asset loading
+- reducing repeated REST requests
+- reducing polling
+- reducing unnecessary JavaScript dependencies
+- reducing unnecessary CSS delivery
+- reducing Block Editor re-renders
+
+Each implementation role must produce its normal implementation report.
+
+### Stage 7 — Cache Validation
+
+When caching is introduced, define:
+
+```text
+Cache Plan
+
+Data:
+Cache Type:
+Cache Key:
+Lifetime:
+Invalidation Trigger:
+Fallback:
+Failure Behavior:
+```
+
+Caching without an invalidation strategy is incomplete.
+
+### Stage 8 — Performance Revalidation
+
+The Performance Engineer must remeasure using a comparable environment and scenario.
+
+Record:
+
+```text
+Performance Result
+
+Metric:
+Environment:
+Scenario:
+Baseline:
+Target:
+Final Result:
+Absolute Difference:
+Percentage Difference:
+Measurement Method:
+Limitations:
+```
+
+If measurement conditions changed materially, the comparison must be marked as non-equivalent.
+
+### Stage 9 — Security Validation
+
+Use the Security Engineer when optimization affects:
+
+- authorization checks
+- permission callbacks
+- validation
+- sanitization
+- escaping
+- data visibility
+- caching of private data
+- secret handling
+- external API behavior
+
+Required output: `Security Review Report`
+
+Performance improvements must not bypass security controls.
+
+### Stage 10 — QA Validation
+
+Use `33_WORDPRESS_ROLES/QA-ENGINEER.md`.
+
+Test:
+
+- original user flow
+- optimized flow
+- invalid input
+- permissions
+- persistence
+- cache invalidation
+- stale-data behavior
+- REST contracts
+- AJAX behavior
+- cron behavior
+- accessibility
+- compatibility
+- regression behavior
+
+Required output: `QA Report`
+
+### Stage 11 — Documentation
+
+Use the Documentation Engineer when optimization changes:
+
+- operational requirements
+- cache behavior
+- cron behavior
+- deployment requirements
+- infrastructure assumptions
+- external service usage
+- configuration
+- troubleshooting procedures
+
+Required output: `Documentation Report`
+
+---
+
+## Optimization Priority
+
+Prioritize work in this order unless dependencies require otherwise:
+
+1. Confirmed user-facing bottlenecks.
+2. Operational stability risks.
+3. Database scalability risks.
+4. High-frequency request costs.
+5. External API dependency costs.
+6. Asset delivery costs.
+7. Lower-impact cleanup.
+
+Do not prioritize speculative micro-optimizations over measured bottlenecks.
+
+---
+
+## Performance Finding Format
+
+```text
+Performance Finding
+
+ID:
+Title:
+Severity:
+Component:
+Scenario:
+Metric:
+Baseline:
+Evidence:
+Cause:
+Recommended Fix:
+Expected Impact:
+Verification Method:
+Status:
+```
+
+---
+
+## Performance Optimization Final Report
+
+Produce:
+
+```text
+Performance Optimization Final Report
+
+Project:
+Project Type:
+Component:
+Performance Problem:
+Baseline:
+Confirmed Bottleneck:
+Role Routing Status:
+Roles Used:
+Optimization Applied:
+Files Created:
+Files Modified:
+Before Measurement:
+After Measurement:
+Measured Difference:
+Security Status:
+QA Status:
+Documentation Status:
+Known Limitations:
+Residual Risks:
+Final Result:
+Next Step:
+```
+
+---
+
+## Completion Criteria
+
+The Optimize Performance Skill is complete only when:
+
+- performance scope is defined
+- role routing is complete
+- baseline measurement exists when practical
+- bottleneck is identified
+- optimization plan is defined
+- responsible Engineer applies the change
+- performance is revalidated
+- security is revalidated when affected
+- QA confirms functional correctness
+- regression testing passes
+- operational documentation is updated when required
+
+---
+
+## Rule
+
+The Optimize Performance Skill must measure before and after significant optimization work whenever practical, target confirmed bottlenecks, use the responsible specialist Engineer for implementation, and preserve security, accessibility, compatibility, data integrity, and functional correctness.

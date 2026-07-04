@@ -149,4 +149,4 @@ No WordPress core files are modified.
 Next file after this:
 
 ```text
-32_WORDPRESS/SECURITY-VALIDATOR.md
+38_WORDPRESS/SECURITY-VALIDATOR.md

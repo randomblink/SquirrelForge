@@ -1,49 +1,32 @@
-# SquirrelForge WordPress Skills
+# SquirrelForge WordPress Standards
 
 ## Purpose
 
-This directory defines the practical WordPress development skills SquirrelForge can perform.
+This directory defines the mandatory engineering standards that all WordPress code generated or reviewed by SquirrelForge must follow.
 
-Where the Knowledge Base explains WordPress and the Standards define how SquirrelForge writes code, Skills define repeatable task workflows.
+These standards ensure that every project is maintainable, secure, consistent, and high-quality. They are the non-negotiable quality gates for the development process.
 
 ---
 
-## Skill Roster
+## Standards Roster
 
-| Skill | Purpose |
+| Standard | Purpose |
 |---|---|
-| `CREATE-PLUGIN.md` | Build a WordPress plugin from requirements. |
-| `CREATE-THEME.md` | Build a WordPress theme from requirements. |
-| `CREATE-BLOCK.md` | Build a block editor feature. |
-| `CREATE-REST-ENDPOINT.md` | Build a REST API endpoint. |
-| `CREATE-SHORTCODE.md` | Build a shortcode. |
-| `CREATE-WIDGET.md` | Build a widget or sidebar feature. |
-| `REVIEW-CODE.md` | Review existing WordPress code. |
-| `REFACTOR-CODE.md` | Improve existing code safely. |
-| `DEBUG-PLUGIN.md` | Diagnose and fix plugin issues. |
-| `OPTIMIZE-PERFORMANCE.md` | Improve performance safely. |
-| `MIGRATE-PLUGIN.md` | Move or upgrade plugin architecture. |
-| `WRITE-DOCUMENTATION.md` | Produce project documentation. |
-| `CREATE-TESTS.md` | Create testing plans and test cases. |
-
----
-
-## Required Skill Flow
-
-Every skill must follow:
-
-1. Identify the task.
-2. Select relevant knowledge.
-3. Apply SquirrelForge standards.
-4. Plan files and changes.
-5. Perform the work.
-6. Validate security.
-7. Validate standards.
-8. Define tests.
-9. Produce final report.
+| `ARCHITECTURE-STANDARD.md` | Defines principles for clean, layered, and maintainable architecture. |
+| `CODE-REVIEW-STANDARD.md` | Defines the process and criteria for performing code reviews. |
+| `CODING-STANDARDS.md` | Defines the base PHP, JS, and CSS coding standards. |
+| `CSS-STANDARD.md` | Defines specific standards for writing scoped, accessible, and responsive CSS. |
+| `DOCUMENTATION-STANDARD.md` | Defines the requirements for all project and code documentation. |
+| `JAVASCRIPT-STANDARD.md` | Defines standards for writing modular, secure, and accessible JavaScript. |
+| `NAMING-STANDARD.md` | Defines mandatory naming conventions for all project assets. |
+| `PHP-STANDARD.md` | Defines specific standards for writing secure and maintainable PHP. |
+| `PLUGIN-STANDARD.md` | Defines the default architecture for building plugins. |
+| `REFACTORING-STANDARD.md` | Defines the rules for safely improving existing code. |
+| `TESTING-STANDARD.md` | Defines the required levels and types of testing for all projects. |
+| `THEME-STANDARD.md` | Defines the default architecture for building themes. |
 
 ---
 
 ## Rule
 
-SquirrelForge must use a defined Skill workflow before performing WordPress development work.
+All WordPress development work must adhere to the relevant standards defined in this directory. The specialist validation roles (`Security Engineer`, `QA Engineer`, etc.) are responsible for enforcement.

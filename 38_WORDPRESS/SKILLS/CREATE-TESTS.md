@@ -1,63 +1,77 @@
-# Skill: Create Tests
+# SquirrelForge WordPress Create Tests Skill
 
 ## Purpose
 
-This document defines the end-to-end process SquirrelForge must follow to generate test plans, test cases, and testing infrastructure for a WordPress project.
+This Skill defines the controlled workflow for creating test plans, test cases, and testing infrastructure for a WordPress project.
 
-## Core Principle
-
-Testing is a non-negotiable part of the development lifecycle. This skill ensures that for every feature built, a corresponding, verifiable testing strategy is also created, proving correctness and preventing regressions.
+It coordinates specialist roles to ensure that for every feature built, a corresponding, verifiable testing strategy is also created.
 
 ---
 
-## Required Inputs
+## Trigger Conditions
 
-- A reference to the code or feature to be tested.
-- The type of testing required (e.g., unit, integration, E2E, manual checklist).
+Use this Skill when the request is to:
 
-## Expected Outputs
+- create tests for a feature
+- write a test plan
+- set up a testing framework (e.g., PHPUnit, Playwright)
 
-- A `TESTING.md` file with a manual testing checklist.
-- Scaffolding for automated tests (e.g., PHPUnit test files with placeholder test methods).
-- Configuration files for the testing framework (e.g., `phpunit.xml.dist`).
+Do not use this Skill to *execute* tests as part of a QA process. Use the `QA Engineer` role for that.
+
+---
+
+## Required References
+
+Before execution, consult:
+
+- `38_WORDPRESS/PIPELINE.md`
+- `38_WORDPRESS/STANDARDS/TESTING-STANDARD.md`
+- `38_WORDPRESS/ROLES/QA-ENGINEER.md`
+- `38_WORDPRESS/ROLES/SECURITY-ENGINEER.md`
+- `38_WORDPRESS/ROLES/PERFORMANCE-ENGINEER.md`
+
+---
+
+## Required Input
+
+```text
+Test Creation Request
+
+Project:
+Feature/Component to Test:
+Implementation Reports:
+Architecture Documents:
+```
 
 ---
 
 ## Workflow
 
-This skill is typically executed as the "Testing Plan" stage of the master `PIPELINE.md`.
+#### Stage 1 — Test Planning
 
-1.  **Intent Analysis**:
-    -   Deconstruct the request: `Task: create_tests, Target: My_Plugin_Settings_Class, Type: unit`.
+Use `QA Engineer` to analyze the feature's requirements and architecture to create a high-level test plan.
 
-2.  **Knowledge Selection**:
-    -   The `Knowledge Manager` selects `TESTING-STANDARD.md` and the relevant coding standards.
+#### Stage 2 — Specialist Input
 
-3.  **Code Analysis**:
-    -   Scan the target code to identify public methods, user-facing UI, and integration points (hooks, REST endpoints).
+The `Security Engineer` provides input on security-specific test cases (e.g., permission failures). The `Performance Engineer` provides input on load and stress test cases.
 
-4.  **Test Case Generation**:
-    -   Based on the analysis, generate a list of test cases covering:
-        -   **Happy Path**: Expected, successful usage.
-        -   **Error Conditions**: How the code handles invalid input or failures.
-        -   **Security**: Tests for authorization and permission failures.
-        -   **Edge Cases**: Tests with empty, null, or boundary values.
+#### Stage 3 — Test Case Generation
 
-5.  **Test Scaffolding & Planning**:
-    -   **Manual Plan**: Generate a `TESTING.md` file with a human-readable checklist based on the generated test cases.
-    -   **Automated Scaffolding**: If automated tests are requested, generate the necessary configuration files and test files with empty methods for each test case.
+Use `QA Engineer` to generate the detailed test cases, including manual steps and stubs for automated tests (e.g., PHPUnit, Playwright).
 
-6.  **Validation**:
-    -   The `Standards Validator` checks that the generated test files and plans adhere to the `TESTING-STANDARD.md`.
+#### Stage 4 — Technical Review
 
-7.  **Final Report**:
-    -   The final task report is updated to include the generated testing plan and instructions on how to execute the tests.
+The original implementation engineer(s) review the test plan for technical feasibility and to identify any missed edge cases. This is a **blocking gate**.
+
+#### Stage 5 — Finalization
+
+The `QA Engineer` incorporates feedback and produces the final, approved test plan and any generated test files.
 
 ---
 
-## Agent Rules
+## Rule
 
-1.  **Cover All Angles**: The generated test plan must include cases for success, failure, and security.
-2.  **Be Specific**: Manual test steps must be clear, unambiguous, and include a specific expected outcome.
-3.  **Automate Where Practical**: The agent should prefer generating stubs for automated unit and integration tests for backend logic over purely manual checklists.
-4.  **Follow the Standard**: All generated test plans and files must adhere to the formats and requirements defined in `TESTING-STANDARD.md`.
+1.  **Cover All Angles**: The generated test plan must include cases for success, failure, security, and accessibility where applicable.
+2.  **Be Specific**: Manual test steps must be clear, unambiguous, and include a specific expected outcome. Automated test stubs should have descriptive names.
+3.  **Automate Where Practical**: Prefer generating stubs for automated unit and integration tests for backend logic over purely manual checklists for the same logic.
+4.  **Follow the Standard**: All generated test plans and files must adhere to the formats and requirements defined in `38_WORDPRESS/STANDARDS/TESTING-STANDARD.md`.

@@ -1,45 +1,69 @@
 # Agent Engine: Context Manager
 
 Version: 1.0.0
-Status: Draft
-Owner: SquirrelForge Maintainers
+Status: Stable
+Owner: Engine Maintainers
 Depends On: See component references
 Used By: See layer README
-Last Updated: 2026-07-01
+Last Updated: 2026-07-04
 
 ## Purpose
 
-The Context Manager is responsible for loading, maintaining, and unloading the information required to complete the current task. It ensures the agent has precisely the right context while minimizing cognitive load.
+The Context Manager is responsible for loading, maintaining, and unloading the information required to complete the current task. It ensures the agent has precisely the right context while minimizing cognitive load and preventing context contamination.
+
+---
 
 ## Responsibilities
 
--   Maintain the active project context (from `CONTEXT-LOADER`).
+-   Maintain the active project context (from the `Project Loader`).
 -   Track the active workflow and task state.
 -   Preserve task-specific information (e.g., user clarifications).
--   Load only the documents needed for the current step.
--   Remove inactive context when it is no longer required.
--   Pass relevant context to supporting skills or workflows.
+-   Load domain-specific knowledge and rules only when required by the task.
+-   Prune stale or irrelevant context to maintain focus.
+-   Provide a traceable record of the context used for a decision.
 
-## Context Loading Order
+---
 
-At the start of any task, the Context Manager loads information in this priority:
+## Context Loading Priority
 
-1.  **Core Rules:** `01_RULES/AGENT-BEHAVIOR.md` and `01_RULES/WORDPRESS-RULES.md`.
-2.  **Project Context:** The output from the `CONTEXT-LOADER`.
-3.  **Active Workflow:** The primary workflow selected for the task.
-4.  **Current Task:** The user's specific request and any clarifications.
-5.  **Supporting Workflows/Skills:** Any additional capabilities needed.
+Context is assembled with the following priority order, where higher-priority items override lower-priority ones in case of conflict:
 
-## Context Unloading (Pruning)
+1.  **Current Task Evidence:** Facts, files, and outputs directly related to the immediate step being executed.
+2.  **Current Task Definition:** The specific request, its goals, and any user clarifications.
+3.  **Active Workflow State:** The state of the primary workflow executing the task.
+4.  **Domain-Specific Knowledge:** Rules and documents loaded by a domain-specific manager (e.g., `38_WORDPRESS/KNOWLEDGE-MANAGER.md`) relevant to the task's domain.
+5.  **Project Context:** The broader project state provided by the `Project Loader`.
+6.  **Core System Rules:** Universal behaviors and constraints, such as `01_RULES/AGENT-BEHAVIOR.md`.
 
-To maintain focus, context that is no longer relevant to the current step should be unloaded. This typically occurs after:
+---
 
--   A major workflow phase is completed.
--   A task is fully validated and finished.
--   The project itself is marked as complete.
+## Context States
 
-**Note:** The core `TASK-STATE` should always be preserved until the session ends.
+| State | Description |
+|---|---|
+| `Loading` | The Context Manager is assembling the required information for a new task. |
+| `Active` | The context is loaded and is being used by an agent for execution. |
+| `Stale` | The context is no longer relevant to the current step and is pending pruning. |
+| `Pruning` | The Context Manager is actively removing stale information. |
+| `Unloaded` | The context for a completed task has been archived and removed from active memory. |
 
-## Rule
+---
 
-Load the minimum context necessary to complete the current step while preserving enough information to maintain continuity throughout the entire task.
+## Context Pruning
+
+To maintain focus and manage token limits, context that is no longer relevant to the current step must be unloaded. Pruning is triggered when:
+
+- A major workflow phase is completed.
+- A task is fully validated and finished.
+- The agent's focus shifts to a different domain or skill.
+- The project itself is marked as complete.
+
+---
+
+## Rules
+
+1.  **Evidence Overrides Memory:** Information derived from direct observation of the current task's state (e.g., file contents, command output) must always take precedence over historical memory or general knowledge.
+2.  **Domain-Specific Loading:** Domain-specific rules (e.g., WordPress standards) must not be loaded into the global context. They must be loaded on-demand by a relevant domain manager (like `38_WORDPRESS/KNOWLEDGE-MANAGER.md`) when a task requires that specific specialization.
+3.  **Minimum Necessary Context:** Load only the minimum context necessary to complete the current step while preserving enough information to maintain continuity throughout the entire task.
+4.  **Staleness Invalidation:** Context from a previous task or workflow step is considered stale and must not be used for a new task unless explicitly re-validated and loaded.
+5.  **Traceability:** The set of active context documents and sources used for any significant agent decision must be recorded for audit and traceability.

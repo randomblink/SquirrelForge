@@ -1,48 +1,56 @@
 # SquirrelForge Task Decomposer
 
 Version: 1.0.0
-Status: Draft
-Owner: SquirrelForge Maintainers
-Depends On: See component references
-Used By: See layer README
+Status: Stable
+Owner: Engine Maintainers
+Depends On: `14_ENGINE/GOAL-PLANNER.md`, `14_ENGINE/DEPENDENCY-ANALYZER.md`
+Used By: `14_ENGINE/ENGINE-OVERVIEW.md`
 Last Updated: 2026-07-01
 
 ## Purpose
 
-The Task Decomposer breaks a goal into small, ordered, executable tasks.
+The Task Decomposer breaks a structured goal from the `Goal Planner` into a series of small, ordered, and independently verifiable tasks. Each task has clear boundaries, inputs, outputs, and completion criteria.
 
 ## Responsibilities
 
-- Convert the primary goal into task steps.
-- Separate required tasks from optional tasks.
-- Identify dependencies between tasks.
-- Detect tasks that require supporting workflows.
-- Keep tasks small enough to validate individually.
-- Pass ordered tasks to the Execution Planner.
+-   Consume the `Goal Definition` from the `Goal Planner`.
+-   Break the primary goal into a sequence of concrete, executable tasks.
+-   For each task, define its specific inputs, expected outputs, and verifiable completion criteria.
+-   Identify task-level dependencies, risks, and required permissions.
+-   Assign a validation owner for each task's output.
+-   Designate key tasks as checkpoints for recovery.
+-   Pass the list of structured `Task Definitions` to the `Dependency Analyzer`.
 
 ## Decomposition Process
 
-1. Receive the goal from the Goal Planner.
-2. Identify the major work areas.
-3. Break each work area into concrete tasks.
-4. Order tasks by dependency.
-5. Mark optional tasks separately.
-6. Identify validation points.
-7. Send the task list to the Execution Planner.
+1.  **Receive Goal:** Ingest the structured `Goal Definition` from the `Goal Planner`.
+2.  **Identify Major Steps:** Break the goal into high-level phases or work areas.
+3.  **Decompose into Tasks:** For each phase, create a list of small, concrete tasks.
+4.  **Define Task Boundaries:** For each task, specify its inputs, outputs, completion criteria, and dependencies.
+5.  **Assess Task Attributes:** Assign risk, permissions, and validation ownership for each task.
+6.  **Emit Task List:** Produce a list of `Task Definition` records.
+7.  **Forward for Analysis:** Pass the task list to the `Dependency Analyzer`.
 
-## Task Model
+## Task Definition
 
 | Field | Description |
 |---|---|
-| Task ID | Unique task identifier |
-| Task Name | Short task label |
-| Description | What must be done |
-| Required | Yes / No |
-| Dependencies | Prior tasks or files needed |
-| Workflow | Primary workflow used |
-| Validation | Required validation check |
-| Status | Not Started / In Progress / Blocked / Complete |
+| **Task ID** | A unique identifier for this specific task. |
+| **Goal ID** | The identifier of the parent goal for traceability. |
+| **Description** | A clear statement of what must be done. |
+| **Inputs** | The specific artifacts or data required to start the task. |
+| **Expected Outputs** | The specific artifacts or data the task must produce. |
+| **Completion Criteria** | A measurable, verifiable definition of "done" for this task. |
+| **Dependencies** | A list of other `Task IDs` that must be completed first. |
+| **Domain Context** | The operational domain (e.g., `WordPress`, `Core`) required for execution. |
+| **Risk** | The estimated risk associated with this specific task (e.g., `Low`, `Medium`, `High`). |
+| **Permissions Required** | The specific permissions needed to execute the task (e.g., `file:write`). |
+| **Validation Owner** | The component or role responsible for validating the task's output. |
+| **Is Checkpoint** | `true` if the successful completion of this task represents a safe recovery point. |
 
 ## Rule
 
-Tasks must be small, ordered, and independently validatable whenever possible.
+1.  **Verifiable Tasks:** Every task must have explicit, non-ambiguous `Completion Criteria`.
+2.  **Small Units of Work:** Tasks should be decomposed to the smallest practical unit of work that can be independently executed and validated.
+3.  **No Ambiguity:** The decomposer must not proceed if the parent goal is ambiguous. It should rely on the `Goal Planner` to handle clarification.
+4.  **Parallelism Rules:** Tasks that have no dependencies on each other may be marked as eligible for parallel execution by the `Execution Planner`.

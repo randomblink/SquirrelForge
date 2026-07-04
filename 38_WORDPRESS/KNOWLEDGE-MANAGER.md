@@ -46,7 +46,7 @@ An agent's decision is only as good as the knowledge it consults. The Knowledge 
 
 ## Conflict Resolution
 
-The Knowledge Manager must enforce the priority order defined in `32_WORDPRESS/KNOWLEDGE/README.md`:
+The Knowledge Manager must enforce the priority order defined in `38_WORDPRESS/KNOWLEDGE/README.md`:
 
 1.  Security rules
 2.  WordPress official behavior

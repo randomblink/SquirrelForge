@@ -13,8 +13,8 @@ Loads projects, interprets goals, selects workflows, plans and routes tasks, tra
 ## Components
 Project Loader, Goal Planner, Task Decomposer, Dependency Analyzer, Execution Planner, Workflow Selector, Task Router, Context Manager, State Manager, Validation, and Output Rules.
 
-## Execution Order
-Loader → Goal Planner → Task Decomposer → Dependency Analyzer → Reasoning → Execution Planner → Workflow Selector → Task Router → Validation → Output.
+## Request Execution Order
+Goal Planner → Task Decomposer & Dependency Analyzer → Execution Planner → Workflow Selector & Task Router → Execution → Validation → Output.
 
 ## Dependencies
 Rules, configuration, workflow and interface catalogs, memory, and reasoning.
