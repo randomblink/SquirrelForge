@@ -23,7 +23,7 @@ Memory stores and retrieves; it does not decide what counts as validated, reusab
 - episodic records of completed work (`EPISODIC-MEMORY.md`),
 - semantic memory records — reusable, project-independent knowledge already promoted into memory (`SEMANTIC-MEMORY.md`),
 - project memory — long-lived, project-specific decisions and history (`PROJECT-MEMORY.md`),
-- memory indexing and retrieval across these memory types (`MEMORY-INDEX.md`),
+- memory indexing (`MEMORY-INDEX.md`) and retrieval (`MEMORY-RETRIEVAL.md`) across these memory types,
 - retention and archival policy for memory records (`MEMORY-RETENTION.md`),
 - and the coordinating process that routes requests to the correct memory type (`MEMORY-MANAGER.md`).
 
@@ -48,7 +48,8 @@ Memory records what was already validated elsewhere; it does not perform that va
 | `EPISODIC-MEMORY.md` | History of completed tasks and outcomes. |
 | `SEMANTIC-MEMORY.md` | Reusable, project-independent knowledge already promoted into memory. |
 | `PROJECT-MEMORY.md` | Project-specific long-lived decisions and history. |
-| `MEMORY-INDEX.md` | Indexing and retrieval across all memory types. |
+| `MEMORY-INDEX.md` | Maintains searchable references and relationships across all memory types. |
+| `MEMORY-RETRIEVAL.md` | Interprets queries, ranks candidates, and returns results from the index. |
 | `MEMORY-RETENTION.md` | Retention periods, archival, and pruning policy. |
 
 The authoritative component roster must match files that actually exist in this directory. A Knowledge Manager is not a Memory component; the platform's single Knowledge Manager is `25_KNOWLEDGE/KNOWLEDGE-MANAGER.md`.
@@ -68,7 +69,9 @@ Episodic Memory (record the completed task)
    ↓
 Semantic / Project Memory (only for already-validated, promotable content)
    ↓
-Memory Index (index for retrieval)
+Memory Index (index for discovery)
+   ↓
+Memory Retrieval (interpret queries, rank, return results)
    ↓
 Memory Retention (retain or archive per policy)
 ```
