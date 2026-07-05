@@ -86,7 +86,7 @@ final class RolePipelineTest extends TestCase
 
         $result = $this->orchestrator->run($context);
 
-        $this->assertSame('Revision Required', $result['status']);
+        $this->assertSame('REVISION_REQUIRED', $result['status']);
         $this->assertFalse($result['complete']);
         $this->assertCount(4, $result['trace']);
         $this->assertSame('reviewer', $result['trace'][3]['stage']);
@@ -102,7 +102,7 @@ final class RolePipelineTest extends TestCase
         $result = $this->orchestrator->run($context);
 
         // architect, planner, developer, reviewer all pass before security fails.
-        $this->assertSame('Failed', $result['status']);
+        $this->assertSame('REMEDIATION_REQUIRED', $result['status']);
         $this->assertFalse($result['complete']);
         $this->assertCount(5, $result['trace']);
         $this->assertSame('security', $result['trace'][4]['stage']);
@@ -119,7 +119,7 @@ final class RolePipelineTest extends TestCase
 
         $this->assertSame('Ready', $result['status']);
         $this->assertTrue($result['complete']);
-        $this->assertSame('Warning', $result['history']['security']['status']);
+        $this->assertSame('APPROVED_WITH_LIMITATIONS', $result['history']['security']['status']);
         $this->assertTrue($result['history']['release']['release']['gates']['security']);
     }
 

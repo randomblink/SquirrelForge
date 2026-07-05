@@ -104,7 +104,7 @@ final class LlmReasoningTest extends TestCase
             'history' => ['developer' => ['implementation' => ['tasks' => []]]],
         ]);
 
-        $this->assertSame('Approved', $result['status']);
+        $this->assertSame('APPROVED', $result['status']);
     }
 
     public function testReviewerAsksLlmOnlyWhenIssuesAreNotExplicit(): void
@@ -121,7 +121,7 @@ final class LlmReasoningTest extends TestCase
 
         $this->assertCount(1, $fake->calls);
         $this->assertSame(['Missing nonce check.'], $result['review']['issues']);
-        $this->assertSame('Revision Required', $result['status']);
+        $this->assertSame('REVISION_REQUIRED', $result['status']);
     }
 
     public function testReviewerRespectsExplicitEmptyIssuesWithoutCallingLlm(): void
@@ -140,7 +140,7 @@ final class LlmReasoningTest extends TestCase
         ]);
 
         $this->assertSame([], $fake->calls);
-        $this->assertSame('Approved', $result['status']);
+        $this->assertSame('APPROVED', $result['status']);
     }
 
     public function testPlannerAsksLlmForPhasesWhenNotSupplied(): void
@@ -176,6 +176,7 @@ final class LlmReasoningTest extends TestCase
         $fake = new FakeLlmClient(json_encode([
             'updates' => ['README.md'],
             'checklist' => ['readme' => true, 'changelog' => true, 'release_notes' => true],
+            'limitations' => [],
         ], JSON_THROW_ON_ERROR));
 
         $agent = new DocumentationAgent($fake);
@@ -185,13 +186,13 @@ final class LlmReasoningTest extends TestCase
             'stage' => 'documentation',
             'history' => [
                 'architect' => ['blueprint' => ['goal' => 'Build a caching plugin.']],
-                'performance' => ['status' => 'Approved'],
+                'performance' => ['status' => 'APPROVED'],
                 'developer' => ['implementation' => ['tasks' => []]],
             ],
         ]);
 
         $this->assertCount(1, $fake->calls);
-        $this->assertSame('Complete', $result['status']);
+        $this->assertSame('COMPLETE', $result['status']);
         $this->assertSame(['README.md'], $result['documentation']['updates']);
     }
 }

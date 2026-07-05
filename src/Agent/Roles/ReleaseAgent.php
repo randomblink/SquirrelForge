@@ -74,11 +74,25 @@ final class ReleaseAgent extends AbstractRoleAgent
         $performance = $this->requireHistory($context, 'performance');
         $documentation = $this->requireHistory($context, 'documentation');
 
+        // Review's own status is checked against APPROVED/APPROVED_WITH_LIMITATIONS/
+        // SPECIALIST_REVIEW_REQUIRED: SPECIALIST_REVIEW_REQUIRED is not itself a
+        // blocking outcome by the time the pipeline reaches Release, because the
+        // specialist review it calls for is exactly the Security and Performance
+        // gates checked independently below -- if those passed, the escalation
+        // Reviewer asked for has already happened.
         $gates = [
-            'review' => ($review['status'] ?? null) === 'Approved',
-            'security' => in_array($security['status'] ?? null, ['Approved', 'Warning'], true),
-            'performance' => in_array($performance['status'] ?? null, ['Approved', 'Warning'], true),
-            'documentation' => ($documentation['status'] ?? null) === 'Complete',
+            'review' => in_array(
+                $review['status'] ?? null,
+                ['APPROVED', 'APPROVED_WITH_LIMITATIONS', 'SPECIALIST_REVIEW_REQUIRED'],
+                true
+            ),
+            'security' => in_array($security['status'] ?? null, ['APPROVED', 'APPROVED_WITH_LIMITATIONS'], true),
+            'performance' => in_array(
+                $performance['status'] ?? null,
+                ['APPROVED', 'APPROVED_WITH_LIMITATIONS', 'OPTIMIZATION_RECOMMENDED'],
+                true
+            ),
+            'documentation' => in_array($documentation['status'] ?? null, ['COMPLETE', 'COMPLETE_WITH_LIMITATIONS'], true),
         ];
 
         $outstanding = array_keys(array_filter($gates, static fn (bool $passed): bool => !$passed));

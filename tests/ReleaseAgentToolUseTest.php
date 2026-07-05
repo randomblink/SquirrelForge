@@ -23,10 +23,10 @@ final class ReleaseAgentToolUseTest extends TestCase
     private function passingHistory(): array
     {
         return [
-            'reviewer' => ['status' => 'Approved'],
-            'security' => ['status' => 'Approved'],
-            'performance' => ['status' => 'Approved'],
-            'documentation' => ['status' => 'Complete'],
+            'reviewer' => ['status' => 'APPROVED'],
+            'security' => ['status' => 'APPROVED'],
+            'performance' => ['status' => 'APPROVED'],
+            'documentation' => ['status' => 'COMPLETE'],
         ];
     }
 

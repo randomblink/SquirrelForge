@@ -9,9 +9,13 @@ use SquirrelForge\Agent\Roles\Support\FindingsEvaluator;
 /**
  * Implements the Agent Security role from `16_AGENTS/AGENT-SECURITY.md`.
  *
- * Any finding marked "critical" fails the stage and blocks release. Non-
- * critical findings produce a "Warning" but still allow the pipeline to
- * proceed, matching the documented Security Outcome table.
+ * Any finding marked "critical" returns `REMEDIATION_REQUIRED` and blocks
+ * release. Non-critical findings return `APPROVED_WITH_LIMITATIONS` but
+ * still allow the pipeline to proceed; no findings is `APPROVED` -- matching
+ * the documented Security Outcome table. `BLOCKED` and `REJECTED` are not
+ * produced by this automatic evaluation; they require a judgment call
+ * (missing context, unacceptable posture) that findings severity alone
+ * cannot establish.
  */
 final class SecurityAgent extends AbstractRoleAgent
 {
@@ -53,14 +57,18 @@ final class SecurityAgent extends AbstractRoleAgent
             $findings = $reasoned['findings'] ?? [];
         }
 
-        $status = FindingsEvaluator::evaluate($findings);
+        $status = FindingsEvaluator::evaluate($findings, [
+            'critical' => 'REMEDIATION_REQUIRED',
+            'nonCritical' => 'APPROVED_WITH_LIMITATIONS',
+            'clean' => 'APPROVED',
+        ]);
 
         return [
             'security' => [
                 'findings' => $findings,
             ],
             'status' => $status,
-            'next_stage' => $status !== 'Failed' ? 'performance' : null,
+            'next_stage' => in_array($status, ['APPROVED', 'APPROVED_WITH_LIMITATIONS'], true) ? 'performance' : null,
         ];
     }
 }

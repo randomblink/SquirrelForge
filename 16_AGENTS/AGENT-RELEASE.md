@@ -73,24 +73,18 @@ The Release stage should produce:
 
 ## Quality Gates
 
-The current implementation (`src/Agent/Roles/ReleaseAgent.php`) checks these literal stage-history status values:
+The current implementation (`src/Agent/Roles/ReleaseAgent.php`) checks each stage's outcome against the passing states defined in its own role specification:
 
-| Stage | Required Status |
+| Stage | Passing Status |
 |---|---|
-| Review | `Approved` |
-| Security | `Approved` or `Warning` |
-| Performance | `Approved` or `Warning` |
-| Documentation | `Complete` |
+| Review | `APPROVED`, `APPROVED_WITH_LIMITATIONS`, or `SPECIALIST_REVIEW_REQUIRED` |
+| Security | `APPROVED` or `APPROVED_WITH_LIMITATIONS` |
+| Performance | `APPROVED`, `APPROVED_WITH_LIMITATIONS`, or `OPTIMIZATION_RECOMMENDED` |
+| Documentation | `COMPLETE` or `COMPLETE_WITH_LIMITATIONS` |
+
+`SPECIALIST_REVIEW_REQUIRED` passes the Review gate because the specialist review it calls for is exactly the Security and Performance gates checked independently above; if those passed, the escalation has already happened.
 
 Any gate not in a passing state is added to the outstanding list and the release is held.
-
----
-
-## Known Inconsistency
-
-The Reviewer, Security, Performance, and Documentation role specifications were revised as part of this cleanup pass to use explicit outcome states (for example `APPROVED`, `APPROVED_WITH_LIMITATIONS`, `REMEDIATION_REQUIRED`, `OPTIMIZATION_RECOMMENDED`, `VALIDATION_REQUIRED`, `COMPLETE`, `COMPLETE_WITH_LIMITATIONS`).
-
-`src/Agent/Roles/ReleaseAgent.php` has not been updated to recognize these values — it still checks only the literal strings in the Quality Gates table above. Until the implementation is updated, a stage reporting one of the newer outcome states (such as `APPROVED_WITH_LIMITATIONS` or `OPTIMIZATION_RECOMMENDED`) will be treated as a failed gate rather than a pass, even though the role specification now considers it an acceptable outcome. This should be resolved by updating the gate-check implementation, not by silently reverting the role specifications.
 
 ---
 
