@@ -49,7 +49,7 @@ Memory Retention must:
 | Prune | Move the record to `Removed`, only once past its retention and archival requirements. |
 | Recommend | Produce a retention recommendation for governance or Memory Manager approval when automatic action is not authorized. |
 
-These reuse the lifecycle stage names `18_MEMORY/MEMORY-MANAGER.md` defines (`Created` / `Active` / `Consolidated` / `Archived` / `Expired` / `Removed`).
+These reuse the lifecycle stage names `18_MEMORY/MEMORY-MANAGER.md` defines (`Created` / `Active` / `Archived` / `Expired` / `Removed`).
 
 ---
 
