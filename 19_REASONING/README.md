@@ -54,7 +54,7 @@ Reasoning decides and explains; it does not execute, persist, validate, or gover
 | `STRATEGY-PLANNER.md` | Converts approved decisions into executable implementation strategies and roadmaps. |
 | `EXPLANATION-ENGINE.md` | Produces clear, traceable explanations describing why decisions and strategies were selected. |
 | `CONFIDENCE-SCORER.md` | Assigns a confidence level to decisions based on evidence, validation history, risks, and knowledge. |
-| `REFLECTION-ENGINE.md` | Extracts lessons from completed, validated work and forwards reusable candidates to the Knowledge Manager. |
+| `REFLECTION-ENGINE.md` | Extracts lessons from completed, validated work and makes improvement candidates available to the Knowledge Manager, without deciding their promotion. |
 
 The authoritative component roster must match files that actually exist in this directory.
 
