@@ -1,21 +1,28 @@
 # SquirrelForge AI Driver Governance
 
+Version: 1.0.0
+Status: Stable
+Owner: AI Driver Maintainers
+Depends On: `23_GOVERNANCE/POLICY-ENGINE.md`, `01_RULES`
+Used By: `19_REASONING/AI-DRIVER.md`, `34_AIDRIVER/AI-SAFETY-GATE.md`, `34_AIDRIVER/MODEL-ROUTER.md`, `34_AIDRIVER/TOOL-SELECTOR.md`
+Last Updated: 2026-07-07
+
 ## Purpose
 
-The AI Driver Governance component establishes the policies, standards, controls, and oversight that govern all AI-driven behavior within SquirrelForge. It ensures that reasoning, planning, model selection, prompt compilation, tool selection, recommendations, and decision-making remain safe, explainable, auditable, compliant, and aligned with platform objectives.
+AI Driver Governance establishes the policies, standards, controls, and oversight that govern all AI-driven behavior within SquirrelForge. It ensures that reasoning, planning, model selection, prompt compilation, tool selection, recommendations, and decision-making remain safe, explainable, auditable, compliant, and aligned with platform objectives.
 
-AI Driver Governance does not perform reasoning or execute actions. It defines the operational boundaries within which the AI Driver and all supporting AI components must operate.
+AI Driver Governance does not perform reasoning or execute actions. It specializes platform-wide governance for the AI-driving domain; it does not replace or override the general policy authority `23_GOVERNANCE` and `01_RULES` already establish, in the same relationship `24_SECURITY/SECURITY-GOVERNANCE.md` has to platform governance for the security domain.
 
 ---
 
-# Responsibilities
+## Responsibilities
 
 - Define AI interaction policies.
 - Establish reasoning standards.
-- Govern AI decision-making.
+- Govern AI decision-making boundaries.
 - Approve AI operational boundaries.
 - Enforce explainability requirements.
-- Manage AI risk.
+- Manage AI-specific risk.
 - Govern model usage.
 - Coordinate AI governance reviews.
 - Record governance activity.
@@ -23,24 +30,22 @@ AI Driver Governance does not perform reasoning or execute actions. It defines t
 
 ---
 
-# Inputs
+## Inputs
 
 AI Driver Governance receives:
 
-- Governance policies
-- AI decision records
-- Prompt compilation reports
-- Model routing reports
-- Safety evaluations
-- Validation reports
-- Audit findings
-- Observability reports
-- Risk assessments
-- Compliance requirements
+- Governance policies (from `23_GOVERNANCE/POLICY-ENGINE.md`)
+- AI decision records (from `19_REASONING/AI-DRIVER.md`)
+- Prompt compilation reports (from `14_ENGINE/PROMPT-COMPILER.md`)
+- Model routing reports (from `34_AIDRIVER/MODEL-ROUTER.md`)
+- Safety evaluations (from `34_AIDRIVER/AI-SAFETY-GATE.md`)
+- Observability reports (from `27_OBSERVABILITY`)
+- Risk assessments (from `19_REASONING/RISK-ASSESSOR.md`)
+- Compliance requirements (from `24_SECURITY/COMPLIANCE.md`)
 
 ---
 
-# Outputs
+## Outputs
 
 AI Driver Governance produces:
 
@@ -50,95 +55,55 @@ AI Driver Governance produces:
 - Risk assessments
 - Operational guidance
 - Governance review reports
-- Audit recommendations
 - Governance audit records
 
 ---
 
-# Governance Workflow
+## Governance Workflow
 
-1. Receive AI execution request from the AI Driver.
+1. Receive an AI governance request or scheduled review trigger.
 2. Identify applicable AI policies.
 3. Review AI activity and supporting evidence.
 4. Evaluate compliance with governance requirements.
 5. Assess operational, security, and ethical risks.
-6. Approve, defer, or reject governance actions.
+6. Approve, defer, or reject the governance action.
 7. Publish governance decision.
 8. Record governance activity.
-9. Notify affected AI components.
-10. Schedule governance review.
+9. Notify affected `34_AIDRIVER` components.
+10. Schedule the next governance review.
 
 ---
 
-# Governance Scope
+## Governance Scope
 
 AI Driver Governance applies to:
 
-- Goal interpretation
-- Context building
-- Action selection
-- Tool selection and usage
-- Model selection and routing
-- AI safety violations
-- Result review
-- Explanation generation
-- AI decision lifecycle
+- Goal interpretation (`14_ENGINE/GOAL-PLANNER.md`)
+- Context assembly (`14_ENGINE/CONTEXT-MANAGER.md`)
+- Action and decision selection (`19_REASONING/DECISION-ENGINE.md`)
+- Tool selection and usage (`34_AIDRIVER/TOOL-SELECTOR.md`)
+- Model selection and routing (`34_AIDRIVER/MODEL-ROUTER.md`)
+- AI safety evaluation (`34_AIDRIVER/AI-SAFETY-GATE.md`)
+- Explanation generation (`19_REASONING/EXPLANATION-ENGINE.md`)
+- The AI decision lifecycle overall
 
 ---
 
-# Governance Policies
-
-Policies define:
-
-- Approved reasoning boundaries
-- Decision authority
-- Safety requirements
-- Explainability requirements
-- Model usage rules
-- Prompt construction standards
-- Tool usage restrictions
-- Privacy requirements
-- Audit expectations
-- Review schedules
-
----
-
-# AI Decision Lifecycle
-
-Every AI-driven decision progresses through:
-
-1. Goal interpretation
-2. Context construction
-3. Action evaluation
-4. Tool evaluation
-5. Prompt compilation
-6. Model routing
-7. Safety evaluation
-8. Validation
-9. Execution
-10. Result review
-11. Explanation
-12. Audit
-13. Continuous improvement
-
----
-
-# Decision Authority
+## Decision Authority
 
 AI Driver Governance determines:
 
-- Which decisions may be automated.
+- Which AI-driven decisions may be automated.
 - Which decisions require approval.
 - Which decisions require human oversight.
 - Which actions are prohibited.
 - Which actions require escalation.
-- Which models may be used.
-- Which tools may be selected.
-- Which workflows require additional governance.
+- Which models may be used (enforced through `34_AIDRIVER/MODEL-ROUTER.md` and `21_CONFIGURATION/MODEL-CONFIG.md`).
+- Which tools may be selected (enforced through `34_AIDRIVER/TOOL-SELECTOR.md` and `21_CONFIGURATION/PERMISSIONS.md`).
 
 ---
 
-# Explainability Requirements
+## Explainability Requirements
 
 Every significant AI decision should be:
 
@@ -152,108 +117,72 @@ Every significant AI decision should be:
 
 ---
 
-# Risk Management
+## Risk Management
 
 Governance evaluates risks involving:
 
 - Unsafe reasoning
 - Incorrect tool selection
-- Prompt leakage
 - Model misuse
 - Privacy violations
 - Security weaknesses
 - Governance noncompliance
 - Hallucinated conclusions
-- Operational instability
 - Uncontrolled autonomous behavior
 
 ---
 
-# Continuous Improvement
-
-AI Driver Governance periodically reviews:
-
-- Decision quality
-- Goal interpretation accuracy
-- Prompt effectiveness
-- Model routing performance
-- Tool selection quality
-- Safety gate effectiveness
-- User satisfaction
-- Audit findings
-- Lessons learned
-- Governance maturity
-
----
-
-# Integration Responsibilities
+## Integration Responsibilities
 
 AI Driver Governance oversees:
 
-- AI Driver
-- Goal Interpreter
-- Action Selector
-- Tool Selector
-- Context Builder
-- Prompt Compiler
-- AI Safety Gate
-- Model Router
-- Result Reviewer
-- Explanation Generator
+- `19_REASONING/AI-DRIVER.md`
+- `14_ENGINE/GOAL-PLANNER.md`
+- `19_REASONING/DECISION-ENGINE.md`
+- `34_AIDRIVER/TOOL-SELECTOR.md`
+- `14_ENGINE/CONTEXT-MANAGER.md`
+- `14_ENGINE/PROMPT-COMPILER.md`
+- `34_AIDRIVER/AI-SAFETY-GATE.md`
+- `34_AIDRIVER/MODEL-ROUTER.md`
 
 AI Driver Governance coordinates with:
 
-- Security Layer
-- Automation Layer
-- Observability Layer
-- Learning Layer
-- Optimization Layer
-- Platform Governance
-- Audit systems
+- `24_SECURITY`
+- `27_OBSERVABILITY`
+- `30_LEARNING`
+- `32_OPTIMIZATION`
+- `23_GOVERNANCE`
 
 ---
 
-# Data Protection
-
-AI Driver Governance must:
-
-- Protect governance records.
-- Protect AI decision history.
-- Protect confidential prompts and context.
-- Enforce access controls.
-- Preserve audit integrity.
-
----
-
-# Safety Rules
+## Safety Rules
 
 AI Driver Governance must never:
 
 - Permit AI behavior outside approved boundaries.
 - Weaken safety controls.
-- Override mandatory governance policies.
+- Override mandatory `23_GOVERNANCE`/`01_RULES` policies.
 - Ignore explainability requirements.
 - Allow unauthorized model usage.
 - Delete protected audit records.
-- Reduce platform transparency.
 
 ---
 
-# Failure Handling
+## Failure Handling
 
 If governance evaluation fails:
 
 - Preserve governance evidence.
 - Record governance failures.
-- Notify the AI Driver.
+- Notify `19_REASONING/AI-DRIVER.md`.
 - Escalate unresolved governance issues.
 - Maintain existing protections.
 - Continue audit recording.
-- Schedule governance review.
+- Schedule a governance review.
 
 ---
 
-# Audit Requirements
+## Audit Requirements
 
 Every AI governance operation records:
 
@@ -264,12 +193,11 @@ Every AI governance operation records:
 - Policies evaluated
 - Governance decision (Approve/Deny)
 - Risk classification
-- Reviewer component
 - Final outcome
 
 ---
 
-# Success Criteria
+## Success Criteria
 
 AI Driver Governance succeeds when:
 
@@ -277,6 +205,25 @@ AI Driver Governance succeeds when:
 - Decisions remain safe, explainable, and auditable.
 - Prompt construction and model routing follow governance requirements.
 - Risks are proactively identified and managed.
-- Privacy and security requirements are enforced.
 - Governance policies remain current and effective.
 - AI operations remain trustworthy, transparent, and aligned with platform objectives.
+
+---
+
+## Permission Boundary
+
+AI Driver Governance may define AI-specific policy, evaluate AI-driven decisions and risk, and issue approvals, exceptions, and operational-boundary decisions for the `34_AIDRIVER` and related AI-reasoning components.
+
+It must not perform reasoning, execute actions, or override platform-wide governance policy that `23_GOVERNANCE` and `01_RULES` already establish — it specializes that policy for the AI-driving domain.
+
+---
+
+## Domain Rule
+
+AI governance principles apply identically regardless of domain; domain-specific AI usage is evaluated against the existing criteria, not a separate domain-specific AI governance system.
+
+---
+
+## Rule
+
+No AI-driven decision may bypass AI Driver Governance oversight; every AI decision lifecycle stage remains subject to review, audit, and correction.
