@@ -1,14 +1,21 @@
 # SquirrelForge Authorization Manager
 
+Version: 1.0.0
+Status: Stable
+Owner: Security Maintainers
+Depends On: `24_SECURITY/AUTHENTICATION-MANAGER.md`, `24_SECURITY/SECURITY-GOVERNANCE.md`, `21_CONFIGURATION/PERMISSIONS.md`, `23_GOVERNANCE/POLICY-ENGINE.md`
+Used By: `24_SECURITY/SECURITY-MANAGER.md`, `24_SECURITY/SECURITY-MONITOR.md`
+Last Updated: 2026-07-06
+
 ## Purpose
 
-The Authorization Manager determines whether an authenticated identity is permitted to perform a requested operation within SquirrelForge. It enforces role-based, attribute-based, and policy-driven access controls to ensure that every action complies with security, governance, and operational requirements.
+The Authorization Manager determines whether an already-authenticated identity is permitted to perform a requested operation within SquirrelForge. It enforces role-based, attribute-based, and policy-driven access controls to ensure that every action complies with security, governance, and operational requirements.
 
-The Authorization Manager grants or denies access only. It does not authenticate identities or modify security policies.
+The Authorization Manager grants or denies access only. It does not authenticate identities (owned by `24_SECURITY/AUTHENTICATION-MANAGER.md`), define security policy (owned by `24_SECURITY/SECURITY-GOVERNANCE.md`), or own declarative tool/configuration permission policy (owned by `21_CONFIGURATION/PERMISSIONS.md`, a configuration-scoped model distinct from this component's runtime access decisions).
 
 ---
 
-# Responsibilities
+## Responsibilities
 
 - Evaluate authorization requests.
 - Enforce access control policies.
@@ -23,27 +30,27 @@ The Authorization Manager grants or denies access only. It does not authenticate
 
 ---
 
-# Authorization Inputs
+## Authorization Inputs
 
 The Authorization Manager evaluates:
 
-- Authenticated identities
+- Authenticated identities (verified by `24_SECURITY/AUTHENTICATION-MANAGER.md`)
 - Requested operations
 - Target resources
 - Assigned roles
-- Permission assignments
-- Security policies
-- Governance rules
+- Permission assignments (from `21_CONFIGURATION/PERMISSIONS.md`)
+- Security policies (from `24_SECURITY/SECURITY-GOVERNANCE.md`)
+- Governance rules (from `23_GOVERNANCE/POLICY-ENGINE.md`)
 - Operational context
 - Resource classifications
 - Environmental conditions
 
 ---
 
-# Authorization Workflow
+## Authorization Workflow
 
 1. Receive authorization request.
-2. Verify authenticated identity.
+2. Verify authenticated identity via `24_SECURITY/AUTHENTICATION-MANAGER.md`.
 3. Identify requested operation.
 4. Determine target resource.
 5. Evaluate applicable policies.
@@ -51,11 +58,11 @@ The Authorization Manager evaluates:
 7. Apply least-privilege rules.
 8. Issue authorization decision.
 9. Record audit information.
-10. Notify the Security Monitor.
+10. Notify `24_SECURITY/SECURITY-MONITOR.md`.
 
 ---
 
-# Authorization Models
+## Authorization Models
 
 The Authorization Manager supports:
 
@@ -69,7 +76,7 @@ The Authorization Manager supports:
 
 ---
 
-# Authorization Decisions
+## Authorization Decisions
 
 Each request results in one of:
 
@@ -84,7 +91,7 @@ Every decision must include supporting rationale.
 
 ---
 
-# Evaluation Criteria
+## Evaluation Criteria
 
 Authorization evaluates:
 
@@ -99,7 +106,7 @@ Authorization evaluates:
 
 ---
 
-# Safety Rules
+## Safety Rules
 
 The Authorization Manager must never:
 
@@ -112,20 +119,20 @@ The Authorization Manager must never:
 
 ---
 
-# Failure Handling
+## Failure Handling
 
 If authorization fails:
 
 - Deny the operation.
 - Preserve request details.
 - Record the failure.
-- Notify the Security Monitor.
+- Notify `24_SECURITY/SECURITY-MONITOR.md`.
 - Escalate repeated failures.
 - Maintain audit continuity.
 
 ---
 
-# Audit Requirements
+## Audit Requirements
 
 Every authorization operation records:
 
@@ -141,7 +148,7 @@ Every authorization operation records:
 
 ---
 
-# Success Criteria
+## Success Criteria
 
 The Authorization Manager succeeds when:
 
@@ -152,3 +159,23 @@ The Authorization Manager succeeds when:
 - Audit history is complete.
 - Governance requirements are respected.
 - Platform resources remain securely protected.
+
+---
+
+## Permission Boundary
+
+The Authorization Manager may evaluate authorization requests and issue grant/deny decisions for authenticated identities against existing roles, permissions, and policy.
+
+It must not authenticate identities, define security policy, or own declarative configuration-scoped permission policy — those remain owned by `24_SECURITY/AUTHENTICATION-MANAGER.md`, `24_SECURITY/SECURITY-GOVERNANCE.md`, and `21_CONFIGURATION/PERMISSIONS.md` respectively.
+
+---
+
+## Domain Rule
+
+Authorization decisions apply identically regardless of domain; domain-specific access rules — for example WordPress capability checks — are owned by the relevant domain layer (`38_WORDPRESS/SECURITY-VALIDATOR.md`), not reimplemented here.
+
+---
+
+## Rule
+
+No operation on a protected resource may proceed without an explicit "Authorized" or "Authorized with Restrictions" decision from the Authorization Manager.
