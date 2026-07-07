@@ -1,14 +1,21 @@
 # SquirrelForge Threat Detector
 
+Version: 1.0.0
+Status: Stable
+Owner: Security Maintainers
+Depends On: `24_SECURITY/SECURITY-GOVERNANCE.md`, `26_INTEGRATIONS`, `37_STORAGE`, `27_OBSERVABILITY`
+Used By: `24_SECURITY/INCIDENT-MANAGER.md`, `24_SECURITY/SECURITY-MONITOR.md`, `24_SECURITY/SECURITY-MANAGER.md`
+Last Updated: 2026-07-06
+
 ## Purpose
 
 The Threat Detector continuously analyzes platform activity to identify suspicious, malicious, or anomalous behavior that could threaten the confidentiality, integrity, or availability of SquirrelForge. It evaluates security events, behavioral patterns, operational anomalies, and policy violations to provide early detection and timely response.
 
-The Threat Detector detects and reports threats only. It does not execute remediation actions or modify system behavior.
+The Threat Detector detects and reports threats only. It does not execute remediation actions or modify system behavior — confirmed threats are handed to `24_SECURITY/INCIDENT-MANAGER.md` for response coordination.
 
 ---
 
-# Responsibilities
+## Responsibilities
 
 - Monitor security events.
 - Detect suspicious activity.
@@ -23,24 +30,23 @@ The Threat Detector detects and reports threats only. It does not execute remedi
 
 ---
 
-# Threat Sources
+## Threat Sources
 
 The Threat Detector analyzes data from:
 
-- Authentication events
-- Authorization failures
-- Policy violations
-- Integration Layer (e.g., suspicious API calls)
-- Workflow execution
-- Agent behavior
-- Data Layer (e.g., unusual access patterns)
-- System logs
-- Monitoring events
+- Authentication events (`24_SECURITY/AUTHENTICATION-MANAGER.md`)
+- Authorization failures (`24_SECURITY/AUTHORIZATION-MANAGER.md`)
+- Policy violations (`24_SECURITY/SECURITY-GOVERNANCE.md`)
+- `26_INTEGRATIONS` (for example, suspicious API calls)
+- Workflow execution (`20_EXECUTION`)
+- Agent behavior (`16_AGENTS`)
+- `37_STORAGE` (for example, unusual access patterns)
+- System logs and monitoring events (`27_OBSERVABILITY`)
 - External security intelligence
 
 ---
 
-# Threat Detection Workflow
+## Threat Detection Workflow
 
 1. Receive security event.
 2. Verify event integrity.
@@ -49,13 +55,13 @@ The Threat Detector analyzes data from:
 5. Evaluate threat indicators.
 6. Classify threat severity.
 7. Generate threat assessment.
-8. Notify the Incident Manager.
+8. Notify `24_SECURITY/INCIDENT-MANAGER.md`.
 9. Record audit information.
 10. Publish threat status.
 
 ---
 
-# Threat Categories
+## Threat Categories
 
 The Threat Detector identifies:
 
@@ -73,7 +79,7 @@ The Threat Detector identifies:
 
 ---
 
-# Threat Severity Levels
+## Threat Severity Levels
 
 Each detected threat is classified as:
 
@@ -87,7 +93,7 @@ Severity determines escalation priority but does not automatically trigger remed
 
 ---
 
-# Detection Methods
+## Detection Methods
 
 The Threat Detector supports:
 
@@ -102,7 +108,7 @@ The Threat Detector supports:
 
 ---
 
-# Safety Rules
+## Safety Rules
 
 The Threat Detector must never:
 
@@ -115,21 +121,20 @@ The Threat Detector must never:
 
 ---
 
-# Failure Handling
+## Failure Handling
 
 If threat detection fails:
 
 - Record the detection failure.
 - Preserve available event data.
-- Record the failure.
-- Notify the Security Monitor.
+- Notify `24_SECURITY/SECURITY-MONITOR.md`.
 - Escalate persistent failures.
 - Continue monitoring unaffected sources.
 - Maintain audit continuity.
 
 ---
 
-# Audit Requirements
+## Audit Requirements
 
 Every detection operation records:
 
@@ -145,7 +150,7 @@ Every detection operation records:
 
 ---
 
-# Success Criteria
+## Success Criteria
 
 The Threat Detector succeeds when:
 
@@ -158,3 +163,23 @@ The Threat Detector succeeds when:
 - Audit history is complete.
 - Potential threats are escalated promptly.
 - Platform security remains continuously observable.
+
+---
+
+## Permission Boundary
+
+The Threat Detector may observe, correlate, classify, and report on security events and behavioral anomalies across the platform.
+
+It must not execute remediation, modify production systems, or coordinate incident response mechanics itself — those remain owned by `24_SECURITY/INCIDENT-MANAGER.md`.
+
+---
+
+## Domain Rule
+
+Threat detection applies identically regardless of domain; domain-specific threat indicators are surfaced through the owning domain layer, not reimplemented here.
+
+---
+
+## Rule
+
+Every confirmed threat, regardless of severity, must be reported to `24_SECURITY/INCIDENT-MANAGER.md`; the Threat Detector never decides remediation on its own authority.
