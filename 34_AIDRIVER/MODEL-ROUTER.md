@@ -1,20 +1,29 @@
 # SquirrelForge Model Router
 
+Version: 1.0.0
+Status: Stable
+Owner: AI Driver Maintainers
+Depends On: `14_ENGINE/PROMPT-COMPILER.md`, `21_CONFIGURATION/MODEL-CONFIG.md`, `23_GOVERNANCE/POLICY-ENGINE.md`, `32_OPTIMIZATION/COST-OPTIMIZER.md`
+Used By: `19_REASONING/AI-DRIVER.md`, `34_AIDRIVER/AI-SAFETY-GATE.md`
+Last Updated: 2026-07-07
+
 ## Purpose
 
 The Model Router selects the most appropriate AI model for each AI-driven request. It evaluates task type, model capabilities, context size, latency, cost, privacy requirements, availability, reliability, and governance policies to route work to the best supported model.
 
-The Model Router does not generate prompts or make reasoning decisions. It receives compiled prompt packages and determines which approved model should process them.
+The Model Router does not generate prompts or make reasoning decisions. It receives compiled prompt packages from `14_ENGINE/PROMPT-COMPILER.md` and determines which approved model should process them.
+
+The Model Router makes the runtime routing decision only. It does not define model capability requirements, routing criteria, context limits, or fallback policy — that declarative configuration is owned by `21_CONFIGURATION/MODEL-CONFIG.md`, which the Model Router applies to each request rather than re-deciding.
 
 ---
 
-# Responsibilities
+## Responsibilities
 
-- Select appropriate AI models.
-- Evaluate model capabilities.
+- Select appropriate AI models for each request.
+- Evaluate model capabilities against `21_CONFIGURATION/MODEL-CONFIG.md`'s declared requirements.
 - Match models to task requirements.
-- Route prompt packages.
-- Support fallback routing.
+- Route prompt packages to the selected model.
+- Support fallback routing per configured fallback behavior.
 - Balance latency, cost, and quality.
 - Enforce privacy and governance constraints.
 - Track model availability.
@@ -23,24 +32,24 @@ The Model Router does not generate prompts or make reasoning decisions. It recei
 
 ---
 
-# Inputs
+## Inputs
 
 The Model Router receives:
 
-- Compiled prompt packages
+- Compiled prompt packages (from `14_ENGINE/PROMPT-COMPILER.md`)
 - Structured goals
 - Task type
 - Model registry
-- Model capabilities
+- Model capability requirements (from `21_CONFIGURATION/MODEL-CONFIG.md`)
 - Model availability
 - Token requirements
-- Privacy requirements
-- Cost constraints
-- Governance policies
+- Data-handling classification (from `21_CONFIGURATION/MODEL-CONFIG.md`)
+- Cost constraints (from `32_OPTIMIZATION/COST-OPTIMIZER.md`)
+- Governance policies (from `23_GOVERNANCE/POLICY-ENGINE.md`)
 
 ---
 
-# Outputs
+## Outputs
 
 The Model Router produces:
 
@@ -54,22 +63,22 @@ The Model Router produces:
 
 ---
 
-# Model Routing Workflow
+## Model Routing Workflow
 
-1. Receive compiled prompt package.
+1. Receive compiled prompt package from `14_ENGINE/PROMPT-COMPILER.md`.
 2. Identify task requirements.
-3. Review model capability registry.
+3. Review model capability registry against `21_CONFIGURATION/MODEL-CONFIG.md`.
 4. Filter unavailable or unauthorized models.
-5. Evaluate privacy and governance constraints.
-6. Compare cost, latency, and quality.
+5. Evaluate privacy and governance constraints via `23_GOVERNANCE/POLICY-ENGINE.md`.
+6. Compare cost, latency, and quality, consulting `32_OPTIMIZATION/COST-OPTIMIZER.md` for cost signals.
 7. Select primary model.
-8. Select fallback model when appropriate.
+8. Select fallback model per `21_CONFIGURATION/MODEL-CONFIG.md`'s fallback behavior.
 9. Route prompt package for execution.
 10. Record audit information.
 
 ---
 
-# Model Selection Criteria
+## Model Selection Criteria
 
 Model selection considers:
 
@@ -81,29 +90,14 @@ Model selection considers:
 - Multimodal capability
 - Latency requirements
 - Cost constraints
-- Privacy requirements
+- Privacy requirements (data-handling classification)
 - Governance approval status
 
----
-
-# Supported Model Types
-
-The Model Router may route to:
-
-- Local models
-- Cloud models
-- Vision models
-- Coding models
-- Reasoning models
-- Fast-response models
-- Long-context models
-- Tool-capable models
-- Specialized domain models
-- Fallback models
+Selection must be capability-based and auditable, per `21_CONFIGURATION/MODEL-CONFIG.md`.
 
 ---
 
-# Routing Strategies
+## Routing Strategies
 
 Supported routing strategies include:
 
@@ -120,7 +114,7 @@ Supported routing strategies include:
 
 ---
 
-# Fallback Handling
+## Fallback Handling
 
 Fallback routing may occur when:
 
@@ -132,109 +126,64 @@ Fallback routing may occur when:
 - Governance policy requires local execution.
 - Context exceeds model limits.
 
----
-
-# Model Registry
-
-The Model Router maintains model metadata including:
-
-- Model ID
-- Provider
-- Deployment type
-- Capabilities
-- Context window
-- Tool support
-- Cost profile
-- Latency profile
-- Reliability status
-- Governance status
+Fallback behavior itself is declared in `21_CONFIGURATION/MODEL-CONFIG.md`; the Model Router executes it.
 
 ---
 
-# Privacy Routing
+## Privacy Routing
 
 Privacy-aware routing ensures:
 
-- Sensitive prompts stay on approved models.
+- Sensitive prompts stay on approved models, per the data-handling classification in `21_CONFIGURATION/MODEL-CONFIG.md`.
 - Local execution is preferred when required.
-- Cloud routing follows governance policy.
+- Cloud routing follows `23_GOVERNANCE/POLICY-ENGINE.md`.
 - Restricted data is never sent to unauthorized providers.
-- Prompt classifications are respected.
 
 ---
 
-# Cost and Latency Management
-
-The Model Router balances:
-
-- Model quality
-- Response time
-- Token cost
-- Inference cost
-- Tool-use cost
-- Availability
-- Operational priority
-- User requirements
-
----
-
-# Integration Responsibilities
+## Integration Responsibilities
 
 The Model Router coordinates with:
 
-- AI Driver
-- Prompt Compiler
-- Tool Selector
-- AI Safety Gate
-- Execution Layer
-- Observability Layer
-- Cost Optimizer
-- AI Driver Governance
+- `19_REASONING/AI-DRIVER.md`
+- `14_ENGINE/PROMPT-COMPILER.md`
+- `34_AIDRIVER/TOOL-SELECTOR.md`
+- `34_AIDRIVER/AI-SAFETY-GATE.md`
+- `20_EXECUTION`
+- `27_OBSERVABILITY`
+- `32_OPTIMIZATION/COST-OPTIMIZER.md`
+- `34_AIDRIVER/AI-DRIVER-GOVERNANCE.md`
 
 ---
 
-# Data Protection
-
-The Model Router must:
-
-- Protect prompt packages.
-- Enforce privacy requirements.
-- Prevent unauthorized model access.
-- Protect provider credentials.
-- Preserve routing integrity.
-- Maintain audit records.
-
----
-
-# Safety Rules
+## Safety Rules
 
 The Model Router must never:
 
 - Route sensitive data to unauthorized models.
-- Use unapproved models.
+- Use models not declared in `21_CONFIGURATION/MODEL-CONFIG.md`.
 - Ignore governance restrictions.
 - Exceed defined cost limits without approval.
-- Bypass safety requirements.
 - Fabricate model capability.
 - Hide routing failures.
 
 ---
 
-# Failure Handling
+## Failure Handling
 
 If model routing fails:
 
 - Preserve routing context.
 - Record routing failure.
-- Attempt approved fallback routing.
-- Notify the AI Driver.
+- Attempt approved fallback routing per `21_CONFIGURATION/MODEL-CONFIG.md`.
+- Notify `19_REASONING/AI-DRIVER.md`.
 - Escalate persistent failures.
 - Return blocked state when no safe model is available.
 - Maintain audit continuity.
 
 ---
 
-# Audit Requirements
+## Audit Requirements
 
 Every model routing operation records:
 
@@ -251,7 +200,7 @@ Every model routing operation records:
 
 ---
 
-# Success Criteria
+## Success Criteria
 
 The Model Router succeeds when:
 
@@ -262,3 +211,23 @@ The Model Router succeeds when:
 - Fallback routing works when needed.
 - Governance policies are consistently applied.
 - Audit records remain complete.
+
+---
+
+## Permission Boundary
+
+The Model Router may evaluate a compiled prompt package against declared model capabilities and select a primary and fallback model for that specific request.
+
+It must not define model capability requirements, context limits, or fallback policy itself — that declarative configuration remains owned by `21_CONFIGURATION/MODEL-CONFIG.md`.
+
+---
+
+## Domain Rule
+
+Model routing applies identically regardless of domain; domain-specific model requirements are declared as capability requirements in `21_CONFIGURATION/MODEL-CONFIG.md`, not decided ad hoc by the router.
+
+---
+
+## Rule
+
+No prompt package may be sent to a model that is not declared, capability-matched, and approved per `21_CONFIGURATION/MODEL-CONFIG.md` and `23_GOVERNANCE/POLICY-ENGINE.md`.
