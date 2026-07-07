@@ -1,14 +1,21 @@
 # SquirrelForge Security Monitor
 
+Version: 1.0.0
+Status: Stable
+Owner: Security Maintainers
+Depends On: `27_OBSERVABILITY`, `24_SECURITY/SECURITY-MANAGER.md`, `24_SECURITY/IDENTITY-MANAGER.md`, `24_SECURITY/AUTHENTICATION-MANAGER.md`, `24_SECURITY/AUTHORIZATION-MANAGER.md`, `24_SECURITY/ENCRYPTION-MANAGER.md`, `24_SECURITY/THREAT-DETECTOR.md`, `24_SECURITY/INCIDENT-MANAGER.md`, `24_SECURITY/SECURITY-GOVERNANCE.md`, `28_RUNTIME-CONFIG/SECRETS-MANAGER.md`, `23_GOVERNANCE/POLICY-ENGINE.md`
+Used By: `24_SECURITY/SECURITY-MANAGER.md`, `24_SECURITY/SECURITY-GOVERNANCE.md`
+Last Updated: 2026-07-06
+
 ## Purpose
 
 The Security Monitor provides continuous oversight of all Security Layer activities. It monitors authentication, authorization, identity management, secrets usage, encryption operations, policy enforcement, threat detection, incident response, governance compliance, and the overall security posture of SquirrelForge.
 
-The Security Monitor observes, analyzes, and reports. It does not execute security operations, override governance decisions, or modify protected resources.
+The Security Monitor observes, analyzes, and reports. It does not execute security operations, override governance decisions, or modify protected resources — those remain owned by the specialist components it observes.
 
 ---
 
-# Responsibilities
+## Responsibilities
 
 - Monitor all Security Layer components.
 - Track security operations.
@@ -23,24 +30,25 @@ The Security Monitor observes, analyzes, and reports. It does not execute securi
 
 ---
 
-# Monitoring Scope
+## Monitoring Scope
 
 The Security Monitor oversees:
 
-- Security Manager
-- Identity Manager
-- Authorization Manager
-- Secrets Manager
-- Encryption Manager
-- Policy Engine
-- Threat Detector
-- Incident Manager
-- Security Governance
+- `24_SECURITY/SECURITY-MANAGER.md`
+- `24_SECURITY/IDENTITY-MANAGER.md`
+- `24_SECURITY/AUTHENTICATION-MANAGER.md`
+- `24_SECURITY/AUTHORIZATION-MANAGER.md`
+- `28_RUNTIME-CONFIG/SECRETS-MANAGER.md`
+- `24_SECURITY/ENCRYPTION-MANAGER.md`
+- `23_GOVERNANCE/POLICY-ENGINE.md`
+- `24_SECURITY/THREAT-DETECTOR.md`
+- `24_SECURITY/INCIDENT-MANAGER.md`
+- `24_SECURITY/SECURITY-GOVERNANCE.md`
 - Cross-layer security events
 
 ---
 
-# Monitoring Workflow
+## Monitoring Workflow
 
 1. Observe security activity.
 2. Collect security metrics.
@@ -55,7 +63,7 @@ The Security Monitor oversees:
 
 ---
 
-# Monitored Metrics
+## Monitored Metrics
 
 The Security Monitor tracks:
 
@@ -76,7 +84,7 @@ The Security Monitor tracks:
 
 ---
 
-# Alert Conditions
+## Alert Conditions
 
 Alerts are generated when:
 
@@ -93,7 +101,7 @@ Alerts are generated when:
 
 ---
 
-# Monitoring Outputs
+## Monitoring Outputs
 
 The Security Monitor produces:
 
@@ -105,9 +113,11 @@ The Security Monitor produces:
 - Audit support reports
 - Historical monitoring records
 
+Alerts and reports are delivered to `24_SECURITY/SECURITY-MANAGER.md` for routing and to `24_SECURITY/SECURITY-GOVERNANCE.md` as monitoring inputs to governance review.
+
 ---
 
-# Safety Rules
+## Safety Rules
 
 The Security Monitor must never:
 
@@ -120,20 +130,20 @@ The Security Monitor must never:
 
 ---
 
-# Failure Handling
+## Failure Handling
 
 If monitoring fails:
 
 - Record the monitoring failure.
 - Preserve available security metrics.
-- Notify system administrators.
+- Notify `24_SECURITY/SECURITY-MANAGER.md`.
 - Retry monitoring operations.
 - Escalate persistent failures.
 - Maintain audit continuity.
 
 ---
 
-# Audit Requirements
+## Audit Requirements
 
 Every monitoring cycle records:
 
@@ -149,7 +159,7 @@ Every monitoring cycle records:
 
 ---
 
-# Success Criteria
+## Success Criteria
 
 The Security Monitor succeeds when:
 
@@ -160,3 +170,23 @@ The Security Monitor succeeds when:
 - Monitoring history remains complete.
 - Historical metrics are preserved.
 - Platform security remains fully observable, auditable, and continuously protected.
+
+---
+
+## Permission Boundary
+
+The Security Monitor may observe, measure, detect, alert, and report on the security posture of every component it monitors.
+
+It must not execute security operations, modify security policy, override authorization or governance decisions, or alter or delete audit and monitoring records — those remain owned by the components it observes.
+
+---
+
+## Domain Rule
+
+Security monitoring applies identically regardless of domain; domain-specific security telemetry (for example WordPress-domain validation results) is surfaced through the owning domain layer, not reimplemented here.
+
+---
+
+## Rule
+
+Every Security Layer component must be observable by the Security Monitor; no component may operate outside its monitoring scope.
