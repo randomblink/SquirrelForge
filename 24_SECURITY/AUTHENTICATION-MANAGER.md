@@ -1,37 +1,46 @@
 # SquirrelForge Authentication Manager
 
+Version: 1.0.0
+Status: Stable
+Owner: Security Maintainers
+Depends On: `24_SECURITY/IDENTITY-MANAGER.md`, `24_SECURITY/SECURITY-GOVERNANCE.md`, `28_RUNTIME-CONFIG/SECRETS-MANAGER.md`
+Used By: `24_SECURITY/AUTHORIZATION-MANAGER.md`, `24_SECURITY/ENCRYPTION-MANAGER.md`, `24_SECURITY/SECURITY-MANAGER.md`
+Last Updated: 2026-07-06
+
 ## Purpose
 
-The Authentication Manager acts as the primary identity gatekeeper for the entire SquirrelForge platform. It is responsible for securely managing and validating the credentials of all internal actors (users, agents, and system components) to verify their identity before they are granted any access.
+The Authentication Manager acts as the primary credential-verification gatekeeper for the entire SquirrelForge platform. It verifies the credentials of actors identified in `24_SECURITY/IDENTITY-MANAGER.md`'s identity records, enforces MFA, and issues the sessions and access tokens other components rely on as proof of a verified identity.
 
-The Authentication Manager answers the fundamental question: "Is this actor who they claim to be?"
+The Authentication Manager answers the fundamental question: "Is this actor who its identity record claims it is?"
+
+The Authentication Manager performs credential verification and session/token issuance only. It does not provision, update, suspend, or deactivate identities (owned by `24_SECURITY/IDENTITY-MANAGER.md`), make authorization decisions (owned by `24_SECURITY/AUTHORIZATION-MANAGER.md`), or store credentials directly (owned by `28_RUNTIME-CONFIG/SECRETS-MANAGER.md`).
 
 ---
 
-# Responsibilities
+## Responsibilities
 
-- Verify actor credentials against a secure identity store.
-- Manage user and agent sessions and their lifecycle.
+- Verify actor credentials against the credential references held in `24_SECURITY/IDENTITY-MANAGER.md`'s identity record.
+- Manage authentication sessions and their lifecycle.
 - Enforce multi-factor authentication (MFA) policies.
 - Issue, validate, and refresh internal access tokens (e.g., JWTs).
-- Enforce credential policies (complexity, rotation) from `SECURITY-GOVERNANCE`.
-- Log every authentication attempt (successful and failed) to the `SECURITY-AUDITOR`.
+- Enforce credential policies (complexity, rotation) from `24_SECURITY/SECURITY-GOVERNANCE.md`.
+- Log every authentication attempt (successful and failed) to `24_SECURITY/SECURITY-MONITOR.md`.
 
 ---
 
-# Authentication Workflow
+## Authentication Workflow
 
 1. An actor presents credentials to access the system.
-2. The Authentication Manager receives the credentials.
-3. It securely hashes and compares the provided credentials against the authoritative identity store.
-4. If MFA is required, it initiates and validates the second-factor challenge.
-5. Upon successful verification, it creates a session and issues a short-lived access token.
-6. The authentication attempt, including its outcome, source IP, and actor ID, is logged to the `SECURITY-AUDITOR`.
+2. The Authentication Manager retrieves the actor's identity record from `24_SECURITY/IDENTITY-MANAGER.md` and confirms it is Active.
+3. It securely hashes and compares the provided credentials against the authoritative credential store (`28_RUNTIME-CONFIG/SECRETS-MANAGER.md`).
+4. If MFA is required by `24_SECURITY/SECURITY-GOVERNANCE.md` policy, it initiates and validates the second-factor challenge.
+5. Upon successful verification, it creates a session and issues a short-lived access token containing the actor's identity and roles.
+6. The authentication attempt, including its outcome, source IP, and identity ID, is logged to `24_SECURITY/SECURITY-MONITOR.md`.
 7. The access token is returned to the actor for use in subsequent requests.
 
 ---
 
-# Supported Credential Types
+## Supported Credential Types
 
 | Type | Actor | Description |
 |---|---|---|
@@ -40,18 +49,20 @@ The Authentication Manager answers the fundamental question: "Is this actor who 
 | Client Certificate | System | mTLS certificates for service-to-service authentication. |
 | Access Token | All | Short-lived tokens (e.g., JWT) issued after initial authentication. |
 
+Which credential types apply to a given actor is determined by that actor's identity record in `24_SECURITY/IDENTITY-MANAGER.md`.
+
 ---
 
-# Authentication Principles
+## Authentication Principles
 
-- **Secure Credential Handling**: Passwords and secrets are never stored in plaintext and are never logged.
-- **Centralized Identity**: This component is the single source of truth for actor identity verification.
+- **Secure Credential Handling**: Passwords and secrets are never stored in plaintext and are never logged; they are held in `28_RUNTIME-CONFIG/SECRETS-MANAGER.md`.
+- **Single Verification Authority**: This component is the single source of truth for credential verification; `24_SECURITY/IDENTITY-MANAGER.md` remains the single source of truth for identity records.
 - **Defense Against Brute Force**: The manager must implement mechanisms like rate limiting and account lockout for repeated failed attempts.
 - **Session Management**: All sessions must have a defined expiration and be securely managed.
 
 ---
 
-# Safety Rules
+## Safety Rules
 
 The Authentication Manager must never:
 
@@ -59,16 +70,17 @@ The Authentication Manager must never:
 - Return detailed error messages that could reveal whether a username exists.
 - Fail to enforce MFA policies when required.
 - Issue an access token for a failed authentication attempt.
+- Provision, update, or deactivate an identity record — that is `24_SECURITY/IDENTITY-MANAGER.md`'s responsibility.
 
 ---
 
-# Audit Requirements
+## Audit Requirements
 
 Every authentication attempt records:
 
 - Authentication Attempt ID
 - Timestamp
-- Actor ID (if known)
+- Identity ID (from `24_SECURITY/IDENTITY-MANAGER.md`, if known)
 - Source IP Address
 - Credential Type Used
 - MFA Status (Required, Succeeded, Failed)
@@ -77,17 +89,31 @@ Every authentication attempt records:
 
 ---
 
-# Success Criteria
+## Success Criteria
 
 The Authentication Manager succeeds when:
 
-- Only actors with valid credentials can gain access.
+- Only actors with valid credentials and an Active identity record can gain access.
 - All authentication attempts are securely logged.
 - MFA and other security policies are correctly enforced.
 - Compromised or invalid credentials are reliably rejected.
 
 ---
 
-# Rule
+## Permission Boundary
 
-No actor may be considered authenticated or be issued an access token for internal operations without successfully passing verification by the Authentication Manager.
+The Authentication Manager may verify credentials against identity records it does not own, enforce MFA, and issue and manage sessions and access tokens.
+
+It must not create, modify, suspend, or deactivate identity records, make authorization decisions, or store credentials directly — those remain owned by `24_SECURITY/IDENTITY-MANAGER.md`, `24_SECURITY/AUTHORIZATION-MANAGER.md`, and `28_RUNTIME-CONFIG/SECRETS-MANAGER.md` respectively.
+
+---
+
+## Domain Rule
+
+Authentication mechanics apply identically regardless of domain; no domain layer may implement its own credential verification.
+
+---
+
+## Rule
+
+No actor may be considered authenticated or be issued an access token for internal operations without successfully passing verification by the Authentication Manager against an Active identity record maintained by `24_SECURITY/IDENTITY-MANAGER.md`.

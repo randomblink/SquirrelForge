@@ -22,8 +22,8 @@ The Security Layer establishes defense-in-depth by governing identity, authentic
 - central security orchestration (`SECURITY-MANAGER.md`),
 - security policy authority — approvals, exceptions, risk acceptance, standards (`SECURITY-GOVERNANCE.md`),
 - continuous security observability (`SECURITY-MONITOR.md`),
-- identity lifecycle (`IDENTITY-MANAGER.md`),
-- credential verification and session/token issuance (`AUTHENTICATION-MANAGER.md`),
+- identity lifecycle and identity records (`IDENTITY-MANAGER.md`),
+- credential verification, MFA enforcement, and session/token issuance (`AUTHENTICATION-MANAGER.md`),
 - authorization and access decisions (`AUTHORIZATION-MANAGER.md`),
 - cryptographic operations (`ENCRYPTION-MANAGER.md`),
 - threat detection and reporting (`THREAT-DETECTOR.md`),
@@ -33,12 +33,12 @@ The Security Layer establishes defense-in-depth by governing identity, authentic
 
 `24_SECURITY` does not own:
 
-- secrets storage (owned by `28_RUNTIME-CONFIG/SECRETS-MANAGER.md` — Encryption Manager and Identity Manager reference it rather than storing secrets themselves),
+- secrets storage (owned by `28_RUNTIME-CONFIG/SECRETS-MANAGER.md` — Encryption Manager, Identity Manager, and Authentication Manager reference it rather than storing secrets themselves),
 - platform-wide policy evaluation for non-security-specific requests (owned by `23_GOVERNANCE/POLICY-ENGINE.md`, which Security Manager and Security Governance coordinate with),
 - WordPress-domain security validation — nonces, sanitization, escaping, capability checks (owned by `38_WORDPRESS/SECURITY-VALIDATOR.md`),
 - and declarative tool/configuration permission policy (owned by `21_CONFIGURATION/PERMISSIONS.md` — a configuration-scoped model distinct from Authorization Manager's runtime access decisions).
 
-**Known open issue:** `IDENTITY-MANAGER.md` and `AUTHENTICATION-MANAGER.md` currently both claim credential verification, MFA enforcement, and token issuance. This overlap has not yet been resolved. Until a dedicated cleanup separates identity lifecycle from authentication mechanics, treat both as jointly responsible for this ground rather than assuming either alone is authoritative or complete.
+**Resolved:** `IDENTITY-MANAGER.md` and `AUTHENTICATION-MANAGER.md` previously both claimed credential verification, MFA enforcement, and token issuance. This has been resolved: Identity Manager owns identity lifecycle and identity records (including role assignments and credential-type references); Authentication Manager owns credential verification, MFA, and session/token issuance, reading identity records from Identity Manager rather than maintaining its own identity store.
 
 ---
 
@@ -49,8 +49,8 @@ The Security Layer establishes defense-in-depth by governing identity, authentic
 | `SECURITY-MANAGER.md` | Central orchestrator coordinating all Security Layer components. |
 | `SECURITY-GOVERNANCE.md` | Authoritative approvals, exceptions, risk acceptance, and policy standards. |
 | `SECURITY-MONITOR.md` | Continuous observability of security operations and posture. |
-| `IDENTITY-MANAGER.md` | Identity lifecycle; currently also claims credential verification (see open issue above). |
-| `AUTHENTICATION-MANAGER.md` | Credential verification, MFA, session/token issuance (see open issue above). |
+| `IDENTITY-MANAGER.md` | Identity lifecycle and identity records; role assignments and credential-type references. |
+| `AUTHENTICATION-MANAGER.md` | Credential verification, MFA, session/token issuance against Identity Manager's records. |
 | `AUTHORIZATION-MANAGER.md` | Access and permission decisions for authenticated identities. |
 | `ENCRYPTION-MANAGER.md` | Cryptographic operations: encryption, hashing, signatures, key management. |
 | `THREAT-DETECTOR.md` | Detects and reports security threats; does not remediate. |
