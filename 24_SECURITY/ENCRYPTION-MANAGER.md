@@ -1,14 +1,21 @@
 # SquirrelForge Encryption Manager
 
+Version: 1.0.0
+Status: Stable
+Owner: Security Maintainers
+Depends On: `24_SECURITY/AUTHENTICATION-MANAGER.md`, `24_SECURITY/AUTHORIZATION-MANAGER.md`, `24_SECURITY/SECURITY-GOVERNANCE.md`, `28_RUNTIME-CONFIG/SECRETS-MANAGER.md`
+Used By: `24_SECURITY/SECURITY-MANAGER.md`, `24_SECURITY/SECURITY-MONITOR.md`
+Last Updated: 2026-07-06
+
 ## Purpose
 
 The Encryption Manager is responsible for protecting sensitive information through approved cryptographic operations. It manages encryption, decryption, digital signatures, integrity verification, and cryptographic key usage while ensuring that all encryption activities comply with SquirrelForge security policies and governance requirements.
 
-The Encryption Manager performs cryptographic operations only. It does not manage identity, authorize access, or store secrets.
+The Encryption Manager performs cryptographic operations only. It does not manage identity (owned by `24_SECURITY/IDENTITY-MANAGER.md`), authorize access (owned by `24_SECURITY/AUTHORIZATION-MANAGER.md`), or store secrets (owned by `28_RUNTIME-CONFIG/SECRETS-MANAGER.md` — the Encryption Manager references keys held there rather than storing them itself).
 
 ---
 
-# Responsibilities
+## Responsibilities
 
 - Encrypt sensitive data.
 - Decrypt authorized data.
@@ -23,39 +30,39 @@ The Encryption Manager performs cryptographic operations only. It does not manag
 
 ---
 
-# Encryption Inputs
+## Encryption Inputs
 
 The Encryption Manager processes:
 
 - Sensitive platform data
 - Protected configuration files
-- Secrets references
+- Secrets references (held by `28_RUNTIME-CONFIG/SECRETS-MANAGER.md`)
 - Backup archives
 - Communication payloads
 - Digital signatures
 - Integrity verification requests
 - Key usage requests
-- Governance policies
+- Governance policies (from `24_SECURITY/SECURITY-GOVERNANCE.md`)
 - Security requirements
 
 ---
 
-# Encryption Workflow
+## Encryption Workflow
 
 1. Receive cryptographic request.
-2. Verify requesting identity.
-3. Confirm authorization.
-4. Validate governance requirements.
+2. Verify requesting identity via `24_SECURITY/AUTHENTICATION-MANAGER.md`.
+3. Confirm authorization via `24_SECURITY/AUTHORIZATION-MANAGER.md`.
+4. Validate governance requirements against `24_SECURITY/SECURITY-GOVERNANCE.md`.
 5. Select approved cryptographic algorithm.
 6. Perform requested operation.
 7. Verify operation integrity.
 8. Record audit information.
-9. Notify the Security Monitor.
+9. Notify `24_SECURITY/SECURITY-MONITOR.md`.
 10. Publish operation status.
 
 ---
 
-# Supported Operations
+## Supported Operations
 
 The Encryption Manager supports:
 
@@ -71,7 +78,7 @@ The Encryption Manager supports:
 
 ---
 
-# Cryptographic Standards
+## Cryptographic Standards
 
 The Encryption Manager enforces:
 
@@ -83,16 +90,16 @@ The Encryption Manager enforces:
 - Cryptographic agility
 - Key rotation compatibility
 
-Specific algorithms are defined by platform security policy rather than hardcoded here.
+Specific algorithms are defined by platform security policy (`24_SECURITY/SECURITY-GOVERNANCE.md`) rather than hardcoded here.
 
 ---
 
-# Key Usage Rules
+## Key Usage Rules
 
 The Encryption Manager ensures:
 
 - Keys are used only for approved purposes.
-- Keys remain protected.
+- Keys remain protected in `28_RUNTIME-CONFIG/SECRETS-MANAGER.md` rather than held by this component.
 - Expired keys are rejected.
 - Revoked keys cannot be used.
 - Rotation schedules are respected.
@@ -100,7 +107,7 @@ The Encryption Manager ensures:
 
 ---
 
-# Safety Rules
+## Safety Rules
 
 The Encryption Manager must never:
 
@@ -114,20 +121,20 @@ The Encryption Manager must never:
 
 ---
 
-# Failure Handling
+## Failure Handling
 
 If cryptographic operations fail:
 
 - Deny the requested operation.
 - Preserve request context.
 - Record the failure.
-- Notify the Security Monitor.
+- Notify `24_SECURITY/SECURITY-MONITOR.md`.
 - Escalate repeated failures.
 - Maintain audit continuity.
 
 ---
 
-# Audit Requirements
+## Audit Requirements
 
 Every cryptographic operation records:
 
@@ -145,7 +152,7 @@ Audit records must never contain cryptographic keys or plaintext sensitive data.
 
 ---
 
-# Success Criteria
+## Success Criteria
 
 The Encryption Manager succeeds when:
 
@@ -156,3 +163,23 @@ The Encryption Manager succeeds when:
 - Cryptographic operations remain fully auditable.
 - Security and governance requirements are maintained.
 - Protected information remains confidential throughout its lifecycle.
+
+---
+
+## Permission Boundary
+
+The Encryption Manager may perform approved cryptographic operations against verified, authorized requests.
+
+It must not manage identity, authorize access, define security policy, or store secrets directly — those remain owned by `24_SECURITY/IDENTITY-MANAGER.md`, `24_SECURITY/AUTHORIZATION-MANAGER.md`, `24_SECURITY/SECURITY-GOVERNANCE.md`, and `28_RUNTIME-CONFIG/SECRETS-MANAGER.md` respectively.
+
+---
+
+## Domain Rule
+
+Cryptographic standards apply identically regardless of domain; no domain layer may define its own encryption algorithms or key handling rules.
+
+---
+
+## Rule
+
+No cryptographic operation may be performed without verified identity, confirmed authorization, and compliance with governance-defined cryptographic standards.
