@@ -1,211 +1,123 @@
 # SquirrelForge Result Reviewer
 
+Version: 1.0.0
+Status: Stable
+Owner: AI Driver Maintainers
+Depends On: `20_EXECUTION/RESULT-COLLECTOR.md`, `14_ENGINE/VALIDATION.md`
+Used By: `19_REASONING/AI-DRIVER.md`, `19_REASONING/REFLECTION-ENGINE.md`
+Last Updated: 2026-07-07
+
 ## Purpose
 
-The Result Reviewer evaluates the outcome of every AI-driven action by comparing expected results with actual execution outcomes. It determines whether goals have been achieved, identifies deviations, recommends recovery actions, and advises the AI Driver on whether to continue, retry, revise the plan, or conclude the task.
+The Result Reviewer closes the AI reasoning loop after execution. It reads `20_EXECUTION/RESULT-COLLECTOR.md`'s assembled Execution Result Set together with `14_ENGINE/VALIDATION.md`'s findings, compares them against the original structured goal, and recommends the AI Driver's next step: continue, retry, revise the plan, or conclude the task.
 
-The Result Reviewer does not execute actions or modify completed results. It provides objective evaluation and feedback to support reliable, explainable, and continuously improving agent behavior.
+The Result Reviewer does not collect execution results (owned by `20_EXECUTION/RESULT-COLLECTOR.md`, which explicitly does not judge correctness), validate output correctness (owned by `14_ENGINE/VALIDATION.md`), decide whether a workflow stage is complete or execution may advance (owned by `20_EXECUTION/WORKFLOW-EXECUTOR.md` and `20_EXECUTION/EXECUTION-ENGINE.md`), score pre-execution confidence (owned by `19_REASONING/CONFIDENCE-SCORER.md`), or extract retrospective lessons from completed work (owned by `19_REASONING/REFLECTION-ENGINE.md`). It is the real-time bridge between a finished action and the next iteration of `19_REASONING/DECISION-ENGINE.md`, distinct from all of those.
 
 ---
 
-# Responsibilities
+## Responsibilities
 
-- Review execution outcomes.
-- Compare expected and actual results.
-- Evaluate goal completion.
-- Detect failures and deviations.
-- Assess execution quality.
-- Recommend recovery actions.
-- Support continuous improvement.
+- Read the Execution Result Set from `20_EXECUTION/RESULT-COLLECTOR.md`.
+- Read validation findings from `14_ENGINE/VALIDATION.md`.
+- Compare expected outcome (from the structured goal) against actual results.
+- Determine goal status.
+- Detect deviations or failures.
+- Recommend the AI Driver's next step.
 - Record review activity.
-- Support explainability.
-- Follow AI governance requirements.
 
 ---
 
-# Inputs
+## Inputs
 
 The Result Reviewer receives:
 
-- Execution results
-- Original structured goals
-- Planned actions
-- Workflow status
-- Tool execution reports
-- Observability data
-- Validation results
-- User feedback
-- Governance policies
-- Safety constraints
+- The Execution Result Set (from `20_EXECUTION/RESULT-COLLECTOR.md`)
+- Validation findings (from `14_ENGINE/VALIDATION.md`)
+- The original structured goal (from `14_ENGINE/GOAL-PLANNER.md`)
+- The selected action and strategy (from `19_REASONING/DECISION-ENGINE.md` and `19_REASONING/STRATEGY-PLANNER.md`)
 
 ---
 
-# Outputs
+## Outputs
 
 The Result Reviewer produces:
 
-- Result evaluations
-- Goal completion assessments
+- Goal status assessments
 - Recovery recommendations
 - Retry recommendations
-- Plan revision requests
+- Plan revision requests (routed back to `19_REASONING/DECISION-ENGINE.md`)
 - Completion confirmations
-- Governance review requests
 - Result review audit records
 
 ---
 
-# Result Review Workflow
+## Result Review Workflow
 
-1. Receive execution results.
-2. Retrieve expected outcomes.
-3. Compare expected and actual results.
-4. Evaluate quality and completeness.
-5. Detect deviations or failures.
-6. Determine goal status.
-7. Recommend next action.
-8. Record audit information.
-9. Notify the AI Driver.
-10. Archive review results.
+1. Receive the Execution Result Set from `20_EXECUTION/RESULT-COLLECTOR.md`.
+2. Retrieve the expected outcome from the structured goal.
+3. Compare expected and actual results, incorporating `14_ENGINE/VALIDATION.md`'s findings.
+4. Detect deviations or failures.
+5. Determine goal status.
+6. Recommend the next step to `19_REASONING/AI-DRIVER.md`.
+7. Record audit information.
 
 ---
 
-# Review Categories
-
-The Result Reviewer evaluates:
-
-- Goal completion
-- Workflow completion
-- Tool execution
-- Planning accuracy
-- Agent performance
-- User satisfaction
-- Resource utilization
-- Error recovery
-- Governance compliance
-- Operational quality
-
----
-
-# Evaluation Criteria
-
-Results are evaluated using:
-
-- Goal achievement
-- Accuracy
-- Completeness
-- Timeliness
-- Reliability
-- User impact
-- Operational efficiency
-- Security compliance
-- Governance compliance
-- Explainability
-
----
-
-# Goal Status
+## Goal Status
 
 Goal outcomes include:
 
 - Completed
 - Partially completed
-- In progress
 - Requires retry
 - Requires replanning
 - Blocked
 - Failed
-- Abandoned
 
 ---
 
-# Recovery Recommendations
+## Recovery Recommendations
 
 The Result Reviewer may recommend:
 
-- Retry current action
-- Retry with different tool
-- Revise plan
+- Retry the current action
+- Retry with a different tool (via `34_AIDRIVER/TOOL-SELECTOR.md`)
+- Revise the plan (routed to `19_REASONING/DECISION-ENGINE.md`)
 - Request clarification
-- Escalate issue
-- Roll back changes
-- Continue workflow
-- Mark goal complete
+- Escalate the issue
+- Continue the workflow
+- Mark the goal complete
+
+The Result Reviewer recommends; it does not execute recovery actions itself. Rollback and generic failure recovery remain owned by `20_EXECUTION/ROLLBACK-MANAGER.md` and `17_COORDINATION/FAILURE-RECOVERY.md`.
 
 ---
 
-# Continuous Improvement
-
-The Result Reviewer identifies:
-
-- Successful patterns
-- Failure patterns
-- Planning weaknesses
-- Tool effectiveness
-- Decision quality
-- Execution bottlenecks
-- Improvement opportunities
-- Lessons learned
-
----
-
-# Integration Responsibilities
-
-The Result Reviewer coordinates with:
-
-- AI Driver
-- Action Selector
-- Context Builder
-- Planning Layer
-- Execution Layer
-- Learning Layer
-- Observability Layer
-- Optimization Layer
-- AI Driver Governance
-
----
-
-# Data Protection
-
-The Result Reviewer must:
-
-- Protect execution results.
-- Preserve evaluation integrity.
-- Enforce governance policies.
-- Protect confidential operational information.
-- Maintain audit records.
-
----
-
-# Safety Rules
+## Safety Rules
 
 The Result Reviewer must never:
 
 - Fabricate evaluation results.
-- Ignore execution failures.
-- Hide incomplete outcomes.
-- Bypass governance requirements.
+- Ignore execution failures or validation findings.
+- Bypass `14_ENGINE/VALIDATION.md`'s conclusions.
 - Alter historical execution records.
 - Execute recovery actions directly.
 - Delete audit records.
 
 ---
 
-# Failure Handling
+## Failure Handling
 
 If result review fails:
 
 - Preserve execution evidence.
-- Record review failures.
-- Notify the AI Driver.
+- Record the review failure.
+- Notify `19_REASONING/AI-DRIVER.md`.
 - Escalate persistent issues.
-- Recommend safe recovery when possible.
 - Maintain audit continuity.
-- Prevent unsupported conclusions.
 
 ---
 
-# Audit Requirements
+## Audit Requirements
 
 Every result review records:
 
@@ -214,21 +126,39 @@ Every result review records:
 - Goal ID
 - Action ID
 - Expected outcome
-- Actual outcome
+- Actual outcome (from `20_EXECUTION/RESULT-COLLECTOR.md` and `14_ENGINE/VALIDATION.md`)
 - Goal status
-- Governance status
+- Recommended next step
 - Final outcome
 
 ---
 
-# Success Criteria
+## Success Criteria
 
 The Result Reviewer succeeds when:
 
-- Execution outcomes are accurately evaluated.
-- Goal completion is correctly determined.
+- Execution outcomes are accurately evaluated against the original goal.
+- Goal status is correctly determined.
 - Recovery recommendations are evidence-based.
-- Continuous improvement opportunities are identified.
-- Governance requirements are enforced.
-- Decision quality improves over time.
+- Recommendations reach `19_REASONING/AI-DRIVER.md` promptly.
 - Audit records remain complete.
+
+---
+
+## Permission Boundary
+
+The Result Reviewer may read assembled results and validation findings, compare them to the original goal, and recommend the AI Driver's next step.
+
+It must not collect results, validate correctness, decide workflow-stage completion, score pre-execution confidence, or extract retrospective lessons — those remain owned by `20_EXECUTION/RESULT-COLLECTOR.md`, `14_ENGINE/VALIDATION.md`, `20_EXECUTION/WORKFLOW-EXECUTOR.md`/`20_EXECUTION/EXECUTION-ENGINE.md`, `19_REASONING/CONFIDENCE-SCORER.md`, and `19_REASONING/REFLECTION-ENGINE.md` respectively.
+
+---
+
+## Domain Rule
+
+Result review applies identically regardless of domain; domain-specific success criteria are carried in the goal and validation evidence it reads, not interpreted by the Result Reviewer itself.
+
+---
+
+## Rule
+
+No AI-driven task may be marked complete, retried, or replanned without the Result Reviewer comparing actual results against the original goal and recording a goal status.

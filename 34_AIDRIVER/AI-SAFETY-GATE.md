@@ -1,217 +1,140 @@
 # SquirrelForge AI Safety Gate
 
+Version: 1.0.0
+Status: Stable
+Owner: AI Driver Maintainers
+Depends On: `19_REASONING/RULE-EVALUATOR.md`, `19_REASONING/RISK-ASSESSOR.md`, `24_SECURITY/AUTHORIZATION-MANAGER.md`
+Used By: `19_REASONING/AI-DRIVER.md`, `20_EXECUTION/ACTION-DISPATCHER.md`
+Last Updated: 2026-07-07
+
 ## Purpose
 
-The AI Safety Gate is the dedicated safety checkpoint for AI-driven reasoning and recommendations within SquirrelForge. It evaluates proposed AI actions for safety, policy compliance, ethical constraints, operational risk, governance requirements, and execution readiness before they proceed to validation, approval, or execution.
+The AI Safety Gate is the final pre-dispatch checkpoint for AI-driven actions. It re-confirms that `19_REASONING/RULE-EVALUATOR.md`'s compliance finding and `19_REASONING/RISK-ASSESSOR.md`'s risk assessment still hold for the concrete action about to be dispatched, before it reaches `20_EXECUTION/ACTION-DISPATCHER.md`.
 
-The AI Safety Gate does not execute actions or replace platform governance. It provides AI-specific oversight that complements the Security Layer, Automation Approval Gate, and Governance systems.
-
----
-
-# Responsibilities
-
-- Evaluate AI-generated actions.
-- Verify policy compliance.
-- Assess operational risks.
-- Enforce ethical constraints.
-- Validate AI behavior boundaries.
-- Detect unsafe recommendations.
-- Block prohibited actions.
-- Record safety evaluations.
-- Support explainability.
-- Maintain AI safety consistency.
+The AI Safety Gate does not re-run rule compliance or risk analysis from scratch — that authority remains owned by `19_REASONING/RULE-EVALUATOR.md` and `19_REASONING/RISK-ASSESSOR.md`. It also does not make the authorization grant/deny decision (owned by `24_SECURITY/AUTHORIZATION-MANAGER.md`). It checks that nothing changed between when those findings were produced and when the action is actually about to execute — new information, a stale decision, or a mismatched action — and blocks dispatch if so. This is the same pattern `20_EXECUTION/ACTION-DISPATCHER.md` uses toward `14_ENGINE/TASK-ROUTER.md`: read an already-made decision rather than re-deciding it.
 
 ---
 
-# Inputs
+## Responsibilities
+
+- Confirm the concrete action about to be dispatched matches the action `19_REASONING/RULE-EVALUATOR.md` and `19_REASONING/RISK-ASSESSOR.md` evaluated.
+- Detect staleness — elapsed time, changed platform state, or changed permissions since those findings were produced.
+- Confirm `24_SECURITY/AUTHORIZATION-MANAGER.md` has not since revoked or altered the relevant authorization.
+- Block dispatch when the action, rule finding, risk finding, or authorization no longer match.
+- Record every gate evaluation.
+
+---
+
+## Inputs
 
 The AI Safety Gate receives:
 
-- Proposed AI actions
-- Structured goals
-- Action selection results
-- Tool selection results
-- Context summaries
-- Risk assessments
-- Governance policies
-- Security policies
-- User permissions
-- Platform state
+- The concrete action proposed for dispatch (from `19_REASONING/DECISION-ENGINE.md` via `34_AIDRIVER/TOOL-SELECTOR.md`)
+- The rule compliance finding (from `19_REASONING/RULE-EVALUATOR.md`)
+- The risk assessment (from `19_REASONING/RISK-ASSESSOR.md`)
+- The current authorization status (from `24_SECURITY/AUTHORIZATION-MANAGER.md`)
 
 ---
 
-# Outputs
+## Outputs
 
 The AI Safety Gate produces:
 
-- Safety decisions
-- Approval recommendations
-- Block decisions
-- Risk assessments
-- Required mitigation steps
-- Governance review requests
-- Validation requests
-- AI safety audit records
+- A gate decision (Pass / Blocked)
+- A staleness or mismatch report, when applicable
+- A re-evaluation request, routed back to `19_REASONING/RULE-EVALUATOR.md` or `19_REASONING/RISK-ASSESSOR.md`, when the prior finding no longer applies
+- AI safety gate audit records
 
 ---
 
-# Safety Evaluation Workflow
+## Gate Evaluation Workflow
 
-1. Receive proposed AI action.
-2. Validate action integrity.
-3. Evaluate applicable safety policies.
-4. Assess operational and ethical risks.
-5. Verify governance compliance.
-6. Determine mitigation requirements.
-7. Approve, conditionally approve, or block the action.
-8. Record audit information.
-9. Notify dependent components.
-10. Archive safety evaluation.
+1. Receive the concrete action proposed for dispatch.
+2. Retrieve the associated rule compliance finding and risk assessment.
+3. Confirm the action matches what was evaluated.
+4. Confirm the findings have not gone stale.
+5. Confirm current authorization from `24_SECURITY/AUTHORIZATION-MANAGER.md`.
+6. Pass the action to `20_EXECUTION/ACTION-DISPATCHER.md`, or block it and request re-evaluation.
+7. Record audit information.
 
 ---
 
-# Safety Evaluation Areas
+## Gate Decisions
 
-The AI Safety Gate evaluates:
-
-- User authorization
-- Operational safety
-- Security implications
-- Privacy protection
-- Ethical considerations
-- Resource impact
-- Platform stability
-- Governance compliance
-- Observability readiness
-- Recovery capability
+- Pass
+- Blocked — Stale Finding
+- Blocked — Action Mismatch
+- Blocked — Authorization Revoked
+- Blocked — Escalated to `19_REASONING/RULE-EVALUATOR.md` or `19_REASONING/RISK-ASSESSOR.md`
 
 ---
 
-# Safety Decisions
-
-Supported decision states include:
-
-- Safe
-- Safe with conditions
-- Requires review
-- Requires mitigation
-- Blocked
-- Escalated
-- Deferred
-
----
-
-# Risk Categories
-
-The AI Safety Gate evaluates risks involving:
-
-- Unauthorized actions
-- Unsafe automation
-- Harmful recommendations
-- Privacy violations
-- Security weaknesses
-- Resource exhaustion
-- Data integrity risks
-- Compliance violations
-- Governance conflicts
-- Operational instability
-
----
-
-# Mitigation Strategies
-
-The AI Safety Gate may require:
-
-- User confirmation
-- Administrative approval
-- Governance review
-- Additional validation
-- Alternative tool selection
-- Reduced execution scope
-- Additional monitoring
-- Manual intervention
-
----
-
-# Integration Responsibilities
-
-The AI Safety Gate coordinates with:
-
-- AI Driver
-- Action Selector
-- Tool Selector
-- Automation Validator
-- Approval Gate
-- Security Layer
-- Risk Management
-- Observability Layer
-- AI Driver Governance
-
----
-
-# Data Protection
-
-The AI Safety Gate must:
-
-- Protect confidential decision data.
-- Enforce access permissions.
-- Preserve evaluation integrity.
-- Follow governance policies.
-- Maintain audit records.
-
----
-
-# Safety Rules
+## Safety Rules
 
 The AI Safety Gate must never:
 
-- Permit unauthorized AI actions.
-- Ignore governance requirements.
-- Bypass security controls.
-- Expose confidential information.
-- Suppress significant risks.
+- Independently re-decide rule compliance or risk level.
+- Grant or deny authorization itself.
+- Pass an action whose rule or risk finding is stale or mismatched.
+- Suppress a blocked outcome.
+- Execute the action directly.
 - Alter audit evidence.
-- Execute actions directly.
 
 ---
 
-# Failure Handling
+## Failure Handling
 
-If safety evaluation fails:
+If gate evaluation fails:
 
+- Default to Blocked.
 - Preserve evaluation inputs.
-- Record evaluation failures.
-- Return a safe blocked state.
-- Notify the AI Driver.
+- Record the failure.
+- Notify `19_REASONING/AI-DRIVER.md`.
 - Escalate persistent failures.
 - Maintain audit continuity.
-- Prevent unsafe execution.
 
 ---
 
-# Audit Requirements
+## Audit Requirements
 
-Every AI safety operation records:
+Every gate evaluation records:
 
-- AI safety operation ID
+- Gate evaluation ID
 - Timestamp
-- Goal ID
-- Proposed action
-- Risk classification
-- Safety decision
-- Governance status
+- Action ID
+- Rule finding reference
+- Risk finding reference
+- Authorization status reference
+- Gate decision
 - Final outcome
 
 ---
 
-# Success Criteria
+## Success Criteria
 
 The AI Safety Gate succeeds when:
 
-- Unsafe AI actions are prevented.
-- Safety policies are consistently enforced.
-- Operational risks are accurately identified.
-- Governance requirements are satisfied.
-- AI recommendations remain explainable.
-- Platform safety is preserved.
+- No action reaches `20_EXECUTION/ACTION-DISPATCHER.md` with a stale, mismatched, or revoked finding.
+- Re-evaluation requests are routed to the correct owning component.
+- Gate decisions remain fast and do not duplicate upstream analysis.
 - Audit records remain complete.
+
+---
+
+## Permission Boundary
+
+The AI Safety Gate may confirm that an already-produced rule finding, risk finding, and authorization status still apply to the concrete action about to be dispatched, and may block dispatch when they do not.
+
+It must not perform rule compliance analysis, risk assessment, or authorization decisions itself — those remain owned by `19_REASONING/RULE-EVALUATOR.md`, `19_REASONING/RISK-ASSESSOR.md`, and `24_SECURITY/AUTHORIZATION-MANAGER.md` respectively.
+
+---
+
+## Domain Rule
+
+Gate evaluation applies identically regardless of domain; domain-specific rule and risk content is carried in the findings it reads, not re-interpreted by the gate itself.
+
+---
+
+## Rule
+
+No AI-driven action may reach `20_EXECUTION/ACTION-DISPATCHER.md` without a Pass decision from the AI Safety Gate confirming its rule finding, risk finding, and authorization are current.
