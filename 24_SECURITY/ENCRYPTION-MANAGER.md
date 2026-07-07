@@ -5,13 +5,13 @@ Status: Stable
 Owner: Security Maintainers
 Depends On: `24_SECURITY/AUTHENTICATION-MANAGER.md`, `24_SECURITY/AUTHORIZATION-MANAGER.md`, `24_SECURITY/SECURITY-GOVERNANCE.md`, `28_RUNTIME-CONFIG/SECRETS-MANAGER.md`
 Used By: `24_SECURITY/SECURITY-MANAGER.md`, `24_SECURITY/SECURITY-MONITOR.md`
-Last Updated: 2026-07-06
+Last Updated: 2026-07-07
 
 ## Purpose
 
-The Encryption Manager is responsible for protecting sensitive information through approved cryptographic operations. It manages encryption, decryption, digital signatures, integrity verification, and cryptographic key usage while ensuring that all encryption activities comply with SquirrelForge security policies and governance requirements.
+The Encryption Manager is responsible for protecting sensitive information through approved cryptographic operations. It performs encryption, decryption, hashing, digital signatures, message authentication, integrity verification, and approved cryptographic key use while ensuring that all encryption activities comply with SquirrelForge security policies and governance requirements.
 
-The Encryption Manager performs cryptographic operations only. It does not manage identity (owned by `24_SECURITY/IDENTITY-MANAGER.md`), authorize access (owned by `24_SECURITY/AUTHORIZATION-MANAGER.md`), or store secrets (owned by `28_RUNTIME-CONFIG/SECRETS-MANAGER.md` — the Encryption Manager references keys held there rather than storing them itself).
+The Encryption Manager performs cryptographic operations only. It does not manage identity (owned by `24_SECURITY/IDENTITY-MANAGER.md`), authorize access (owned by `24_SECURITY/AUTHORIZATION-MANAGER.md`), define cryptographic standards (owned by `24_SECURITY/SECURITY-GOVERNANCE.md`), or store, rotate, revoke, or lifecycle-manage keys or secrets (owned by `28_RUNTIME-CONFIG/SECRETS-MANAGER.md` — the Encryption Manager requests and uses approved key references rather than storing keys itself).
 
 ---
 
@@ -22,9 +22,9 @@ The Encryption Manager performs cryptographic operations only. It does not manag
 - Manage cryptographic operations.
 - Verify digital signatures.
 - Validate data integrity.
-- Enforce encryption standards.
-- Coordinate key usage.
-- Support key rotation.
+- Apply governance-defined encryption standards during cryptographic operations.
+- Request and use approved key references from `28_RUNTIME-CONFIG/SECRETS-MANAGER.md`.
+- Support key-rotation compatibility by accepting current approved key references and rejecting expired or revoked references.
 - Record cryptographic operations.
 - Preserve cryptographic compliance.
 
@@ -53,12 +53,13 @@ The Encryption Manager processes:
 2. Verify requesting identity via `24_SECURITY/AUTHENTICATION-MANAGER.md`.
 3. Confirm authorization via `24_SECURITY/AUTHORIZATION-MANAGER.md`.
 4. Validate governance requirements against `24_SECURITY/SECURITY-GOVERNANCE.md`.
-5. Select approved cryptographic algorithm.
-6. Perform requested operation.
-7. Verify operation integrity.
-8. Record audit information.
-9. Notify `24_SECURITY/SECURITY-MONITOR.md`.
-10. Publish operation status.
+5. Select an algorithm approved by governance-defined cryptographic standards.
+6. Request the approved key reference from `28_RUNTIME-CONFIG/SECRETS-MANAGER.md` when the operation requires one.
+7. Perform the requested cryptographic operation.
+8. Verify operation integrity.
+9. Record operation evidence without storing keys or plaintext.
+10. Notify `24_SECURITY/SECURITY-MONITOR.md`.
+11. Publish operation status.
 
 ---
 
@@ -80,7 +81,7 @@ The Encryption Manager supports:
 
 ## Cryptographic Standards
 
-The Encryption Manager enforces:
+The Encryption Manager applies governance-defined standards for:
 
 - Approved encryption algorithms
 - Approved hashing algorithms
@@ -96,14 +97,14 @@ Specific algorithms are defined by platform security policy (`24_SECURITY/SECURI
 
 ## Key Usage Rules
 
-The Encryption Manager ensures:
+The Encryption Manager ensures during cryptographic operations that:
 
 - Keys are used only for approved purposes.
-- Keys remain protected in `28_RUNTIME-CONFIG/SECRETS-MANAGER.md` rather than held by this component.
+- Keys remain protected in `28_RUNTIME-CONFIG/SECRETS-MANAGER.md` rather than held, stored, rotated, or revoked by this component.
 - Expired keys are rejected.
 - Revoked keys cannot be used.
-- Rotation schedules are respected.
-- Key usage remains auditable.
+- Current key references produced by rotation are accepted when approved by `28_RUNTIME-CONFIG/SECRETS-MANAGER.md`.
+- Key usage evidence remains auditable without exposing key material.
 
 ---
 
@@ -116,6 +117,7 @@ The Encryption Manager must never:
 - Ignore authorization requirements.
 - Perform unauthorized decryption.
 - Bypass governance.
+- Rotate, revoke, persist, or lifecycle-manage keys directly.
 - Store plaintext sensitive data unnecessarily.
 - Disable integrity verification.
 
@@ -168,9 +170,9 @@ The Encryption Manager succeeds when:
 
 ## Permission Boundary
 
-The Encryption Manager may perform approved cryptographic operations against verified, authorized requests.
+The Encryption Manager may perform approved cryptographic operations against verified, authorized requests using governance-defined standards and key references supplied by `28_RUNTIME-CONFIG/SECRETS-MANAGER.md`.
 
-It must not manage identity, authorize access, define security policy, or store secrets directly — those remain owned by `24_SECURITY/IDENTITY-MANAGER.md`, `24_SECURITY/AUTHORIZATION-MANAGER.md`, `24_SECURITY/SECURITY-GOVERNANCE.md`, and `28_RUNTIME-CONFIG/SECRETS-MANAGER.md` respectively.
+It must not manage identity, authorize access, define cryptographic or security policy, store secrets directly, or manage key lifecycle — those remain owned by `24_SECURITY/IDENTITY-MANAGER.md`, `24_SECURITY/AUTHORIZATION-MANAGER.md`, `24_SECURITY/SECURITY-GOVERNANCE.md`, and `28_RUNTIME-CONFIG/SECRETS-MANAGER.md` respectively.
 
 ---
 

@@ -5,28 +5,28 @@ Status: Stable
 Owner: Security Maintainers
 Depends On: `24_SECURITY/SECURITY-GOVERNANCE.md`, `26_INTEGRATIONS`, `37_STORAGE`, `27_OBSERVABILITY`
 Used By: `24_SECURITY/INCIDENT-MANAGER.md`, `24_SECURITY/SECURITY-MONITOR.md`, `24_SECURITY/SECURITY-MANAGER.md`
-Last Updated: 2026-07-06
+Last Updated: 2026-07-07
 
 ## Purpose
 
-The Threat Detector continuously analyzes platform activity to identify suspicious, malicious, or anomalous behavior that could threaten the confidentiality, integrity, or availability of SquirrelForge. It evaluates security events, behavioral patterns, operational anomalies, and policy violations to provide early detection and timely response.
+The Threat Detector analyzes security-domain signals, telemetry references, event evidence, behavioral patterns, and threat indicators to identify suspicious, malicious, or anomalous behavior that could threaten the confidentiality, integrity, or availability of SquirrelForge.
 
-The Threat Detector detects and reports threats only. It does not execute remediation actions or modify system behavior — confirmed threats are handed to `24_SECURITY/INCIDENT-MANAGER.md` for response coordination.
+The Threat Detector detects, correlates evidence, classifies threat severity, and reports threat assessments only. It does not own general monitoring or telemetry collection, execute remediation actions, modify system behavior, classify incidents, or coordinate incident response — confirmed or suspected threats are handed to `24_SECURITY/INCIDENT-MANAGER.md` for incident intake. It is distinct from `24_SECURITY/VULNERABILITY-MANAGEMENT.md`, which tracks static weaknesses through their remediation lifecycle rather than detecting active runtime exploitation or anomalous behavior.
 
 ---
 
 ## Responsibilities
 
-- Monitor security events.
+- Consume security events and observability signal references.
 - Detect suspicious activity.
 - Identify behavioral anomalies.
 - Evaluate threat indicators.
 - Correlate related security events.
 - Classify detected threats.
-- Generate security alerts.
-- Support incident response.
-- Record threat activity.
-- Preserve threat intelligence history.
+- Generate threat assessments and threat findings.
+- Notify incident-response owners when threat evidence warrants incident intake.
+- Maintain threat-domain records and evidence references.
+- Preserve threat intelligence references through owning storage or observability infrastructure.
 
 ---
 
@@ -36,7 +36,7 @@ The Threat Detector analyzes data from:
 
 - Authentication events (`24_SECURITY/AUTHENTICATION-MANAGER.md`)
 - Authorization failures (`24_SECURITY/AUTHORIZATION-MANAGER.md`)
-- Policy violations (`24_SECURITY/SECURITY-GOVERNANCE.md`)
+- Policy-violation findings from the component that performed policy evaluation
 - `26_INTEGRATIONS` (for example, suspicious API calls)
 - Workflow execution (`20_EXECUTION`)
 - Agent behavior (`16_AGENTS`)
@@ -55,8 +55,8 @@ The Threat Detector analyzes data from:
 5. Evaluate threat indicators.
 6. Classify threat severity.
 7. Generate threat assessment.
-8. Notify `24_SECURITY/INCIDENT-MANAGER.md`.
-9. Record audit information.
+8. Notify `24_SECURITY/INCIDENT-MANAGER.md` when incident intake is warranted.
+9. Record threat-domain evidence references and request observability/audit recording through owning infrastructure.
 10. Publish threat status.
 
 ---
@@ -89,7 +89,7 @@ Each detected threat is classified as:
 - High
 - Critical
 
-Severity determines escalation priority but does not automatically trigger remediation.
+Threat severity informs routing and incident intake priority, but it is not incident classification and does not automatically trigger remediation or response.
 
 ---
 
@@ -116,8 +116,10 @@ The Threat Detector must never:
 - Suppress critical threat alerts.
 - Modify production systems.
 - Execute remediation actions.
+- Classify incidents or coordinate incident response.
+- Own general monitoring, telemetry, logging, storage, or audit infrastructure.
 - Bypass governance policies.
-- Remove audit records.
+- Remove audit, observability, or threat records.
 
 ---
 
@@ -128,15 +130,15 @@ If threat detection fails:
 - Record the detection failure.
 - Preserve available event data.
 - Notify `24_SECURITY/SECURITY-MONITOR.md`.
-- Escalate persistent failures.
-- Continue monitoring unaffected sources.
-- Maintain audit continuity.
+- Escalate persistent failures to `24_SECURITY/SECURITY-MANAGER.md` for routing and `24_SECURITY/SECURITY-GOVERNANCE.md` when governance disposition is required.
+- Continue analyzing available signal sources.
+- Maintain threat-record continuity and request observability recording through owning infrastructure.
 
 ---
 
-## Audit Requirements
+## Threat Record
 
-Every detection operation records:
+Every threat-domain record includes:
 
 - Threat analysis ID
 - Timestamp
@@ -145,8 +147,10 @@ Every detection operation records:
 - Severity level
 - Detection method
 - Supporting evidence
-- Escalation status
+- Incident intake reference, when handed to `24_SECURITY/INCIDENT-MANAGER.md`
 - Final outcome
+
+Threat records preserve evidence references. General logs, metrics, traces, dashboards, alerts, and audit infrastructure remain owned by `27_OBSERVABILITY`.
 
 ---
 
@@ -158,19 +162,19 @@ The Threat Detector succeeds when:
 - Security threats are identified promptly.
 - Threat classifications are evidence-based.
 - Anomalous behavior is accurately identified.
-- Alerts are generated accurately.
+- Threat findings are generated accurately.
 - Incident response receives timely notification.
-- Audit history is complete.
-- Potential threats are escalated promptly.
-- Platform security remains continuously observable.
+- Threat-domain history is complete.
+- Potential threats are routed promptly.
+- Platform security signals remain available through owning observability components.
 
 ---
 
 ## Permission Boundary
 
-The Threat Detector may observe, correlate, classify, and report on security events and behavioral anomalies across the platform.
+The Threat Detector may consume security signals and observability references, correlate threat evidence, classify threat severity, report threat assessments, and maintain threat-domain records.
 
-It must not execute remediation, modify production systems, or coordinate incident response mechanics itself — those remain owned by `24_SECURITY/INCIDENT-MANAGER.md`.
+It must not own general monitoring or telemetry collection, execute remediation, modify production systems, classify incidents, coordinate incident response mechanics, or own general audit/storage infrastructure — those remain owned by `27_OBSERVABILITY`, remediation owners, execution owners, `24_SECURITY/INCIDENT-MANAGER.md`, and `37_STORAGE` as applicable. It must not track or prioritize static vulnerabilities through a remediation lifecycle — that remains owned by `24_SECURITY/VULNERABILITY-MANAGEMENT.md`.
 
 ---
 
@@ -182,4 +186,4 @@ Threat detection applies identically regardless of domain; domain-specific threa
 
 ## Rule
 
-Every confirmed threat, regardless of severity, must be reported to `24_SECURITY/INCIDENT-MANAGER.md`; the Threat Detector never decides remediation on its own authority.
+Every confirmed or suspected threat that may require response must be reported to `24_SECURITY/INCIDENT-MANAGER.md` for incident intake. The Threat Detector classifies threat severity only; it never decides incident classification, response, remediation, or recovery on its own authority.

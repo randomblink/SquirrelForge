@@ -5,13 +5,13 @@ Status: Stable
 Owner: Security Maintainers
 Depends On: `24_SECURITY/THREAT-DETECTOR.md`, `24_SECURITY/SECURITY-MONITOR.md`, `23_GOVERNANCE/POLICY-ENGINE.md`
 Used By: `24_SECURITY/SECURITY-MANAGER.md`, `24_SECURITY/SECURITY-GOVERNANCE.md`
-Last Updated: 2026-07-06
+Last Updated: 2026-07-07
 
 ## Purpose
 
-The Incident Manager coordinates the response to confirmed or suspected security incidents within SquirrelForge. It manages investigation, containment, recovery, communication, evidence preservation, and post-incident analysis while ensuring that all actions comply with governance, security policies, and audit requirements.
+The Incident Manager coordinates the response to confirmed or suspected security incidents within SquirrelForge. It owns security-incident intake, incident classification, response coordination, incident-record lifecycle, incident communications, evidence-reference handling, and post-incident review while ensuring that coordinated actions comply with governance, security policies, and audit requirements.
 
-The Incident Manager coordinates security-incident response only. It does not detect threats (owned by `24_SECURITY/THREAT-DETECTOR.md`), define security policies (owned by `24_SECURITY/SECURITY-GOVERNANCE.md`), or perform generic workflow failure recovery (owned by `17_COORDINATION/FAILURE-RECOVERY.md` and `20_EXECUTION/ROLLBACK-MANAGER.md`) — its recovery coordination is scoped specifically to security incidents.
+The Incident Manager coordinates security-incident response only. It does not detect or classify threats (owned by `24_SECURITY/THREAT-DETECTOR.md`), define security policies or approve exceptions (owned by `24_SECURITY/SECURITY-GOVERNANCE.md`), execute recovery, rollback, remediation, or workflow failure handling directly (owned by `17_COORDINATION/FAILURE-RECOVERY.md`, `20_EXECUTION/FAILURE-HANDLER.md`, `20_EXECUTION/ROLLBACK-MANAGER.md`, and the assigned remediation owner), validate recovery itself (owned by `14_ENGINE/VALIDATION.md` and the validating specialist), own authoritative workflow/task state (owned by `14_ENGINE/STATE-MANAGER.md`), or own general observability/audit infrastructure (owned by `27_OBSERVABILITY`).
 
 ---
 
@@ -20,19 +20,19 @@ The Incident Manager coordinates security-incident response only. It does not de
 - Receive incident notifications.
 - Classify security incidents.
 - Coordinate incident investigation.
-- Initiate containment procedures.
-- Support evidence preservation.
-- Coordinate recovery activities.
+- Coordinate authorized containment actions.
+- Coordinate evidence preservation requests.
+- Coordinate authorized security-specific recovery requests.
 - Manage incident communications.
-- Record incident history.
+- Maintain the incident-domain record lifecycle.
 - Conduct post-incident reviews.
-- Maintain incident audit records.
+- Attach validation, recovery, observability, and audit evidence references from owning components.
 
 ---
 
 ## Incident Sources
 
-The Incident Manager is activated by escalated alerts from:
+The Incident Manager is activated by incident notifications, escalated alerts, or incident candidates from:
 
 - `24_SECURITY/THREAT-DETECTOR.md`
 - `24_SECURITY/SECURITY-MONITOR.md`
@@ -51,14 +51,15 @@ The Incident Manager is activated by escalated alerts from:
 
 1. Receive incident notification.
 2. Verify incident authenticity.
-3. Classify incident severity.
-4. Initiate investigation.
-5. Coordinate containment actions.
-6. Preserve evidence.
-7. Support recovery procedures.
-8. Conduct post-incident review.
-9. Record audit information.
-10. Publish incident status.
+3. Attach any threat assessment supplied by `24_SECURITY/THREAT-DETECTOR.md`.
+4. Classify the security incident independently from the threat assessment.
+5. Open or update the incident-domain record.
+6. Coordinate investigation and evidence-preservation requests.
+7. Coordinate only authorized containment, recovery, rollback, or remediation requests through the owning components.
+8. Attach validation evidence supplied by `14_ENGINE/VALIDATION.md`, testing, execution, recovery, or specialist owners.
+9. Conduct post-incident review.
+10. Request observability, audit, and reporting records through the owning infrastructure.
+11. Publish incident-domain status.
 
 ---
 
@@ -91,6 +92,8 @@ Incidents are classified as:
 
 Severity determines escalation, communication, and response priorities.
 
+Threat severity from `24_SECURITY/THREAT-DETECTOR.md` is an input to incident intake. It is not the same as incident classification. The Incident Manager classifies the incident after reviewing threat evidence, affected assets, operational impact, containment status, and governance requirements.
+
 ---
 
 ## Response Activities
@@ -98,11 +101,12 @@ Severity determines escalation, communication, and response priorities.
 The Incident Manager coordinates:
 
 - Investigation
-- Containment
-- Eradication
-- Recovery
-- Verification
-- Documentation
+- Authorized containment
+- Authorized eradication or remediation requests
+- Authorized security-specific recovery coordination
+- Evidence-reference preservation
+- Validation evidence attachment
+- Incident-domain documentation
 - Lessons learned
 - Preventive recommendations
 
@@ -116,8 +120,10 @@ The Incident Manager must never:
 - Ignore verified incidents.
 - Override governance policies.
 - Conceal security events.
-- Remove audit records.
-- Perform unauthorized recovery actions.
+- Remove audit, observability, state, validation, or incident records.
+- Execute recovery, rollback, remediation, or workflow failure handling directly.
+- Perform unauthorized containment or recovery actions.
+- Treat incident status as authoritative workflow/task state.
 
 ---
 
@@ -126,28 +132,32 @@ The Incident Manager must never:
 If incident response fails:
 
 - Preserve all available evidence.
-- Record the failure.
-- Notify `24_SECURITY/SECURITY-MONITOR.md`.
+- Preserve incident-domain state and correlation references.
+- Request failure recording through `24_SECURITY/SECURITY-MONITOR.md` and `27_OBSERVABILITY`.
 - Escalate unresolved incidents.
-- Continue containment where possible.
-- Maintain audit continuity.
+- Coordinate additional containment only when authorized by the owning component or governance decision.
+- Maintain incident-record continuity.
 
 ---
 
-## Audit Requirements
+## Incident Record
 
-Every incident response records:
+Every incident-domain record should include:
 
 - Incident ID
 - Timestamp
 - Incident category
 - Severity level
-- Detection source
+- Threat assessment reference, when supplied by `24_SECURITY/THREAT-DETECTOR.md`
+- Detection or notification source
 - Investigation status
-- Containment actions
-- Recovery status
+- Authorized containment references
+- Authorized recovery, rollback, or remediation references
+- Validation evidence references
 - Final resolution
 - Post-incident review reference
+
+The Incident Manager owns the incident-domain record lifecycle. It may request logging, audit, metrics, tracing, dashboard, alerting, or archival through the owning observability and storage infrastructure, but it must not replace that infrastructure.
 
 ---
 
@@ -156,20 +166,20 @@ Every incident response records:
 The Incident Manager succeeds when:
 
 - Incidents are investigated promptly.
-- Containment actions are coordinated effectively.
-- Evidence is preserved.
-- Recovery is validated.
+- Authorized containment actions are coordinated effectively.
+- Evidence references are preserved and traceable.
+- Recovery validation evidence is attached from the owning validation or recovery component.
 - Lessons learned are documented.
-- Audit history is complete.
-- Security incidents remain fully traceable throughout their lifecycle.
+- Incident-domain history is complete.
+- Security incidents remain traceable throughout their incident lifecycle without replacing authoritative workflow/task state.
 
 ---
 
 ## Permission Boundary
 
-The Incident Manager may classify confirmed or suspected security incidents and coordinate investigation, containment, security-specific recovery, and post-incident review.
+The Incident Manager may receive security-incident notifications, classify incidents, coordinate investigation, coordinate authorized containment and security-specific recovery requests, maintain incident-domain records, attach validation and evidence references, manage incident communications, and conduct post-incident review.
 
-It must not detect threats itself, define security policy, or perform generic (non-security) workflow failure recovery — those remain owned by `24_SECURITY/THREAT-DETECTOR.md`, `24_SECURITY/SECURITY-GOVERNANCE.md`, and `17_COORDINATION/FAILURE-RECOVERY.md`/`20_EXECUTION/ROLLBACK-MANAGER.md` respectively.
+It must not detect or classify threats itself, define security policy, approve exceptions, execute recovery, perform rollback, remediate vulnerabilities, handle generic workflow failure recovery, independently validate recovery, own authoritative workflow/task state, or own general observability/audit infrastructure — those remain owned by `24_SECURITY/THREAT-DETECTOR.md`, `24_SECURITY/SECURITY-GOVERNANCE.md`, `17_COORDINATION/FAILURE-RECOVERY.md`, `20_EXECUTION/FAILURE-HANDLER.md`, `20_EXECUTION/ROLLBACK-MANAGER.md`, assigned remediation owners, `14_ENGINE/VALIDATION.md`, `14_ENGINE/STATE-MANAGER.md`, and `27_OBSERVABILITY` respectively.
 
 ---
 
@@ -181,4 +191,4 @@ Incident response coordination applies identically regardless of domain; domain-
 
 ## Rule
 
-Every confirmed security incident must be tracked from notification to post-incident review; no incident may be closed without a recorded resolution and audit trail.
+Every confirmed security incident must be tracked in an incident-domain record from notification to post-incident review. No incident may be closed without a recorded resolution, required owner evidence references, and any required validation or governance disposition.

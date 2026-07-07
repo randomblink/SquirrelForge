@@ -5,7 +5,7 @@ Status: Stable
 Owner: Security Maintainers
 Depends On: `24_SECURITY/IDENTITY-MANAGER.md`, `24_SECURITY/SECURITY-GOVERNANCE.md`, `28_RUNTIME-CONFIG/SECRETS-MANAGER.md`
 Used By: `24_SECURITY/AUTHORIZATION-MANAGER.md`, `24_SECURITY/ENCRYPTION-MANAGER.md`, `24_SECURITY/SECURITY-MANAGER.md`
-Last Updated: 2026-07-06
+Last Updated: 2026-07-07
 
 ## Purpose
 
@@ -34,7 +34,7 @@ The Authentication Manager performs credential verification and session/token is
 2. The Authentication Manager retrieves the actor's identity record from `24_SECURITY/IDENTITY-MANAGER.md` and confirms it is Active.
 3. It securely hashes and compares the provided credentials against the authoritative credential store (`28_RUNTIME-CONFIG/SECRETS-MANAGER.md`).
 4. If MFA is required by `24_SECURITY/SECURITY-GOVERNANCE.md` policy, it initiates and validates the second-factor challenge.
-5. Upon successful verification, it creates a session and issues a short-lived access token containing the actor's identity and roles.
+5. Upon successful verification, it creates a session and issues a short-lived access token containing authentication claims such as identity and role claims for downstream authorization evaluation.
 6. The authentication attempt, including its outcome, source IP, and identity ID, is logged to `24_SECURITY/SECURITY-MONITOR.md`.
 7. The access token is returned to the actor for use in subsequent requests.
 
@@ -47,9 +47,10 @@ The Authentication Manager performs credential verification and session/token is
 | Password | User | Hashed and salted passwords for human users. |
 | API Key | Agent / System | Long-lived, revocable keys for programmatic access. |
 | Client Certificate | System | mTLS certificates for service-to-service authentication. |
-| Access Token | All | Short-lived tokens (e.g., JWT) issued after initial authentication. |
 
 Which credential types apply to a given actor is determined by that actor's identity record in `24_SECURITY/IDENTITY-MANAGER.md`.
+
+Access tokens are issued authentication artifacts, not automatic authorization. Token and role claims are inputs to `24_SECURITY/AUTHORIZATION-MANAGER.md`.
 
 ---
 

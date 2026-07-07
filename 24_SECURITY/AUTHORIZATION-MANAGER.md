@@ -5,23 +5,24 @@ Status: Stable
 Owner: Security Maintainers
 Depends On: `24_SECURITY/AUTHENTICATION-MANAGER.md`, `24_SECURITY/SECURITY-GOVERNANCE.md`, `21_CONFIGURATION/PERMISSIONS.md`, `23_GOVERNANCE/POLICY-ENGINE.md`
 Used By: `24_SECURITY/SECURITY-MANAGER.md`, `24_SECURITY/SECURITY-MONITOR.md`
-Last Updated: 2026-07-06
+Last Updated: 2026-07-07
 
 ## Purpose
 
-The Authorization Manager determines whether an already-authenticated identity is permitted to perform a requested operation within SquirrelForge. It enforces role-based, attribute-based, and policy-driven access controls to ensure that every action complies with security, governance, and operational requirements.
+The Authorization Manager determines whether an already-authenticated identity is permitted to perform a requested operation within SquirrelForge. It issues runtime grant/deny decisions using identity status, token claims, role assignments, permission declarations, policy results, resource context, and governance references.
 
-The Authorization Manager grants or denies access only. It does not authenticate identities (owned by `24_SECURITY/AUTHENTICATION-MANAGER.md`), define security policy (owned by `24_SECURITY/SECURITY-GOVERNANCE.md`), or own declarative tool/configuration permission policy (owned by `21_CONFIGURATION/PERMISSIONS.md`, a configuration-scoped model distinct from this component's runtime access decisions).
+The Authorization Manager grants or denies access only. It does not authenticate identities (owned by `24_SECURITY/AUTHENTICATION-MANAGER.md`), treat token or role claims as automatic authorization, define security policy (owned by `24_SECURITY/SECURITY-GOVERNANCE.md`), evaluate general policy independently (owned by `23_GOVERNANCE/POLICY-ENGINE.md`), or own declarative tool/configuration permission policy (owned by `21_CONFIGURATION/PERMISSIONS.md`, a configuration-scoped model distinct from this component's runtime access decisions).
 
 ---
 
 ## Responsibilities
 
 - Evaluate authorization requests.
-- Enforce access control policies.
-- Verify assigned roles.
-- Evaluate permissions.
-- Apply attribute-based rules.
+- Issue runtime authorization decisions.
+- Enforce the resulting authorization decision.
+- Read assigned roles and token claims as inputs.
+- Evaluate permission declarations as runtime inputs.
+- Apply authorized attribute/context checks.
 - Support least-privilege access.
 - Deny unauthorized operations.
 - Record authorization decisions.
@@ -32,15 +33,16 @@ The Authorization Manager grants or denies access only. It does not authenticate
 
 ## Authorization Inputs
 
-The Authorization Manager evaluates:
+The Authorization Manager uses:
 
 - Authenticated identities (verified by `24_SECURITY/AUTHENTICATION-MANAGER.md`)
+- Token claims as authentication assertions only
 - Requested operations
 - Target resources
 - Assigned roles
 - Permission assignments (from `21_CONFIGURATION/PERMISSIONS.md`)
 - Security policies (from `24_SECURITY/SECURITY-GOVERNANCE.md`)
-- Governance rules (from `23_GOVERNANCE/POLICY-ENGINE.md`)
+- Policy evaluation results or governance rules (from `23_GOVERNANCE/POLICY-ENGINE.md`)
 - Operational context
 - Resource classifications
 - Environmental conditions
@@ -53,11 +55,11 @@ The Authorization Manager evaluates:
 2. Verify authenticated identity via `24_SECURITY/AUTHENTICATION-MANAGER.md`.
 3. Identify requested operation.
 4. Determine target resource.
-5. Evaluate applicable policies.
+5. Read applicable policy evaluation results, security policy references, and permission declarations.
 6. Verify assigned permissions.
-7. Apply least-privilege rules.
+7. Apply least-privilege and authorized attribute/context checks.
 8. Issue authorization decision.
-9. Record audit information.
+9. Record authorization decision evidence.
 10. Notify `24_SECURITY/SECURITY-MONITOR.md`.
 
 ---
@@ -164,9 +166,9 @@ The Authorization Manager succeeds when:
 
 ## Permission Boundary
 
-The Authorization Manager may evaluate authorization requests and issue grant/deny decisions for authenticated identities against existing roles, permissions, and policy.
+The Authorization Manager may evaluate authorization requests and issue runtime grant/deny decisions for authenticated identities against existing identity status, token claims, roles, permission declarations, policy results, resource context, and governance references.
 
-It must not authenticate identities, define security policy, or own declarative configuration-scoped permission policy — those remain owned by `24_SECURITY/AUTHENTICATION-MANAGER.md`, `24_SECURITY/SECURITY-GOVERNANCE.md`, and `21_CONFIGURATION/PERMISSIONS.md` respectively.
+It must not authenticate identities, treat token or role claims as automatic authorization, define security policy, independently own general policy evaluation, or own declarative configuration-scoped permission policy — those remain owned by `24_SECURITY/AUTHENTICATION-MANAGER.md`, `24_SECURITY/SECURITY-GOVERNANCE.md`, `23_GOVERNANCE/POLICY-ENGINE.md`, and `21_CONFIGURATION/PERMISSIONS.md` respectively.
 
 ---
 

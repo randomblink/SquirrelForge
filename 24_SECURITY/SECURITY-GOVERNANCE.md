@@ -5,13 +5,13 @@ Status: Stable
 Owner: Security Maintainers
 Depends On: `23_GOVERNANCE`, `01_RULES`
 Used By: `24_SECURITY/SECURITY-MANAGER.md`, `24_SECURITY/SECURITY-MONITOR.md`, `24_SECURITY/IDENTITY-MANAGER.md`, `24_SECURITY/AUTHENTICATION-MANAGER.md`, `24_SECURITY/ENCRYPTION-MANAGER.md`, `28_RUNTIME-CONFIG/SECRETS-MANAGER.md`
-Last Updated: 2026-07-06
+Last Updated: 2026-07-07
 
 ## Purpose
 
-Security Governance establishes and enforces the security-specific policies, standards, compliance requirements, and risk management principles that govern security operations within SquirrelForge. It is the authoritative decision-making body for security approvals, exceptions, and risk acceptance.
+Security Governance defines security-domain policies, standards, compliance requirements, and risk-management principles for security operations within SquirrelForge. It is the authoritative decision-making body for security approvals, exceptions, and risk acceptance.
 
-Security Governance evaluates and authorizes security decisions. It does not directly execute security operations or modify protected resources — those remain owned by the specialist components it governs (`24_SECURITY/IDENTITY-MANAGER.md`, `24_SECURITY/AUTHENTICATION-MANAGER.md`, `24_SECURITY/AUTHORIZATION-MANAGER.md`, `24_SECURITY/ENCRYPTION-MANAGER.md`, and others). It specializes platform-wide governance for the security domain; it does not replace or override the general policy authority `23_GOVERNANCE` and `01_RULES` already establish.
+Security Governance reviews supplied security evidence and issues security-domain governance decisions. It does not perform general policy evaluation, produce independent risk assessments, make ordinary runtime authorization decisions, enforce controls operationally, execute security operations, or modify protected resources. Those remain owned by `23_GOVERNANCE/POLICY-ENGINE.md`, `19_REASONING/RISK-ASSESSOR.md`, `24_SECURITY/AUTHORIZATION-MANAGER.md`, the specialist security components, and execution owners as applicable.
 
 ---
 
@@ -19,9 +19,9 @@ Security Governance evaluates and authorizes security decisions. It does not dir
 
 - Define security governance policies.
 - Review security proposals.
-- Evaluate security risks.
+- Review supplied risk assessments for security governance decisions.
 - Approve or reject security exceptions.
-- Enforce compliance requirements, in coordination with `24_SECURITY/COMPLIANCE.md`.
+- Record compliance-governance decisions using findings from `24_SECURITY/COMPLIANCE.md`.
 - Manage security standards.
 - Coordinate policy revisions.
 - Maintain governance records.
@@ -32,11 +32,11 @@ Security Governance evaluates and authorizes security decisions. It does not dir
 
 ## Governance Inputs
 
-Security Governance evaluates:
+Security Governance reviews:
 
 - Security policy proposals
 - Authorization exceptions
-- Risk assessments
+- Risk assessments from the responsible risk or security owner
 - Incident reports (from `24_SECURITY/INCIDENT-MANAGER.md`)
 - Threat assessments (from `24_SECURITY/THREAT-DETECTOR.md`)
 - Compliance reviews (from `24_SECURITY/COMPLIANCE.md`)
@@ -52,7 +52,7 @@ Security Governance evaluates:
 1. Receive governance request.
 2. Verify request completeness.
 3. Review applicable security policies.
-4. Evaluate identified risks.
+4. Review supplied risk assessments and security evidence.
 5. Confirm compliance obligations.
 6. Assess operational impact.
 7. Issue governance decision.
@@ -79,7 +79,7 @@ Every decision must include documented justification and supporting evidence.
 
 ## Evaluation Criteria
 
-Security Governance evaluates:
+Security Governance reviews:
 
 - Security impact
 - Risk level
@@ -92,17 +92,18 @@ Security Governance evaluates:
 
 ---
 
-## Policy Enforcement
+## Governance Decision Scope
 
-Security Governance ensures:
+Security Governance records decisions that confirm:
 
-- Security standards are consistently applied.
 - Risk acceptance is formally documented.
 - Compliance obligations are satisfied.
 - Exceptions receive documented approval.
 - Governance decisions remain traceable.
 - Security policies remain current.
-- Platform-wide security consistency is maintained.
+- Required evidence, conditions, and limitations are identified.
+
+Operational enforcement belongs to the component executing the relevant control, not Security Governance.
 
 ---
 
@@ -114,7 +115,7 @@ Security Governance must never:
 - Ignore critical security risks.
 - Bypass compliance requirements.
 - Override mandatory security controls.
-- Remove audit records.
+- Remove governance records or audit references.
 - Permit undocumented governance decisions.
 
 ---
@@ -159,15 +160,15 @@ Security Governance succeeds when:
 - Compliance obligations are satisfied.
 - Governance history remains complete.
 - Unauthorized security exceptions are prevented.
-- Security governance remains transparent, auditable, and platform-wide.
+- Security governance remains transparent, traceable, and scoped to the security domain.
 
 ---
 
 ## Permission Boundary
 
-Security Governance may define security-specific policy, evaluate risk, and issue approvals, exceptions, and risk-acceptance decisions.
+Security Governance may define security-domain policy, review supplied security evidence and risk assessments, and issue approvals, exceptions, and risk-acceptance decisions.
 
-It must not execute security operations directly (owned by the specialist components it governs), and it must not override platform-wide governance policy that `23_GOVERNANCE` and `01_RULES` already establish — it specializes that policy for the security domain.
+It must not execute security operations directly, perform general policy evaluation, produce independent risk assessments, make ordinary runtime authorization decisions, enforce controls operationally, or override platform-wide governance policy that `23_GOVERNANCE` and `01_RULES` already establish.
 
 ---
 
@@ -179,4 +180,4 @@ Security governance principles apply identically regardless of domain; domain-sp
 
 ## Rule
 
-Every system-wide security policy must be registered in Security Governance and distributed via `24_SECURITY/SECURITY-MANAGER.md` to ensure consistent application and enforcement across all security components.
+Every security-domain policy, exception, approval, or risk-acceptance decision must be recorded in Security Governance and referenced by the affected security components. Security Governance defines and decides; operational components apply controls and report evidence through their own authority.

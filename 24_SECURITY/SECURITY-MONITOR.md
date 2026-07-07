@@ -3,15 +3,15 @@
 Version: 1.0.0
 Status: Stable
 Owner: Security Maintainers
-Depends On: `27_OBSERVABILITY`, `24_SECURITY/SECURITY-MANAGER.md`, `24_SECURITY/IDENTITY-MANAGER.md`, `24_SECURITY/AUTHENTICATION-MANAGER.md`, `24_SECURITY/AUTHORIZATION-MANAGER.md`, `24_SECURITY/ENCRYPTION-MANAGER.md`, `24_SECURITY/THREAT-DETECTOR.md`, `24_SECURITY/INCIDENT-MANAGER.md`, `24_SECURITY/SECURITY-GOVERNANCE.md`, `28_RUNTIME-CONFIG/SECRETS-MANAGER.md`, `23_GOVERNANCE/POLICY-ENGINE.md`
-Used By: `24_SECURITY/SECURITY-MANAGER.md`, `24_SECURITY/SECURITY-GOVERNANCE.md`
-Last Updated: 2026-07-06
+Depends On: `27_OBSERVABILITY`, `24_SECURITY/SECURITY-MANAGER.md`, `24_SECURITY/IDENTITY-MANAGER.md`, `24_SECURITY/AUTHENTICATION-MANAGER.md`, `24_SECURITY/AUTHORIZATION-MANAGER.md`, `24_SECURITY/ENCRYPTION-MANAGER.md`, `24_SECURITY/THREAT-DETECTOR.md`, `24_SECURITY/INCIDENT-MANAGER.md`, `24_SECURITY/SECURITY-GOVERNANCE.md`, `24_SECURITY/COMPLIANCE.md`, `24_SECURITY/VULNERABILITY-MANAGEMENT.md`, `28_RUNTIME-CONFIG/SECRETS-MANAGER.md`, `23_GOVERNANCE/POLICY-ENGINE.md`
+Used By: `24_SECURITY/SECURITY-MANAGER.md`, `24_SECURITY/SECURITY-GOVERNANCE.md`, `24_SECURITY/INCIDENT-MANAGER.md`
+Last Updated: 2026-07-07
 
 ## Purpose
 
-The Security Monitor provides continuous oversight of all Security Layer activities. It monitors authentication, authorization, identity management, secrets usage, encryption operations, policy enforcement, threat detection, incident response, governance compliance, and the overall security posture of SquirrelForge.
+The Security Monitor provides continuous observability of all Security Layer activity. It observes authentication, authorization, identity management, secrets usage, encryption operations, threat detection, incident response, and the overall security posture of SquirrelForge, and aggregates compliance status reported by `24_SECURITY/COMPLIANCE.md` and vulnerability status reported by `24_SECURITY/VULNERABILITY-MANAGEMENT.md` into platform-wide security reporting.
 
-The Security Monitor observes, analyzes, and reports. It does not execute security operations, override governance decisions, or modify protected resources — those remain owned by the specialist components it observes.
+The Security Monitor observes, aggregates, and reports. It does not execute security operations, define or evaluate policy, independently verify compliance, remediate vulnerabilities, or override governance decisions — those remain owned by the specialist components it observes. It specializes `27_OBSERVABILITY`'s general telemetry into security-domain reporting; it does not own general logging, metrics, tracing, or dashboard infrastructure itself.
 
 ---
 
@@ -21,7 +21,8 @@ The Security Monitor observes, analyzes, and reports. It does not execute securi
 - Track security operations.
 - Measure security performance.
 - Detect operational anomalies.
-- Verify governance compliance.
+- Aggregate compliance status reported by `24_SECURITY/COMPLIANCE.md`.
+- Aggregate vulnerability status reported by `24_SECURITY/VULNERABILITY-MANAGEMENT.md`.
 - Generate alerts and reports.
 - Support security auditing.
 - Maintain historical security metrics.
@@ -44,6 +45,8 @@ The Security Monitor oversees:
 - `24_SECURITY/THREAT-DETECTOR.md`
 - `24_SECURITY/INCIDENT-MANAGER.md`
 - `24_SECURITY/SECURITY-GOVERNANCE.md`
+- `24_SECURITY/COMPLIANCE.md`
+- `24_SECURITY/VULNERABILITY-MANAGEMENT.md`
 - Cross-layer security events
 
 ---
@@ -54,7 +57,7 @@ The Security Monitor oversees:
 2. Collect security metrics.
 3. Monitor component health.
 4. Detect anomalies.
-5. Verify policy compliance.
+5. Aggregate compliance status from `24_SECURITY/COMPLIANCE.md` and vulnerability status from `24_SECURITY/VULNERABILITY-MANAGEMENT.md`.
 6. Generate security alerts.
 7. Produce monitoring reports.
 8. Archive monitoring history.
@@ -78,6 +81,8 @@ The Security Monitor tracks:
 - Threat detection frequency
 - Incident response time
 - Governance approval rate
+- Compliance status (sourced from `24_SECURITY/COMPLIANCE.md`)
+- Vulnerability remediation status (sourced from `24_SECURITY/VULNERABILITY-MANAGEMENT.md`)
 - Security audit completeness
 - Security policy violations
 - Overall security posture
@@ -96,6 +101,8 @@ Alerts are generated when:
 - Threat severity exceeds defined limits.
 - Incident response is delayed.
 - Governance workflows stall.
+- Compliance status regresses to Non-Compliant.
+- Critical vulnerabilities remain unremediated past defined thresholds.
 - Security monitoring components become unavailable.
 - Security posture falls below acceptable thresholds.
 
@@ -109,7 +116,8 @@ The Security Monitor produces:
 - Health reports
 - Threat summaries
 - Alert notifications
-- Compliance reports
+- Compliance status summaries sourced from `24_SECURITY/COMPLIANCE.md`
+- Vulnerability status summaries sourced from `24_SECURITY/VULNERABILITY-MANAGEMENT.md`
 - Audit support reports
 - Historical monitoring records
 
@@ -127,6 +135,7 @@ The Security Monitor must never:
 - Alter audit records.
 - Expose sensitive security information.
 - Delete monitoring history.
+- Independently determine compliance status or vulnerability severity — those determinations remain owned by `24_SECURITY/COMPLIANCE.md` and `24_SECURITY/VULNERABILITY-MANAGEMENT.md` respectively.
 
 ---
 
@@ -166,7 +175,7 @@ The Security Monitor succeeds when:
 - All Security Layer components are continuously monitored.
 - Security issues are detected promptly.
 - Threats and anomalies are reported accurately.
-- Governance compliance is verified.
+- Compliance and vulnerability status are accurately aggregated and reported.
 - Monitoring history remains complete.
 - Historical metrics are preserved.
 - Platform security remains fully observable, auditable, and continuously protected.
@@ -175,9 +184,9 @@ The Security Monitor succeeds when:
 
 ## Permission Boundary
 
-The Security Monitor may observe, measure, detect, alert, and report on the security posture of every component it monitors.
+The Security Monitor may observe, measure, detect, alert, and report on the security posture of every component it monitors, including aggregating compliance status from `24_SECURITY/COMPLIANCE.md` and vulnerability status from `24_SECURITY/VULNERABILITY-MANAGEMENT.md`.
 
-It must not execute security operations, modify security policy, override authorization or governance decisions, or alter or delete audit and monitoring records — those remain owned by the components it observes.
+It must not execute security operations, modify security policy, independently verify compliance, remediate vulnerabilities, override authorization or governance decisions, or alter or delete audit and monitoring records — those remain owned by the components it observes. It must not own `27_OBSERVABILITY`'s general telemetry, logging, metrics, tracing, or dashboard infrastructure — it specializes that infrastructure into security-domain reporting.
 
 ---
 
@@ -189,4 +198,4 @@ Security monitoring applies identically regardless of domain; domain-specific se
 
 ## Rule
 
-Every Security Layer component must be observable by the Security Monitor; no component may operate outside its monitoring scope.
+Every Security Layer component, including `24_SECURITY/COMPLIANCE.md` and `24_SECURITY/VULNERABILITY-MANAGEMENT.md`, must be observable by the Security Monitor; no component may operate outside its monitoring scope.

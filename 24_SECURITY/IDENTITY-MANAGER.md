@@ -5,7 +5,7 @@ Status: Stable
 Owner: Security Maintainers
 Depends On: `24_SECURITY/SECURITY-GOVERNANCE.md`, `28_RUNTIME-CONFIG/SECRETS-MANAGER.md`
 Used By: `24_SECURITY/AUTHENTICATION-MANAGER.md`, `24_SECURITY/AUTHORIZATION-MANAGER.md`, `24_SECURITY/SECURITY-MANAGER.md`
-Last Updated: 2026-07-06
+Last Updated: 2026-07-07
 
 ## Purpose
 
@@ -72,7 +72,8 @@ The identity record tracks which of these credential types are associated with a
 | Password | User | Hashed and salted passwords for interactive logins. |
 | API Key | Agent, Service | Long-lived, revocable keys for programmatic access. |
 | Client Certificate | Service | mTLS certificates for secure service-to-service authentication. |
-| Access Token | All | Short-lived tokens (e.g., JWT) issued after successful authentication. |
+
+Access tokens are authentication artifacts issued by `24_SECURITY/AUTHENTICATION-MANAGER.md`, not identity-record credential-type references.
 
 ---
 
