@@ -37,12 +37,12 @@ An agent's decision is only as good as the knowledge it consults. The Knowledge 
 
 | Task | Knowledge Documents to Consult |
 | :--- | :--- |
-| **Build a new plugin** | `PLUGIN-HANDBOOK.md`, `CODING-STANDARDS.md`, `SECURITY.md`, `DATABASE.md` |
-| **Build a block theme** | `THEME-HANDBOOK.md`, `BLOCK-EDITOR.md`, `CODING-STANDARDS.md`, `ACCESSIBILITY.md` |
-| **Create a REST endpoint** | `REST-API.md`, `SECURITY.md`, `PERFORMANCE.md`, `CODING-STANDARDS.md` |
-| **Create a settings page** | `SETTINGS-API.md`, `SECURITY.md`, `CODING-STANDARDS.md`, `ACCESSIBILITY.md` |
-| **Create a WooCommerce extension** | `WOOCOMMERCE.md`, `PLUGIN-HANDBOOK.md`, `REST-API.md`, `SECURITY.md`, `DATABASE.md` |
-| **Add a custom taxonomy** | `TAXONOMIES.md`, `PLUGIN-HANDBOOK.md`, `CODING-STANDARDS.md` |
+| **Build a new plugin** | `PLUGIN-HANDBOOK.md`, `CODING-STANDARDS.md`, `SECURITY.md`, `38_WORDPRESS/KNOWLEDGE/DATABASE.md` |
+| **Build a block theme** | `38_WORDPRESS/KNOWLEDGE/THEME-HANDBOOK.md`, `BLOCK-EDITOR.md`, `CODING-STANDARDS.md`, `38_WORDPRESS/KNOWLEDGE/ACCESSIBILITY.md` |
+| **Create a REST endpoint** | `38_WORDPRESS/KNOWLEDGE/REST-API.md`, `SECURITY.md`, `PERFORMANCE.md`, `CODING-STANDARDS.md` |
+| **Create a settings page** | `SETTINGS-API.md`, `SECURITY.md`, `CODING-STANDARDS.md`, `38_WORDPRESS/KNOWLEDGE/ACCESSIBILITY.md` |
+| **Create a WooCommerce extension** | `WOOCOMMERCE.md`, `PLUGIN-HANDBOOK.md`, `38_WORDPRESS/KNOWLEDGE/REST-API.md`, `SECURITY.md`, `38_WORDPRESS/KNOWLEDGE/DATABASE.md` |
+| **Add a custom taxonomy** | `38_WORDPRESS/KNOWLEDGE/TAXONOMIES.md`, `PLUGIN-HANDBOOK.md`, `CODING-STANDARDS.md` |
 | **Create a shortcode** | `SHORTCODES.md`, `SECURITY.md`, `CODING-STANDARDS.md` |
 
 ---

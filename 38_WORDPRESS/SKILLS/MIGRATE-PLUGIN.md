@@ -39,7 +39,7 @@ Use the appropriate specialized Skill instead.
 
 Use:
 
-`32_WORDPRESS/SKILLS/REFACTOR-CODE.md`
+`38_WORDPRESS/SKILLS/REFACTOR-CODE.md`
 
 for behavior-preserving internal code restructuring.
 
@@ -698,7 +698,7 @@ Use `Project Architect` to define the high-level migration strategy and impact. 
 
 #### Stage 2 — Role Routing
 
-Use `Role Manager` and `ROLE-ROUTING-MATRIX.md` to produce the `WordPress Role Routing Decision`.
+Use `Role Manager` and `38_WORDPRESS/SKILLS/ROLE-ROUTING-MATRIX.md` to produce the `WordPress Role Routing Decision`.
 
 #### Stage 3 — Implementation
 

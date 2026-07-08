@@ -96,5 +96,5 @@ SquirrelForge must not create a block that renders unescaped dynamic content.
 Next file:
 
 ```text
-32_WORDPRESS/SKILLS/CREATE-WIDGET.md
+38_WORDPRESS/SKILLS/CREATE-WIDGET.md
 ```

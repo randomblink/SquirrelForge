@@ -69,19 +69,19 @@ The Skill Routing Map must coordinate with:
 
 | Skill | Primary Purpose |
 |---|---|
-| `CREATE-PLUGIN.md` | Create a new WordPress plugin or major plugin feature system. |
-| `CREATE-THEME.md` | Create a WordPress theme, child theme, block theme, classic theme, or hybrid theme. |
-| `CREATE-BLOCK.md` | Create a custom block or Block Editor extension. |
-| `CREATE-REST-ENDPOINT.md` | Create or modify a WordPress REST API endpoint. |
+| `38_WORDPRESS/SKILLS/CREATE-PLUGIN.md` | Create a new WordPress plugin or major plugin feature system. |
+| `38_WORDPRESS/SKILLS/CREATE-THEME.md` | Create a WordPress theme, child theme, block theme, classic theme, or hybrid theme. |
+| `38_WORDPRESS/SKILLS/CREATE-BLOCK.md` | Create a custom block or Block Editor extension. |
+| `38_WORDPRESS/SKILLS/CREATE-REST-ENDPOINT.md` | Create or modify a WordPress REST API endpoint. |
 | `CREATE-SHORTCODE.md` | Create a WordPress shortcode. |
-| `CREATE-WIDGET.md` | Create a WordPress widget or sidebar feature. |
+| `38_WORDPRESS/SKILLS/CREATE-WIDGET.md` | Create a WordPress widget or sidebar feature. |
 | `MIGRATE-PLUGIN.md` | Perform controlled plugin architecture, data, API, or compatibility migration. |
-| `REVIEW-CODE.md` | Inspect existing code and produce evidence-based findings. |
-| `REFACTOR-CODE.md` | Restructure code while preserving approved external behavior. |
-| `DEBUG-PLUGIN.md` | Diagnose and fix a reproducible plugin defect. |
-| `OPTIMIZE-PERFORMANCE.md` | Measure, identify, and improve confirmed performance bottlenecks. |
-| `CREATE-TESTS.md` | Design and implement meaningful regression protection. |
-| `WRITE-DOCUMENTATION.md` | Create or update documentation based on actual validated behavior. |
+| `38_WORDPRESS/SKILLS/REVIEW-CODE.md` | Inspect existing code and produce evidence-based findings. |
+| `38_WORDPRESS/SKILLS/REFACTOR-CODE.md` | Restructure code while preserving approved external behavior. |
+| `38_WORDPRESS/SKILLS/DEBUG-PLUGIN.md` | Diagnose and fix a reproducible plugin defect. |
+| `38_WORDPRESS/SKILLS/OPTIMIZE-PERFORMANCE.md` | Measure, identify, and improve confirmed performance bottlenecks. |
+| `38_WORDPRESS/SKILLS/CREATE-TESTS.md` | Design and implement meaningful regression protection. |
+| `38_WORDPRESS/SKILLS/WRITE-DOCUMENTATION.md` | Create or update documentation based on actual validated behavior. |
 
 ---
 
@@ -154,7 +154,7 @@ Supporting Skills execute bounded specialized workflows within that lifecycle.
 
 ### New Plugin
 
-If the user requests a new plugin or a new plugin-scale feature system, select `CREATE-PLUGIN.md`.
+If the user requests a new plugin or a new plugin-scale feature system, select `38_WORDPRESS/SKILLS/CREATE-PLUGIN.md`.
 
 Examples:
 
@@ -166,16 +166,16 @@ Examples:
 
 Supporting Skills may include:
 
-- `CREATE-BLOCK.md`
-- `CREATE-REST-ENDPOINT.md`
+- `38_WORDPRESS/SKILLS/CREATE-BLOCK.md`
+- `38_WORDPRESS/SKILLS/CREATE-REST-ENDPOINT.md`
 - `CREATE-SHORTCODE.md`
-- `CREATE-WIDGET.md`
-- `CREATE-TESTS.md`
-- `WRITE-DOCUMENTATION.md`
+- `38_WORDPRESS/SKILLS/CREATE-WIDGET.md`
+- `38_WORDPRESS/SKILLS/CREATE-TESTS.md`
+- `38_WORDPRESS/SKILLS/WRITE-DOCUMENTATION.md`
 
 ### New Theme
 
-If the user requests a complete theme, select `CREATE-THEME.md`.
+If the user requests a complete theme, select `38_WORDPRESS/SKILLS/CREATE-THEME.md`.
 
 Examples:
 
@@ -185,13 +185,13 @@ Examples:
 - create a child theme
 - convert an approved design system into a theme
 
-Supporting Skills may include `CREATE-BLOCK.md`, `CREATE-TESTS.md`, and `WRITE-DOCUMENTATION.md`.
+Supporting Skills may include `38_WORDPRESS/SKILLS/CREATE-BLOCK.md`, `38_WORDPRESS/SKILLS/CREATE-TESTS.md`, and `38_WORDPRESS/SKILLS/WRITE-DOCUMENTATION.md`.
 
 Persistent business functionality must not be placed in the theme merely because the theme request exposed the need.
 
 ### New Block
 
-If the primary deliverable is a custom block or Block Editor extension, select `CREATE-BLOCK.md`.
+If the primary deliverable is a custom block or Block Editor extension, select `38_WORDPRESS/SKILLS/CREATE-BLOCK.md`.
 
 If the block is one component of a larger plugin or theme project, the parent project Skill remains primary.
 
@@ -205,7 +205,7 @@ CREATE-BLOCK
 
 ### New REST Endpoint
 
-If the primary deliverable is a REST route or API contract, select `CREATE-REST-ENDPOINT.md`.
+If the primary deliverable is a REST route or API contract, select `38_WORDPRESS/SKILLS/CREATE-REST-ENDPOINT.md`.
 
 If REST work belongs to a larger plugin or block project, the parent Skill remains primary.
 
@@ -217,13 +217,13 @@ If the shortcode belongs to a larger plugin project, use `CREATE-PLUGIN` as prim
 
 ### New Widget
 
-If the primary deliverable is a widget or sidebar feature, select `CREATE-WIDGET.md`.
+If the primary deliverable is a widget or sidebar feature, select `38_WORDPRESS/SKILLS/CREATE-WIDGET.md`.
 
 If the widget belongs to a larger plugin or theme project, the parent project Skill remains primary.
 
 ### Existing Defect
 
-If the user reports broken behavior and wants it fixed, select `DEBUG-PLUGIN.md`.
+If the user reports broken behavior and wants it fixed, select `38_WORDPRESS/SKILLS/DEBUG-PLUGIN.md`.
 
 Examples:
 
@@ -238,7 +238,7 @@ The debugging workflow must confirm the cause before changing code.
 
 ### Code Inspection
 
-If the user wants findings, risks, or an assessment without implementation changes, select `REVIEW-CODE.md`.
+If the user wants findings, risks, or an assessment without implementation changes, select `38_WORDPRESS/SKILLS/REVIEW-CODE.md`.
 
 Examples:
 
@@ -253,7 +253,7 @@ A review must not silently become implementation work.
 
 ### Internal Restructuring
 
-If the user wants code organization improved while preserving behavior, select `REFACTOR-CODE.md`.
+If the user wants code organization improved while preserving behavior, select `38_WORDPRESS/SKILLS/REFACTOR-CODE.md`.
 
 Examples:
 
@@ -283,7 +283,7 @@ Migration requires source state, target state, transition strategy, failure beha
 
 ### Performance Work
 
-If the primary objective is performance improvement, select `OPTIMIZE-PERFORMANCE.md`.
+If the primary objective is performance improvement, select `38_WORDPRESS/SKILLS/OPTIMIZE-PERFORMANCE.md`.
 
 Examples:
 
@@ -298,13 +298,13 @@ Optimization must begin with measurement whenever practical.
 
 ### Test Creation
 
-If the primary deliverable is a test suite, test plan, or regression protection, select `CREATE-TESTS.md`.
+If the primary deliverable is a test suite, test plan, or regression protection, select `38_WORDPRESS/SKILLS/CREATE-TESTS.md`.
 
 If tests are required as part of another Skill, that parent Skill remains primary.
 
 ### Documentation
 
-If the primary deliverable is documentation, select `WRITE-DOCUMENTATION.md`.
+If the primary deliverable is documentation, select `38_WORDPRESS/SKILLS/WRITE-DOCUMENTATION.md`.
 
 Documentation must be based on actual implementation evidence.
 
@@ -574,8 +574,8 @@ The goal is internal restructuring with behavior preservation.
 4. Role routing must not replace Skill selection.
 5. A Skill must not silently expand into another Skill.
 6. Ambiguous intent must be resolved before implementation begins.
-7. New plugin-scale systems must use `CREATE-PLUGIN.md` as the primary Skill.
-8. New theme-scale systems must use `CREATE-THEME.md` as the primary Skill.
+7. New plugin-scale systems must use `38_WORDPRESS/SKILLS/CREATE-PLUGIN.md` as the primary Skill.
+8. New theme-scale systems must use `38_WORDPRESS/SKILLS/CREATE-THEME.md` as the primary Skill.
 9. Debugging must confirm cause before repair.
 10. Performance optimization must measure before and after significant changes whenever practical.
 11. Migration must define source state, target state, transition strategy, and recovery behavior.

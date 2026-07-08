@@ -53,21 +53,21 @@ Those responsibilities remain in their respective architectural layers.
 
 | Component | Responsibility |
 |---|---|
-| `WORDPRESS-CORE.md` | Defines core WordPress concepts, lifecycle, hooks, files, and execution flow. |
+| `38_WORDPRESS/KNOWLEDGE/WORDPRESS-CORE.md` | Defines core WordPress concepts, lifecycle, hooks, files, and execution flow. |
 | `PLUGIN-HANDBOOK.md` | Defines plugin development concepts, structure, lifecycle, and best practices. |
-| `THEME-HANDBOOK.md` | Defines classic, child, hybrid, and block theme development concepts. |
+| `38_WORDPRESS/KNOWLEDGE/THEME-HANDBOOK.md` | Defines classic, child, hybrid, and block theme development concepts. |
 | `BLOCK-EDITOR.md` | Defines Gutenberg and block editor concepts and block development rules. |
 | `SETTINGS-API.md` | Defines settings pages, sections, fields, sanitization, and options. |
-| `REST-API.md` | Defines REST route creation, permission callbacks, schemas, and responses. |
-| `DATABASE.md` | Defines safe database usage, `$wpdb`, schema changes, and custom tables. |
-| `CUSTOM-POST-TYPES.md` | Defines custom post type registration and use cases. |
-| `TAXONOMIES.md` | Defines custom taxonomy registration and use cases. |
+| `38_WORDPRESS/KNOWLEDGE/REST-API.md` | Defines REST route creation, permission callbacks, schemas, and responses. |
+| `38_WORDPRESS/KNOWLEDGE/DATABASE.md` | Defines safe database usage, `$wpdb`, schema changes, and custom tables. |
+| `38_WORDPRESS/KNOWLEDGE/CUSTOM-POST-TYPES.md` | Defines custom post type registration and use cases. |
+| `38_WORDPRESS/KNOWLEDGE/TAXONOMIES.md` | Defines custom taxonomy registration and use cases. |
 | `SHORTCODES.md` | Defines shortcode creation, attributes, rendering, and safety. |
 | `CRON.md` | Defines WordPress scheduled events, recurrence, unscheduling, and cleanup rules. |
 | `MEDIA.md` | Defines uploads, attachments, image handling, validation, and media safety. |
 | `SECURITY.md` | Defines WordPress-specific security principles and common failure patterns. |
 | `PERFORMANCE.md` | Defines caching, asset loading, query safety, and optimization rules. |
-| `ACCESSIBILITY.md` | Defines accessibility expectations for themes, admin pages, blocks, and frontend output. |
+| `38_WORDPRESS/KNOWLEDGE/ACCESSIBILITY.md` | Defines accessibility expectations for themes, admin pages, blocks, and frontend output. |
 | `INTERNATIONALIZATION.md` | Defines translation, localization, escaping, and text-domain rules. |
 | `WOOCOMMERCE.md` | Defines WooCommerce extension concepts, hooks, products, checkout, and orders. |
 | `CODING-STANDARDS.md` | Defines WordPress PHP, JavaScript, CSS, and documentation standards. |

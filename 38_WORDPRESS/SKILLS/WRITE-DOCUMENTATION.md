@@ -27,7 +27,7 @@ Documentation is a deliverable, not an afterthought. Good documentation makes so
 
 ## Workflow
 
-This skill is typically one of the final stages in the master `PIPELINE.md`.
+This skill is typically one of the final stages in the master `38_WORDPRESS/PIPELINE.md`.
 
 1.  **Intent Analysis**:
     -   Deconstruct the request: `Task: write_documentation, Target: my-plugin`.
