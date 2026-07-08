@@ -1,233 +1,30 @@
 # SquirrelForge Workflow Automator
 
+Version: 1.0.0
+Status: Stable
+Owner: Automation Maintainers
+Depends On: APPROVAL-GATE.md, AUTOMATION-VALIDATOR.md, AUTOMATION-GOVERNANCE.md, 20_EXECUTION, 35_RESILIENCE
+Used By: AUTOMATION-MANAGER.md, TASK-ORCHESTRATOR.md
+Last Updated: 2026-07-08
+
 ## Purpose
 
-The Workflow Automator executes approved workflows automatically after all required rules, validations, approvals, and governance checks have been satisfied. It coordinates workflow initialization, execution, monitoring, recovery, and completion while maintaining observability, reliability, and auditability.
+The Workflow Automator converts fully qualified Automation-domain workflow requests into execution handoffs and tracks automation-facing workflow status from authoritative execution references.
 
-The Workflow Automator does not evaluate automation rules or governance policies. It executes workflows that have already been approved by the Automation Layer.
+## Responsibilities
 
----
+- Receive workflow automation requests with required trigger, rule, readiness, approval, and governance references.
+- Check handoff completeness and workflow-definition references.
+- Submit workflow execution requests to authoritative Execution components.
+- Coordinate Automation-domain task handoffs with Task Orchestrator where applicable.
+- Consume execution progress, completion, failure, and recovery-status references.
+- Request recovery handling from Resilience owners when authorized conditions require it.
+- Publish automation-facing workflow status and evidence references.
 
-# Responsibilities
+## Boundary
 
-- Execute approved workflows.
-- Initialize workflow instances.
-- Coordinate workflow execution.
-- Monitor workflow progress.
-- Handle workflow recovery.
-- Detect execution failures.
-- Publish workflow status.
-- Record workflow activity.
-- Support observability.
-- Enforce automation governance.
+The Workflow Automator does not initialize or own authoritative workflow instances, execute actions, allocate resources, own workflow execution state, monitor infrastructure, execute retries, rollback, recovery, or state restoration, perform validation, enforce governance policy, or own logging, audit, and storage infrastructure.
 
----
+## Rule
 
-# Inputs
-
-The Workflow Automator receives:
-
-- Approved automation requests
-- Workflow definitions
-- Trigger decisions
-- Rule evaluation results
-- Validation approvals
-- Approval decisions
-- Workflow parameters
-- Execution context
-- Governance policies
-- Platform state
-
----
-
-# Outputs
-
-The Workflow Automator produces:
-
-- Workflow execution requests
-- Task execution requests
-- Workflow status updates
-- Progress notifications
-- Recovery requests
-- Completion reports
-- Governance review requests
-- Workflow audit records
-
----
-
-# Workflow Automation Workflow
-
-1. Receive approved workflow request.
-2. Validate execution context.
-3. Initialize workflow instance.
-4. Allocate required resources.
-5. Start workflow execution.
-6. Monitor workflow progress.
-7. Coordinate recovery if necessary.
-8. Complete workflow execution.
-9. Record audit information.
-10. Publish workflow results.
-
----
-
-# Supported Workflow Types
-
-The Workflow Automator supports:
-
-- Sequential workflows
-- Parallel workflows
-- Conditional workflows
-- Event-driven workflows
-- Scheduled workflows
-- Long-running workflows
-- Background workflows
-- Multi-agent workflows
-- Integration workflows
-- Recovery workflows
-
----
-
-# Workflow Components
-
-Every workflow execution includes:
-
-- Workflow instance ID
-- Workflow definition ID
-- Automation ID
-- Correlation ID
-- Execution context
-- Start timestamp
-- Current state
-- Progress status
-- Completion status
-- Metadata
-
----
-
-# Execution States
-
-Workflow execution progresses through:
-
-- Initialized
-- Pending
-- Starting
-- Running
-- Waiting
-- Recovering
-- Completed
-- Failed
-- Cancelled
-- Archived
-
----
-
-# Recovery Management
-
-Recovery capabilities include:
-
-- Retry execution
-- Resume execution
-- Rollback initiation
-- Partial recovery
-- Dependency recovery
-- State restoration
-- Escalation procedures
-
----
-
-# Monitoring Responsibilities
-
-The Workflow Automator continuously monitors:
-
-- Execution progress
-- Task completion
-- Dependency resolution
-- Resource utilization
-- Error conditions
-- Timeout events
-- Recovery status
-- Completion metrics
-
----
-
-# Integration Responsibilities
-
-The Workflow Automator coordinates with:
-
-- Automation Manager
-- Task Orchestrator
-- Workflow Engine
-- Scheduler
-- Trigger Manager
-- Observability Layer
-- Optimization Layer
-- Automation Governance
-
----
-
-# Data Protection
-
-The Workflow Automator must:
-
-- Protect workflow definitions.
-- Preserve execution history.
-- Protect execution context.
-- Enforce governance policies.
-- Maintain audit integrity.
-
----
-
-# Safety Rules
-
-The Workflow Automator must never:
-
-- Execute unapproved workflows.
-- Bypass workflow validation.
-- Ignore governance requirements.
-- Modify workflow history.
-- Suppress execution failures.
-- Expose confidential workflow data.
-- Delete audit records.
-
----
-
-# Failure Handling
-
-If workflow automation fails:
-
-- Preserve workflow state.
-- Record execution failures.
-- Attempt approved recovery procedures.
-- Notify the Automation Manager.
-- Escalate persistent failures.
-- Maintain audit continuity.
-- Prevent inconsistent workflow states.
-
----
-
-# Audit Requirements
-
-Every workflow automation operation records:
-
-- Workflow automation ID
-- Timestamp
-- Workflow instance ID
-- Automation ID
-- Execution status
-- Recovery status
-- Governance status
-- Final outcome
-
----
-
-# Success Criteria
-
-The Workflow Automator succeeds when:
-
-- Approved workflows execute correctly.
-- Workflow state remains consistent.
-- Recovery procedures function as designed.
-- Progress remains observable.
-- Governance requirements are enforced.
-- Audit records remain complete.
-- Automated workflows reliably achieve their intended outcomes.
+Workflow Automator owns the automation-to-execution handoff, not the execution engine.

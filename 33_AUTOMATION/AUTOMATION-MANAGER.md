@@ -1,191 +1,34 @@
 # SquirrelForge Automation Manager
 
+Version: 1.0.0
+Status: Stable
+Owner: Automation Maintainers
+Depends On: RULE-ENGINE.md, EVENT-LISTENER.md, SCHEDULER.md, TRIGGER-MANAGER.md, WORKFLOW-AUTOMATOR.md, TASK-ORCHESTRATOR.md, APPROVAL-GATE.md, AUTOMATION-VALIDATOR.md, AUTOMATION-GOVERNANCE.md
+Used By: automation-domain callers and downstream consumers
+Last Updated: 2026-07-08
+
 ## Purpose
 
-The Automation Manager coordinates all automation activities across SquirrelForge. It serves as the central controller for rule-based automation, event-driven automation, scheduled automation, trigger management, workflow automation, task orchestration, approval enforcement, validation, and automation governance.
+The Automation Manager coordinates Automation Layer intake, specialist routing, checkpoint progression, and automation-domain status aggregation.
 
-The Automation Manager does not directly execute automated actions. It orchestrates the Automation Layer by routing approved automation activity to the proper components while ensuring that all automated work remains safe, observable, governed, auditable, and compliant.
+## Responsibilities
 
----
+- Receive automation requests and authoritative event references.
+- Check request structure and prerequisite-reference availability.
+- Route work to the appropriate Automation specialist.
+- Coordinate rule, trigger, schedule, readiness, approval, and governance handoffs.
+- Submit approved workflow and task handoffs to the appropriate automation coordination components.
+- Aggregate automation-domain decisions, status, and evidence references.
+- Report status to callers and observability consumers.
 
-# Responsibilities
+## Boundary
 
-- Coordinate all Automation Layer components.
-- Receive automation requests.
-- Validate automation requirements.
-- Route automation operations.
-- Coordinate rule, event, schedule, and trigger handling.
-- Enforce approval checkpoints.
-- Coordinate automated workflow execution.
-- Monitor automation status.
-- Record automation activity.
-- Enforce automation governance.
+The Automation Manager does not evaluate specialist rules, make trigger decisions, own schedules, make approval or governance decisions, perform platform-wide validation, make Security decisions, execute actions, own authoritative workflow/task state, perform retries or recovery, collect telemetry, or own storage and audit infrastructure.
 
----
+## Failure Handling
 
-# Inputs
+Coordination failures produce failure status and evidence references for authoritative failure, resilience, and observability paths. The manager does not create a parallel retry or recovery mechanism.
 
-The Automation Manager receives:
+## Rule
 
-- Automation requests
-- Platform events
-- Workflow events
-- Schedule definitions
-- Trigger definitions
-- Rule definitions
-- Approval requirements
-- Validation reports
-- Governance policies
-- Observability reports
-
----
-
-# Outputs
-
-The Automation Manager produces:
-
-- Automation plans
-- Rule evaluation requests
-- Event handling requests
-- Schedule execution requests
-- Trigger evaluation requests
-- Workflow automation requests
-- Task orchestration requests
-- Approval gate requests
-- Governance review requests
-- Automation audit records
-
----
-
-# Automation Workflow
-
-1. Receive automation request.
-2. Validate automation structure.
-3. Identify automation type.
-4. Determine required components.
-5. Evaluate rules and prerequisites.
-6. Enforce approval checkpoints.
-7. Route approved automation.
-8. Monitor automation progress.
-9. Record audit information.
-10. Publish automation status.
-
----
-
-# Coordinated Operations
-
-The Automation Manager coordinates:
-
-- Rule evaluation
-- Event listening
-- Schedule execution
-- Trigger management
-- Workflow automation
-- Task orchestration
-- Approval enforcement
-- Automation validation
-- Governance enforcement
-
----
-
-# Coordination Responsibilities
-
-The Automation Manager coordinates:
-
-- Rule Engine
-- Event Listener
-- Scheduler
-- Trigger Manager
-- Workflow Automator
-- Task Orchestrator
-- Approval Gate
-- Automation Validator
-- Automation Governance
-
----
-
-# Automation Types
-
-Supported automation types include:
-
-- Rule-based automation
-- Event-driven automation
-- Scheduled automation
-- Conditional automation
-- Workflow automation
-- Task automation
-- Alert-triggered automation
-- Health-triggered automation
-- Governance-triggered automation
-
----
-
-# Automation Principles
-
-Every automation should be:
-
-- Approved when required
-- Observable
-- Auditable
-- Safe
-- Measurable
-- Governed
-- Reversible when appropriate
-- Failure-aware
-
----
-
-# Safety Rules
-
-The Automation Manager must never:
-
-- Bypass approval requirements.
-- Execute unvalidated automation.
-- Ignore governance restrictions.
-- Suppress automation failures.
-- Modify protected audit records.
-- Trigger unsafe automated actions.
-- Hide automation activity from observability.
-
----
-
-# Failure Handling
-
-If automation coordination fails:
-
-- Preserve automation request details.
-- Record coordination failure.
-- Notify affected components.
-- Retry coordination when appropriate.
-- Escalate persistent failures.
-- Prevent unsafe execution.
-- Maintain audit continuity.
-
----
-
-# Audit Requirements
-
-Every automation operation records:
-
-- Automation operation ID
-- Timestamp
-- Automation type
-- Trigger source
-- Coordinated components
-- Approval status
-- Governance status
-- Final outcome
-
----
-
-# Success Criteria
-
-The Automation Manager succeeds when:
-
-- Automation requests are properly coordinated.
-- Rules, events, schedules, and triggers are handled correctly.
-- Approval requirements are enforced.
-- Automated work remains observable.
-- Governance requirements are consistently applied.
-- Unsafe automation is prevented.
-- Audit records remain complete.
+Coordination does not transfer specialist or cross-layer authority to the Automation Manager.
