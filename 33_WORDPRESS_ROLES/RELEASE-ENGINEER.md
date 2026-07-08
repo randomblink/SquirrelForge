@@ -1,3 +1,6 @@
+Status: Stable
+
+---
 # SquirrelForge WordPress Release Engineer Role
 
 ## Purpose

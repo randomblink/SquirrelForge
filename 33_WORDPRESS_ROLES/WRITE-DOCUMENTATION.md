@@ -1,3 +1,6 @@
+Status: Stable
+
+---
 # SquirrelForge WordPress Write Documentation Skill
 
 ## Purpose

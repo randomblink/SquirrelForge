@@ -1,3 +1,6 @@
+Status: Stable
+
+---
 # SquirrelForge WordPress Block Engineer Role
 
 ## Purpose

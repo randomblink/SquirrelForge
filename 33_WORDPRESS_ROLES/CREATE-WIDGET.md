@@ -1,3 +1,6 @@
+Status: Stable
+
+---
 # SquirrelForge WordPress Create Widget Skill
 
 ## Purpose

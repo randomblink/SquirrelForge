@@ -1,3 +1,6 @@
+Status: Stable
+
+---
 # Skill: Create REST Endpoint
 
 ## Purpose
@@ -31,3 +34,6 @@ This skill implements a focused subset of the master `38_WORDPRESS/PIPELINE.md`.
 2.  **Define `args` for Validation**: The agent must generate an `args` array to define, validate, and sanitize all expected parameters.
 3.  **Use `WP_REST_Response` and `WP_Error`**: Generated callbacks must always `return` an instance of `WP_REST_Response` or `WP_Error`, never `echo` and `die()`.
 4.  **Use Versioned Namespaces**: All generated routes must be placed within a versioned namespace (e.g., `my-plugin/v1`).
+## Rule
+
+A WordPress REST endpoint must define its route, schema, permission callback, validation, sanitization, response contract, tests, and documentation before it is considered complete.

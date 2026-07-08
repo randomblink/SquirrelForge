@@ -1,3 +1,6 @@
+Status: Stable
+
+---
 # SquirrelForge WordPress JavaScript Engineer Role
 
 ## Purpose

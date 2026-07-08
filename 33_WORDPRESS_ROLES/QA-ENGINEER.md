@@ -1,3 +1,6 @@
+Status: Stable
+
+---
 # SquirrelForge WordPress QA Engineer Role
 
 ## Purpose

@@ -1,3 +1,6 @@
+Status: Stable
+
+---
 # Skill: Create Plugin
 
 ## Purpose
@@ -34,3 +37,6 @@ This skill implements the master `38_WORDPRESS/PIPELINE.md` by assigning each st
 1.  **Follow the Pipeline**: This skill must be executed by following the `PIPELINE.md` stages in order, without skipping any validation or review steps.
 2.  **Gate Enforcement**: A `Fail` status from any validation role (`Security`, `Performance`, `QA`) or a `Blocked` status from the `Release Engineer` must halt the process and return the work to the appropriate implementation role for remediation.
 3.  **Traceability**: The final report must include the pass/fail status of each validation gate, providing a clear audit trail of the quality assurance process.
+## Rule
+
+A WordPress plugin must be created through approved architecture, implementation, security, QA, documentation, and release gates before it is considered complete.

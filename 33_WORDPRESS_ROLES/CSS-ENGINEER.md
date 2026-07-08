@@ -1,3 +1,6 @@
+Status: Stable
+
+---
 # SquirrelForge WordPress CSS Engineer Role
 
 ## Purpose

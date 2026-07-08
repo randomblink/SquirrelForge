@@ -1,3 +1,6 @@
+Status: Stable
+
+---
 # SquirrelForge WordPress Role Manager
 
 ## Purpose

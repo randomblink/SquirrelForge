@@ -1,3 +1,6 @@
+Status: Stable
+
+---
 # Skill: Create Tests
 
 ## Purpose
@@ -31,3 +34,6 @@ This skill implements the "QA & Testing" stage of the master `38_WORDPRESS/PIPEL
 2.  **Be Specific**: Manual test steps must be clear, unambiguous, and include a specific expected outcome. Automated test stubs should have descriptive names.
 3.  **Automate Where Practical**: The agent should prefer generating stubs for automated unit and integration tests for backend logic over purely manual checklists for the same logic.
 4.  **Follow the Standard**: All generated test plans and files must adhere to the formats and requirements defined in `38_WORDPRESS/STANDARDS/TESTING-STANDARD.md`.
+## Rule
+
+WordPress tests must verify expected behavior, failure behavior, regression risk, and applicable security or compatibility requirements before test work is considered complete.

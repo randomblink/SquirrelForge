@@ -1,3 +1,6 @@
+Status: Stable
+
+---
 # SquirrelForge WordPress Roles Layer
 
 ## Purpose

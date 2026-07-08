@@ -1,3 +1,6 @@
+Status: Stable
+
+---
 # SquirrelForge WordPress REST Engineer Role
 
 ## Purpose

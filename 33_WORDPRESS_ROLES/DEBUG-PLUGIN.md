@@ -1,3 +1,7 @@
+Status: Stable
+
+---
+
 # SquirrelForge WordPress Debug Plugin Skill
 
 ## Purpose
@@ -218,13 +222,13 @@ Update applicable documentation:
 - `README.md` (if known limitations change)
 - Developer documentation (if behavior changes)
 
-#### Stage 9 — Release Preparation
+#### Stage 9 — Release Review
 
 Use:
 
 `33_WORDPRESS_ROLES/RELEASE-ENGINEER.md`
 
-If the fix is part of a release, the `Release Engineer` packages it into a new version, following all release readiness checks.
+The `Release Engineer` must confirm that the fix is documented, validated, and safe to release.
 
 ### Required Handoff Contract
 
@@ -277,15 +281,62 @@ Final Result:
 Next Step:
 ```
 
-### Completion Criteria
+## Output
 
-The `Debug Plugin` Skill is complete only when:
+This Skill must produce:
 
-- the root cause is identified
-- a fix is implemented
-- the fix passes all required validation gates (Security, Performance, QA)
-- documentation is updated
-- the fix is included in a release when applicable
+- QA defect report.
+- Role routing decision.
+- Root cause analysis report.
+- Implemented fix summary.
+- Security validation result, when required.
+- Performance validation result, when required.
+- QA verification result.
+- Documentation update summary.
+- Release readiness decision.
+
+---
+
+## Validation Requirements
+
+The debugging workflow is valid only when:
+
+- The bug has reproducible steps or a documented reproduction limitation.
+- The root cause is identified before implementation.
+- The implemented fix is minimal and targeted.
+- Security-sensitive changes pass Security Engineer review.
+- Performance-sensitive changes pass Performance Engineer review.
+- QA confirms the original bug is fixed.
+- Regression testing is completed.
+- Documentation is updated when behavior, limitations, or public APIs change.
+- Release Engineer approval is recorded.
+
+---
+
+## Handoff Rules
+
+- The QA Engineer owns defect reproduction and final verification.
+- The Role Manager owns assignment of specialist roles.
+- Implementation engineers own root cause analysis and fix implementation.
+- The Security Engineer owns security approval when security-sensitive areas are touched.
+- The Performance Engineer owns performance approval when performance-sensitive areas are touched.
+- The Documentation Engineer owns documentation updates.
+- The Release Engineer owns final release readiness review.
+
+---
+
+## Completion Criteria
+
+This Skill is complete only when:
+
+- The defect is reproduced or reproduction limitations are documented.
+- The root cause is recorded.
+- The fix is implemented according to WordPress standards.
+- Required validation gates pass.
+- QA verification passes.
+- Documentation updates are complete.
+- Release readiness is approved.
+- Final debugging output is recorded.
 
 ## Rule
 

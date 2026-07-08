@@ -1,3 +1,6 @@
+Status: Stable
+
+---
 # SquirrelForge WordPress Refactor Code Skill
 
 ## Purpose

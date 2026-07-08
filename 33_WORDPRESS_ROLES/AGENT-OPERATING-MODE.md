@@ -1,3 +1,6 @@
+Status: Stable
+
+---
 # SquirrelForge WordPress Agent Operating Mode
 
 ## Purpose
