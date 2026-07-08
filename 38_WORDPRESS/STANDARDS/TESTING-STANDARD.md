@@ -28,6 +28,12 @@ Testing should occur before deployment, not after.
 
 ## Testing Levels
 
+Testing levels define the minimum validation depth required for WordPress work.
+
+Each level must be selected according to task risk, affected surface area, and production impact.
+
+Higher-risk changes require multiple validation levels before completion.
+
 ## Level 1 — Static Validation
 
 Verify:

@@ -400,6 +400,10 @@ Performance Engineer is mandatory when meaningful performance-sensitive changes 
 
 ## Independent Review Rule
 
+Independent review must be assigned when a task changes security boundaries, stored data, public output, release behavior, or user-facing workflows.
+
+The implementing role must not be the only validating role for production-impacting work.
+
 ## Rule
 
 The Skill routing matrix must map each WordPress task to required roles, gates, and handoffs.
