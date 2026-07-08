@@ -1,100 +1,49 @@
-# SquirrelForge Runtime Configuration Manager
+# SquirrelForge Runtime Configuration
+
+Version: 1.0.0
+Status: Stable
+Owner: Runtime Configuration Maintainers
+Depends On: `28_RUNTIME-CONFIG/CONFIGURATION-REGISTRY.md`, `28_RUNTIME-CONFIG/ENVIRONMENTS.md`, `28_RUNTIME-CONFIG/FEATURE-FLAGS.md`, `28_RUNTIME-CONFIG/POLICY-CONFIGURATION.md`, `28_RUNTIME-CONFIG/SECRETS-MANAGER.md`, `28_RUNTIME-CONFIG/CONFIGURATION-VALIDATOR.md`
+Used By: `28_RUNTIME-CONFIG/CONFIGURATION-MANAGER.md`, Core, Engine, Execution, Integrations, Security, Observability, WordPress
+Last Updated: 2026-07-08
 
 ## Purpose
 
-The Runtime Configuration Manager governs how validated configuration is loaded, cached, refreshed, and distributed during active system execution, ensuring that all running components use consistent and approved configuration values.
+Runtime Configuration owns active runtime configuration resolution for running components.
+
+It combines registered configuration records, environment overlays, feature-flag configuration, policy-configuration references, and secret references into validated active configuration bundles.
+
+It does not own the configuration registry, environment definitions, feature-flag records, policy evaluation, secret values, execution state, deployment, recovery, or authoritative workflow state.
 
 ---
 
 ## Responsibilities
 
-- Load validated runtime configuration.
-- Cache active configuration values.
-- Distribute configuration to running components.
-- Apply approved runtime overrides.
-- Refresh configuration when required.
-- Synchronize configuration updates.
-- Record runtime configuration activity.
-- Report runtime configuration status.
-
----
-
-## Runtime Configuration Process
-
-1. Receive configuration request.
-2. Load validated configuration.
-3. Apply environment profile.
-4. Apply approved runtime overrides.
-5. Populate runtime cache.
-6. Distribute configuration to requesting component.
-7. Record runtime activity.
-8. Monitor for configuration updates.
-
----
-
-## Runtime Configuration Sources
-
-| Source | Description |
-|---|---|
-| Configuration Manager | Primary configuration authority |
-| Environment Profile | Environment-specific settings |
-| Feature Flags | Runtime feature controls |
-| Policy Configuration | Operational rules |
-| Secrets Manager | Secure credentials |
-| Runtime Overrides | Authorized temporary changes |
+- Resolve active runtime configuration bundles.
+- Apply environment overlays and approved override precedence.
+- Include feature-flag and policy-configuration references.
+- Include secret references without exposing raw secret values.
+- Refresh active configuration bundles after approved configuration-domain changes.
+- Return runtime configuration status and evidence references to callers.
 
 ---
 
 ## Runtime States
 
-| State | Description |
+| State | Meaning |
 |---|---|
-| Initializing | Loading configuration |
-| Active | Configuration available for use |
-| Refreshing | Applying updated values |
-| Synchronized | All components updated |
-| Invalid | Validation failure detected |
-| Expired | Configuration no longer valid |
+| `Initializing` | Runtime configuration bundle is being resolved. |
+| `Active` | Validated configuration bundle is available for use. |
+| `Refreshing` | Approved configuration changes are being re-resolved. |
+| `Invalid` | Configuration-domain validation failed. |
+| `Expired` | Configuration bundle is no longer valid for use. |
+
+These are runtime-configuration states only. They are not execution, deployment, workflow, recovery, or validation states outside this layer.
 
 ---
 
-## Runtime Record
+## Rules
 
-| Field | Description |
-|---|---|
-| Runtime ID | Unique identifier |
-| Configuration Version | Active version |
-| Environment | Current environment |
-| Cache Status | Loaded / Refreshing / Invalid |
-| Override Status | None / Active |
-| Timestamp | Last synchronization |
-| Validation | Pass / Fail |
-
----
-
-## Refresh Policy
-
-Configuration refresh may occur:
-
-- At system startup.
-- During scheduled refresh intervals.
-- Following approved configuration updates.
-- After feature flag changes.
-- Following environment changes.
-- Upon explicit administrative request.
-
----
-
-## Runtime Rules
-
-- Only validated configuration may enter runtime.
-- Unauthorized overrides are prohibited.
-- Running workflows receive consistent configuration.
-- Refreshes must preserve system integrity.
-- Configuration synchronization must be recorded.
-
----
-
-## Rule
-
-Every runtime configuration value used during execution must originate from validated configuration sources, be synchronized across active components, and remain consistent until an approved refresh occurs.
+1. Runtime Configuration may expose secret references only, never raw secret values.
+2. Runtime Configuration must use registered and configuration-domain-validated records.
+3. Runtime refresh does not authorize deployment or change workflow state.

@@ -1,79 +1,57 @@
 # SquirrelForge Configuration Manager
 
+Version: 1.0.0
+Status: Stable
+Owner: Runtime Configuration Maintainers
+Depends On: `28_RUNTIME-CONFIG/CONFIGURATION-REGISTRY.md`, `28_RUNTIME-CONFIG/CONFIGURATION-VALIDATOR.md`, `28_RUNTIME-CONFIG/RUNTIME-CONFIGURATION.md`, `28_RUNTIME-CONFIG/CONFIGURATION-AUDIT.md`
+Used By: Core, Engine, Execution, Integrations, Security, Observability, WordPress
+Last Updated: 2026-07-08
+
 ## Purpose
 
-The Configuration Manager serves as the central authority for configuration management across SquirrelForge, ensuring that all components receive validated, versioned, and consistent configuration data throughout the system lifecycle.
+The Configuration Manager coordinates runtime-configuration requests across the Runtime Configuration Layer.
+
+It routes registration, lookup, validation, resolution, secret-reference, policy-configuration, feature-flag, environment, and audit-history requests to the owning Runtime Configuration component and aggregates configuration-domain status references.
+
+It does not own every configuration record directly, perform platform-wide validation, make governance or security decisions, execute deployments, mutate workflow state, or maintain logging/audit/observability infrastructure.
 
 ---
 
 ## Responsibilities
 
-- Register configuration sources.
-- Load configuration data.
-- Validate configuration before use.
-- Distribute approved configuration.
-- Manage configuration versions.
-- Coordinate configuration updates.
-- Record configuration activity.
-- Report configuration status.
+- Receive configuration-domain coordination requests.
+- Route registry requests to `CONFIGURATION-REGISTRY.md`.
+- Route environment-overlay requests to `ENVIRONMENTS.md`.
+- Route runtime-resolution requests to `RUNTIME-CONFIGURATION.md`.
+- Route feature-flag requests to `FEATURE-FLAGS.md`.
+- Route policy-configuration requests to `POLICY-CONFIGURATION.md`.
+- Route secret-reference requests to `SECRETS-MANAGER.md`.
+- Route configuration-domain validation requests to `CONFIGURATION-VALIDATOR.md`.
+- Route configuration-history requests to `CONFIGURATION-AUDIT.md`.
+- Aggregate configuration-domain status and evidence references for callers.
 
 ---
 
-## Configuration Process
+## Boundary
 
-1. Receive configuration request.
-2. Identify requested configuration.
-3. Verify registration.
-4. Load configuration data.
-5. Validate configuration integrity.
-6. Apply version controls.
-7. Distribute approved configuration.
-8. Record configuration activity.
-9. Return configuration status.
+`CONFIGURATION-MANAGER.md` owns configuration coordination only.
 
----
+It does not own:
 
-## Configuration Sources
-
-| Source | Description |
-|---|---|
-| Default Configuration | Built-in system defaults |
-| Environment Profile | Environment-specific values |
-| Runtime Configuration | Active execution settings |
-| Feature Flags | Runtime feature controls |
-| Secrets Manager | Secure credentials |
-| Policy Configuration | Operational rules |
-| User Configuration | Authorized user preferences |
+- configuration item catalog records (`CONFIGURATION-REGISTRY.md`),
+- environment profile records (`ENVIRONMENTS.md`),
+- resolved active runtime bundles (`RUNTIME-CONFIGURATION.md`),
+- feature flag records (`FEATURE-FLAGS.md`),
+- policy configuration records (`POLICY-CONFIGURATION.md`),
+- secret lifecycle records (`SECRETS-MANAGER.md`),
+- configuration-domain validation conclusions (`CONFIGURATION-VALIDATOR.md`),
+- configuration history records (`CONFIGURATION-AUDIT.md`),
+- or non-configuration domain authority.
 
 ---
 
-## Configuration Record
+## Rules
 
-| Field | Description |
-|---|---|
-| Configuration ID | Unique identifier |
-| Source | Configuration origin |
-| Version | Configuration version |
-| Status | Active / Pending / Invalid / Deprecated |
-| Timestamp | Last update |
-| Validation | Pass / Fail |
-
----
-
-## Configuration Lifecycle
-
-| Stage | Description |
-|---|---|
-| Registered | Configuration source recognized |
-| Loaded | Configuration retrieved |
-| Validated | Integrity verified |
-| Active | Available for use |
-| Updated | Modified and redistributed |
-| Deprecated | Scheduled for removal |
-| Archived | Retained for history |
-
----
-
-## Rule
-
-Every configuration value used by SquirrelForge must originate from a registered source, pass validation, and be distributed through the Configuration Manager before use.
+1. Configuration Manager must route requests to the owning Runtime Configuration component.
+2. Configuration Manager may aggregate status and evidence references only.
+3. Configuration Manager must not replace governance, security, execution, validation, storage, or observability owners.

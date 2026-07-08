@@ -1,90 +1,65 @@
-# SquirrelForge Configuration Audit Manager
+# SquirrelForge Configuration Audit
+
+Version: 1.0.0
+Status: Stable
+Owner: Runtime Configuration Maintainers
+Depends On: `27_OBSERVABILITY/AUDIT-TRAIL.md`, `37_STORAGE`
+Used By: `28_RUNTIME-CONFIG/CONFIGURATION-MANAGER.md`, Runtime Configuration components, Governance, Security
+Last Updated: 2026-07-08
 
 ## Purpose
 
-The Configuration Audit Manager maintains a complete, immutable history of configuration changes across SquirrelForge, ensuring accountability, traceability, version control, and compliance throughout the configuration lifecycle.
+Configuration Audit owns configuration-domain change history, version references, change records, actor references, approval references, prior-state references, new-state references, and configuration audit evidence references.
+
+It records configuration-domain history and emits/consumes audit evidence references through the Observability audit owner. It does not own general audit infrastructure, immutable audit storage, compliance certification, rollback execution, deployment state, or runtime workflow state.
 
 ---
 
 ## Responsibilities
 
-- Record configuration changes.
-- Track configuration versions.
-- Capture change authorship.
-- Record approvals.
-- Preserve historical configuration states.
-- Support configuration rollback.
-- Provide audit reporting.
-- Enforce retention policies.
+- Record configuration-domain change history.
+- Record configuration version references and lifecycle changes.
+- Record actor, approval, reason, timestamp, prior-state, and new-state references.
+- Preserve rollback-request and rollback-result references without executing rollback.
+- Provide configuration history references to Runtime Configuration components.
+- Emit audit evidence references to `27_OBSERVABILITY/AUDIT-TRAIL.md`.
 
 ---
 
-## Audit Process
+## Audited Configuration Events
 
-1. Detect configuration change.
-2. Capture previous configuration state.
-3. Record new configuration state.
-4. Identify responsible actor.
-5. Record approval information.
-6. Assign version identifier.
-7. Store immutable audit record.
-8. Publish audit completion.
-
----
-
-## Audited Events
-
-| Event | Description |
+| Event | Meaning |
 |---|---|
-| Configuration Created | Initial registration |
-| Configuration Updated | Existing value modified |
-| Configuration Deleted | Authorized removal |
-| Version Published | New active version |
-| Validation Approved | Configuration passed validation |
-| Validation Rejected | Configuration failed validation |
-| Rollback Executed | Previous version restored |
-| Policy Updated | Operational policy changed |
+| `Configuration Registered` | Configuration item was added to the registry. |
+| `Configuration Updated` | Configuration record or value reference changed. |
+| `Configuration Deprecated` | Configuration item was scheduled for removal. |
+| `Configuration Archived` | Configuration item was retained for history only. |
+| `Validation Recorded` | Configuration-domain validation result was recorded. |
+| `Secret Lifecycle Changed` | Secret metadata, rotation, revocation, or status changed. |
+| `Feature Flag Changed` | Feature-flag configuration changed. |
+| `Policy Configuration Changed` | Configurable policy value changed. |
+| `Environment Overlay Changed` | Environment profile or overlay changed. |
 
 ---
 
-## Audit Record
+## Boundary
 
-| Field | Description |
-|---|---|
-| Audit ID | Unique identifier |
-| Configuration ID | Affected configuration |
-| Version | Configuration version |
-| Change Type | Created / Updated / Deleted / Rolled Back |
-| Actor | User, agent, or system component |
-| Approval | Approval reference (if required) |
-| Timestamp | Change time |
-| Notes | Additional context |
+`CONFIGURATION-AUDIT.md` owns configuration-domain history records only.
 
----
+It does not own:
 
-## Versioning Principles
-
-- Every approved change creates a new version.
-- Previous versions remain available for inspection.
-- Rollbacks create new audit events rather than overwriting history.
-- Version identifiers remain unique.
-- Historical records are immutable.
-- Audit history supports complete reconstruction of configuration state.
+- general audit infrastructure (`27_OBSERVABILITY/AUDIT-TRAIL.md`),
+- storage infrastructure (`37_STORAGE`),
+- compliance certification,
+- rollback execution,
+- recovery execution,
+- deployment authority,
+- or authoritative workflow/task state.
 
 ---
 
-## Retention Policy
+## Rules
 
-| Record Type | Minimum Retention |
-|---|---|
-| Active Configuration History | Lifetime of the configuration |
-| Deprecated Configuration History | 3 years |
-| Security Configuration Changes | 5 years |
-| Policy Configuration Changes | Permanent |
-| Rollback History | Permanent |
-
----
-
-## Rule
-
-Every configuration change must generate an immutable audit record before the updated configuration becomes active.
+1. Every configuration-domain change must create a configuration history record before the new configuration is considered active.
+2. Configuration Audit must use audit and storage owners for immutable audit infrastructure and persistence.
+3. Rollback history may be recorded here, but rollback execution belongs to execution/recovery owners.

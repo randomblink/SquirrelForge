@@ -1,162 +1,71 @@
 # SquirrelForge Secrets Manager
 
+Version: 1.0.0
+Status: Stable
+Owner: Runtime Configuration Maintainers
+Depends On: `24_SECURITY`, `24_SECURITY/ENCRYPTION-MANAGER.md`, `27_OBSERVABILITY/AUDIT-TRAIL.md`, `37_STORAGE`
+Used By: Security, Integrations, Runtime Configuration, Execution, WordPress
+Last Updated: 2026-07-08
+
 ## Purpose
 
-The Secrets Manager securely stores, manages, distributes, rotates, and revokes sensitive credentials used throughout SquirrelForge. It protects API keys, OAuth credentials, access tokens, encryption keys, certificates, passwords, and other confidential material while ensuring that secrets are accessed only by authorized components under approved security policies.
+The Secrets Manager owns secret lifecycle records, secret metadata, secret references, rotation status, revocation status, expiration status, and secure retrieval handoff references for confidential runtime material.
 
-The Secrets Manager manages secrets only. It does not authenticate identities, authorize operations, or expose secret values to unauthorized components.
-
----
-
-# Responsibilities
-
-- Securely store secrets.
-- Manage secret lifecycle.
-- Control secret access.
-- Rotate expiring secrets.
-- Revoke compromised secrets.
-- Verify secret integrity.
-- Support secure secret retrieval.
-- Record secret operations.
-- Enforce secret policies.
-- Preserve secret confidentiality.
+It manages secret records and references. It does not authenticate identities, authorize access, define security policy, perform cryptographic operations, own encryption standards, own key-generation decisions, execute incident response, or expose raw secrets in logs, metadata, or audit records.
 
 ---
 
-# Managed Secret Types
+## Responsibilities
 
-The Secrets Manager protects:
-
-- API keys
-- OAuth client credentials
-- Access tokens
-- Refresh tokens
-- Encryption keys
-- Certificates
-- Passwords
-- Signing keys
-- Service account credentials
-- Other confidential platform secrets
+- Maintain secret metadata and lifecycle records.
+- Store or reference secret material through approved storage and security controls.
+- Record secret type, owner, scope, expiration, rotation, revocation, and status metadata.
+- Coordinate secret retrieval handoff only after receiving required security/authorization references.
+- Record rotation and revocation status.
+- Preserve secret-operation evidence references without exposing secret values.
 
 ---
 
-# Secret Workflow
+## Boundary
 
-1. Receive secret management request.
-2. Verify requesting identity.
-3. Confirm authorization.
-4. Validate governance requirements.
-5. Perform requested secret operation.
-6. Verify operation integrity.
-7. Update secret metadata.
-8. Record audit information.
-9. Notify the Security Monitor.
-10. Publish operation status.
+`SECRETS-MANAGER.md` owns:
 
----
+- secret lifecycle records,
+- secret metadata,
+- secret references,
+- rotation and revocation status,
+- expiration status,
+- and secure retrieval handoff references.
 
-# Secret Lifecycle
+`SECRETS-MANAGER.md` does not own:
 
-A secret progresses through:
-
-- Registered
-- Active
-- Rotation Pending
-- Rotated
-- Suspended
-- Revoked
-- Archived
-
-Only **Active** secrets may be used for production operations.
+- identity authentication (`24_SECURITY/AUTHENTICATION-MANAGER.md`),
+- runtime authorization (`24_SECURITY/AUTHORIZATION-MANAGER.md`),
+- security-domain policy (`24_SECURITY/SECURITY-GOVERNANCE.md`),
+- cryptographic operations or encryption standards (`24_SECURITY/ENCRYPTION-MANAGER.md`),
+- incident response or threat classification,
+- general audit infrastructure (`27_OBSERVABILITY/AUDIT-TRAIL.md`),
+- or storage infrastructure (`37_STORAGE`).
 
 ---
 
-# Secret Metadata
+## Secret States
 
-Each managed secret includes:
-
-- Secret ID
-- Secret type
-- Owning component
-- Creation timestamp
-- Expiration timestamp
-- Rotation schedule
-- Access policy
-- Integrity status
-- Governance status
-- Lifecycle state
-
-Secret values themselves must never appear in metadata or audit records.
+| State | Meaning |
+|---|---|
+| `Registered` | Secret metadata exists. |
+| `Active` | Secret reference is available for approved retrieval handoff. |
+| `Rotation Pending` | Secret is scheduled for rotation. |
+| `Rotated` | Replacement secret reference is active. |
+| `Suspended` | Secret reference is temporarily unavailable. |
+| `Revoked` | Secret reference must not be used. |
+| `Archived` | Secret metadata is retained for history only. |
 
 ---
 
-# Access Controls
+## Rules
 
-The Secrets Manager ensures:
-
-- Least-privilege access
-- Role-based secret access
-- Approved component access
-- Secret usage tracking
-- Secure secret delivery
-- Automatic expiration handling
-- Rotation policy enforcement
-
----
-
-# Safety Rules
-
-The Secrets Manager must never:
-
-- Expose plaintext secrets.
-- Store secrets in logs.
-- Return secrets to unauthorized identities.
-- Ignore expiration policies.
-- Bypass governance.
-- Reuse revoked secrets.
-- Disable rotation requirements.
-
----
-
-# Failure Handling
-
-If secret management fails:
-
-- Deny the requested operation.
-- Preserve request context.
-- Record the failure.
-- Notify the Security Monitor.
-- Escalate repeated failures.
-- Maintain audit continuity.
-
----
-
-# Audit Requirements
-
-Every secret operation records:
-
-- Secret operation ID
-- Timestamp
-- Secret ID
-- Secret type
-- Operation performed
-- Identity requesting access
-- Authorization status
-- Governance status
-- Final outcome
-
-Audit records must never contain the secret value.
-
----
-
-# Success Criteria
-
-The Secrets Manager succeeds when:
-
-- Secrets remain confidential.
-- Access is consistently authorized.
-- Rotation policies are enforced.
-- Expired and revoked secrets cannot be used.
-- Secret operations remain fully auditable.
-- Security policies are respected.
-- Sensitive credentials remain protected throughout their lifecycle.
+1. Secret values must never appear in logs, metadata, configuration bundles, or audit records.
+2. Secrets Manager must consume security authorization references; it must not decide authorization itself.
+3. Cryptographic operations belong to Security's Encryption Manager.
+4. Secret lifecycle changes must preserve configuration-domain and audit evidence references.

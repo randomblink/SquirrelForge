@@ -1,92 +1,49 @@
-# SquirrelForge Policy Configuration Manager
+# SquirrelForge Policy Configuration
+
+Version: 1.0.0
+Status: Stable
+Owner: Runtime Configuration Maintainers
+Depends On: `23_GOVERNANCE/POLICY-ENGINE.md`, `28_RUNTIME-CONFIG/CONFIGURATION-REGISTRY.md`, `28_RUNTIME-CONFIG/CONFIGURATION-VALIDATOR.md`, `28_RUNTIME-CONFIG/CONFIGURATION-AUDIT.md`
+Used By: `28_RUNTIME-CONFIG/RUNTIME-CONFIGURATION.md`, `23_GOVERNANCE/POLICY-ENGINE.md`, Security, Execution, Integrations, Observability
+Last Updated: 2026-07-08
 
 ## Purpose
 
-The Policy Configuration Manager defines and governs configurable operational policies that control the behavior of SquirrelForge without requiring software changes. Policies establish consistent operational rules, limits, thresholds, and governance across all platform components.
+Policy Configuration owns configurable policy value records and policy-reference records used by policy-owning components.
+
+It records policy configuration identifiers, categories, values, owners, scopes, versions, override references, and lifecycle status. It does not define governance policy, evaluate policy, enforce policy, approve exceptions, or make domain decisions.
 
 ---
 
 ## Responsibilities
 
-- Register operational policies.
-- Define configurable policy values.
-- Apply policy inheritance.
-- Validate policy consistency.
-- Distribute approved policies.
-- Record policy changes.
-- Support policy versioning.
-- Report policy status.
+- Register configurable policy value records.
+- Maintain policy configuration values, owners, scopes, and version references.
+- Record inheritance and override references for configurable policy values.
+- Validate policy configuration structure and reference integrity through `CONFIGURATION-VALIDATOR.md`.
+- Provide policy configuration references to policy-owning components.
+- Preserve policy configuration changes through configuration-domain history.
 
 ---
 
-## Policy Process
+## Boundary
 
-1. Receive policy request.
-2. Identify requested policy.
-3. Verify policy registration.
-4. Load policy definition.
-5. Validate policy values.
-6. Apply inheritance and overrides.
-7. Record policy activity.
-8. Return approved policy.
+`POLICY-CONFIGURATION.md` owns policy configuration records only.
 
----
+It does not own:
 
-## Policy Categories
-
-| Category | Description |
-|---|---|
-| Security | Authentication, authorization, encryption |
-| Workflow | Workflow execution behavior |
-| Execution | Retry, timeout, rollback, concurrency |
-| Validation | Rule enforcement and verification |
-| Integration | External communication policies |
-| Observability | Logging, metrics, tracing, telemetry |
-| Retention | Data retention and archival |
-| Governance | Compliance and operational controls |
+- policy definition or policy intent,
+- general policy evaluation (`23_GOVERNANCE/POLICY-ENGINE.md`),
+- security-domain policy decisions,
+- runtime authorization,
+- compliance certification,
+- enforcement of policy outcomes,
+- or workflow/execution state.
 
 ---
 
-## Common Policy Settings
+## Rules
 
-| Setting | Example |
-|---|---|
-| Retry Limit | Maximum retry attempts |
-| Timeout | Maximum execution duration |
-| Approval Threshold | Required approval level |
-| Retention Period | Data preservation duration |
-| Log Level | Minimum logging severity |
-| Validation Strictness | Standard or strict validation |
-| Concurrency Limit | Maximum parallel executions |
-| Alert Threshold | Operational alert trigger |
-
----
-
-## Policy Record
-
-| Field | Description |
-|---|---|
-| Policy ID | Unique identifier |
-| Name | Policy name |
-| Category | Policy classification |
-| Version | Policy version |
-| Status | Active / Deprecated / Archived |
-| Owner | Responsible component |
-| Last Updated | Most recent modification |
-
----
-
-## Governance Principles
-
-- Policies must be centrally managed.
-- Changes require validation before activation.
-- Policies are version-controlled.
-- Overrides are explicitly authorized.
-- Policy history remains auditable.
-- Conflicting policies are prohibited.
-
----
-
-## Rule
-
-Every configurable operational behavior within SquirrelForge must be governed by a registered, validated, and version-controlled policy before it may influence system operation.
+1. Policy Configuration must not replace the policy owner that interprets or evaluates the policy.
+2. Policy configuration values must be registered, validated, versioned, and traceable before use.
+3. Policy Configuration may expose configurable values and references only.

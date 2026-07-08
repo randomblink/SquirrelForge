@@ -1,48 +1,27 @@
-# SquirrelForge Environment Manager
+# SquirrelForge Environments
+
+Version: 1.0.0
+Status: Stable
+Owner: Runtime Configuration Maintainers
+Depends On: `28_RUNTIME-CONFIG/CONFIGURATION-REGISTRY.md`, `28_RUNTIME-CONFIG/CONFIGURATION-VALIDATOR.md`, `28_RUNTIME-CONFIG/CONFIGURATION-AUDIT.md`
+Used By: `28_RUNTIME-CONFIG/RUNTIME-CONFIGURATION.md`, `28_RUNTIME-CONFIG/CONFIGURATION-MANAGER.md`
+Last Updated: 2026-07-08
 
 ## Purpose
 
-The Environment Manager defines and governs environment-specific configuration profiles used throughout SquirrelForge, ensuring that each deployment target operates with appropriate settings while maintaining consistency, isolation, and controlled inheritance.
+Environments owns environment profile records, environment overlays, inheritance rules, environment-specific configuration references, and override precedence for runtime configuration.
+
+It does not own deployment targets, deployment approval, infrastructure provisioning, execution state, secret values, or platform validation.
 
 ---
 
 ## Responsibilities
 
-- Define supported environments.
-- Manage environment profiles.
-- Apply environment-specific configuration.
-- Control configuration inheritance.
-- Validate environment consistency.
-- Prevent unauthorized overrides.
-- Record environment changes.
-- Support environment discovery.
-
----
-
-## Environment Process
-
-1. Identify active environment.
-2. Load base configuration.
-3. Apply environment profile.
-4. Apply authorized overrides.
-5. Validate resulting configuration.
-6. Record environment state.
-7. Distribute approved configuration.
-
----
-
-## Supported Environments
-
-| Environment | Purpose |
-|---|---|
-| Local | Individual development workstation |
-| Development | Active software development |
-| Testing | Functional and integration testing |
-| QA | Quality assurance validation |
-| Staging | Pre-production verification |
-| Production | Live operational environment |
-| CI | Continuous Integration |
-| Disaster Recovery | Recovery and continuity operations |
+- Maintain registered environment profiles.
+- Record environment overlay references and inheritance order.
+- Record allowed override scopes and precedence.
+- Provide environment-specific configuration references to runtime resolution.
+- Preserve environment profile changes through configuration-domain history.
 
 ---
 
@@ -50,39 +29,18 @@ The Environment Manager defines and governs environment-specific configuration p
 
 | Field | Description |
 |---|---|
-| Environment ID | Unique identifier |
-| Name | Environment name |
-| Parent | Base profile (if inherited) |
-| Configuration Version | Applied configuration version |
-| Status | Active / Inactive |
-| Last Updated | Most recent change |
-| Validation | Pass / Fail |
+| Environment ID | Stable environment identifier. |
+| Name | Environment name. |
+| Parent Profile | Base profile reference, when inherited. |
+| Overlay References | Environment-specific configuration overlays. |
+| Override Rules | Allowed override scope and precedence. |
+| Validation Reference | Configuration-domain validation record. |
+| Lifecycle Status | Active, deprecated, or archived status. |
 
 ---
 
-## Inheritance Rules
+## Rules
 
-- Common configuration is inherited from the base profile.
-- Environment-specific values override inherited values.
-- Secrets remain isolated by environment.
-- Production values cannot inherit temporary development settings.
-- Override precedence must be deterministic and documented.
-
----
-
-## Environment Validation
-
-Verify that:
-
-- The environment profile exists.
-- Required configuration is present.
-- Secrets are available.
-- Unsupported overrides are rejected.
-- Configuration passes validation.
-- Deployment target matches the selected environment.
-
----
-
-## Rule
-
-Every SquirrelForge deployment must operate within a registered environment profile that has been validated before configuration is applied.
+1. Environment overlays must be deterministic and traceable.
+2. Environment profiles may reference secret identifiers but must not contain raw secret values.
+3. Environment validation is configuration-domain validation only; deployment readiness belongs to deployment/execution owners.
