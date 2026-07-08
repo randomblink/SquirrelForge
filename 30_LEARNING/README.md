@@ -1,38 +1,52 @@
 # SquirrelForge Learning Layer
 
+Version: 1.0.0
+Status: Stable
+Owner: Learning Maintainers
+Depends On: 14_ENGINE/VALIDATION.md, 19_REASONING/RISK-ASSESSOR.md, 20_EXECUTION, 23_GOVERNANCE/POLICY-ENGINE.md, 27_OBSERVABILITY, 32_OPTIMIZATION, 35_RESILIENCE, 37_STORAGE
+Used By: SquirrelForge learning and adaptation workflows
+Last Updated: 2026-07-08
+
 ## Purpose
 
-This directory defines how SquirrelForge turns workflow outcomes, feedback, and operational history into validated, governed improvements over time.
+The Learning Layer converts feedback, evaluated outcomes, and historical experience references into evidence-backed learning signals, patterns, and governed adaptation proposals.
 
-The Learning Layer collects raw experience, filters it for genuine signal, detects recurring patterns, and proposes adaptations -- but no adaptation becomes durable behavior without passing governance and validation first. Learning never bypasses the platform's safety, security, or approval requirements.
-
----
+Learning owns learning-domain records and decisions. It does not bypass Validation, Governance, Security, Execution, Resilience, Storage, or Observability authorities.
 
 ## Component Roster
 
 | Component | Responsibility |
 |---|---|
-| `LEARNING-MANAGER.md` | Coordinates every learning-related activity: feedback, evaluation, pattern detection, and adaptation. |
-| `FEEDBACK-COLLECTOR.md` | Gathers structured feedback from users, agents, workflows, and monitoring into standardized learning records. |
-| `EVALUATION-ENGINE.md` | Determines whether collected experiences provide meaningful learning value, filtering noise from signal. |
-| `PATTERN-DETECTOR.md` | Identifies recurring behaviors, trends, correlations, and anomalies across historical experience. |
-| `EXPERIENCE-STORE.md` | The permanent, traceable repository for all validated learning experiences. |
-| `ADAPTATION-MANAGER.md` | Applies approved behavioral or workflow improvements only after evaluation and governance approval. |
-| `LEARNING-GOVERNANCE.md` | Final authority for approving, rejecting, or restricting proposed adaptations. |
-| `LEARNING-MONITOR.md` | Continuously oversees Learning Layer health, effectiveness, and compliance. |
+| `LEARNING-MANAGER.md` | Coordinates learning-domain intake, evaluation, pattern analysis, adaptation proposals, and status aggregation. |
+| `FEEDBACK-COLLECTOR.md` | Normalizes feedback submissions into learning-domain feedback records and evidence references. |
+| `EVALUATION-ENGINE.md` | Assesses learning value, evidence quality, confidence, and learning-domain qualification. |
+| `PATTERN-DETECTOR.md` | Detects recurring learning patterns, trends, correlations, and anomalies from evaluated experience references. |
+| `EXPERIENCE-STORE.md` | Owns learning-domain experience records and retrieval metadata while delegating persistence infrastructure to Storage. |
+| `ADAPTATION-MANAGER.md` | Plans and coordinates approved adaptations through authoritative execution, validation, and recovery owners. |
+| `LEARNING-GOVERNANCE.md` | Owns Learning-domain adaptation approval, rejection, conditions, restrictions, and decision records. |
+| `LEARNING-MONITOR.md` | Correlates Learning-domain health and effectiveness signals from authoritative observability references. |
 
----
+## Layer Boundary
 
-## Learning Principles
+The Learning Layer:
 
-- No experience becomes knowledge without evaluation.
-- No adaptation becomes behavior without governance approval.
-- Noise and unsupported conclusions must be filtered out, not learned from.
-- Every learning outcome must remain traceable to its source evidence.
-- Learning never bypasses security, validation, or approval requirements.
+- owns learning feedback records, evaluation results, pattern findings, experience records, adaptation proposals, Learning-domain governance decisions, and Learning-domain health findings;
+- consumes validation results rather than replacing `14_ENGINE/VALIDATION.md`;
+- consumes risk assessments from `19_REASONING/RISK-ASSESSOR.md`;
+- relies on `23_GOVERNANCE/POLICY-ENGINE.md` for governance-policy evaluation where applicable;
+- coordinates implementation through `20_EXECUTION` and recovery through `35_RESILIENCE` rather than executing parallel operational mechanisms;
+- consumes optimization proposals and references from `32_OPTIMIZATION` where applicable;
+- uses `37_STORAGE` for persistence infrastructure;
+- consumes and emits observability references through `27_OBSERVABILITY` without owning general telemetry, logging, metrics, tracing, dashboards, alerting, diagnostics, health, or audit infrastructure.
 
----
+## Principles
+
+- No experience is treated as a reliable learning signal without Learning-domain evaluation.
+- No adaptation changes durable behavior without the required Learning-domain decision and all applicable external approvals.
+- Learning conclusions remain traceable to evidence and source references.
+- Learning components do not infer missing evidence or rewrite authoritative source records.
+- Learning does not create parallel execution, recovery, validation, storage, or observability infrastructure.
 
 ## Rule
 
-No proposed adaptation may change SquirrelForge's behavior until the Evaluation Engine has confirmed a reliable signal, `LEARNING-GOVERNANCE.md` has approved it, and the change has been recorded in `EXPERIENCE-STORE.md`.
+A proposed adaptation may proceed only when its learning evidence is qualified, the required Learning Governance decision exists, and all applicable external validation, policy, security, execution, release, deployment, and recovery requirements are satisfied by their authoritative owners.

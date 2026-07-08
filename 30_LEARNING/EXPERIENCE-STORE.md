@@ -1,156 +1,36 @@
 # SquirrelForge Experience Store
 
+Version: 1.0.0
+Status: Stable
+Owner: Learning Maintainers
+Depends On: FEEDBACK-COLLECTOR.md, EVALUATION-ENGINE.md, PATTERN-DETECTOR.md, LEARNING-GOVERNANCE.md, 37_STORAGE
+Used By: EVALUATION-ENGINE.md, PATTERN-DETECTOR.md, LEARNING-MANAGER.md, ADAPTATION-MANAGER.md
+Last Updated: 2026-07-08
+
 ## Purpose
 
-The Experience Store is the permanent repository for all validated learning experiences within SquirrelForge. It preserves historical records of workflow executions, evaluations, feedback, optimization results, and governance decisions to support evidence-based learning and complete traceability.
+The Experience Store owns authoritative Learning-domain experience records, identifiers, metadata, relationships, and retrieval references. Raw persistence infrastructure remains with `37_STORAGE`.
 
-The Experience Store never analyzes or modifies experiences. It serves as the authoritative source of learning history.
+## Responsibilities
 
----
+- Create stable Learning experience identifiers.
+- Record source, workflow, event-category, confidence, evidence, evaluation, pattern, governance, and adaptation references.
+- Maintain Learning-domain experience relationships and lifecycle metadata.
+- Provide metadata and record retrieval for evaluation and pattern analysis.
+- Preserve references to authoritative source records without duplicating their ownership.
+- Coordinate persistence and retrieval operations through Storage owners.
 
-# Responsibilities
+## Boundary
 
-- Store validated learning experiences.
-- Preserve historical records.
-- Organize experiences by category.
-- Maintain immutable audit history.
-- Support retrieval for evaluation.
-- Support pattern analysis.
-- Support optimization research.
-- Preserve governance decisions.
-- Ensure data integrity.
-- Protect learning history from unauthorized modification.
+The Experience Store does not:
 
----
+- own raw file, blob, database, backup, archive, or storage infrastructure;
+- analyze experiences, evaluate learning value, or detect patterns;
+- change governance decisions or adaptation outcomes;
+- own general audit-trail infrastructure;
+- perform authorization decisions;
+- execute storage recovery or retry policy independently.
 
-# Stored Experience Types
+## Integrity Rule
 
-The Experience Store records:
-
-- Workflow executions
-- User feedback
-- Agent feedback
-- Validation results
-- Rule evaluations
-- Risk assessments
-- Security events
-- Performance metrics
-- Optimization recommendations
-- Governance decisions
-- Approved adaptations
-- Learning reports
-
----
-
-# Storage Workflow
-
-1. Receive validated experience.
-2. Verify integrity.
-3. Assign unique identifier.
-4. Attach metadata.
-5. Store immutable record.
-6. Index for retrieval.
-7. Generate audit entry.
-8. Confirm successful storage.
-
----
-
-# Experience Metadata
-
-Each stored experience includes:
-
-- Experience ID
-- Timestamp
-- Source component
-- Workflow ID
-- Event category
-- Severity
-- Confidence level
-- Supporting evidence
-- Related evaluations
-- Governance status
-- Adaptation status
-
----
-
-# Retrieval Capabilities
-
-The Experience Store supports retrieval by:
-
-- Experience ID
-- Workflow
-- Component
-- Agent
-- Date range
-- Event type
-- Severity
-- Confidence
-- Governance status
-- Learning category
-
----
-
-# Integrity Rules
-
-The Experience Store must ensure:
-
-- Records are immutable.
-- Data remains complete.
-- Metadata is preserved.
-- Audit trails remain intact.
-- Retrieval is accurate.
-- Historical relationships are maintained.
-
----
-
-# Safety Rules
-
-The Experience Store must never:
-
-- Modify stored experiences.
-- Delete historical records.
-- Change governance decisions.
-- Alter timestamps.
-- Remove supporting evidence.
-- Permit unauthorized access.
-
----
-
-# Failure Handling
-
-If storage fails:
-
-- Preserve the incoming record.
-- Record the failure.
-- Notify the Learning Monitor.
-- Retry storage when appropriate.
-- Escalate persistent failures.
-- Maintain audit continuity.
-
----
-
-# Audit Requirements
-
-Every storage operation records:
-
-- Storage timestamp
-- Experience ID
-- Source component
-- Validation status
-- Storage result
-- Integrity verification
-- Retrieval index status
-
----
-
-# Success Criteria
-
-The Experience Store succeeds when:
-
-- All validated experiences are stored.
-- Records remain immutable.
-- Retrieval is reliable.
-- Metadata is complete.
-- Audit history is preserved.
-- Evidence remains linked.
-- No historical information is lost.
+Learning-domain experience records preserve stable identity and lineage. Persistence guarantees, backup, restoration, and physical storage lifecycle are supplied by authoritative Storage components.

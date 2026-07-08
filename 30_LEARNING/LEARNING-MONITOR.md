@@ -1,156 +1,37 @@
 # SquirrelForge Learning Monitor
 
+Version: 1.0.0
+Status: Stable
+Owner: Learning Maintainers
+Depends On: Learning Layer status references, 27_OBSERVABILITY
+Used By: LEARNING-MANAGER.md, Learning maintainers, observability consumers
+Last Updated: 2026-07-08
+
 ## Purpose
 
-The Learning Monitor provides continuous oversight of all Learning Layer activities. It tracks learning workflows, evaluates operational health, detects failures, measures effectiveness, and ensures that learning processes remain reliable, transparent, and compliant with governance requirements.
+The Learning Monitor consumes authoritative observability and Learning-domain status references, correlates Learning-domain health and effectiveness indicators, and produces Learning-domain findings and reports.
 
-The Learning Monitor observes and reports. It does not modify learning behavior or approve adaptations.
+## Responsibilities
 
----
+- Consume telemetry, metric, log, alert, health, and event references from Observability owners.
+- Correlate Learning Layer processing, evaluation, pattern, governance, adaptation, and experience-status signals.
+- Interpret Learning-domain thresholds and effectiveness indicators.
+- Detect Learning-domain stalled progress, repeated failures, unusual trends, and unauthorized-adaptation signals from authoritative inputs.
+- Produce Learning-domain health findings, effectiveness summaries, and status reports.
+- Route findings to the Learning Manager, owning Learning component, Security, Resilience, or Observability owner as appropriate.
 
-# Responsibilities
+## Boundary
 
-- Monitor all Learning Layer components.
-- Track learning workflow execution.
-- Detect processing failures.
-- Measure learning effectiveness.
-- Monitor system performance.
-- Verify governance compliance.
-- Generate operational alerts.
-- Produce monitoring reports.
-- Support auditing activities.
-- Maintain historical monitoring records.
+The Learning Monitor does not:
 
----
+- collect general telemetry;
+- own logs, metrics, traces, dashboards, alerts, diagnostics, health reporting, or audit-trail infrastructure;
+- independently verify governance compliance as an authority;
+- make adaptation approval decisions;
+- own authoritative workflow or task state;
+- execute retries, recovery, rollback, remediation, or adaptation;
+- create a parallel monitoring history or storage infrastructure.
 
-# Monitoring Scope
+## Rule
 
-The Learning Monitor oversees:
-
-- Learning Manager
-- Feedback Collector
-- Experience Store
-- Evaluation Engine
-- Pattern Detector
-- Optimization Engine
-- Adaptation Manager
-- Learning Governance
-- Learning workflows
-- Learning audit records
-
----
-
-# Monitoring Workflow
-
-1. Observe learning activity.
-2. Collect operational metrics.
-3. Detect anomalies.
-4. Verify workflow completion.
-5. Monitor component health.
-6. Check governance compliance.
-7. Generate alerts when required.
-8. Produce monitoring reports.
-9. Archive monitoring history.
-10. Publish system status.
-
----
-
-# Monitored Metrics
-
-The Learning Monitor tracks:
-
-- Learning events processed
-- Feedback collection rate
-- Experience storage success rate
-- Evaluation completion rate
-- Pattern detection frequency
-- Optimization proposal volume
-- Adaptation success rate
-- Governance approval rate
-- Processing latency
-- System availability
-
----
-
-# Alert Conditions
-
-Alerts are generated when:
-
-- Learning workflows fail.
-- Component availability decreases.
-- Storage errors occur.
-- Evaluations fail repeatedly.
-- Pattern detection anomalies are identified.
-- Governance workflows stall.
-- Unauthorized adaptation is attempted.
-- Audit integrity is compromised.
-- Performance thresholds are exceeded.
-
----
-
-# Monitoring Outputs
-
-The Learning Monitor produces:
-
-- Operational dashboards
-- Health reports
-- Alert notifications
-- Performance summaries
-- Compliance reports
-- Audit support reports
-- Historical monitoring records
-
----
-
-# Safety Rules
-
-The Learning Monitor must never:
-
-- Modify learning data.
-- Approve adaptations.
-- Override governance decisions.
-- Suppress critical alerts.
-- Delete monitoring history.
-- Alter audit records.
-
----
-
-# Failure Handling
-
-If monitoring fails:
-
-- Record the monitoring failure.
-- Preserve all available metrics.
-- Notify system administrators.
-- Retry monitoring operations.
-- Escalate persistent failures.
-- Maintain audit continuity.
-
----
-
-# Audit Requirements
-
-Every monitoring cycle records:
-
-- Monitoring ID
-- Timestamp
-- Components monitored
-- Workflow status
-- Performance metrics
-- Alerts generated
-- Compliance status
-- Monitoring outcome
-
----
-
-# Success Criteria
-
-The Learning Monitor succeeds when:
-
-- All Learning Layer components are continuously monitored.
-- Operational issues are detected promptly.
-- Alerts are generated accurately.
-- Governance compliance is verified.
-- Monitoring records remain complete.
-- Historical metrics are preserved.
-- Learning operations remain fully observable and traceable.
+The Learning Monitor specializes authoritative signals into Learning-domain findings. General observability collection and infrastructure remain with `27_OBSERVABILITY`, while operational action remains with the relevant owning component.

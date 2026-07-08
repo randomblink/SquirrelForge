@@ -1,154 +1,39 @@
 # SquirrelForge Pattern Detector
 
+Version: 1.0.0
+Status: Stable
+Owner: Learning Maintainers
+Depends On: EVALUATION-ENGINE.md, EXPERIENCE-STORE.md
+Used By: LEARNING-MANAGER.md, 32_OPTIMIZATION, LEARNING-GOVERNANCE.md
+Last Updated: 2026-07-08
+
 ## Purpose
 
-The Pattern Detector identifies recurring behaviors, trends, correlations, anomalies, and repeated outcomes across historical learning experiences. Its purpose is to distinguish meaningful patterns from isolated events and provide evidence-based insights for optimization.
+The Pattern Detector identifies recurring Learning-domain patterns, trends, correlations, and anomalies across qualified evaluation and experience references.
 
-The Pattern Detector identifies patterns only. It never changes system behavior or recommends implementation without further evaluation and governance.
+## Responsibilities
 
----
+- Analyze qualified historical experience references.
+- Group related observations for pattern analysis.
+- Detect recurrence, trends, correlations, and anomalies.
+- Measure pattern strength and Learning-domain confidence.
+- Produce pattern findings, source references, evidence summaries, and optimization-candidate references.
+- Provide qualified pattern findings to downstream Optimization and Learning consumers.
 
-# Responsibilities
+## Boundary
 
-- Analyze historical experiences.
-- Detect recurring patterns.
-- Identify trends over time.
-- Discover correlations.
-- Identify anomalies.
-- Measure pattern strength.
-- Classify learning patterns.
-- Generate pattern reports.
-- Forward validated patterns to the Optimization Engine.
-- Maintain complete pattern history.
+The Pattern Detector does not:
 
----
+- modify source experiences;
+- perform general anomaly monitoring for the platform;
+- replace observability diagnostics or alerting;
+- perform general risk assessment;
+- create optimization policy or execute optimizations;
+- recommend or implement behavioral changes as an authority;
+- approve adaptations;
+- own general historical storage or audit infrastructure;
+- execute retries or recovery.
 
-# Pattern Sources
+## Rule
 
-The Pattern Detector analyzes:
-
-- Stored experiences
-- Workflow histories
-- User feedback
-- Agent behavior
-- Validation outcomes
-- Rule evaluations
-- Risk assessments
-- Performance metrics
-- Security events
-- Optimization history
-
----
-
-# Pattern Detection Workflow
-
-1. Receive evaluated learning data.
-2. Retrieve related historical experiences.
-3. Group similar events.
-4. Identify recurring behaviors.
-5. Measure statistical significance.
-6. Calculate confidence.
-7. Detect anomalies.
-8. Generate pattern report.
-9. Forward validated patterns to the Optimization Engine.
-10. Record detection results.
-
----
-
-# Pattern Categories
-
-Supported categories include:
-
-- Workflow efficiency
-- User behavior
-- Agent collaboration
-- Validation performance
-- Rule compliance
-- Error recurrence
-- Security incidents
-- Performance trends
-- Resource utilization
-- Optimization opportunities
-
----
-
-# Pattern Strength Levels
-
-Patterns are classified as:
-
-- Confirmed
-- Strong
-- Moderate
-- Weak
-- Inconclusive
-
-Only Confirmed and Strong patterns are eligible for optimization analysis.
-
----
-
-# Outputs
-
-The Pattern Detector produces:
-
-- Pattern reports
-- Confidence scores
-- Trend summaries
-- Correlation analyses
-- Anomaly reports
-- Optimization candidates
-- Audit records
-
----
-
-# Safety Rules
-
-The Pattern Detector must never:
-
-- Treat isolated events as patterns.
-- Ignore contradictory evidence.
-- Recommend behavioral changes.
-- Modify historical experiences.
-- Override governance.
-- Suppress anomalies.
-
----
-
-# Failure Handling
-
-If pattern detection fails:
-
-- Preserve evaluation data.
-- Record the failure.
-- Notify the Learning Monitor.
-- Retry when appropriate.
-- Escalate persistent failures.
-- Maintain audit continuity.
-
----
-
-# Audit Requirements
-
-Every pattern analysis records:
-
-- Pattern ID
-- Timestamp
-- Source experiences
-- Pattern category
-- Confidence level
-- Strength classification
-- Statistical evidence
-- Forwarding status
-
----
-
-# Success Criteria
-
-The Pattern Detector succeeds when:
-
-- Meaningful patterns are accurately identified.
-- Weak evidence is filtered appropriately.
-- Confidence levels are justified.
-- Trends remain traceable.
-- Anomalies are preserved.
-- Qualified patterns are forwarded.
-- Complete audit history is maintained.
+Pattern findings are Learning-domain analytical evidence. They remain proposals or evidence inputs until the appropriate Optimization, Learning Governance, Validation, Execution, and other authoritative owners act on them.
