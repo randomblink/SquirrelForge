@@ -1,8 +1,19 @@
 # SquirrelForge Semantic Search Manager
 
+Version: 1.0.0
+Status: Stable
+Owner: Knowledge Maintainers
+Depends On: `25_KNOWLEDGE/KNOWLEDGE-REGISTRY.md`, `25_KNOWLEDGE/KNOWLEDGE-VALIDATOR.md`, `25_KNOWLEDGE/EMBEDDINGS.md`, `25_KNOWLEDGE/KNOWLEDGE-VERSIONING.md`, `25_KNOWLEDGE/CITATION-MANAGER.md`, `24_SECURITY/AUTHORIZATION-MANAGER.md`
+Used By: `25_KNOWLEDGE/KNOWLEDGE-MANAGER.md`, Reasoning, Agents, Workflows
+Last Updated: 2026-07-08
+
 ## Purpose
 
-The Semantic Search Manager enables SquirrelForge to retrieve knowledge based on meaning, context, and intent rather than exact keyword matching, improving the relevance and usefulness of information returned to workflows, reasoning systems, and AI agents.
+The Semantic Search Manager executes Knowledge Layer retrieval over registered, validated, authorized, and version-aware knowledge assets.
+
+It interprets knowledge retrieval intent, uses embedding references and metadata filters, ranks candidate knowledge assets, and returns relevance-ranked knowledge references.
+
+It does not generate embeddings, validate knowledge, assign trust, create citations, create version records, own raw document storage, make authorization decisions, make reasoning decisions, or own general logging, audit, storage, or observability infrastructure.
 
 ---
 
@@ -14,7 +25,7 @@ The Semantic Search Manager enables SquirrelForge to retrieve knowledge based on
 - Calculate similarity scores.
 - Rank search results.
 - Apply filtering rules.
-- Record search activity.
+- Request observability/audit records when required.
 - Return relevance-ranked results.
 
 ---
@@ -23,13 +34,13 @@ The Semantic Search Manager enables SquirrelForge to retrieve knowledge based on
 
 1. Receive search request.
 2. Interpret search intent.
-3. Generate semantic representation.
-4. Retrieve candidate knowledge.
+3. Retrieve or request embedding references from `25_KNOWLEDGE/EMBEDDINGS.md`.
+4. Retrieve candidate knowledge references from registered and validated assets.
 5. Calculate similarity scores.
-6. Apply filtering and authorization.
+6. Apply metadata, trust, version, citation, and authorization filters.
 7. Rank results by relevance.
-8. Record search activity.
-9. Return search results.
+8. Request search activity recording when required.
+9. Return search result references.
 
 ---
 
@@ -55,6 +66,9 @@ The Semantic Search Manager enables SquirrelForge to retrieve knowledge based on
 | Search Type | Retrieval method |
 | Results Returned | Number of matching assets |
 | Top Relevance Score | Highest similarity score |
+| Registry References | Knowledge Registry entries returned |
+| Version References | Knowledge versions included |
+| Citation References | Citation references included when required |
 | Timestamp | Search time |
 | Requesting Component | Originating subsystem |
 
@@ -64,8 +78,8 @@ The Semantic Search Manager enables SquirrelForge to retrieve knowledge based on
 
 - Prioritize semantic relevance.
 - Prefer authoritative knowledge.
-- Respect trust levels.
-- Apply authorization filtering.
+- Respect trust results from `25_KNOWLEDGE/KNOWLEDGE-VALIDATOR.md`.
+- Consume authorization decisions from `24_SECURITY/AUTHORIZATION-MANAGER.md`.
 - Favor current versions over deprecated content.
 - Support deterministic ranking when scores are equal.
 
@@ -75,13 +89,27 @@ The Semantic Search Manager enables SquirrelForge to retrieve knowledge based on
 
 - Return meaningful results.
 - Minimize irrelevant matches.
-- Preserve explainability.
-- Record retrieval decisions.
+- Preserve explainability by returning citation and provenance references.
+- Request retrieval decision records through owning observability infrastructure when required.
 - Support scalable indexing.
 - Continuously improve ranking quality.
 
 ---
 
+## Permission Boundary
+
+The Semantic Search Manager may interpret knowledge retrieval intent, retrieve candidate knowledge references, calculate similarity scores, apply metadata/trust/version/citation/authorization filters, rank results, and return relevance-ranked knowledge references.
+
+It must not generate embeddings, validate knowledge, assign trust, create citations, create version records, own raw document storage, make authorization decisions, make reasoning decisions, or own general logging, audit, storage, or observability infrastructure.
+
+---
+
+## Domain Rule
+
+Semantic retrieval applies identically regardless of domain. Domain-specific knowledge can be searched only after it is registered, validated, authorized for the requester, and represented through Knowledge Layer references.
+
+---
+
 ## Rule
 
-Every semantic search performed by SquirrelForge must retrieve only authorized, validated, and relevance-ranked knowledge assets before results are returned to the requesting component.
+Every semantic search performed by SquirrelForge must return only authorized, registered, validated, version-aware, and relevance-ranked knowledge references.

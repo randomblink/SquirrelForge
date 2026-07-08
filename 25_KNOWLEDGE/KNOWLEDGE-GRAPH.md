@@ -1,8 +1,19 @@
 # SquirrelForge Knowledge Graph Manager
 
+Version: 1.0.0
+Status: Stable
+Owner: Knowledge Maintainers
+Depends On: `25_KNOWLEDGE/KNOWLEDGE-REGISTRY.md`, `25_KNOWLEDGE/CITATION-MANAGER.md`, `25_KNOWLEDGE/KNOWLEDGE-VALIDATOR.md`
+Used By: `25_KNOWLEDGE/KNOWLEDGE-MANAGER.md`, `25_KNOWLEDGE/SEMANTIC-SEARCH.md`, Reasoning, Agents
+Last Updated: 2026-07-08
+
 ## Purpose
 
-The Knowledge Graph Manager represents knowledge as interconnected entities and relationships, enabling SquirrelForge to understand context, dependencies, hierarchies, and reasoning paths across the entire knowledge ecosystem.
+The Knowledge Graph Manager owns Knowledge Layer entity and relationship records.
+
+It represents registered knowledge assets as graph entities and records explicit relationships between them for traversal, context, dependency awareness, and explanation support.
+
+It does not own registry metadata, citation records, knowledge validation, reasoning decisions, workflow dependency authority, authorization decisions, or general logging, audit, storage, or observability infrastructure.
 
 ---
 
@@ -10,12 +21,12 @@ The Knowledge Graph Manager represents knowledge as interconnected entities and 
 
 - Register knowledge entities.
 - Define relationships between entities.
-- Maintain graph structure.
+- Maintain graph relationship records.
 - Support graph traversal.
 - Discover indirect relationships.
 - Preserve ontology consistency.
-- Record graph updates.
-- Support relationship-aware reasoning.
+- Provide relationship references to Knowledge Manager, Registry, Semantic Search, and reasoning components.
+- Support relationship-aware reasoning by supplying graph records.
 
 ---
 
@@ -24,9 +35,9 @@ The Knowledge Graph Manager represents knowledge as interconnected entities and 
 1. Receive graph request.
 2. Identify target entities.
 3. Verify entity registration.
-4. Resolve relationships.
+4. Create, update, or resolve graph relationship records.
 5. Traverse the knowledge graph.
-6. Record traversal activity.
+6. Request observability/audit recording when required.
 7. Return graph results.
 
 ---
@@ -70,6 +81,7 @@ The Knowledge Graph Manager represents knowledge as interconnected entities and 
 | Relationship | Connection type |
 | Target Entity | Destination node |
 | Confidence | Relationship confidence |
+| Evidence Reference | Citation, validation, or provenance reference supporting the relationship |
 | Timestamp | Last updated |
 | Status | Active / Deprecated |
 
@@ -84,8 +96,24 @@ The Knowledge Graph Manager represents knowledge as interconnected entities and 
 - Ontology consistency must be preserved.
 - Relationship history should remain traceable.
 
+Graph relationships are knowledge-context records. Execution dependency ordering remains owned by `14_ENGINE/DEPENDENCY-ANALYZER.md` and workflow/execution components.
+
+---
+
+## Permission Boundary
+
+The Knowledge Graph Manager may create and maintain knowledge entity records, relationship records, ontology metadata, traversal results, indirect relationship findings, and relationship evidence references.
+
+It must not own Knowledge Registry metadata, citation records, knowledge validation, reasoning decisions, workflow dependency authority, authorization decisions, or general logging, audit, storage, or observability infrastructure.
+
+---
+
+## Domain Rule
+
+Knowledge graph modeling applies identically regardless of domain. Domain-specific relationships are represented as relationship records rather than separate domain-specific graph systems.
+
 ---
 
 ## Rule
 
-Every knowledge relationship used for reasoning, retrieval, or planning must be represented as a validated entity relationship within the Knowledge Graph before it may influence system behavior.
+Every knowledge relationship used for reasoning, retrieval, or planning must be represented as a graph relationship with registered entities and evidence references before it may influence knowledge-domain results.
