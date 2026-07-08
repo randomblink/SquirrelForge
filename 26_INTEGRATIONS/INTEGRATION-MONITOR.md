@@ -1,116 +1,95 @@
 # SquirrelForge Integration Monitor
 
+Version: 1.0.0
+Status: Stable
+Owner: Integrations Maintainers
+Depends On: `21_CONFIGURATION`, `26_INTEGRATIONS/CONNECTOR-MANAGER.md`, `26_INTEGRATIONS/INTEGRATION-MANAGER.md`, `26_INTEGRATIONS/SERVICE-DISCOVERY.md`, `27_OBSERVABILITY`
+Used By: `26_INTEGRATIONS/INTEGRATION-MANAGER.md`, `26_INTEGRATIONS/CONNECTOR-MANAGER.md`, `26_INTEGRATIONS/SERVICE-DISCOVERY.md`, `26_INTEGRATIONS/INTEGRATION-GOVERNANCE.md`
+Last Updated: 2026-07-08
+
 ## Purpose
 
-The Integration Monitor provides continuous oversight of the health, performance, security, and compliance of all external integrations. It tracks the operational status of APIs, connectors, and gateways, ensuring that communications with the outside world are reliable, efficient, and performing as expected.
+The Integration Monitor interprets integration-domain telemetry, status references, availability references, and provider/connector signals to produce integration health, availability, performance, and status findings.
 
-The Integration Monitor observes and reports only. It does not modify integration behavior or approve changes.
+It consumes observability inputs and Integration-layer status references, then reports integration-domain findings to Integration components and callers.
 
----
-
-# Responsibilities
-
-- Monitor health and availability of all active integrations.
-- Track key performance metrics (latency, error rate, throughput).
-- Verify compliance with governance policies (e.g., rate limits).
-- Detect and alert on service outages or performance degradation.
-- Monitor for security anomalies (e.g., authentication failures).
-- Provide data for integration health dashboards.
-- Record all monitoring events for historical analysis.
+It does not own general observability infrastructure, logging, metrics pipelines, traces, dashboards, alerts, audit storage, security monitoring, compliance assessment, governance approval, recovery execution, or authoritative workflow state.
 
 ---
 
-# Monitoring Scope
+## Responsibilities
 
-The Integration Monitor oversees:
-
-- API Gateway
-- Connector Manager
-- Authentication Manager
-- Service Discovery
-- Request Router
-- Response Handler
-- Retry Manager
-- Integration Governance
-- All registered external endpoints
+- Consume integration telemetry and status references from observability owners.
+- Interpret integration-domain health, availability, latency, error, rate-limit, authentication-failure, and degradation signals.
+- Produce integration health and availability findings.
+- Provide availability references to `CONNECTOR-MANAGER.md`, `SERVICE-DISCOVERY.md`, and `INTEGRATION-MANAGER.md`.
+- Report integration-domain degradation, outage, or status findings to owning components.
+- Preserve integration-monitor finding references through owning observability, audit, and storage infrastructure.
 
 ---
 
-# Monitoring Workflow
+## Boundary
 
-1. Collect telemetry (logs and metrics) from all Integration Layer components.
-2. Aggregate metrics on a per-integration basis.
-3. Evaluate metrics against configured health and performance thresholds.
-4. If a threshold is breached, generate an alert.
-5. Update the `Health Status` of the integration in the Integration Manager.
-6. Store historical metric data for trend analysis and reporting.
+`INTEGRATION-MONITOR.md` owns:
+
+- integration-domain telemetry interpretation,
+- integration health findings,
+- integration availability findings,
+- integration performance findings,
+- integration degradation findings,
+- and integration status references supplied to Integration components.
+
+`INTEGRATION-MONITOR.md` does not own:
+
+- general logs, metrics, traces, dashboards, alerts, audit records, or observability pipelines (`27_OBSERVABILITY`),
+- security-domain monitoring or threat detection (`24_SECURITY/SECURITY-MONITOR.md` and `24_SECURITY/THREAT-DETECTOR.md`),
+- compliance assessment (`24_SECURITY/COMPLIANCE.md`),
+- integration approval or exception decisions (`INTEGRATION-GOVERNANCE.md`),
+- connector registry lifecycle (`CONNECTOR-MANAGER.md`),
+- integration routing or handoff coordination (`INTEGRATION-MANAGER.md`),
+- recovery execution, retries, rollback, or failure handling,
+- external request execution,
+- or authoritative workflow/task lifecycle state.
 
 ---
 
-# Monitored Metrics
+## Monitored Integration Signals
 
-| Metric | Description |
+Integration Monitor may interpret:
+
+| Signal | Meaning |
 |---|---|
-| `integration.latency.seconds` | The time taken for an external call to complete. |
-| `integration.requests.total` | A counter of all requests, labeled by status (success/fail). |
-| `integration.error.rate` | The percentage of requests that result in an error. |
-| `integration.health.status` | The current health of the integration (1 for healthy, 0 for unhealthy). |
-| `integration.ratelimit.hits.total` | A counter for every time a rate limit is enforced. |
-| `integration.auth.failures.total` | A counter for authentication failures. |
+| `Availability` | External service, connector, or endpoint availability reference. |
+| `Latency` | Integration call duration or delay signal. |
+| `Error Rate` | Error frequency signal for a connector, provider, endpoint, or API. |
+| `Rate Limit` | Rate-limit hit or quota-status signal. |
+| `Authentication Failure` | External authentication failure signal from Integration Authentication or provider components. |
+| `Timeout` | Transport timeout signal. |
+| `Degradation` | Reduced capability, partial outage, or unstable provider status. |
+
+These signals are interpreted as integration-domain findings only. They do not become security incidents, compliance findings, or workflow state without the owning component making that decision.
 
 ---
 
-# Alert Conditions
+## Finding States
 
-Alerts are generated for:
+| State | Meaning |
+|---|---|
+| `Healthy` | Current signals show expected integration behavior. |
+| `Degraded` | Signals show reduced or unreliable behavior. |
+| `Unavailable` | Signals show the integration cannot currently serve requests. |
+| `Rate Limited` | Signals show active rate-limit or quota pressure. |
+| `Authentication Failing` | Signals show external authentication failures. |
+| `Unknown` | Required observability or status references are missing or stale. |
 
-- Sudden spikes in latency for a specific API.
-- High error rates for a database connector.
-- An external service failing health checks from Service Discovery.
-- An integration that is being consistently rate-limited.
-- A high number of authentication failures for a specific service.
-- A component of the Integration Layer becoming unhealthy.
-
----
-
-# Safety Rules
-
-The Integration Monitor must never:
-
-- Modify integration configurations.
-- Suppress critical security or availability alerts.
-- Delete historical monitoring data.
-- Alter audit records.
+Finding states are integration-monitor states only. They are not connector lifecycle, workflow, validation, recovery, compliance, or incident states.
 
 ---
 
-# Audit Requirements
+## Rules
 
-Every monitoring cycle records:
-
-- Monitoring Cycle ID
-- Timestamp
-- Integrations Monitored
-- Health Status Summary
-- Performance Metrics Snapshot
-- Alerts Generated
-- Compliance Status
-
----
-
-# Success Criteria
-
-The Integration Monitor succeeds when:
-
-- All active integrations are continuously monitored.
-- Operational issues and security anomalies are detected promptly.
-- Alerts are generated accurately and are actionable.
-- Governance compliance is continuously verified.
-- Monitoring records remain complete and auditable.
-- The operational status of all integrations is transparent.
-
----
-
-# Rule
-
-Every active integration must be continuously observed by the Integration Monitor, and its `Health Status` must be kept current in the Integration Manager to ensure it is eligible for routing.
+1. Integration Monitor must consume telemetry and status references from owning observability and Integration components.
+2. Integration Monitor may produce integration-domain findings, but it must not maintain observability infrastructure.
+3. Integration Monitor must not approve integrations, enforce governance, execute recovery, or change workflow state.
+4. Integration Monitor must keep findings separate from security incidents, compliance findings, and validation outcomes unless those owners consume the finding.
+5. Integration Monitor must provide status and availability references to Integration components without replacing their ownership.

@@ -1,88 +1,82 @@
 # SquirrelForge Webhook Manager
 
+Version: 1.0.0
+Status: Stable
+Owner: Integrations Maintainers
+Depends On: `21_CONFIGURATION`, `24_SECURITY`, `26_INTEGRATIONS/AUTHENTICATION.md`, `26_INTEGRATIONS/INTEGRATION-GOVERNANCE.md`, `26_INTEGRATIONS/INTEGRATION-MANAGER.md`, `27_OBSERVABILITY`, `28_RUNTIME-CONFIG`
+Used By: `26_INTEGRATIONS/INTEGRATION-MANAGER.md`, External event and notification integrations
+Last Updated: 2026-07-08
+
 ## Purpose
 
-The Webhook Manager manages inbound and outbound webhook communications between SquirrelForge and external systems, ensuring secure delivery, event validation, reliable processing, and complete auditability.
+The Webhook Manager adapts inbound and outbound webhook communications between SquirrelForge and approved external systems.
+
+It owns webhook protocol handling, signature/reference checks, payload-shape checks, outbound webhook payload translation, delivery status normalization, and webhook event/status evidence references.
+
+It does not own business event routing, workflow execution, security authorization, credential storage, retry/recovery execution, business validation, logging, audit, observability infrastructure, or authoritative workflow state.
 
 ---
 
 ## Responsibilities
 
-- Receive inbound webhook events.
-- Validate webhook authenticity.
-- Verify payload integrity.
-- Process outbound webhook deliveries.
-- Route events to the appropriate workflow.
-- Retry failed deliveries when permitted.
-- Record webhook activity.
-- Report delivery status.
+- Receive approved inbound webhook requests at Integration-layer webhook endpoints.
+- Check webhook signature, token, timestamp, replay, and payload-shape references using approved configuration and security inputs.
+- Normalize inbound webhook event metadata and payload references.
+- Return inbound webhook event references to `INTEGRATION-MANAGER.md` or the approved caller for routing.
+- Translate approved outbound webhook handoffs into provider-specific payloads.
+- Coordinate outbound webhook signing/authentication using approved references.
+- Normalize outbound delivery response, error, status, and evidence references.
+- Emit webhook event references through observability owners.
 
 ---
 
-## Webhook Process
+## Boundary
 
-### Inbound
+`WEBHOOK-MANAGER.md` owns:
 
-1. Receive webhook request.
-2. Verify source authenticity.
-3. Validate signature or authentication token.
-4. Validate payload structure.
-5. Record the incoming event.
-6. Route the event to the appropriate workflow.
-7. Return an acknowledgment.
+- webhook protocol handling,
+- inbound webhook payload-shape checks,
+- webhook signature and replay-reference checks,
+- outbound webhook payload translation,
+- webhook delivery status normalization,
+- webhook event/status evidence references,
+- and webhook acknowledgment handling.
 
-### Outbound
+`WEBHOOK-MANAGER.md` does not own:
 
-1. Receive outbound event.
-2. Build webhook payload.
-3. Apply authentication or signing.
-4. Deliver webhook.
-5. Receive delivery response.
-6. Retry if allowed.
-7. Record delivery status.
+- business event routing or task routing (`INTEGRATION-MANAGER.md` and workflow owners),
+- workflow execution,
+- platform authentication or authorization decisions,
+- credential or secret storage,
+- security policy enforcement,
+- business validation or task-completion validation,
+- retry, recovery, rollback, or workflow failure handling,
+- logging, audit, metrics, traces, dashboards, alerts, or observability infrastructure,
+- or authoritative workflow/task lifecycle state.
 
 ---
 
-## Webhook Status
+## Webhook Statuses
 
 | Status | Meaning |
 |---|---|
-| Received | Event accepted |
-| Validated | Authentication and payload verified |
-| Routed | Event delivered internally |
-| Delivered | Outbound webhook accepted |
-| Retrying | Awaiting another delivery attempt |
-| Failed | Delivery or validation failed |
-| Rejected | Event refused |
+| `Received` | Inbound webhook request was received. |
+| `Rejected` | Required signature, token, timestamp, replay, or payload-shape reference failed. |
+| `Accepted` | Webhook passed protocol-level checks and produced an event reference. |
+| `Dispatched` | Event reference was handed to the approved caller or Integration Manager. |
+| `Delivery Submitted` | Outbound webhook delivery was submitted. |
+| `Delivered` | External system accepted outbound webhook delivery. |
+| `Delivery Failed` | External system rejected or failed outbound delivery. |
+
+These are webhook transport statuses only. They are not business validation, workflow state, incident state, or recovery state.
 
 ---
 
-## Webhook Record
+## Rules
 
-| Field | Description |
-|---|---|
-| Event ID | Unique identifier |
-| Direction | Inbound / Outbound |
-| Source | Originating system |
-| Destination | Receiving system |
-| Event Type | Type of webhook event |
-| Status | Current processing state |
-| Timestamp | Processing time |
-| Result | Outcome summary |
-
----
-
-## Security Requirements
-
-- Verify webhook signatures when supported.
-- Reject unauthorized sources.
-- Validate payload format before processing.
-- Prevent duplicate event processing.
-- Record all webhook activity for auditing.
-- Never execute unverified webhook content.
-
----
-
-## Rule
-
-Every webhook event must be authenticated, validated, recorded, and routed before it may affect any SquirrelForge workflow.
+1. Webhook Manager must process only approved webhook endpoints and outbound handoffs.
+2. Webhook Manager must use credential, signing, endpoint, governance, and configuration references from owning components.
+3. Webhook Manager may perform protocol-level signature, replay, and payload-shape checks only.
+4. Webhook Manager must not route business events independently of Integration Manager or workflow owners.
+5. Webhook Manager may report retryable delivery status, but retry/recovery decisions belong to execution and coordination owners.
+6. Webhook Manager must emit event references through observability owners.

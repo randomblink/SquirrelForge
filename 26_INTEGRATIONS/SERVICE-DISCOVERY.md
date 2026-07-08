@@ -1,165 +1,101 @@
 # SquirrelForge Service Discovery
 
+Version: 1.0.0
+Status: Stable
+Owner: Integrations Maintainers
+Depends On: `21_CONFIGURATION`, `24_SECURITY`, `26_INTEGRATIONS/CONNECTOR-MANAGER.md`, `26_INTEGRATIONS/INTEGRATION-GOVERNANCE.md`, `27_OBSERVABILITY`, `37_STORAGE`
+Used By: `26_INTEGRATIONS/INTEGRATION-MANAGER.md`, `26_INTEGRATIONS/CONNECTOR-MANAGER.md`, `26_INTEGRATIONS/INTEGRATION-GOVERNANCE.md`, `26_INTEGRATIONS/INTEGRATION-MONITOR.md`
+Last Updated: 2026-07-08
+
 ## Purpose
 
-The Service Discovery component identifies, registers, and maintains information about approved external services, APIs, connectors, MCP servers, plugins, databases, and infrastructure resources available to SquirrelForge. It provides a reliable catalog of service capabilities, endpoints, versions, and operational status to support secure and efficient integration.
+Service Discovery owns integration-domain discovery records for external services, APIs, connectors, MCP servers, plugins, repositories, database services, file-storage services, automation platforms, and provider endpoints available for approved Integration-layer use.
 
-Service Discovery identifies available services only. It does not establish connections or execute requests.
+It records endpoint references, capability metadata, protocol metadata, provider metadata, version references, ownership references, availability references, and discovery evidence references.
 
----
-
-# Responsibilities
-
-- Discover approved services.
-- Register available service endpoints.
-- Maintain the service catalog.
-- Verify service availability.
-- Record supported capabilities.
-- Track service versions.
-- Monitor endpoint changes.
-- Support capability lookup.
-- Notify Integration Manager of service updates.
-- Maintain discovery history.
+It does not establish external connections, execute requests, perform security authorization, approve integrations, own connector registry records, monitor general infrastructure, execute recovery, store secrets, maintain logging/audit/observability infrastructure, or own authoritative workflow state.
 
 ---
 
-# Discoverable Services
+## Responsibilities
 
-Service Discovery supports:
-
-- REST APIs
-- GraphQL APIs
-- MCP servers
-- WordPress sites
-- Git repositories
-- Cloud platforms
-- Databases
-- Storage providers
-- Email services
-- Calendar services
-- AI providers
-- Deployment platforms
-- Monitoring systems
-- Automation services
-- Internal platform services
+- Discover or ingest approved external service references.
+- Record endpoint, provider, protocol, capability, and version metadata.
+- Record ownership, governance, configuration, and credential-reference requirements.
+- Record service availability references supplied by integration monitoring or observability owners.
+- Provide discovery records to `INTEGRATION-MANAGER.md`, `CONNECTOR-MANAGER.md`, and `INTEGRATION-GOVERNANCE.md`.
+- Preserve discovery history and evidence references through owning storage, audit, and observability infrastructure.
 
 ---
 
-# Discovery Workflow
+## Boundary
 
-1. Receive discovery request.
-2. Verify governance policies.
-3. Identify discovery target.
-4. Validate service identity.
-5. Retrieve service metadata.
-6. Verify service availability.
-7. Record capabilities.
-8. Update service catalog.
-9. Notify Integration Manager.
-10. Archive discovery results.
+`SERVICE-DISCOVERY.md` owns:
 
----
+- integration-domain service discovery records,
+- endpoint references,
+- service capability metadata,
+- protocol and version metadata,
+- provider and ownership references,
+- service availability references,
+- and discovery evidence references.
 
-# Service Metadata
+`SERVICE-DISCOVERY.md` does not own:
 
-Each discovered service records:
-
-- Service ID
-- Service name
-- Provider
-- Version
-- Endpoint
-- Authentication requirements
-- Supported operations
-- Availability status
-- Health status
-- Governance status
+- connector registry records or connector lifecycle (`CONNECTOR-MANAGER.md`),
+- integration routing or handoff coordination (`INTEGRATION-MANAGER.md`),
+- integration approval decisions (`INTEGRATION-GOVERNANCE.md`),
+- authentication, authorization, or security enforcement (`24_SECURITY`),
+- credential or secret storage (`28_RUNTIME-CONFIG`),
+- external request execution,
+- recovery, rollback, retry, or failure handling,
+- general health monitoring infrastructure,
+- logging, audit, metrics, traces, dashboards, alerts, or observability pipelines,
+- platform storage infrastructure,
+- or authoritative workflow/task lifecycle state.
 
 ---
 
-# Capability Catalog
+## Discovery Record
 
-The Service Discovery catalog includes:
-
-- Available operations
-- Supported protocols
-- Authentication methods
-- API versions
-- Connector compatibility
-- Rate limits
-- Service dependencies
-- Feature availability
-- Operational constraints
-
----
-
-# Discovery States
-
-A service may exist in one of the following states:
-
-- Discovered
-- Verified
-- Available
-- Degraded
-- Unavailable
-- Deprecated
-- Retired
-
-Only **Verified** and **Available** services may be selected for integration.
+| Field | Description |
+|---|---|
+| Service ID | Stable service identifier. |
+| Service Name | Human-readable service name. |
+| Provider Reference | External provider or owner reference. |
+| Endpoint Reference | Endpoint reference, not raw secret material. |
+| Protocol Metadata | REST, GraphQL, MCP, webhook, database, file-service, or other protocol metadata. |
+| Capability Metadata | Declared available operations or capabilities. |
+| Version Reference | API, service, connector, or protocol version reference. |
+| Credential Requirement Reference | Required credential/authentication reference type. |
+| Governance Reference | Integration governance approval or restriction reference. |
+| Availability Reference | Latest availability/status reference from monitoring or observability owners. |
+| Discovery Status | Current discovery-record state. |
 
 ---
 
-# Safety Rules
+## Discovery States
 
-The Service Discovery component must never:
+| State | Meaning |
+|---|---|
+| `Discovered` | Service metadata was found or provided. |
+| `Reference Pending` | Required endpoint, owner, governance, or credential references are incomplete. |
+| `Verified` | Required discovery references are present. |
+| `Available` | Availability reference indicates the service can be considered by routing owners. |
+| `Degraded` | Availability reference indicates constrained service. |
+| `Unavailable` | Availability reference indicates the service is not currently usable. |
+| `Deprecated` | Service is scheduled for removal or replacement. |
+| `Retired` | Service is no longer available for new integration use. |
 
-- Register unverified services.
-- Expose sensitive service metadata.
-- Discover unauthorized endpoints.
-- Ignore governance restrictions.
-- Override authentication requirements.
-- Modify external service configurations.
-
----
-
-# Failure Handling
-
-If service discovery fails:
-
-- Preserve discovery context.
-- Record the failure.
-- Notify the Integration Monitor.
-- Retry discovery when appropriate.
-- Escalate persistent failures.
-- Maintain audit continuity.
+Discovery states are service-discovery record states only. They are not connector lifecycle, workflow, validation, recovery, or incident states.
 
 ---
 
-# Audit Requirements
+## Rules
 
-Every discovery operation records:
-
-- Discovery ID
-- Timestamp
-- Target service
-- Provider
-- Version
-- Availability status
-- Discovery result
-- Governance status
-- Catalog update status
-- Final outcome
-
----
-
-# Success Criteria
-
-The Service Discovery component succeeds when:
-
-- Approved services are accurately discovered.
-- Service metadata is complete.
-- Capability information remains current.
-- Endpoint availability is verified.
-- Discovery history is preserved.
-- Audit records are complete.
-- Only verified services are made available for integration.
+1. Service Discovery must record references and metadata only; it must not execute external service calls except approved discovery checks.
+2. Service Discovery must not approve services for use; governance decisions belong to `INTEGRATION-GOVERNANCE.md`.
+3. Service Discovery must not create connector registry records; connector ownership belongs to `CONNECTOR-MANAGER.md`.
+4. Service Discovery may expose availability references, but monitoring infrastructure belongs to `27_OBSERVABILITY` and `INTEGRATION-MONITOR.md`.
+5. Service Discovery must not store raw secrets or bypass security decisions.
+6. Discovery history and evidence references must be preserved through owning storage, audit, and observability infrastructure.

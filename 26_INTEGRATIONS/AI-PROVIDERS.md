@@ -1,94 +1,46 @@
-# SquirrelForge AI Providers Manager
+# SquirrelForge AI Providers
+
+Version: 1.0.0
+Status: Deprecated
+Owner: Integrations Maintainers
+Depends On: `26_INTEGRATIONS/LLM-PROVIDERS.md`
+Used By: Migration and compatibility references
+Last Updated: 2026-07-08
 
 ## Purpose
 
-The AI Providers Manager standardizes how SquirrelForge connects to AI models and providers, including hosted AI services, local models, specialized reasoning systems, and fallback providers.
+This file is retained only as a compatibility redirect.
+
+AI and LLM provider integration ownership now belongs to `26_INTEGRATIONS/LLM-PROVIDERS.md`, which defines provider-client interfaces, provider capability metadata, provider request and response normalization, credential-reference handoff, provider status reporting, and provider transport error normalization.
 
 ---
 
-## Responsibilities
+## Replacement
 
-- Register available AI providers.
-- Identify provider capabilities.
-- Select the correct model for each task.
-- Route prompts and requests.
-- Normalize AI responses.
-- Track token, cost, and usage metadata.
-- Monitor provider health.
-- Manage fallback provider selection.
+Use `26_INTEGRATIONS/LLM-PROVIDERS.md` for:
 
----
-
-## AI Provider Process
-
-1. Receive AI request.
-2. Identify required capability.
-3. Select approved provider and model.
-4. Verify authentication or local availability.
-5. Route request to selected provider.
-6. Receive model response.
-7. Normalize response format.
-8. Record usage metadata.
-9. Return result to the requesting workflow.
+- external AI and LLM provider client interfaces,
+- provider-specific request and response translation,
+- provider capability and model metadata,
+- provider transport status and error normalization,
+- credential handshake through approved security and runtime-configuration references,
+- and observability event references for provider calls.
 
 ---
 
-## Provider Types
+## Boundary
 
-| Provider Type | Description |
-|---|---|
-| Hosted API | External AI provider accessed by API |
-| Local Model | Locally hosted model such as Ollama |
-| Embedded Model | Model bundled into the system |
-| Specialized Agent | Purpose-built AI component |
-| Fallback Provider | Backup provider used when primary fails |
+This file does not own:
 
----
-
-## Capability Categories
-
-| Capability | Use |
-|---|---|
-| Reasoning | Planning, judgment, and decision support |
-| Coding | Code generation, debugging, and refactoring |
-| Vision | Image analysis and visual interpretation |
-| Writing | Drafting, editing, and documentation |
-| Retrieval | Search, summarization, and context extraction |
-| Validation | Rule checking and output review |
-| Automation | Tool use and workflow execution |
-
----
-
-## Provider Record
-
-| Field | Description |
-|---|---|
-| Provider ID | Unique identifier |
-| Provider Name | AI provider name |
-| Model | Selected model |
-| Capability | Required task capability |
-| Status | Active / Degraded / Failed / Fallback |
-| Auth Status | Authenticated / Not Required / Failed |
-| Usage | Token, cost, or runtime metadata |
-| Timestamp | Request time |
-| Result | Normalized response summary |
-
----
-
-## Fallback Policy
-
-When the selected provider is unavailable:
-
-1. Record provider failure.
-2. Identify required capability.
-3. Select approved fallback provider.
-4. Verify fallback availability.
-5. Route request to fallback provider.
-6. Record fallback usage.
-7. Return normalized result.
+- model selection or fallback routing (`34_AIDRIVER/MODEL-ROUTER.md`),
+- reasoning decisions (`19_REASONING`),
+- platform authentication, authorization, or security enforcement (`24_SECURITY`),
+- secret storage or runtime configuration (`28_RUNTIME-CONFIG` and `21_CONFIGURATION`),
+- general retry, recovery, or rollback authority (`17_COORDINATION` and `20_EXECUTION`),
+- or observability infrastructure (`27_OBSERVABILITY`).
 
 ---
 
 ## Rule
 
-Every AI request must be routed through an approved provider, matched to a required capability, recorded with usage metadata, and returned in a normalized format.
+No new responsibility should be added to this file. New or updated AI/LLM provider integration behavior must be documented in `26_INTEGRATIONS/LLM-PROVIDERS.md`.

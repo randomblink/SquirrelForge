@@ -1,102 +1,80 @@
-# SquirrelForge File Storage Manager
+# SquirrelForge File Storage Connector
+
+Version: 1.0.0
+Status: Stable
+Owner: Integrations Maintainers
+Depends On: `21_CONFIGURATION`, `24_SECURITY`, `26_INTEGRATIONS/AUTHENTICATION.md`, `26_INTEGRATIONS/CONNECTOR-MANAGER.md`, `26_INTEGRATIONS/INTEGRATION-MANAGER.md`, `27_OBSERVABILITY`, `28_RUNTIME-CONFIG`, `37_STORAGE`
+Used By: `26_INTEGRATIONS/INTEGRATION-MANAGER.md`, Components requiring approved external file-service handoff
+Last Updated: 2026-07-08
 
 ## Purpose
 
-The File Storage Manager provides a standardized interface for storing, retrieving, synchronizing, versioning, and protecting files used throughout SquirrelForge workflows.
+The File Storage Connector adapts approved external file-storage services into standardized Integration-layer request and response interfaces.
+
+It owns external file-service protocol adaptation, file-service request translation, storage-provider response normalization, and external file-service status references.
+
+It does not own SquirrelForge storage infrastructure, artifact lifecycle, retention, backup/restore authority, version history, credential storage, authorization, business validation, recovery execution, logging, audit, observability infrastructure, or authoritative workflow state.
 
 ---
 
 ## Responsibilities
 
-- Register approved storage providers.
-- Manage local and remote file storage.
-- Store and retrieve workflow artifacts.
-- Synchronize files across storage locations.
-- Verify file integrity.
-- Manage file versioning.
-- Record storage activity.
-- Handle storage failures.
+- Adapt approved external file-service handoff requests to provider-specific protocols.
+- Consume connector, endpoint, credential, governance, and configuration references from owning components.
+- Translate create, read, update, delete, copy, move, sync, archive, and restore handoff requests when approved by the caller.
+- Normalize external file-service responses, errors, checksums, version references, and availability status.
+- Return file-service response, error, status, and evidence references to the caller.
+- Emit file-service integration event references through observability owners.
 
 ---
 
-## Storage Process
+## Boundary
 
-1. Receive storage request.
-2. Identify target storage provider.
-3. Verify provider availability.
-4. Authenticate if required.
-5. Validate file operation.
-6. Execute storage operation.
-7. Verify operation success.
-8. Record storage activity.
-9. Return operation result.
+`FILE-STORAGE.md` owns:
+
+- external file-service protocol adaptation,
+- file-service request translation,
+- file-service response normalization,
+- external file-service status references,
+- external checksum/version references returned by providers,
+- and file-service handoff evidence references.
+
+`FILE-STORAGE.md` does not own:
+
+- SquirrelForge storage infrastructure, document storage, artifact persistence, or retention (`37_STORAGE`),
+- file lifecycle policy, backup/restore authority, or archival governance,
+- runtime authorization decisions,
+- credential or secret storage,
+- business validation or task-completion validation,
+- retry, rollback, recovery, or workflow failure handling,
+- logging, audit, metrics, traces, dashboards, alerts, or observability infrastructure,
+- or authoritative workflow/task lifecycle state.
 
 ---
 
-## Supported Storage Types
+## Supported Handoff Types
 
-| Storage Type | Description |
+| Type | Description |
 |---|---|
-| Local Storage | Files stored on the local system |
-| Network Storage | Shared network locations |
-| Cloud Storage | Hosted file storage providers |
-| Object Storage | Bucket-based object storage |
-| Archive Storage | Long-term retention storage |
-| Temporary Storage | Short-lived execution artifacts |
+| `Create` | Submit an approved external file create request. |
+| `Read` | Retrieve file content or metadata from an approved external file-service reference. |
+| `Update` | Submit an approved external file update request. |
+| `Delete` | Submit an approved external file delete request. |
+| `Copy` | Submit an approved external file copy request. |
+| `Move` | Submit an approved external file move request. |
+| `Synchronize` | Submit an approved sync request and return external service status. |
+| `Archive` | Submit an approved external archive request. |
+| `Restore` | Submit an approved external restore request. |
+
+These are external file-service handoff types only. Platform storage ownership remains with `37_STORAGE`.
 
 ---
 
-## Supported Operations
+## Rules
 
-| Operation | Description |
-|---|---|
-| Create | Store a new file |
-| Read | Retrieve file contents |
-| Update | Modify an existing file |
-| Delete | Remove an authorized file |
-| Copy | Duplicate a file |
-| Move | Relocate a file |
-| Synchronize | Keep multiple locations consistent |
-| Archive | Move to long-term storage |
-| Restore | Recover archived content |
-
----
-
-## Storage Record
-
-| Field | Description |
-|---|---|
-| Storage ID | Unique identifier |
-| Provider | Registered storage provider |
-| Operation | Storage operation |
-| File Path | Managed file location |
-| Version | File version identifier |
-| Status | Success / Failed / Pending |
-| Timestamp | Operation time |
-
----
-
-## Integrity Verification
-
-- Verify file existence.
-- Validate file size.
-- Confirm checksum when available.
-- Detect corruption.
-- Preserve version history.
-- Record integrity verification results.
-
----
-
-## Security Requirements
-
-- Restrict access to authorized workflows.
-- Encrypt sensitive files when supported.
-- Protect backup copies.
-- Prevent unauthorized deletion.
-- Maintain complete audit logs.
-
----
-
-## Rule
-
-Every file operation must use an approved storage provider, verify file integrity, preserve version history, and generate an auditable storage record.
+1. File Storage Connector may process only approved external file-service handoffs.
+2. File Storage Connector must use credential, connector, endpoint, governance, and configuration references from owning components.
+3. File Storage Connector must not store raw secrets or become the platform storage owner.
+4. File Storage Connector may report provider checksum, version, and integrity references, but it must not validate business outcomes.
+5. File Storage Connector must return normalized response, error, status, and evidence references to the caller.
+6. File Storage Connector must emit event references through observability owners.

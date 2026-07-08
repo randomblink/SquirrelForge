@@ -1,58 +1,75 @@
-# Integrations: Authentication Manager
+# SquirrelForge Integration Authentication
 
 Version: 1.0.0
 Status: Stable
 Owner: Integrations Maintainers
-Depends On: `21_CONFIGURATION/README.md`, `24_SECURITY/README.md`
-Used By: `26_INTEGRATIONS/INTEGRATION-MANAGER.md`
-Last Updated: 2026-07-04
+Depends On: `21_CONFIGURATION`, `24_SECURITY`, `28_RUNTIME-CONFIG`
+Used By: `26_INTEGRATIONS/INTEGRATION-MANAGER.md`, `26_INTEGRATIONS/API-GATEWAY.md`, Integration connector and provider components
+Last Updated: 2026-07-08
 
 ## Purpose
 
-The Authentication Manager is the central service within the `Integrations` layer responsible for managing credentials and authenticating with external systems. It provides a secure, standardized way for components like `LLM Providers` and `Connectors` to obtain the authorization needed for their operations, without ever handling secrets directly.
+Integration Authentication coordinates authentication handshakes with external systems for approved integration calls.
+
+It consumes credential references, secret-reference status, and security decisions from their owning components, then coordinates provider-specific credential exchange, token refresh handoff, signing material use, or authentication-status reporting for Integration components.
+
+It does not own platform identity, platform authentication, runtime authorization, credential storage, secret storage, raw credential lifecycle, security policy, business routing, integration execution, logging, audit, observability infrastructure, or task validation.
 
 ---
 
 ## Responsibilities
 
--   Retrieve credential references from a secure configuration or secrets manager.
--   Orchestrate authentication flows (e.g., OAuth 2.0 token exchange).
--   Provide valid, short-lived tokens or API keys to authorized internal clients upon request.
--   Manage the lifecycle of credentials, including refreshing expiring tokens.
--   Log all authentication events (requests, successes, failures) for security auditing.
--   Report the status of authentication providers (e.g., `Valid`, `Expired`, `Failed`).
+- Coordinate external-service authentication handshakes for approved integration components.
+- Consume credential and secret references from `28_RUNTIME-CONFIG` and `21_CONFIGURATION`.
+- Consume security and authorization status references from `24_SECURITY`, when required.
+- Exchange approved credential references for external provider tokens or signed requests when the provider protocol requires it.
+- Refresh external provider tokens only through approved references and owner-provided rules.
+- Return external authentication status references to callers.
+- Report authentication failures as integration-domain status references.
+- Emit authentication event references through observability owners.
 
 ---
 
-## Interaction with Integration Clients
+## Boundary
 
-Integration clients (like an API client in the `LLM Providers` component) do not manage their own credentials. Instead, they request them from the Authentication Manager.
+`AUTHENTICATION.md` owns:
 
-1.  An integration client (e.g., `Anthropic Client`) needs to make an authenticated API call.
-2.  It requests the necessary credential (e.g., an API key) from the Authentication Manager for the `anthropic` service.
-3.  The Authentication Manager retrieves the secret reference from the `Configuration Manager`, fetches the secret from the secure vault, and returns it to the client.
-4.  The client uses the credential for the single transaction and then discards it.
+- external integration authentication flow coordination,
+- provider-specific credential-handshake mechanics,
+- token exchange and token refresh handoff for external providers,
+- request-signing coordination using approved references,
+- and integration authentication status references.
 
-This ensures that secrets are not stored, logged, or managed by the individual clients.
+`AUTHENTICATION.md` does not own:
+
+- platform identity lifecycle or user/session authentication (`24_SECURITY/IDENTITY-MANAGER.md` and `24_SECURITY/AUTHENTICATION-MANAGER.md`),
+- runtime authorization decisions (`24_SECURITY/AUTHORIZATION-MANAGER.md`),
+- raw credential storage, secret storage, key storage, or key rotation (`28_RUNTIME-CONFIG` and `24_SECURITY/ENCRYPTION-MANAGER.md`),
+- declarative credential configuration (`21_CONFIGURATION`),
+- security-domain policy (`24_SECURITY/SECURITY-GOVERNANCE.md`),
+- integration routing (`INTEGRATION-MANAGER.md`),
+- connector/provider execution internals,
+- retry, recovery, or rollback execution,
+- logs, metrics, traces, dashboards, alerts, audit infrastructure, or observability pipelines (`27_OBSERVABILITY`),
+- or validation of business outcomes and task completion.
+
+---
+
+## Authentication Flow
 
 ```text
-Integration Client (e.g., Connector)
-       │
-       ▼ (1. "I need a token for 'github'")
-Authentication Manager
-       │
-       ▼ (2. Retrieves secret reference from Config)
-Secrets Vault
-       │
-       ▼ (3. Returns secret to Auth Manager)
-Authentication Manager
-       │
-       ▼ (4. Returns credential to Client)
-Integration Client
-       │
-       ▼ (5. Uses credential for external call)
-External API
+Integration component requests external auth status or credential handshake
+   ↓
+Integration Authentication checks required credential and security references
+   ↓
+Owning config, secrets, and security components provide references or decisions
+   ↓
+Integration Authentication performs provider-specific handshake or signing coordination
+   ↓
+Caller receives external authentication status, token reference, or failure reference
 ```
+
+Raw secrets must remain with the owning secrets/runtime-configuration component. Integration Authentication may use approved references; it must not persist or expose raw secret material.
 
 ---
 
@@ -60,17 +77,23 @@ External API
 
 | Status | Meaning |
 |---|---|
-| `Valid` | The credential is active and ready for use. |
-| `Expired` | The credential has expired and must be refreshed. |
-| `Invalid` | The credential was rejected by the external service. |
-| `Revoked` | The credential has been manually revoked and is no longer valid. |
-| `Pending` | An authentication flow (e.g., OAuth) is in progress. |
+| `Ready` | Required references exist and external authentication can proceed. |
+| `Pending` | External authentication handshake is in progress. |
+| `Valid` | External provider accepted the authentication material or status. |
+| `Expired` | External provider credential or token requires approved refresh. |
+| `Invalid` | External provider rejected the authentication material. |
+| `Revoked` | Credential or token is no longer authorized by its owning component or provider. |
+| `Blocked` | Required security, authorization, configuration, or secret reference is missing or denied. |
+
+These are external integration authentication states only. They are not platform identity, session, or authorization states.
 
 ---
 
-## Rule
+## Rules
 
-1.  **No Direct Secret Access:** Integration clients **must not** access secret storage directly. All credential requests must go through the Authentication Manager.
-2.  **Ephemeral Credentials:** Clients should treat credentials as ephemeral and request them as needed. They **must not** store or cache credentials themselves.
-3.  **Centralized Logic:** All logic for handling specific authentication methods (e.g., OAuth 2.0 grant types) **must** reside within the Authentication Manager.
-4.  **Complete Audit Trail:** Every request for a credential, and its outcome, must be logged for a complete audit trail.
+1. Integration components must use approved credential references rather than raw secrets.
+2. Integration Authentication must not store, log, or expose raw credential material.
+3. Platform authentication and runtime authorization decisions must come from `24_SECURITY`.
+4. Credential storage and secret lifecycle decisions must come from runtime-configuration and security owners.
+5. Integration Authentication may report authentication status, but it must not approve business access or mark work complete.
+6. Authentication event references must be emitted through `27_OBSERVABILITY`.

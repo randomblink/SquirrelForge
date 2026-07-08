@@ -1,157 +1,171 @@
 # SquirrelForge Integration Governance
 
+Version: 1.0.0
+Status: Stable
+Owner: Integrations Maintainers
+Depends On: `19_REASONING/RISK-ASSESSOR.md`, `23_GOVERNANCE/POLICY-ENGINE.md`, `24_SECURITY`, `26_INTEGRATIONS/CONNECTOR-MANAGER.md`, `26_INTEGRATIONS/SERVICE-DISCOVERY.md`, `27_OBSERVABILITY`, `37_STORAGE`
+Used By: `26_INTEGRATIONS/INTEGRATION-MANAGER.md`, `26_INTEGRATIONS/CONNECTOR-MANAGER.md`, `26_INTEGRATIONS/SERVICE-DISCOVERY.md`
+Last Updated: 2026-07-08
+
 ## Purpose
 
-The Integration Governance component establishes and enforces the policies that govern all communication between SquirrelForge and external systems. It ensures that integrations remain secure, compliant, authorized, auditable, and aligned with platform objectives.
+Integration Governance owns integration-domain policy requirements, external-connection approval records, integration exceptions, allowed and prohibited integration constraints, required evidence lists, and integration governance decision records.
 
-Integration Governance evaluates and authorizes integration activities. It does not execute integration requests or modify external systems.
+It reviews supplied evidence from security, policy, risk, compliance, connector, and service-discovery owners, then issues integration-domain governance decisions for `INTEGRATION-MANAGER.md` to consume.
 
----
-
-# Responsibilities
-
-- Define integration policies.
-- Review integration proposals.
-- Verify security compliance.
-- Enforce authentication requirements.
-- Approve or reject integration requests.
-- Apply operational restrictions.
-- Maintain governance records.
-- Support regulatory compliance.
-- Coordinate policy updates.
-- Preserve complete audit history.
+It does not own general policy evaluation, security-domain policy, runtime authorization, authentication, risk assessment, compliance certification, integration execution, monitoring infrastructure, recovery, storage, audit, or observability infrastructure.
 
 ---
 
-# Governance Inputs
+## Responsibilities
 
-Integration Governance evaluates:
-
-- Integration requests
-- API definitions
-- Connector configurations
-- Authentication policies
-- Security assessments
-- Risk assessments
-- Service discovery results
-- Operational requirements
-- Compliance requirements
-- Historical governance records
+- Define integration-domain policy requirements for external connections.
+- Define required evidence for integration approval requests.
+- Review integration proposals for completeness against integration-domain requirements.
+- Review supplied security, policy, risk, compliance, connector, and service-discovery evidence.
+- Issue integration-domain approval, rejection, deferral, exception, and restriction decisions.
+- Record allowed and prohibited external-connection constraints.
+- Record integration exceptions and required conditions.
+- Maintain integration governance decision records and evidence references.
+- Provide governance decision references to `INTEGRATION-MANAGER.md`.
+- Preserve governance history by recording governance records and evidence references through the owning storage, audit, and observability infrastructure.
 
 ---
 
-# Governance Workflow
+## Boundary
 
-1. Receive integration request.
-2. Verify request completeness.
-3. Review security requirements.
-4. Validate authentication strategy.
-5. Assess operational risks.
-6. Confirm policy compliance.
-7. Evaluate service eligibility.
-8. Issue governance decision.
-9. Record governance outcome.
-10. Notify the Integration Manager.
+`INTEGRATION-GOVERNANCE.md` owns:
 
----
+- integration-domain policy requirements,
+- integration approval criteria,
+- required evidence lists,
+- external-connection approval records,
+- integration exception records,
+- allowed and prohibited integration constraints,
+- integration-specific conditions and limitations,
+- and integration governance decision records.
 
-# Governance Decisions
+`INTEGRATION-GOVERNANCE.md` does not own:
 
-Integration Governance may issue:
-
-- Approved
-- Approved with Conditions
-- Deferred
-- Requires Additional Evidence
-- Rejected
-- Permanently Prohibited
-
-Each decision must include documented justification.
-
----
-
-# Evaluation Criteria
-
-Every integration proposal is evaluated for:
-
-- Security
-- Authentication
-- Authorization
-- Risk
-- Compliance
-- Reliability
-- Availability
-- Auditability
-- Data protection
-- Alignment with platform policies
+- general policy evaluation or platform-wide governance decisions (`23_GOVERNANCE/POLICY-ENGINE.md` and `23_GOVERNANCE`),
+- security-domain policy definition, security exceptions, or security risk acceptance (`24_SECURITY/SECURITY-GOVERNANCE.md`),
+- runtime authorization decisions (`24_SECURITY/AUTHORIZATION-MANAGER.md`),
+- authentication, credential verification, MFA, session issuance, or provider credential handshakes (`24_SECURITY/AUTHENTICATION-MANAGER.md` and `26_INTEGRATIONS/AUTHENTICATION.md`),
+- independent risk assessment (`19_REASONING/RISK-ASSESSOR.md` and assigned risk owners),
+- compliance certification or compliance-domain assessment authority (`24_SECURITY/COMPLIANCE.md` and assigned compliance owners),
+- connector registry records or connector readiness checks (`26_INTEGRATIONS/CONNECTOR-MANAGER.md`),
+- service discovery records or endpoint verification (`26_INTEGRATIONS/SERVICE-DISCOVERY.md`),
+- integration routing, handoff coordination, or response aggregation (`26_INTEGRATIONS/INTEGRATION-MANAGER.md`),
+- integration execution or external system modification,
+- recovery execution, retries, rollback, or failure handling (`17_COORDINATION` and `20_EXECUTION`),
+- platform storage or persistence infrastructure (`37_STORAGE`),
+- or logs, metrics, traces, dashboards, alerts, audit infrastructure, or observability pipelines (`27_OBSERVABILITY`).
 
 ---
 
-# Policy Enforcement
+## Governance Inputs
 
-Integration Governance ensures:
+Integration Governance may review:
 
-- Only approved services are used.
-- Authentication policies are enforced.
-- Sensitive data is protected.
-- Compliance requirements are satisfied.
-- Audit requirements are maintained.
-- Risk controls remain active.
-- External access remains governed.
+- integration proposal records,
+- requesting component references,
+- external service or provider references,
+- connector metadata from `CONNECTOR-MANAGER.md`,
+- service-discovery records from `SERVICE-DISCOVERY.md`,
+- security evidence and security-governance decisions from `24_SECURITY`,
+- runtime authorization decision references from `24_SECURITY/AUTHORIZATION-MANAGER.md`, when applicable,
+- policy evaluation results from `23_GOVERNANCE/POLICY-ENGINE.md`,
+- supplied risk assessments from assigned risk owners,
+- compliance evidence or compliance-status records from `24_SECURITY/COMPLIANCE.md` or assigned compliance owners,
+- data classification and handling requirements,
+- operational constraints supplied by execution or domain owners,
+- and historical integration governance records.
 
----
-
-# Safety Rules
-
-Integration Governance must never:
-
-- Approve insecure integrations.
-- Ignore authentication failures.
-- Bypass security policies.
-- Permit unauthorized data access.
-- Remove audit requirements.
-- Allow unmanaged external communication.
+Integration Governance reviews supplied evidence. It does not replace the owner that produced that evidence.
 
 ---
 
-# Failure Handling
+## Governance Workflow
 
-If governance review fails:
-
-- Preserve the integration proposal.
-- Record the failure.
-- Notify the Integration Monitor.
-- Request additional evidence if appropriate.
-- Escalate unresolved governance issues.
-- Maintain audit continuity.
-
----
-
-# Audit Requirements
-
-Every governance decision records:
-
-- Governance ID
-- Timestamp
-- Integration request ID
-- Decision type
-- Decision rationale
-- Security review
-- Risk assessment
-- Compliance status
-- Conditions applied
-- Reviewer component
+1. Receive an integration governance request.
+2. Verify the request contains required proposal fields and owner references.
+3. Identify the required integration-domain evidence list.
+4. Request or consume connector and service-discovery references.
+5. Review supplied security, policy, authorization, risk, compliance, and operational evidence.
+6. Compare the proposal against integration-domain policy requirements and constraints.
+7. Identify required conditions, limitations, exception needs, or missing evidence.
+8. Issue an integration governance decision.
+9. Record the decision, rationale, evidence references, and conditions through owning infrastructure.
+10. Provide the decision reference to `INTEGRATION-MANAGER.md`.
 
 ---
 
-# Success Criteria
+## Governance Decisions
 
-Integration Governance succeeds when:
+| Decision | Meaning |
+|---|---|
+| `Approved` | Integration may proceed under recorded requirements and references. |
+| `Approved with Conditions` | Integration may proceed only when recorded conditions are satisfied. |
+| `Exception Approved` | Integration exception is approved with documented scope, reason, and expiration or review requirements. |
+| `Deferred` | Decision is postponed because timing, owner review, or external dependency is unresolved. |
+| `Requires Additional Evidence` | Required evidence is missing or insufficient. |
+| `Rejected` | Integration is not approved under current requirements and evidence. |
+| `Prohibited` | Integration is not allowed by integration-domain constraints. |
 
-- Every integration receives a documented decision.
-- Security policies are consistently enforced.
-- Authentication requirements are verified.
-- Compliance obligations are satisfied.
-- Governance history remains complete.
-- Unauthorized integrations are prevented.
-- All external communication remains fully governed.
+Each decision must include documented rationale, scope, evidence references, and any conditions or limitations.
+
+---
+
+## Required Evidence Categories
+
+Integration Governance may require evidence for:
+
+- external service identity and ownership,
+- connector definition and readiness,
+- endpoint and protocol references,
+- credential and authentication strategy references,
+- authorization decision references, when the integration affects protected resources,
+- security review or security-governance decision references,
+- policy evaluation results,
+- supplied risk assessment references,
+- data classification and data-handling constraints,
+- compliance evidence or compliance-status references,
+- event-emission requirement references for observability owners,
+- operational support ownership,
+- and deprecation, suspension, or retirement expectations.
+
+Required evidence lists are integration-domain requirements. Evidence conclusions remain owned by the components that produced them.
+
+---
+
+## Integration Constraints
+
+Integration Governance may record constraints such as:
+
+- allowed external services or providers,
+- prohibited services or providers,
+- allowed protocols,
+- prohibited protocols,
+- required credential-reference handling,
+- required security or authorization references,
+- allowed data classifications,
+- outbound-data restrictions,
+- required event-emission references for observability owners,
+- connector activation conditions,
+- exception expiration dates,
+- review dates,
+- and suspension or retirement conditions.
+
+These constraints are consumed by `INTEGRATION-MANAGER.md`, `CONNECTOR-MANAGER.md`, and other Integration components. Satisfying or enforcing a constraint belongs to the component that owns the relevant control.
+
+---
+
+## Rules
+
+1. Integration Governance decisions must be scoped to integration-domain external-connection governance.
+2. Integration Governance must consume policy, security, authorization, risk, compliance, connector, and service-discovery evidence from the authoritative owners.
+3. Integration Governance must not independently authenticate, authorize, evaluate general policy, assess risk, certify compliance, or execute integrations.
+4. Integration Governance may approve, reject, defer, prohibit, condition, or approve exceptions for integration proposals only within its integration-domain scope.
+5. Integration Governance decisions must include rationale, scope, evidence references, and conditions or limitations.
+6. Integration Governance decision records must be preserved through the owning storage, audit, and observability infrastructure.
+7. `INTEGRATION-MANAGER.md` consumes integration governance decision references; it must not replace this component's approval records.
