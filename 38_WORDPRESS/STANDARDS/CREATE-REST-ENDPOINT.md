@@ -1,3 +1,6 @@
+Status: Stable
+
+---
 # Skill: Create REST Endpoint
 
 ## Purpose

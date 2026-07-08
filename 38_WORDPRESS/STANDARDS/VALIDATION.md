@@ -1,3 +1,6 @@
+Status: Stable
+
+---
 # WordPress: Validation Checklist
 
 Version: 1.0.0

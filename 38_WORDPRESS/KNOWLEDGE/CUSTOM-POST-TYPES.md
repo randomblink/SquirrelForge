@@ -1,3 +1,6 @@
+Status: Stable
+
+---
 # WordPress Custom Post Types (CPTs)
 
 ## Purpose

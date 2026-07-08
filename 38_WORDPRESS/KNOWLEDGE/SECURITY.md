@@ -1,3 +1,6 @@
+Status: Stable
+
+---
 # WordPress Security Principles
 
 ## Purpose

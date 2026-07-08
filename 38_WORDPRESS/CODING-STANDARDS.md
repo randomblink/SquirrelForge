@@ -1,3 +1,6 @@
+Status: Stable
+
+---
 # WordPress Coding Standards
 
 ## Purpose

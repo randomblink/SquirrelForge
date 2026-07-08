@@ -1,3 +1,6 @@
+Status: Stable
+
+---
 # SquirrelForge WordPress Skill Routing Map
 
 ## Purpose

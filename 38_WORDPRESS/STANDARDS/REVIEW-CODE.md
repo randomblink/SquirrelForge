@@ -1,3 +1,6 @@
+Status: Stable
+
+---
 # SquirrelForge Skill: Review WordPress Code
 
 ## Purpose

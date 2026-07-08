@@ -1,3 +1,6 @@
+Status: Stable
+
+---
 # SquirrelForge WordPress Code Review Standard
 
 ## Purpose

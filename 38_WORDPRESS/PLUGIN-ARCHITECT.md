@@ -1,3 +1,6 @@
+Status: Stable
+
+---
 # SquirrelForge Plugin Architect
 
 ## Purpose

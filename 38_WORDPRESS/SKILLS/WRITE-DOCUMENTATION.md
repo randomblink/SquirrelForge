@@ -1,3 +1,6 @@
+Status: Stable
+
+---
 # Skill: Write Documentation
 
 ## Purpose

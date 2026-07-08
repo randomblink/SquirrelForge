@@ -1,3 +1,6 @@
+Status: Stable
+
+---
 # SquirrelForge WordPress File Structure Rules
 
 ## Purpose

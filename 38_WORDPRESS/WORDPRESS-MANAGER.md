@@ -1,3 +1,6 @@
+Status: Stable
+
+---
 # SquirrelForge WordPress Manager
 
 ## Purpose
@@ -44,7 +47,7 @@ Requirements Definition
 ↓
 Selected Skill
 ↓
-38_WORDPRESS/ROLES/ROLE-MANAGER.md
+33_WORDPRESS_ROLES/ROLE-MANAGER.md
 ↓
 Role Routing Matrix
 ↓
@@ -61,8 +64,8 @@ Before managing WordPress work, consult:
 - `38_WORDPRESS/PIPELINE.md`
 - `38_WORDPRESS/SKILLS/SKILL-ROUTING-MAP.md`
 - `38_WORDPRESS/KNOWLEDGE/KNOWLEDGE-MANAGER.md`
-- `38_WORDPRESS/ROLES/ROLE-MANAGER.md`
-- `38_WORDPRESS/ROLES/ROLE-ROUTING-MATRIX.md`
+- `33_WORDPRESS_ROLES/ROLE-MANAGER.md`
+- `33_WORDPRESS_ROLES/ROLE-ROUTING-MATRIX.md`
 - `38_WORDPRESS/SECURITY-VALIDATOR.md`
 
 ### Hard Rules

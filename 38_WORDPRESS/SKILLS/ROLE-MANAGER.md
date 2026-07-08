@@ -1,10 +1,13 @@
+Status: Stable
+
+---
 # SquirrelForge WordPress Role Manager
 
 ## Purpose
 
 The Role Manager receives a selected `Skill` and project context from the `WordPress Manager` and produces a `WordPress Role Routing Decision`.
 
-It is the specialist role responsible for consulting the `38_WORDPRESS/ROLES/ROLE-ROUTING-MATRIX.md` to determine the exact sequence of specialist roles, validation gates, and handoffs required to execute a given Skill.
+It is the specialist role responsible for consulting the `33_WORDPRESS_ROLES/ROLE-ROUTING-MATRIX.md` to determine the exact sequence of specialist roles, validation gates, and handoffs required to execute a given Skill.
 
 ---
 
@@ -71,4 +74,4 @@ Routing Status: [e.g., Ready]
 
 ## Rule
 
-The Role Manager must produce a `WordPress Role Routing Decision` by consulting the `38_WORDPRESS/ROLES/ROLE-ROUTING-MATRIX.md` before any implementation or validation roles are executed. It does not select the `Skill` itself, but rather plans the execution of the `Skill` that has already been selected.
+The Role Manager must produce a `WordPress Role Routing Decision` by consulting the `33_WORDPRESS_ROLES/ROLE-ROUTING-MATRIX.md` before any implementation or validation roles are executed. It does not select the `Skill` itself, but rather plans the execution of the `Skill` that has already been selected.

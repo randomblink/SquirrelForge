@@ -1,3 +1,6 @@
+Status: Stable
+
+---
 # SquirrelForge WordPress Agent Readiness Report
 
 ## Purpose

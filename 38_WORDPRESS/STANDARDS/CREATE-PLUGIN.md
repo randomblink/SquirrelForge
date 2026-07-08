@@ -1,3 +1,6 @@
+Status: Stable
+
+---
 # SquirrelForge Skill: Create WordPress Plugin
 
 ## Purpose
