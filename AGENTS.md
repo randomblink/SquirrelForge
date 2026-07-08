@@ -7,4 +7,3 @@ Before project-changing work, read and follow [`AI-BOOTSTRAP.md`](AI-BOOTSTRAP.m
 Inspect relevant files before editing. Preserve unrelated user changes and repository files. Do not bypass SquirrelForge routing when an applicable manager, Skill, Knowledge, Role, workflow, or validation path exists.
 
 Run appropriate validation before declaring completion, or report clearly why validation could not be run.
-

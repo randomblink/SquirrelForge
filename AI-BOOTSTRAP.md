@@ -99,4 +99,3 @@ At completion, report:
 - documentation updates,
 - release-readiness status,
 - and whether the work is complete.
-
