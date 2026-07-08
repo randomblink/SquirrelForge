@@ -26,13 +26,13 @@ Creating a REST endpoint is a security-critical task. The process must prioritiz
 
 ## Workflow
 
-This skill follows the master `PIPELINE.md`.
+This skill follows the master `38_WORDPRESS/PIPELINE.md`.
 
 1.  **Intent Analysis**:
     -   Deconstruct the request: `Task: create_rest_endpoint, Route: /my-plugin/v1/submit, Method: POST, Permissions: administrator`.
 
 2.  **Knowledge Selection**:
-    -   The `Knowledge Manager` selects `REST-API.md`, `SECURITY.md`, and `CODING-STANDARDS.md`.
+    -   The `Knowledge Manager` selects `38_WORDPRESS/KNOWLEDGE/REST-API.md`, `SECURITY.md`, and `CODING-STANDARDS.md`.
 
 3.  **Requirements Builder**:
     -   Generate functional requirements (e.g., "Must accept a 'name' and 'email' parameter," "Must return a JSON object with a success status").

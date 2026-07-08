@@ -27,13 +27,13 @@ Creating a block is a JavaScript-heavy task that requires a modern build process
 
 ## Workflow
 
-This skill follows the master `PIPELINE.md`.
+This skill follows the master `38_WORDPRESS/PIPELINE.md`.
 
 1.  **Intent Analysis**:
     -   Deconstruct the request: `Task: create_block, Name: "Team Member", Attributes: [name, title, photo]`.
 
 2.  **Knowledge Selection**:
-    -   The `Knowledge Manager` selects `BLOCK-EDITOR.md`, `JAVASCRIPT-STANDARD.md`, `CODING-STANDARDS.md`, `ACCESSIBILITY.md`, and `SECURITY.md`.
+    -   The `Knowledge Manager` selects `38_WORDPRESS/KNOWLEDGE/BLOCK-EDITOR.md`, `JAVASCRIPT-STANDARD.md`, `CODING-STANDARDS.md`, `38_WORDPRESS/KNOWLEDGE/ACCESSIBILITY.md`, and `SECURITY.md`.
 
 3.  **Requirements Builder**:
     -   Generate functional requirements (e.g., "Must have an editable name and title," "Must include an image selector for the photo," "Must have a color picker for the background").

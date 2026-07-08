@@ -27,14 +27,14 @@ Creating a theme is a systematic process focused on presentation, layout, and us
 
 ## Workflow
 
-This skill follows the master `PIPELINE.md`.
+This skill follows the master `38_WORDPRESS/PIPELINE.md`.
 
 1.  **Intent Analysis**:
     -   Deconstruct the user request into a structured task: `Task: create_theme, Type: block_theme, Style: minimalist_blog`.
 
 2.  **Knowledge Selection**:
     -   The `Knowledge Manager` is invoked with the task type.
-    -   It selects required documents, such as `THEME-HANDBOOK.md`, `BLOCK-EDITOR.md` (if a block theme), `ACCESSIBILITY.md`, and `CODING-STANDARDS.md`.
+    -   It selects required documents, such as `38_WORDPRESS/KNOWLEDGE/THEME-HANDBOOK.md`, `38_WORDPRESS/KNOWLEDGE/BLOCK-EDITOR.md` (if a block theme), `38_WORDPRESS/KNOWLEDGE/ACCESSIBILITY.md`, and `CODING-STANDARDS.md`.
 
 3.  **Requirements Builder**:
     -   Generate functional requirements (e.g., "Must have a dark mode toggle," "Must support a primary navigation menu," "Must include templates for single posts and pages").
@@ -74,7 +74,7 @@ This skill follows the master `PIPELINE.md`.
 
 ## Agent Rules
 
-1.  **Follow the Pipeline**: This skill must be executed by following the `PIPELINE.md` stages in order.
+1.  **Follow the Pipeline**: This skill must be executed by following the `38_WORDPRESS/PIPELINE.md` stages in order.
 2.  **Gate Enforcement**: A failure at any validation or review stage must halt the process and trigger a revision cycle.
 3.  **Strict Separation**: The agent must not generate plugin-territory functionality (like CPTs) within the theme. It should propose a companion plugin instead.
 
