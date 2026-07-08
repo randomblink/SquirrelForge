@@ -43,9 +43,7 @@ This checklist determines whether the SquirrelForge WordPress Layer is ready to 
 - [ ] `CREATE-THEME.md`
 - [ ] `CREATE-BLOCK.md`
 - [ ] `CREATE-REST-ENDPOINT.md`
-- [ ] `CREATE-SHORTCODE.md`
 - [ ] `CREATE-WIDGET.md`
-- [ ] `MIGRATE-PLUGIN.md`
 - [ ] `REVIEW-CODE.md`
 - [ ] `REFACTOR-CODE.md`
 - [ ] `DEBUG-PLUGIN.md`

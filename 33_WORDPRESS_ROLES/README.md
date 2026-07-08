@@ -481,7 +481,6 @@ The SquirrelForge WordPress Roles Layer is the specialist execution and validati
 - `CREATE-BLOCK.md`
 - `CREATE-PLUGIN.md`
 - `CREATE-REST-ENDPOINT.md`
-- `CREATE-SHORTCODE.md`
 - `CREATE-TESTS.md`
 - `CREATE-THEME.md`
 - `CREATE-WIDGET.md`
@@ -490,7 +489,6 @@ The SquirrelForge WordPress Roles Layer is the specialist execution and validati
 - `DEBUG-PLUGIN.md`
 - `DOCUMENTATION-ENGINEER.md`
 - `JAVASCRIPT-ENGINEER.md`
-- `MIGRATE-PLUGIN.md`
 - `OPTIMIZE-PERFORMANCE.md`
 - `PERFORMANCE-ENGINEER.md`
 - `PHP-ENGINEER.md`
