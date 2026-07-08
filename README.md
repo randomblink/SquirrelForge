@@ -158,6 +158,14 @@ The primary architectural documents are:
 
 Each layer contains its own README describing its purpose and components.
 
+## AI Agent Bootstrap
+
+External AI coding agents enter SquirrelForge through [`AI-BOOTSTRAP.md`](AI-BOOTSTRAP.md).
+
+Compatible coding agents may discover [`AGENTS.md`](AGENTS.md) automatically; that file delegates to the vendor-neutral bootstrap.
+
+SquirrelForge then routes work through its internal orchestration, Agent, domain, Skill, Knowledge, Role, execution, validation, documentation, and release-readiness layers.
+
 ## Development Philosophy
 
 SquirrelForge emphasizes:

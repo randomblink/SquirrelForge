@@ -122,4 +122,6 @@ Rules → Engine → Reasoning → Agents → Execution → Testing → Output
 
 ## Start
 
+External AI agents enter SquirrelForge through [AI Bootstrap](../AI-BOOTSTRAP.md), which delegates into this layer for the required agent startup sequence.
+
 Load [Agent Profile](AGENT-PROFILE.md), then execute [Bootstrap](BOOTSTRAP.md).
