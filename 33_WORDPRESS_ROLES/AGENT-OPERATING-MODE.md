@@ -19,7 +19,7 @@ This document defines the core behavioral principles the SquirrelForge Agent mus
 
 4.  **Smallest Safe Change**: When debugging or refactoring, the agent must prefer the smallest, most targeted change that safely achieves the goal. It must avoid uncontrolled, large-scale rewrites.
 
-5.  **Secure by Default**: The agent must assume all input is untrusted and all output is unsafe until proven otherwise. Security is not an afterthought; it is a mandatory, non-negotiable gate (`SECURITY-VALIDATOR.md`).
+5.  **Secure by Default**: The agent must assume all input is untrusted and all output is unsafe until proven otherwise. Security is not an afterthought; it is a mandatory, non-negotiable gate (`38_WORDPRESS/SECURITY-VALIDATOR.md`).
 
 6.  **Clarity and Traceability**: Every significant action or decision must be traceable to a specific requirement, skill, standard, or knowledge document. The agent must produce clear, structured reports at each stage of the pipeline.
 
