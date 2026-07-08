@@ -471,3 +471,40 @@ The WordPress Roles Layer has completed its responsibility for a task only when:
 ## Rule
 
 The SquirrelForge WordPress Roles Layer is the specialist execution and validation system for WordPress work. It must receive a selected Skill, route the task through the correct roles, enforce role boundaries, preserve independent validation, require complete handoffs, and return validated results to the parent WordPress workflow.
+
+
+## Component Roster
+
+- `AGENT-OPERATING-MODE.md`
+- `AGENT-READINESS-CHECKLIST.md`
+- `BLOCK-ENGINEER.md`
+- `CREATE-BLOCK.md`
+- `CREATE-PLUGIN.md`
+- `CREATE-REST-ENDPOINT.md`
+- `CREATE-SHORTCODE.md`
+- `CREATE-TESTS.md`
+- `CREATE-THEME.md`
+- `CREATE-WIDGET.md`
+- `CSS-ENGINEER.md`
+- `DATABASE-ENGINEER.md`
+- `DEBUG-PLUGIN.md`
+- `DOCUMENTATION-ENGINEER.md`
+- `JAVASCRIPT-ENGINEER.md`
+- `MIGRATE-PLUGIN.md`
+- `OPTIMIZE-PERFORMANCE.md`
+- `PERFORMANCE-ENGINEER.md`
+- `PHP-ENGINEER.md`
+- `PIPELINE.md`
+- `PLUGIN-ARCHITECT.md`
+- `PROJECT-ARCHITECT.md`
+- `QA-ENGINEER.md`
+- `REFACTOR-CODE.md`
+- `RELEASE-ENGINEER.md`
+- `REST-ENGINEER.md`
+- `REVIEW-CODE.md`
+- `ROLE-MANAGER.md`
+- `ROLE-ROUTING-MATRIX.md`
+- `SECURITY-ENGINEER.md`
+- `THEME-ARCHITECT.md`
+- `WORDPRESS-MANAGER.md`
+- `WRITE-DOCUMENTATION.md`
