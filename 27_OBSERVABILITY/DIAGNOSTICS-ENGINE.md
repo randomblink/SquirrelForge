@@ -1,233 +1,32 @@
 # SquirrelForge Diagnostics Engine
 
+Version: 1.0.0
+Status: Stable
+Owner: Observability Maintainers
+Depends On: `27_OBSERVABILITY/LOG-MANAGER.md`, `27_OBSERVABILITY/METRICS-MANAGER.md`, `27_OBSERVABILITY/TRACE-MANAGER.md`, `27_OBSERVABILITY/OBSERVABILITY-GOVERNANCE.md`
+Used By: `27_OBSERVABILITY/ALERT-MANAGER.md`, `27_OBSERVABILITY/HEALTH-REPORTER.md`, Execution, Integrations, Security, Governance
+Last Updated: 2026-07-08
+
 ## Purpose
 
-The Diagnostics Engine analyzes telemetry, logs, metrics, traces, and health information to identify operational issues, determine probable root causes, detect abnormal behavior, and support rapid troubleshooting across SquirrelForge.
+The Diagnostics Engine interprets observability records to produce diagnostic findings, correlation reports, probable-cause reports, anomaly findings, and troubleshooting evidence references.
 
-The Diagnostics Engine does not collect telemetry or modify platform behavior. It consumes observability data to generate diagnostic findings, recommendations, and reports that assist administrators, governance components, and automated remediation systems.
-
----
-
-# Responsibilities
-
-- Analyze observability data.
-- Detect operational anomalies.
-- Identify performance bottlenecks.
-- Correlate related events.
-- Perform root cause analysis.
-- Generate diagnostic findings.
-- Recommend corrective actions.
-- Support health reporting.
-- Record diagnostic activity.
-- Enforce observability governance.
+It does not collect telemetry, execute remediation, assign incident ownership, decide security severity, validate business outcomes, change workflow state, or perform recovery.
 
 ---
 
-# Inputs
+## Responsibilities
 
-The Diagnostics Engine receives:
-
-- Telemetry events
-- Structured logs
-- Metrics
-- Distributed traces
-- Health reports
-- Alert notifications from the `ALERT-MANAGER`.
-- Security events
-- Workflow execution data
-- Agent activity
-- Governance policies
+- Consume log, metric, trace, alert, health, and telemetry references.
+- Correlate observability evidence across components.
+- Produce diagnostic findings and probable-cause references.
+- Identify degraded dependencies, bottlenecks, anomalies, and failure-path evidence.
+- Provide diagnostic references to alerting, health, dashboards, and owning domain components.
 
 ---
 
-# Outputs
+## Rules
 
-The Diagnostics Engine produces:
-
-- Diagnostic reports
-- Root cause analyses
-- Performance assessments
-- Dependency analyses
-- Anomaly reports
-- Operational recommendations
-- Health diagnostics
-- Governance review requests
-- Diagnostic audit records
-
----
-
-# Diagnostics Workflow
-
-1. Receive diagnostic request or trigger.
-2. Gather relevant observability data.
-3. Correlate related events.
-4. Analyze execution timelines.
-5. Evaluate system performance.
-6. Identify probable root causes.
-7. Generate diagnostic findings.
-8. Publish recommendations.
-9. Record audit information.
-10. Notify dependent observability services.
-
----
-
-# Diagnostic Categories
-
-The Diagnostics Engine supports:
-
-- Performance diagnostics
-- Workflow diagnostics
-- Agent diagnostics
-- API diagnostics
-- Integration diagnostics
-- Infrastructure diagnostics
-- Security diagnostics
-- Validation diagnostics
-- Resource diagnostics
-- Governance diagnostics
-
----
-
-# Analysis Techniques
-
-Supported analysis methods include:
-
-- Event correlation
-- Timeline reconstruction
-- Root cause analysis
-- Dependency analysis
-- Trend analysis
-- Failure pattern detection
-- Performance profiling
-- Resource utilization analysis
-- Threshold evaluation
-- Historical comparison
-
----
-
-# Root Cause Analysis
-
-Root cause investigations may evaluate:
-
-- Workflow failures
-- Agent execution failures
-- API latency
-- Integration failures
-- Infrastructure instability
-- Resource exhaustion
-- Security incidents
-- Configuration issues
-- Dependency failures
-- Governance violations
-
----
-
-# Diagnostic Report Structure
-
-Every diagnostic report includes:
-
-- Diagnostic ID
-- Timestamp
-- Scope
-- Affected components
-- Observed symptoms
-- Supporting evidence
-- Probable root cause
-- Confidence level
-- Recommended actions
-- Governance status
-
----
-
-# Confidence Levels
-
-Diagnostic confidence may be reported as:
-
-- Confirmed
-- High
-- Moderate
-- Low
-- Inconclusive
-
----
-
-# Integration Responsibilities
-
-The Diagnostics Engine provides findings to:
-
-- Dashboard Manager
-- Alert Manager
-- Health Reporter
-- Observability Governance
-- Workflow Engine
-- Operations administrators
-- Automated remediation systems
-- Audit systems
-
----
-
-# Data Protection
-
-The Diagnostics Engine must:
-
-- Protect confidential information.
-- Exclude secrets from reports.
-- Preserve evidence integrity.
-- Enforce governance requirements.
-- Respect access controls.
-
----
-
-# Safety Rules
-
-The Diagnostics Engine must never:
-
-- Modify production data.
-- Alter telemetry records.
-- Delete evidence.
-- Expose confidential information.
-- Fabricate diagnostic conclusions.
-- Bypass governance requirements.
-
----
-
-# Failure Handling
-
-If diagnostics cannot complete:
-
-- Preserve available evidence.
-- Record diagnostic failures.
-- Report incomplete analyses.
-- Retry when appropriate.
-- Notify the Observability Manager.
-- Escalate persistent failures.
-- Maintain audit continuity.
-
----
-
-# Audit Requirements
-
-Every diagnostic operation records:
-
-- Diagnostic Operation ID
-- Timestamp
-- Diagnostic scope
-- Data Sources Queried
-- Correlated components
-- Confidence level
-- Governance status
-- Final outcome
-
----
-
-# Success Criteria
-
-The Diagnostics Engine succeeds when:
-
-- Operational issues are accurately identified.
-- Root causes are reliably determined.
-- Performance bottlenecks are detected.
-- Diagnostic reports are evidence-based.
-- Recommendations support effective remediation.
-- Sensitive information remains protected.
-- Governance requirements are consistently enforced.
+1. Diagnostics Engine findings are evidence and recommendations only.
+2. Remediation, recovery, incident classification, and workflow state changes belong to their owning components.
+3. Diagnostics Engine must distinguish observed evidence from inferred probable cause.

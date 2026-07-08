@@ -1,157 +1,54 @@
 # SquirrelForge Observability Manager
 
+Version: 1.0.0
+Status: Stable
+Owner: Observability Maintainers
+Depends On: `23_GOVERNANCE`, `27_OBSERVABILITY/OBSERVABILITY-GOVERNANCE.md`, `37_STORAGE`
+Used By: Engine, Execution, Integrations, Security, Governance, Runtime Config, Testing
+Last Updated: 2026-07-08
+
 ## Purpose
 
-The Observability Manager coordinates all observability operations across SquirrelForge. It serves as the central controller for collecting, processing, and routing telemetry data, ensuring that logs, metrics, and traces are managed consistently and made available for analysis, alerting, and reporting in a governed way.
+The Observability Manager coordinates observability requests, signal handoffs, status aggregation, and evidence-reference routing across the Observability Layer.
 
-The Observability Manager does not directly collect telemetry or generate metrics. It orchestrates the Observability Layer to provide consistent, secure, and comprehensive visibility into platform operations.
-
----
-
-# Responsibilities
-
-- Coordinate all Observability Layer components.
-- Receive observability requests.
-- Validate observability requirements.
-- Route observability operations.
-- Coordinate telemetry collection.
-- Coordinate logging, metrics, and tracing.
-- Support diagnostics and health reporting.
-- Enforce observability governance.
-- Record observability activity.
-- Publish platform observability status.
+It does not collect telemetry directly, write logs directly, calculate metrics, build traces, diagnose issues, create alerts, validate business outcomes, execute recovery, own storage infrastructure, or change workflow state.
 
 ---
 
-# Inputs
+## Responsibilities
 
-The Observability Manager receives:
-
-- Platform events
-- Workflow events
-- Agent activity
-- Integration events
-- Data operations
-- Security events
-- Monitoring alerts
-- Diagnostic requests
-- Governance policies
-- Health status updates
+- Receive observability coordination requests.
+- Route telemetry, logging, metrics, tracing, audit, diagnostics, alert, dashboard, and health-reporting requests to the owning Observability component.
+- Check observability request structure and required references.
+- Aggregate observability-domain status and evidence references.
+- Coordinate with Observability Governance for retention, redaction, and signal-standard references.
+- Return observability status references to callers.
 
 ---
 
-# Outputs
+## Boundary
 
-The Observability Manager produces:
+`OBSERVABILITY-MANAGER.md` owns observability coordination only.
 
-- Telemetry collection requests
-- Logging requests
-- Metrics updates
-- Trace requests
-- Diagnostic requests
-- Dashboard updates
-- Alert requests
-- Health reports
-- Governance review requests
-- Observability audit records
+It does not own:
 
----
-
-# Observability Workflow
-
-1. Receive observability event.
-2. Validate event structure.
-3. Determine required observability services.
-4. Coordinate telemetry collection.
-5. Route logging, metrics, and tracing.
-6. Trigger diagnostics if required.
-7. Update dashboards and health status.
-8. Record audit information.
-9. Notify governance components.
-10. Publish observability status.
+- telemetry collection (`TELEMETRY-COLLECTOR.md`),
+- log records (`LOG-MANAGER.md`),
+- metric records (`METRICS-MANAGER.md`),
+- trace records (`TRACE-MANAGER.md`),
+- audit-event records (`AUDIT-TRAIL.md`),
+- diagnostics (`DIAGNOSTICS-ENGINE.md`),
+- alerts (`ALERT-MANAGER.md`),
+- health reports (`HEALTH-REPORTER.md`),
+- dashboards (`DASHBOARD-MANAGER.md`),
+- observability standards and retention rules (`OBSERVABILITY-GOVERNANCE.md`),
+- storage infrastructure (`37_STORAGE`),
+- or domain decisions outside Observability.
 
 ---
 
-# Coordinated Operations
+## Rules
 
-The Observability Manager coordinates:
-
-- Telemetry collection
-- Structured logging
-- Metrics collection
-- Distributed tracing
-- Diagnostics
-- Dashboard generation
-- Alert management
-- Health reporting
-- Governance enforcement
-
----
-
-# Coordination Responsibilities
-
-The Observability Manager coordinates:
-
-- Telemetry Collector
-- Log Manager
-- Metrics Manager
-- Trace Manager
-- Diagnostics Engine
-- Dashboard Manager
-- Alert Manager
-- Health Reporter
-- Observability Governance
-
----
-
-# Safety Rules
-
-The Observability Manager must never:
-
-- Expose sensitive information.
-- Bypass security or governance.
-- Suppress critical operational events.
-- Ignore observability failures.
-- Modify production data.
-- Delete audit records.
-
----
-
-# Failure Handling
-
-If observability coordination fails:
-
-- Preserve event information.
-- Record the failure.
-- Notify affected monitoring systems.
-- Retry coordination when appropriate.
-- Escalate persistent failures.
-- Maintain audit continuity.
-
----
-
-# Audit Requirements
-
-Every observability operation records:
-
-- Observability operation ID
-- Timestamp
-- Event source
-- Coordinated components
-- Governance status
-- Processing status
-- Final outcome
-
----
-
-# Success Criteria
-
-The Observability Manager succeeds when:
-
-- Platform activity is consistently observable.
-- Observability components are properly coordinated.
-- Sensitive information remains protected.
-- Governance requirements are enforced.
-- Audit records remain complete.
-- Operational visibility is comprehensive.
-- Platform health remains continuously measurable.
+1. Observability Manager must route work to the owning Observability component.
+2. Observability Manager may aggregate status and evidence references only.
+3. Observability Manager must not replace authoritative workflow, security, governance, execution, validation, storage, or recovery owners.

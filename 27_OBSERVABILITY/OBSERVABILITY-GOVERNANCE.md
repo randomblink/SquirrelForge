@@ -1,263 +1,50 @@
 # SquirrelForge Observability Governance
 
+Version: 1.0.0
+Status: Stable
+Owner: Observability Maintainers
+Depends On: `23_GOVERNANCE/POLICY-ENGINE.md`, `24_SECURITY`, `28_RUNTIME-CONFIG`, `37_STORAGE`
+Used By: `27_OBSERVABILITY/OBSERVABILITY-MANAGER.md`, Observability components
+Last Updated: 2026-07-08
+
 ## Purpose
 
-The Observability Governance component establishes the policies, standards, controls, and oversight required to ensure that all observability operations within SquirrelForge are secure, compliant, consistent, auditable, and aligned with platform governance requirements.
+Observability Governance owns observability-domain standards for telemetry, logs, metrics, traces, audit-event records, diagnostics, alerts, dashboards, health reports, redaction, retention, and evidence requirements.
 
-Observability Governance defines how telemetry, logs, metrics, traces, diagnostics, dashboards, alerts, and health reporting are managed throughout their lifecycle while protecting sensitive information and maintaining operational integrity.
+It reviews supplied governance, security, privacy, and compliance evidence, then records observability-domain governance decisions and constraints.
 
-Observability Governance does not collect observability data or generate operational information. It governs how observability services operate and ensures compliance across the entire Observability Layer.
-
----
-
-# Responsibilities
-
-- Define observability governance policies.
-- Enforce observability standards.
-- Govern data collection practices.
-- Manage observability compliance.
-- Define retention requirements.
-- Govern access permissions.
-- Protect sensitive information.
-- Coordinate governance reviews.
-- Record governance activity.
-- Continuously improve observability governance.
+It does not own general policy evaluation, security policy, runtime authorization, compliance certification, storage infrastructure, operational diagnosis, alert decisions, or workflow state.
 
 ---
 
-# Inputs
+## Responsibilities
 
-Observability Governance receives:
-
-- Governance policies
-- Compliance requirements
-- Audit findings
-- Security policies
-- Privacy requirements
-- Regulatory requirements
-- Observability reports
-- Health reports
-- Diagnostic reports
-- Operational feedback
+- Define observability-domain signal standards.
+- Define observability retention, redaction, privacy, and evidence requirements.
+- Review observability proposals against supplied policy, security, compliance, and storage evidence.
+- Record observability governance decisions, exceptions, conditions, and evidence references.
+- Provide observability governance references to Observability components.
 
 ---
 
-# Outputs
+## Boundary
 
-Observability Governance produces:
+`OBSERVABILITY-GOVERNANCE.md` owns observability-domain governance records and constraints only.
 
-- Governance policies
-- Compliance decisions
-- Access control policies
-- Data retention policies
-- Observability standards
-- Governance review reports
-- Audit recommendations
-- Risk assessments
-- Governance audit records
+It does not own:
 
----
-
-# Governance Workflow
-
-1. Receive governance request.
-2. Validate applicable policies.
-3. Evaluate observability practices.
-4. Assess compliance status.
-5. Review security and privacy requirements.
-6. Approve or reject governance actions.
-7. Publish governance decisions.
-8. Record governance activity.
-9. Notify affected components.
-10. Schedule ongoing governance reviews.
+- general policy evaluation (`23_GOVERNANCE/POLICY-ENGINE.md`),
+- security decisions (`24_SECURITY`),
+- compliance certification,
+- storage infrastructure (`37_STORAGE`),
+- raw secret handling (`28_RUNTIME-CONFIG`),
+- operational alert/diagnostic/health conclusions,
+- or enforcement by non-observability components.
 
 ---
 
-# Governance Scope
+## Rules
 
-Observability Governance applies to:
-
-- Telemetry collection
-- Structured logging
-- Metrics management
-- Distributed tracing
-- Diagnostics
-- Dashboard generation
-- Alert management
-- Health reporting
-- Audit records
-- Observability configuration
-
----
-
-# Governance Policies
-
-Policies may define:
-
-- Data collection rules
-- Data classification
-- Access permissions
-- Privacy requirements
-- Security requirements
-- Compliance obligations
-- Retention schedules
-- Archival procedures
-- Audit expectations
-- Operational standards
-
----
-
-# Access Control
-
-Governance defines access based on:
-
-- Administrative roles
-- Operational roles
-- Security roles
-- Auditor roles
-- Developer roles
-- Service accounts
-- Automated systems
-- Principle of least privilege
-
----
-
-# Compliance Requirements
-
-Governance ensures compliance with:
-
-- Internal governance policies
-- Security standards
-- Privacy standards
-- Regulatory obligations
-- Audit requirements
-- Organizational standards
-- Platform architecture standards
-
----
-
-# Data Lifecycle Management
-
-Governance defines:
-
-- Collection approval
-- Validation requirements
-- Storage standards
-- Retention periods
-- Archival procedures
-- Secure disposal
-- Audit preservation
-- Recovery requirements
-
----
-
-# Review Activities
-
-Governance periodically reviews:
-
-- Telemetry quality
-- Logging practices
-- Metric accuracy
-- Trace completeness
-- Dashboard integrity
-- Alert effectiveness
-- Health reporting accuracy
-- Access permissions
-- Retention compliance
-- Audit completeness
-
----
-
-# Risk Management
-
-Governance evaluates risks involving:
-
-- Unauthorized access
-- Sensitive data exposure
-- Missing audit records
-- Data corruption
-- Incomplete observability
-- Regulatory violations
-- Operational blind spots
-- Governance noncompliance
-
----
-
-# Integration Responsibilities
-
-Observability Governance oversees:
-
-- Observability Manager
-- Telemetry Collector
-- Log Manager
-- Metrics Manager
-- Trace Manager
-- Diagnostics Engine
-- Dashboard Manager
-- Alert Manager
-- Health Reporter
-
-Governance coordinates with:
-
-- Security Layer
-- Audit Layer
-- Compliance systems
-- Risk management
-- Platform governance
-
----
-
-# Safety Rules
-
-Observability Governance must never:
-
-- Allow unauthorized observability access.
-- Permit collection of prohibited information.
-- Delete protected audit records.
-- Override security requirements.
-- Ignore compliance violations.
-- Weaken governance controls.
-- Bypass audit requirements.
-
----
-
-# Failure Handling
-
-If governance operations fail:
-
-- Preserve governance evidence.
-- Record governance failures.
-- Notify the Observability Manager.
-- Escalate critical governance issues.
-- Maintain existing protections.
-- Continue audit recording.
-- Schedule governance review.
-
----
-
-# Audit Requirements
-
-Every governance operation records:
-
-- Governance operation ID
-- Timestamp
-- Policy evaluated
-- Scope
-- Decision
-- Compliance status
-- Reviewer
-- Final outcome
-
----
-
-# Success Criteria
-
-Observability Governance succeeds when:
-
-- Observability policies are consistently enforced.
-- Sensitive information remains protected.
-- Compliance requirements are satisfied.
-- Access controls remain effective.
-- Audit records remain complete.
-- Observability practices remain standardized.
-- Platform visibility remains secure, reliable, and trustworthy.
+1. Observability Governance decisions must be scoped to observability-domain data and evidence handling.
+2. Observability Governance must consume supplied evidence from authoritative owners.
+3. Observability Governance must not certify compliance or override security, storage, or governance owners.
