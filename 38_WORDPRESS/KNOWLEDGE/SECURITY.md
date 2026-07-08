@@ -123,3 +123,7 @@ SquirrelForge must reject any code that:
 - Uses unsanitized input in a query or logic.
 - Performs a raw SQL query with user input.
 - Allows unrestricted file uploads.
+
+## Rule
+
+Security knowledge must be applied before release whenever WordPress work touches input, output, permissions, storage, files, APIs, or secrets.

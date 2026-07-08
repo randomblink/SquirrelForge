@@ -126,3 +126,7 @@ function my_plugin_rewrite_flush() {
 }
 register_activation_hook( __FILE__, 'my_plugin_rewrite_flush' );
 ```
+
+## Rule
+
+WordPress custom post type work must define registration, capabilities, rewrite behavior, storage impact, and documentation.

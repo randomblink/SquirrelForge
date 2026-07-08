@@ -130,3 +130,7 @@ code is readable
 Rule
 
 SquirrelForge must reject WordPress PHP code that fails critical security, naming, or maintainability requirements.
+
+## Rule
+
+PHP work must follow WordPress coding, security, lifecycle, compatibility, and maintainability requirements.

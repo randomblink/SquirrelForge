@@ -87,3 +87,7 @@ In addition to tooling, the agent must perform a logical review:
 3.  **Classify Findings**: Assign a severity level to every identified issue.
 4.  **Reject Critical Issues**: If any "Critical" issues are found, the pipeline must halt, and the code must be sent back to the Code Generator or Refactoring Advisor for a fix.
 5.  **Generate a Report**: The output of a code review is a structured report listing all findings, their locations, severity, and recommended actions.
+
+## Rule
+
+Code review must identify blocking issues, risks, required changes, and final approval status.

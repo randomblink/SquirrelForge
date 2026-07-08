@@ -75,3 +75,7 @@ For every significant output (e.g., a generated file, an architectural plan), th
 1.  **Centralized Authority**: All WordPress agents and components **must** request knowledge through the Knowledge Manager. They must not select knowledge documents themselves.
 2.  **Mandatory Consultation**: No architectural plan may be created and no code may be generated without first consulting the knowledge provided by the Knowledge Manager for that task.
 3.  **Context is King**: The agent must operate only on the knowledge provided for the current task. It should not assume knowledge from a previous, unrelated task is still relevant.
+
+## Rule
+
+Knowledge selection must prioritize required, specific, and current WordPress references before task execution.

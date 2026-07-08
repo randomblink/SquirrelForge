@@ -104,3 +104,7 @@ function my_plugin_taxonomy_rewrite_flush() {
 }
 register_activation_hook( __FILE__, 'my_plugin_taxonomy_rewrite_flush' );
 ```
+
+## Rule
+
+Taxonomy knowledge must guide registration, relationships, rewrite behavior, capabilities, and data migration decisions.

@@ -74,3 +74,7 @@ This skill follows the master `PIPELINE.md`.
 1.  **Use `block.json`**: The agent must use the `block.json` metadata file as the canonical source of truth for defining a block.
 2.  **Separate Edit and Save**: The agent should generate separate `edit.js` and `save.js` components to maintain a clear separation of concerns.
 3.  **Assume a Build Step**: The agent's process assumes a modern JavaScript build tool (like `@wordpress/scripts`) will be used to compile the source JSX and Sass into browser-ready assets.
+
+## Rule
+
+Block creation must preserve editor behavior, frontend rendering, serialization, accessibility, and compatibility.

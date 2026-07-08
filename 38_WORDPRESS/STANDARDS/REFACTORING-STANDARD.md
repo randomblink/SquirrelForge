@@ -72,3 +72,7 @@ Refactoring should be considered when:
 3.  **Log Each Step**: For complex refactorings, the agent should log each small change and the successful test run that followed it.
 4.  **Follow Standards**: All refactored code must adhere to the `ARCHITECTURE-STANDARD.md` and other relevant standards.
 5.  **Propose, Don't Assume**: The `Refactoring Advisor` in the pipeline should propose refactorings as part of a code review report, not apply them automatically without approval, unless it's part of a bug-fixing task.
+
+## Rule
+
+Refactoring must preserve intended behavior, reduce structural risk, and pass regression validation.

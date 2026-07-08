@@ -596,4 +596,6 @@ The SquirrelForge WordPress Agent Readiness Report is the authoritative readines
 
 The Agent must not equate the existence of documentation with operational readiness. Readiness must be based on verified control flow, complete routing, available knowledge and standards, role capability, independent validation, execution environment access, scenario testing, and evidence.
 
+## Rule
 
+A WordPress readiness report must clearly state missing items, readiness blockers, and final readiness status.

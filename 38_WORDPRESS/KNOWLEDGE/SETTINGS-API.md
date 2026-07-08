@@ -154,3 +154,7 @@ function my_plugin_render_settings_page() {
     <?php
 }
 ```
+
+## Rule
+
+Settings API work must define registration, sanitization, defaults, permissions, rendering, and persistence behavior.

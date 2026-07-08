@@ -153,3 +153,7 @@ Next file after this:
 
 ```text
 38_WORDPRESS/SECURITY-VALIDATOR.md
+
+## Rule
+
+WordPress files must follow the approved structure, naming, responsibility, and dependency rules before implementation is considered valid.

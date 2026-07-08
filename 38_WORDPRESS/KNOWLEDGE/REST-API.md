@@ -144,3 +144,7 @@ For any endpoint that modifies data (`POST`, `PUT`, `DELETE`), the `permission_c
     return current_user_can( 'edit_posts' );
 },
 ```
+
+## Rule
+
+REST API knowledge must guide route registration, schema, permissions, validation, sanitization, and response behavior.

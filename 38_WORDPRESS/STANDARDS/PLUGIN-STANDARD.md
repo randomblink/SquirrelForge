@@ -154,3 +154,7 @@ no WordPress core files are modified
 Rule
 
 SquirrelForge must generate plugins using this standard unless a project-specific architecture is explicitly documented and approved.
+
+## Rule
+
+Plugin work must follow approved structure, lifecycle, security, compatibility, documentation, and release requirements.

@@ -85,3 +85,7 @@ SquirrelForge must reject or refactor theme code that:
 - Uses `query_posts()`. This function modifies the main query and is highly discouraged. Use `WP_Query` for secondary loops instead.
 - Directly accesses the database with `$wpdb` for content that could be fetched with `WP_Query`.
 - Hardcodes API keys or other secrets.
+
+## Rule
+
+Theme handbook knowledge must guide templates, theme support, styles, accessibility, and block compatibility.

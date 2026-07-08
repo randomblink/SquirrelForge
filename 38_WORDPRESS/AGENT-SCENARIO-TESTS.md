@@ -126,4 +126,6 @@ Rule
 
 The WordPress Agent must pass scenario tests before it can be considered operational for real WordPress development work.
 
+## Rule
 
+WordPress agent scenarios must validate routing, role handoffs, safety gates, and final outputs before readiness is accepted.

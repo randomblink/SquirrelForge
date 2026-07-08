@@ -637,4 +637,6 @@ The SquirrelForge WordPress Agent Boot Sequence is the mandatory initialization 
 
 The Agent must verify controllers, workflows, Skills, knowledge, standards, roles, validation capabilities, documentation capability, release capability, and execution contracts before claiming readiness or beginning unrestricted WordPress development work.
 
+## Rule
 
+The WordPress Agent must complete boot checks before routing or executing WordPress work.

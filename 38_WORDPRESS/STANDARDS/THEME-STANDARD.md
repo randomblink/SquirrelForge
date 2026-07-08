@@ -161,3 +161,7 @@ no WordPress core files are modified
 Rule
 
 SquirrelForge must generate themes using this standard unless a project-specific architecture is explicitly documented and approved.
+
+## Rule
+
+Theme work must satisfy WordPress theme structure, template, accessibility, performance, and compatibility requirements.

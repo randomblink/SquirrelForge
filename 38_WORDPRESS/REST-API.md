@@ -144,3 +144,7 @@ For any endpoint that modifies data (`POST`, `PUT`, `DELETE`), the `permission_c
     return current_user_can( 'edit_posts' );
 },
 ```
+
+## Rule
+
+WordPress REST API work must define route, permission callback, validation, sanitization, response contract, and tests.

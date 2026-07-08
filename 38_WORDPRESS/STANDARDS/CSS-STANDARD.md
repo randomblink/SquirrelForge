@@ -105,3 +105,7 @@ frontend styles do not affect unrelated content
 Rule
 
 SquirrelForge must generate CSS that is scoped, accessible, responsive, and maintainable.
+
+## Rule
+
+CSS work must preserve visual behavior, accessibility, maintainability, and correct loading context.

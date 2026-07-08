@@ -133,3 +133,7 @@ register_activation_hook( __FILE__, 'my_plugin_install' );
 1.  **Use `WP_Query` first:** For any query involving posts, pages, or CPTs.
 2.  **Use Meta/Option/User functions next:** Use `get_post_meta()`, `get_option()`, `get_user_by()` before writing custom queries.
 3.  **Use `$wpdb` as a last resort:** For interacting with custom tables or when a complex query cannot be achieved with the above APIs.
+
+## Rule
+
+WordPress database work must preserve data integrity, use safe queries, support upgrades, and document schema behavior.

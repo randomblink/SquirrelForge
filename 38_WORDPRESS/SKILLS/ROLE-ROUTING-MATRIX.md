@@ -399,3 +399,7 @@ For production WordPress releases, the following independent gates are mandatory
 Performance Engineer is mandatory when meaningful performance-sensitive changes exist.
 
 ## Independent Review Rule
+
+## Rule
+
+The Skill routing matrix must map each WordPress task to required roles, gates, and handoffs.

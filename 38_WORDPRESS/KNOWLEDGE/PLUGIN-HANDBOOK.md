@@ -143,3 +143,7 @@ register_activation_hook( __FILE__, 'my_plugin_activate' );
 5.  **Use Lifecycle Hooks Correctly**: Place `flush_rewrite_rules` in the activation hook. Place data removal in `uninstall.php`.
 6.  **Prefix All Names**: Generate a unique prefix for the plugin and apply it to all non-class functions, constants, and globals.
 7.  **Conditionally Load Assets**: When generating asset enqueueing code, use conditional checks (e.g., `is_admin()`, `is_singular('my-cpt')`) to limit where assets are loaded.
+
+## Rule
+
+Plugin handbook knowledge must guide plugin structure, hooks, lifecycle, security, and release behavior.

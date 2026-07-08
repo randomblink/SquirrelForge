@@ -308,3 +308,7 @@ The context must be one of:
 - WooCommerce extension
 - migration
 - maintenance script
+
+## Rule
+
+WordPress core knowledge must guide compatibility, lifecycle, hook, and API decisions.

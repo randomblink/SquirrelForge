@@ -74,3 +74,7 @@ This skill follows the master `PIPELINE.md`.
 2.  **Define `args` for Validation**: The agent must generate an `args` array to define, validate, and sanitize all expected parameters.
 3.  **Use `WP_REST_Response` and `WP_Error`**: Generated callbacks must always `return` an instance of `WP_REST_Response` or `WP_Error`, never `echo` and `die`.
 4.  **Use Versioned Namespaces**: All generated routes must be placed within a versioned namespace (e.g., `my-plugin/v1`).
+
+## Rule
+
+REST endpoint creation must include schema, permissions, validation, sanitization, response contract, and tests.

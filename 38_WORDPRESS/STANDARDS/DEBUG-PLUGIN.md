@@ -79,3 +79,7 @@ Debugging is a process of elimination. The workflow starts by gathering evidence
 3.  **Fix the Cause, Not the Symptom**: The implemented fix must address the root cause of the bug, not just suppress the error message.
 4.  **Safety is Paramount**: Any fix must pass the same security and standards validation as new code.
 5.  **Verify the Fix**: The agent must define a clear set of steps to verify that the bug is gone and that no new bugs have been introduced.
+
+## Rule
+
+Plugin debugging must fix the verified root cause and pass regression validation.

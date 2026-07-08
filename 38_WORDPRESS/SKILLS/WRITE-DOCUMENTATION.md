@@ -59,3 +59,7 @@ This skill is typically one of the final stages in the master `PIPELINE.md`.
 2.  **Follow the Standard**: All generated documentation must strictly adhere to the formats and requirements defined in `DOCUMENTATION-STANDARD.md`.
 3.  **Be Comprehensive**: The agent must ensure that all key aspects of the project (installation, usage, hooks, etc.) are documented in the `README.md`.
 4.  **Be Accurate**: PHPDoc blocks must accurately reflect the parameters, return types, and purpose of the code they describe.
+
+## Rule
+
+WordPress documentation work must explain usage, configuration, behavior, limitations, and release impact.

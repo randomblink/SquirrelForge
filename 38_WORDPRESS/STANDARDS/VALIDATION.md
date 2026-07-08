@@ -41,3 +41,7 @@ This document defines the standard validation checklist for tasks within the Wor
 -   [ ] **Clarity:** Is the final report, formatted according to `14_ENGINE/OUTPUT-RULES.md`, clear and easy to understand?
 -   [ ] **Honesty:** Is the status of testing and validation clearly and honestly stated?
 -   [ ] **Actionable Next Step:** Does the report provide a logical next step for the user?
+
+## Rule
+
+Validation must be explicit, reproducible, and tied to the selected WordPress workflow.

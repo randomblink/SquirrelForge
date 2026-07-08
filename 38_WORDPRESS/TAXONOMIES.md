@@ -104,3 +104,7 @@ function my_plugin_taxonomy_rewrite_flush() {
 }
 register_activation_hook( __FILE__, 'my_plugin_taxonomy_rewrite_flush' );
 ```
+
+## Rule
+
+WordPress taxonomy work must preserve data integrity, rewrite behavior, capability rules, and admin/frontend compatibility.

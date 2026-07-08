@@ -77,3 +77,7 @@ This skill follows the master `PIPELINE.md`.
 1.  **Follow the Pipeline**: This skill must be executed by following the `PIPELINE.md` stages in order.
 2.  **Gate Enforcement**: A failure at any validation or review stage must halt the process and trigger a revision cycle.
 3.  **Strict Separation**: The agent must not generate plugin-territory functionality (like CPTs) within the theme. It should propose a companion plugin instead.
+
+## Rule
+
+Theme creation must pass architecture, accessibility, performance, QA, documentation, and release gates.
