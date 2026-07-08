@@ -1,188 +1,35 @@
 # SquirrelForge Optimization Manager
 
+Version: 1.0.0
+Status: Stable
+Owner: Optimization Maintainers
+Depends On: OPTIMIZATION-ENGINE.md, PERFORMANCE-OPTIMIZER.md, RESOURCE-OPTIMIZER.md, WORKFLOW-OPTIMIZER.md, AGENT-OPTIMIZER.md, CAPACITY-PLANNER.md, COST-OPTIMIZER.md, OPTIMIZATION-VALIDATOR.md, OPTIMIZATION-GOVERNANCE.md
+Used By: optimization-domain callers and downstream consumers
+Last Updated: 2026-07-08
+
 ## Purpose
 
-The Optimization Manager coordinates all optimization activities across SquirrelForge. It serves as the central controller for performance improvement, resource optimization, workflow refinement, agent enhancement, capacity planning, cost optimization, validation, and optimization governance.
+The Optimization Manager coordinates Optimization Layer intake, specialist routing, proposal progression, validation and governance handoffs, and optimization-domain status aggregation.
 
-The Optimization Manager does not directly optimize platform components. It orchestrates the Optimization Layer by coordinating specialized optimization services while ensuring that every optimization is evidence-based, governed, measurable, and safe.
+## Responsibilities
 
----
+- Receive optimization requests and trigger references.
+- Check request structure and prerequisite evidence references.
+- Route work to the appropriate optimization specialist or Optimization Engine.
+- Coordinate proposal handoffs to Optimization Validator and Optimization Governance.
+- Aggregate specialist findings, proposal, validation, governance, and implementation-status references.
+- Publish optimization-domain status to callers and observability consumers.
 
-# Responsibilities
+## Boundary
 
-- Coordinate all Optimization Layer components.
-- Receive optimization requests.
-- Validate optimization requirements.
-- Prioritize optimization opportunities.
-- Route optimization activities.
-- Coordinate optimization planning.
-- Monitor optimization progress.
-- Enforce optimization governance.
-- Record optimization activity.
-- Publish optimization status.
+The Optimization Manager coordinates the layer. It does not independently perform specialist optimization analysis, general risk assessment, platform validation, governance-policy evaluation, Optimization Governance decisions, production execution, deployment, retry, recovery, rollback, remediation, storage persistence, general monitoring, or audit-trail infrastructure.
 
----
+Priority recommendations produced by the manager are optimization-domain coordination outputs and do not replace business, governance, risk, release, or execution priorities owned elsewhere.
 
-# Inputs
+## Failure Handling
 
-The Optimization Manager receives:
+Coordination failures produce failure status and evidence references for owning failure, resilience, and observability paths. The manager does not create a parallel retry or recovery mechanism.
 
-- Health reports and alerts from the Observability Layer.
-- Observability reports
-- Performance metrics
-- Diagnostic findings
-- Workflow analytics
-- Agent performance reports
-- Capacity forecasts
-- Cost analyses
-- Governance decisions and policies.
-- User optimization requests
-- Operational objectives
+## Rule
 
----
-
-# Outputs
-
-The Optimization Manager produces:
-
-- Optimization plans
-- Optimization assignments
-- Performance improvement requests
-- Resource optimization requests
-- Workflow optimization requests
-- Validation requests
-- Governance review requests
-- Optimization reports
-- Optimization audit records
-
----
-
-# Optimization Workflow
-
-1. Receive an optimization trigger (e.g., a high-latency alert).
-2. Validate optimization objectives.
-3. Review supporting observability data.
-4. Prioritize optimization opportunities.
-5. Assign optimization activities.
-6. Coordinate optimization execution.
-7. Validate optimization results.
-8. Record audit information.
-9. Notify governance components.
-10. Publish optimization status.
-
----
-
-# Coordinated Operations
-
-The Optimization Manager coordinates:
-
-- Performance optimization
-- Resource optimization
-- Workflow optimization
-- Agent optimization
-- Capacity planning
-- Cost optimization
-- Optimization validation
-- Governance enforcement
-
----
-
-# Coordination Responsibilities
-
-The Optimization Manager coordinates:
-
-- Performance Optimizer
-- Resource Optimizer
-- Workflow Optimizer
-- Agent Optimizer
-- Capacity Planner
-- Cost Optimizer
-- Optimization Validator
-- Optimization Governance
-
----
-
-# Optimization Principles
-
-Every optimization should be:
-
-- Evidence-based
-- Measurable
-- Safe
-- Incremental when practical
-- Reversible when appropriate
-- Auditable
-- Governed
-- Consistent with platform architecture
-
----
-
-# Decision Criteria
-
-Optimization priorities may consider:
-
-- Performance impact
-- Resource efficiency
-- Reliability improvements
-- Operational cost
-- User experience
-- Security implications
-- Governance requirements
-- Implementation complexity
-- Business value
-- Risk level
-
----
-
-# Safety Rules
-
-The Optimization Manager must never:
-
-- Bypass governance.
-- Ignore observability evidence.
-- Reduce platform security.
-- Compromise platform stability.
-- Modify protected audit records.
-- Approve unvalidated optimizations.
-
----
-
-# Failure Handling
-
-If an optimization activity fails:
-
-- Preserve optimization requests.
-- Record coordination failures.
-- Notify affected components.
-- Retry coordination when appropriate.
-- Escalate persistent failures.
-- Maintain audit continuity.
-
----
-
-# Audit Requirements
-
-Every optimization lifecycle event records:
-
-- Optimization operation ID
-- Timestamp
-- Optimization objective
-- Coordinated components
-- Governance status
-- Validation status
-- Processing status
-- Final outcome
-
----
-
-# Success Criteria
-
-The Optimization Manager succeeds when:
-
-- Optimization opportunities are accurately prioritized.
-- Optimization activities are effectively coordinated.
-- Improvements are measurable.
-- Platform stability is preserved.
-- Governance requirements are enforced.
-- Audit records remain complete.
-- Platform performance continuously improves without compromising security or reliability.
+Coordination does not transfer specialist or cross-layer authority to the Optimization Manager.
