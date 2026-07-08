@@ -39,7 +39,7 @@ Use the appropriate specialized Skill instead.
 
 Use:
 
-`32_WORDPRESS/SKILLS/REFACTOR-CODE.md`
+`38_WORDPRESS/SKILLS/REFACTOR-CODE.md`
 
 for behavior-preserving internal code restructuring.
 
