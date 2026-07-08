@@ -17,7 +17,7 @@ This checklist determines whether the SquirrelForge WordPress Layer is ready to 
 - [ ] `KNOWLEDGE/KNOWLEDGE-MANAGER.md` exists.
 - [ ] `33_WORDPRESS_ROLES/ROLE-MANAGER.md` exists.
 - [ ] `33_WORDPRESS_ROLES/ROLE-ROUTING-MATRIX.md` exists.
-- [ ] `SECURITY-VALIDATOR.md` exists.
+- [ ] `38_WORDPRESS/SECURITY-VALIDATOR.md` exists.
 - [ ] `STANDARDS/` exists.
 - [ ] `SKILLS/` exists.
 - [ ] `KNOWLEDGE/` exists.
