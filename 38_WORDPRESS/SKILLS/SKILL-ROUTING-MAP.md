@@ -73,9 +73,9 @@ The Skill Routing Map must coordinate with:
 | `38_WORDPRESS/SKILLS/CREATE-THEME.md` | Create a WordPress theme, child theme, block theme, classic theme, or hybrid theme. |
 | `38_WORDPRESS/SKILLS/CREATE-BLOCK.md` | Create a custom block or Block Editor extension. |
 | `38_WORDPRESS/SKILLS/CREATE-REST-ENDPOINT.md` | Create or modify a WordPress REST API endpoint. |
-| `CREATE-SHORTCODE.md` | Create a WordPress shortcode. |
+| `38_WORDPRESS/SKILLS/CREATE-SHORTCODE.md` | Create a WordPress shortcode. |
 | `38_WORDPRESS/SKILLS/CREATE-WIDGET.md` | Create a WordPress widget or sidebar feature. |
-| `MIGRATE-PLUGIN.md` | Perform controlled plugin architecture, data, API, or compatibility migration. |
+| `38_WORDPRESS/SKILLS/MIGRATE-PLUGIN.md` | Perform controlled plugin architecture, data, API, or compatibility migration. |
 | `38_WORDPRESS/SKILLS/REVIEW-CODE.md` | Inspect existing code and produce evidence-based findings. |
 | `38_WORDPRESS/SKILLS/REFACTOR-CODE.md` | Restructure code while preserving approved external behavior. |
 | `38_WORDPRESS/SKILLS/DEBUG-PLUGIN.md` | Diagnose and fix a reproducible plugin defect. |
@@ -168,7 +168,7 @@ Supporting Skills may include:
 
 - `38_WORDPRESS/SKILLS/CREATE-BLOCK.md`
 - `38_WORDPRESS/SKILLS/CREATE-REST-ENDPOINT.md`
-- `CREATE-SHORTCODE.md`
+- `38_WORDPRESS/SKILLS/CREATE-SHORTCODE.md`
 - `38_WORDPRESS/SKILLS/CREATE-WIDGET.md`
 - `38_WORDPRESS/SKILLS/CREATE-TESTS.md`
 - `38_WORDPRESS/SKILLS/WRITE-DOCUMENTATION.md`
@@ -211,9 +211,9 @@ If REST work belongs to a larger plugin or block project, the parent Skill remai
 
 ### New Shortcode
 
-If the primary deliverable is a shortcode, select `CREATE-SHORTCODE.md`.
+If the primary deliverable is a shortcode, select `38_WORDPRESS/SKILLS/CREATE-SHORTCODE.md`.
 
-If the shortcode belongs to a larger plugin project, use `CREATE-PLUGIN` as primary and `CREATE-SHORTCODE` as supporting.
+If the shortcode belongs to a larger plugin project, use `CREATE-PLUGIN` as primary and `38_WORDPRESS/SKILLS/CREATE-SHORTCODE.md` as supporting.
 
 ### New Widget
 
@@ -264,11 +264,11 @@ Examples:
 - improve testability
 - simplify internal architecture
 
-If public contracts, stored data, or major compatibility behavior must change, evaluate `MIGRATE-PLUGIN.md` instead.
+If public contracts, stored data, or major compatibility behavior must change, evaluate `38_WORDPRESS/SKILLS/MIGRATE-PLUGIN.md` instead.
 
 ### Migration
 
-If the task changes architecture, stored data, compatibility contracts, API versions, or major implementation models, select `MIGRATE-PLUGIN.md`.
+If the task changes architecture, stored data, compatibility contracts, API versions, or major implementation models, select `38_WORDPRESS/SKILLS/MIGRATE-PLUGIN.md`.
 
 Examples:
 

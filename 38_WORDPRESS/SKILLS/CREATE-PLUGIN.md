@@ -137,6 +137,7 @@ Possible selections include:
 - WordPress Core
 - Plugin Handbook
 - Security
+- Custom Post Types
 - Database
 - REST API
 - Block Editor

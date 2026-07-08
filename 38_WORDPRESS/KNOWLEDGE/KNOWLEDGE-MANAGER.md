@@ -38,6 +38,8 @@ An agent's decision is only as good as the knowledge it consults. The Knowledge 
 | Task | Knowledge Documents to Consult |
 | :--- | :--- |
 | **Build a new plugin** | `PLUGIN-HANDBOOK.md`, `CODING-STANDARDS.md`, `SECURITY.md`, `38_WORDPRESS/KNOWLEDGE/DATABASE.md` |
+| **Build a plugin with custom post types** | `PLUGIN-HANDBOOK.md`, `38_WORDPRESS/KNOWLEDGE/CUSTOM-POST-TYPES.md`, `CODING-STANDARDS.md`, `SECURITY.md` |
+| **Build a plugin with custom post types and REST endpoints** | `PLUGIN-HANDBOOK.md`, `38_WORDPRESS/KNOWLEDGE/CUSTOM-POST-TYPES.md`, `38_WORDPRESS/KNOWLEDGE/REST-API.md`, `SECURITY.md`, `CODING-STANDARDS.md` |
 | **Build a block theme** | `38_WORDPRESS/KNOWLEDGE/THEME-HANDBOOK.md`, `BLOCK-EDITOR.md`, `CODING-STANDARDS.md`, `38_WORDPRESS/KNOWLEDGE/ACCESSIBILITY.md` |
 | **Create a REST endpoint** | `38_WORDPRESS/KNOWLEDGE/REST-API.md`, `SECURITY.md`, `PERFORMANCE.md`, `CODING-STANDARDS.md` |
 | **Create a settings page** | `SETTINGS-API.md`, `SECURITY.md`, `CODING-STANDARDS.md`, `38_WORDPRESS/KNOWLEDGE/ACCESSIBILITY.md` |
