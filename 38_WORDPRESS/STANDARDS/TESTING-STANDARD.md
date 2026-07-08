@@ -11,7 +11,7 @@ Testing verifies that generated code is functionally correct, secure, performant
 
 ---
 
-# Testing Philosophy
+## Testing Philosophy
 
 Every generated project should be verified at multiple levels:
 
@@ -26,7 +26,7 @@ Testing should occur before deployment, not after.
 
 ---
 
-# Testing Levels
+## Testing Levels
 
 ## Level 1 — Static Validation
 
@@ -120,7 +120,7 @@ Verify:
 
 ---
 
-# Plugin Testing Checklist
+## Plugin Testing Checklist
 
 Verify:
 
@@ -138,7 +138,7 @@ Verify:
 
 ---
 
-# Theme Testing Checklist
+## Theme Testing Checklist
 
 Verify:
 
@@ -154,7 +154,7 @@ Verify:
 
 ---
 
-# Performance Testing
+## Performance Testing
 
 Verify:
 
@@ -167,7 +167,7 @@ Verify:
 
 ---
 
-# Browser Testing
+## Browser Testing
 
 Test supported browsers defined by project requirements.
 
@@ -180,7 +180,7 @@ Minimum expectation:
 
 ---
 
-# Error Testing
+## Error Testing
 
 Verify:
 
@@ -195,7 +195,7 @@ Applications should fail gracefully.
 
 ---
 
-# Logging
+## Logging
 
 Testing should record:
 
@@ -208,7 +208,7 @@ Testing should record:
 
 ---
 
-# Approval States
+## Approval States
 
 | Status | Meaning |
 |--------|---------|
@@ -218,7 +218,7 @@ Testing should record:
 
 ---
 
-# Final Testing Report
+## Final Testing Report
 
 Each completed task should produce:
 
@@ -245,6 +245,6 @@ Final Status:
 
 ---
 
-# Rule
+## Rule
 
 No WordPress project may be approved until all required testing levels have been completed or explicitly waived with documented justification.

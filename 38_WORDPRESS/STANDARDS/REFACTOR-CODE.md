@@ -27,7 +27,7 @@ Before refactoring, consult:
 
 ---
 
-# Refactoring Goals
+## Refactoring Goals
 
 Improve:
 
@@ -43,7 +43,7 @@ Without changing expected behavior.
 
 ---
 
-# Refactoring Workflow
+## Refactoring Workflow
 
 1. Inspect the existing code.
 2. Understand current behavior.
@@ -56,7 +56,7 @@ Without changing expected behavior.
 
 ---
 
-# Common Refactoring Tasks
+## Common Refactoring Tasks
 
 Examples include:
 
@@ -74,7 +74,7 @@ Examples include:
 
 ---
 
-# Do Not Change
+## Do Not Change
 
 Unless explicitly requested, do not change:
 
@@ -90,7 +90,7 @@ Unless explicitly requested, do not change:
 
 ---
 
-# Architecture Improvements
+## Architecture Improvements
 
 Look for:
 
@@ -103,7 +103,7 @@ Look for:
 
 ---
 
-# Security Review
+## Security Review
 
 Every refactoring must verify:
 
@@ -119,7 +119,7 @@ Security must never be weakened.
 
 ---
 
-# Performance Review
+## Performance Review
 
 Identify:
 
@@ -132,7 +132,7 @@ Identify:
 
 ---
 
-# Documentation Review
+## Documentation Review
 
 Update documentation when:
 
@@ -144,7 +144,7 @@ Update documentation when:
 
 ---
 
-# Validation Checklist
+## Validation Checklist
 
 Verify:
 
@@ -157,7 +157,7 @@ Verify:
 
 ---
 
-# Refactoring Report
+## Refactoring Report
 
 Produce:
 
@@ -176,7 +176,7 @@ Remaining Recommendations:
 
 ---
 
-# Approval States
+## Approval States
 
 | Status | Meaning |
 |--------|---------|
@@ -186,6 +186,6 @@ Remaining Recommendations:
 
 ---
 
-# Rule
+## Rule
 
 SquirrelForge must preserve functional behavior during refactoring unless the project requirements explicitly authorize behavioral changes.

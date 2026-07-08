@@ -11,7 +11,7 @@ The objective is to produce software that is maintainable, testable, secure, ext
 
 ---
 
-# Core Principles
+## Core Principles
 
 Every project should be:
 
@@ -26,7 +26,7 @@ Every project should be:
 
 ---
 
-# Separation of Responsibilities
+## Separation of Responsibilities
 
 Each component should have one primary responsibility.
 
@@ -50,7 +50,7 @@ No class should perform multiple unrelated responsibilities.
 
 ---
 
-# Layered Architecture
+## Layered Architecture
 
 SquirrelForge plugins should be organized into logical layers.
 
@@ -70,7 +70,7 @@ Business logic should remain independent of presentation whenever practical.
 
 ---
 
-# Dependency Direction
+## Dependency Direction
 
 Dependencies should move downward.
 
@@ -84,7 +84,7 @@ Avoid circular dependencies.
 
 ---
 
-# Class Design
+## Class Design
 
 Classes should:
 
@@ -96,7 +96,7 @@ Classes should:
 
 ---
 
-# Method Design
+## Method Design
 
 Methods should:
 
@@ -108,7 +108,7 @@ Methods should:
 
 ---
 
-# Configuration
+## Configuration
 
 Configuration belongs in:
 
@@ -120,7 +120,7 @@ Configuration should never be scattered throughout the codebase.
 
 ---
 
-# Business Logic
+## Business Logic
 
 Business rules should not be embedded inside:
 
@@ -134,7 +134,7 @@ Business logic belongs in dedicated service classes.
 
 ---
 
-# Data Access
+## Data Access
 
 Database access should be isolated.
 
@@ -149,7 +149,7 @@ Controllers should not contain SQL.
 
 ---
 
-# Error Handling
+## Error Handling
 
 Errors should:
 
@@ -160,7 +160,7 @@ Errors should:
 
 ---
 
-# Extensibility
+## Extensibility
 
 Projects should expose extension points through:
 
@@ -173,7 +173,7 @@ Avoid requiring modifications to core project files.
 
 ---
 
-# Documentation
+## Documentation
 
 Each architectural component should explain:
 
@@ -184,7 +184,7 @@ Each architectural component should explain:
 
 ---
 
-# Review Checklist
+## Review Checklist
 
 Verify that:
 
@@ -198,6 +198,6 @@ Verify that:
 
 ---
 
-# Rule
+## Rule
 
 SquirrelForge must generate WordPress projects that prioritize long-term maintainability over short-term convenience. Architectural consistency is a required quality gate for every generated project.

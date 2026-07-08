@@ -9,7 +9,7 @@ This document defines the standards and guidelines SquirrelForge must follow whe
 
 ---
 
-# Core Principles
+## Core Principles
 
 - **Improve, Don't Break**: Refactoring should make the code better without introducing new bugs or altering functionality.
 - **Small, Safe Steps**: Prefer a series of small, verifiable changes over a single large, risky one.
@@ -18,7 +18,7 @@ This document defines the standards and guidelines SquirrelForge must follow whe
 
 ---
 
-# Triggers for Refactoring
+## Triggers for Refactoring
 
 Refactoring should be considered when:
 
@@ -29,7 +29,7 @@ Refactoring should be considered when:
 
 ---
 
-# Common Refactoring Targets (Code Smells)
+## Common Refactoring Targets (Code Smells)
 
 - **Duplicated Code**: Identical or very similar code blocks in multiple places.
     - **Refactoring**: Extract the duplicate code into a new, shared method or function.
@@ -46,7 +46,7 @@ Refactoring should be considered when:
 
 ---
 
-# Refactoring Workflow
+## Refactoring Workflow
 
 1.  **Identify Target**: Select a specific piece of code to refactor.
 2.  **Ensure Tests Exist**: Verify that there are tests covering the current behavior. If not, create a testing plan first.
@@ -56,7 +56,7 @@ Refactoring should be considered when:
 
 ---
 
-# Forbidden Patterns
+## Forbidden Patterns
 
 - **Refactoring and Adding Features Simultaneously**: This makes it impossible to distinguish between bugs introduced by the refactoring and bugs in the new feature.
 - **Large-Scale, Untested Changes**: Rewriting a large component without a safety net of tests.
@@ -65,7 +65,7 @@ Refactoring should be considered when:
 
 ---
 
-# Agent Rules
+## Agent Rules
 
 1.  **Justify the Refactoring**: Before refactoring, the agent must state *why* the change is being made (e.g., "Refactoring to reduce duplication before adding the new 'export' feature").
 2.  **Prioritize Safety**: The agent must confirm that a testing strategy exists before beginning any significant refactoring.

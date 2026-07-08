@@ -11,7 +11,7 @@ The goal is to produce JavaScript that is secure, maintainable, performant, and 
 
 ---
 
-# Design Principles
+## Design Principles
 
 JavaScript should be:
 
@@ -25,7 +25,7 @@ JavaScript should be:
 
 ---
 
-# Preferred Architecture
+## Preferred Architecture
 
 SquirrelForge prefers:
 
@@ -39,7 +39,7 @@ Avoid large monolithic scripts.
 
 ---
 
-# File Organization
+## File Organization
 
 Typical structure:
 
@@ -57,7 +57,7 @@ Large projects may organize by feature.
 
 ---
 
-# Loading Rules
+## Loading Rules
 
 Scripts must be loaded through WordPress.
 
@@ -70,7 +70,7 @@ Do not hardcode `<script>` tags in templates unless explicitly required.
 
 ---
 
-# Scope Rules
+## Scope Rules
 
 Avoid polluting the global namespace.
 
@@ -84,7 +84,7 @@ Avoid creating unnecessary global variables.
 
 ---
 
-# DOM Access
+## DOM Access
 
 When interacting with the DOM:
 
@@ -95,7 +95,7 @@ When interacting with the DOM:
 
 ---
 
-# WordPress Integration
+## WordPress Integration
 
 JavaScript should integrate with WordPress using supported APIs.
 
@@ -111,7 +111,7 @@ Avoid relying on undocumented internal behavior.
 
 ---
 
-# AJAX
+## AJAX
 
 AJAX requests must:
 
@@ -122,7 +122,7 @@ AJAX requests must:
 
 ---
 
-# REST API
+## REST API
 
 REST requests should:
 
@@ -133,7 +133,7 @@ REST requests should:
 
 ---
 
-# Accessibility
+## Accessibility
 
 Interactive components must support:
 
@@ -145,7 +145,7 @@ Interactive components must support:
 
 ---
 
-# Performance
+## Performance
 
 JavaScript should:
 
@@ -158,7 +158,7 @@ JavaScript should:
 
 ---
 
-# Error Handling
+## Error Handling
 
 JavaScript should:
 
@@ -169,7 +169,7 @@ JavaScript should:
 
 ---
 
-# Browser Compatibility
+## Browser Compatibility
 
 Generated code should target the browsers defined by the project requirements.
 
@@ -177,7 +177,7 @@ Polyfills should only be added when necessary.
 
 ---
 
-# Security
+## Security
 
 JavaScript must never:
 
@@ -190,7 +190,7 @@ Server-side validation is always authoritative.
 
 ---
 
-# Documentation
+## Documentation
 
 Complex modules should document:
 
@@ -203,7 +203,7 @@ Complex modules should document:
 
 ---
 
-# Forbidden Patterns
+## Forbidden Patterns
 
 SquirrelForge must reject JavaScript that:
 
@@ -217,7 +217,7 @@ SquirrelForge must reject JavaScript that:
 
 ---
 
-# Review Checklist
+## Review Checklist
 
 Verify:
 
@@ -231,6 +231,6 @@ Verify:
 
 ---
 
-# Rule
+## Rule
 
 All generated JavaScript must be modular, secure, accessible, performant, and integrated with WordPress through supported APIs.

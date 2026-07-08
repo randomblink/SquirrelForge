@@ -11,7 +11,7 @@ The validator is intended to prevent common vulnerabilities including unauthoriz
 
 ---
 
-# Responsibilities
+## Responsibilities
 
 The Security Validator shall:
 
@@ -30,7 +30,7 @@ The Security Validator shall:
 
 ---
 
-# Security Validation Workflow
+## Security Validation Workflow
 
 1. Scan generated code.
 2. Identify user input.
@@ -45,7 +45,7 @@ The Security Validator shall:
 
 ---
 
-# Input Validation Rules
+## Input Validation Rules
 
 Every value entering the system must be validated.
 
@@ -62,7 +62,7 @@ Examples include:
 
 ---
 
-# Sanitization Rules
+## Sanitization Rules
 
 Incoming values must be sanitized before use.
 
@@ -81,7 +81,7 @@ Examples include:
 
 ---
 
-# Output Escaping Rules
+## Output Escaping Rules
 
 All output must be escaped immediately before rendering.
 
@@ -97,7 +97,7 @@ Examples include:
 
 ---
 
-# Nonce Requirements
+## Nonce Requirements
 
 Whenever data changes occur:
 
@@ -116,7 +116,7 @@ Examples include:
 
 ---
 
-# Capability Checks
+## Capability Checks
 
 Administrative operations must verify permissions.
 
@@ -134,7 +134,7 @@ The validator must reject:
 
 ---
 
-# Database Rules
+## Database Rules
 
 Database operations must:
 
@@ -151,7 +151,7 @@ The validator rejects:
 
 ---
 
-# REST API Validation
+## REST API Validation
 
 REST endpoints must define:
 
@@ -163,7 +163,7 @@ Endpoints without permission callbacks fail validation.
 
 ---
 
-# AJAX Validation
+## AJAX Validation
 
 AJAX handlers must verify:
 
@@ -174,7 +174,7 @@ AJAX handlers must verify:
 
 ---
 
-# File Upload Validation
+## File Upload Validation
 
 Uploads must verify:
 
@@ -187,7 +187,7 @@ Executable uploads must never be permitted unless explicitly required and separa
 
 ---
 
-# API Credentials
+## API Credentials
 
 The validator rejects:
 
@@ -204,7 +204,7 @@ Secrets should instead come from:
 
 ---
 
-# Cron Validation
+## Cron Validation
 
 Scheduled tasks must:
 
@@ -215,7 +215,7 @@ Scheduled tasks must:
 
 ---
 
-# Error Handling
+## Error Handling
 
 Sensitive information must never be displayed to visitors.
 
@@ -223,7 +223,7 @@ Debug information must be limited to development environments.
 
 ---
 
-# Logging Rules
+## Logging Rules
 
 Security failures should log:
 
@@ -237,7 +237,7 @@ Sensitive data must never be written to logs.
 
 ---
 
-# Security Report
+## Security Report
 
 Each validation produces:
 
@@ -255,7 +255,7 @@ The report should include:
 
 ---
 
-# Critical Failure Conditions
+## Critical Failure Conditions
 
 SquirrelForge must reject WordPress code that:
 
@@ -271,6 +271,6 @@ SquirrelForge must reject WordPress code that:
 
 ---
 
-# Rule
+## Rule
 
 No WordPress code may be approved until all critical security checks pass or documented exceptions have been explicitly reviewed and accepted.

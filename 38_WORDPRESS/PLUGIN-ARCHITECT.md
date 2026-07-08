@@ -13,7 +13,7 @@ The Plugin Architect produces the blueprint that guides the Code Generator, Secu
 
 ---
 
-# Responsibilities
+## Responsibilities
 
 The Plugin Architect shall:
 
@@ -34,7 +34,7 @@ The Plugin Architect shall:
 
 ---
 
-# Plugin Design Workflow
+## Plugin Design Workflow
 
 1. Analyze project goals.
 2. Identify major features.
@@ -48,7 +48,7 @@ The Plugin Architect shall:
 
 ---
 
-# Required Architectural Decisions
+## Required Architectural Decisions
 
 Before implementation begins, the Plugin Architect must determine:
 
@@ -64,7 +64,7 @@ Before implementation begins, the Plugin Architect must determine:
 
 ---
 
-# Plugin Lifecycle
+## Plugin Lifecycle
 
 Every plugin should define:
 
@@ -116,7 +116,7 @@ Typical responsibilities:
 
 ---
 
-# Core Components
+## Core Components
 
 A production plugin should separate responsibilities into dedicated components.
 
@@ -137,7 +137,7 @@ Typical components include:
 
 ---
 
-# Class Design Rules
+## Class Design Rules
 
 Each class should have one primary responsibility.
 
@@ -152,7 +152,7 @@ Classes should communicate through well-defined interfaces where practical.
 
 ---
 
-# Hook Planning
+## Hook Planning
 
 The architect should document:
 
@@ -166,7 +166,7 @@ Every hook should have documented intent.
 
 ---
 
-# Data Storage Planning
+## Data Storage Planning
 
 Determine whether data belongs in:
 
@@ -182,7 +182,7 @@ The simplest suitable storage mechanism should be preferred.
 
 ---
 
-# Asset Strategy
+## Asset Strategy
 
 Determine:
 
@@ -197,7 +197,7 @@ Assets should only load where required.
 
 ---
 
-# Settings Strategy
+## Settings Strategy
 
 Document:
 
@@ -211,7 +211,7 @@ Every setting must include sanitization and validation.
 
 ---
 
-# REST API Strategy
+## REST API Strategy
 
 Document:
 
@@ -224,7 +224,7 @@ Document:
 
 ---
 
-# AJAX Strategy
+## AJAX Strategy
 
 Document:
 
@@ -236,7 +236,7 @@ Document:
 
 ---
 
-# Internationalization
+## Internationalization
 
 Plugins should support localization by:
 
@@ -246,7 +246,7 @@ Plugins should support localization by:
 
 ---
 
-# Extensibility
+## Extensibility
 
 The architect should identify opportunities for:
 
@@ -260,7 +260,7 @@ Plugins should be designed for future growth.
 
 ---
 
-# Documentation Requirements
+## Documentation Requirements
 
 Each plugin should include:
 
@@ -273,7 +273,7 @@ Each plugin should include:
 
 ---
 
-# Architectural Deliverables
+## Architectural Deliverables
 
 The Plugin Architect should produce:
 
@@ -289,7 +289,7 @@ The Plugin Architect should produce:
 
 ---
 
-# Validation Checklist
+## Validation Checklist
 
 Before implementation begins, verify:
 
@@ -304,6 +304,6 @@ Before implementation begins, verify:
 
 ---
 
-# Rule
+## Rule
 
 No plugin implementation should begin until an architectural specification has been completed and approved by the WordPress Manager.

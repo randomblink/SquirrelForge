@@ -11,7 +11,7 @@ Consistent naming prevents collisions, improves discovery, supports maintainabil
 
 ---
 
-# General Naming Rules
+## General Naming Rules
 
 Names must be:
 
@@ -25,7 +25,7 @@ Avoid unexplained abbreviations, generic global names, inconsistent casing, and 
 
 ---
 
-# Plugin Slugs
+## Plugin Slugs
 
 Plugin slugs must use lowercase kebab-case.
 
@@ -38,7 +38,7 @@ squirrelforge-security
 
 ---
 
-# Theme Slugs
+## Theme Slugs
 
 Theme slugs must use lowercase kebab-case.
 
@@ -51,7 +51,7 @@ squirrelforge-block
 
 ---
 
-# PHP Namespaces
+## PHP Namespaces
 
 Use a vendor namespace whenever practical.
 
@@ -69,7 +69,7 @@ SquirrelForge\Forms
 
 ---
 
-# PHP Class Names
+## PHP Class Names
 
 Classes must use PascalCase.
 
@@ -88,7 +88,7 @@ One class per file.
 
 ---
 
-# File Names
+## File Names
 
 PHP files:
 
@@ -118,7 +118,7 @@ editor.js
 
 ---
 
-# Function Names
+## Function Names
 
 Functions must always be prefixed.
 
@@ -146,7 +146,7 @@ must never exist in the global namespace.
 
 ---
 
-# Hook Names
+## Hook Names
 
 Custom hooks should include the project prefix.
 
@@ -159,7 +159,7 @@ sf_forms_after_save
 
 ---
 
-# Option Names
+## Option Names
 
 Pattern:
 
@@ -176,7 +176,7 @@ sf_forms_version
 
 ---
 
-# Database Tables
+## Database Tables
 
 Pattern:
 
@@ -192,7 +192,7 @@ wp_sf_forms_entries
 
 ---
 
-# REST Namespaces
+## REST Namespaces
 
 Pattern:
 
@@ -210,7 +210,7 @@ Version changes should create new namespaces rather than breaking existing APIs.
 
 ---
 
-# Asset Handles
+## Asset Handles
 
 Pattern:
 
@@ -229,7 +229,7 @@ squirrelforge-forms-public
 
 ---
 
-# Text Domains
+## Text Domains
 
 Text domains should match the plugin or theme slug.
 
@@ -241,7 +241,7 @@ squirrelforge-forms
 
 ---
 
-# Image Assets
+## Image Assets
 
 Use descriptive lowercase filenames.
 
@@ -262,7 +262,7 @@ newlogo2.png
 
 ---
 
-# Documentation Files
+## Documentation Files
 
 Use uppercase with hyphens.
 
@@ -277,7 +277,7 @@ LICENSE.md
 
 ---
 
-# Validation Checklist
+## Validation Checklist
 
 Verify that:
 
@@ -292,6 +292,6 @@ Verify that:
 
 ---
 
-# Rule
+## Rule
 
 Every generated WordPress project must follow this naming standard unless a documented project requirement overrides it.

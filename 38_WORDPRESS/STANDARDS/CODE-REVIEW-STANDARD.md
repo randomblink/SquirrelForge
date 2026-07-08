@@ -9,7 +9,7 @@ This document defines the standard process and criteria SquirrelForge uses to pe
 
 ---
 
-# Core Principles
+## Core Principles
 
 - **Automate First**: Use automated tools to catch common issues related to standards and security.
 - **Be Consistent**: Apply the same review criteria to all code.
@@ -18,7 +18,7 @@ This document defines the standard process and criteria SquirrelForge uses to pe
 
 ---
 
-# Review Areas
+## Review Areas
 
 Every code review must assess the following areas:
 
@@ -30,7 +30,7 @@ Every code review must assess the following areas:
 
 ---
 
-# Automated Tooling
+## Automated Tooling
 
 The review process should leverage static analysis tools where possible.
 
@@ -41,7 +41,7 @@ The review process should leverage static analysis tools where possible.
 
 ---
 
-# Manual Review Checklist (Automated Agent)
+## Manual Review Checklist (Automated Agent)
 
 In addition to tooling, the agent must perform a logical review:
 
@@ -64,7 +64,7 @@ In addition to tooling, the agent must perform a logical review:
 
 ---
 
-# Severity Levels
+## Severity Levels
 
 - **Critical**: A security vulnerability, a fatal error, or a major architectural violation. Must be fixed before approval.
 - **Warning**: A standards violation, a likely bug, or a performance issue. Should be fixed before approval.
@@ -72,7 +72,7 @@ In addition to tooling, the agent must perform a logical review:
 
 ---
 
-# Forbidden Patterns
+## Forbidden Patterns
 
 - **Ignoring Validation Results**: Approving code that has failed a security or standards validation check.
 - **Introducing Anti-Patterns**: Adding "god classes," global state, or other patterns that violate the architecture standard.
@@ -80,7 +80,7 @@ In addition to tooling, the agent must perform a logical review:
 
 ---
 
-# Agent Rules
+## Agent Rules
 
 1.  **Follow the Pipeline**: The Code Reviewer stage in the `AGENT-PIPELINE.md` must be executed after code generation and validation.
 2.  **Use Checklists**: Systematically check the generated code against the security, architecture, and readability checklists.
