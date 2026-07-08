@@ -14,7 +14,7 @@ It is the specialist role responsible for consulting the `33_WORDPRESS_ROLES/ROL
 ## Responsibilities
 
 - Receive the selected `Skill` and project context.
-- Consult the `ROLE-ROUTING-MATRIX.md`.
+- Consult the `38_WORDPRESS/SKILLS/ROLE-ROUTING-MATRIX.md`.
 - Determine the required sequence of specialist roles (Architects, Engineers, Validators).
 - Identify all mandatory and conditional validation gates.
 - Define the expected reports from each role.
@@ -26,7 +26,7 @@ It is the specialist role responsible for consulting the `33_WORDPRESS_ROLES/ROL
 ## Workflow
 
 1.  **Receive Task**: Get the selected `Skill` and project context from the `WordPress Manager`.
-2.  **Consult Matrix**: Analyze the `ROLE-ROUTING-MATRIX.md` to find the standard route for the given `Skill`.
+2.  **Consult Matrix**: Analyze the `38_WORDPRESS/SKILLS/ROLE-ROUTING-MATRIX.md` to find the standard route for the given `Skill`.
 3.  **Analyze Context**: Identify any conditional roles required based on the project's specific needs (e.g., add `Database Engineer` if the task involves custom tables).
 4.  **Produce Decision**: Generate the `WordPress Role Routing Decision` document, which lists the final, ordered sequence of roles and gates.
 5.  **Handoff**: Provide the `Routing Decision` back to the `WordPress Manager` to continue the pipeline.

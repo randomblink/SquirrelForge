@@ -69,7 +69,7 @@ Use `REST Engineer` to produce a `REST Engineering Report` (as a plan). The plan
 
 #### Stage 2 — Role Routing
 
-Use `Role Manager` and `ROLE-ROUTING-MATRIX.md` to produce the `WordPress Role Routing Decision`.
+Use `Role Manager` and `38_WORDPRESS/SKILLS/ROLE-ROUTING-MATRIX.md` to produce the `WordPress Role Routing Decision`.
 
 #### Stage 3 — Implementation
 

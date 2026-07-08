@@ -698,7 +698,7 @@ Use `Project Architect` to define the high-level migration strategy and impact. 
 
 #### Stage 2 — Role Routing
 
-Use `Role Manager` and `ROLE-ROUTING-MATRIX.md` to produce the `WordPress Role Routing Decision`.
+Use `Role Manager` and `38_WORDPRESS/SKILLS/ROLE-ROUTING-MATRIX.md` to produce the `WordPress Role Routing Decision`.
 
 #### Stage 3 — Implementation
 
