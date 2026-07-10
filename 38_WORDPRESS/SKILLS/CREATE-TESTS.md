@@ -29,6 +29,7 @@ Before execution, consult:
 
 - `38_WORDPRESS/PIPELINE.md`
 - `38_WORDPRESS/STANDARDS/TESTING-STANDARD.md`
+- `29_TESTING/README.md`
 - `33_WORDPRESS_ROLES/QA-ENGINEER.md`
 - `33_WORDPRESS_ROLES/SECURITY-ENGINEER.md`
 - `33_WORDPRESS_ROLES/PERFORMANCE-ENGINEER.md`
@@ -77,4 +78,4 @@ The `QA Engineer` incorporates feedback and produces the final, approved test pl
 1.  **Cover All Angles**: The generated test plan must include cases for success, failure, security, and accessibility where applicable.
 2.  **Be Specific**: Manual test steps must be clear, unambiguous, and include a specific expected outcome. Automated test stubs should have descriptive names.
 3.  **Automate Where Practical**: Prefer generating stubs for automated unit and integration tests for backend logic over purely manual checklists for the same logic.
-4.  **Follow the Standard**: All generated test plans and files must adhere to the formats and requirements defined in `38_WORDPRESS/STANDARDS/TESTING-STANDARD.md`.
+4.  **Follow Both Standards**: All generated test plans and files must adhere to the WordPress-specific dimensions in `38_WORDPRESS/STANDARDS/TESTING-STANDARD.md` and the general test-category execution and reporting responsibilities in `29_TESTING/README.md`. See that standard's Relationship to the General Testing Layer section for how the two map onto each other.
