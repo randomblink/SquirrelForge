@@ -43,6 +43,8 @@ Those responsibilities remain in their respective layers.
 | Component | Responsibility |
 |---|---|
 | `AGENT-BEHAVIOR.md` | Defines general agent operating rules. |
+| `FILE-STRUCTURE-RULES.md` | Defines required WordPress plugin, theme, and block theme file structure, naming, and forbidden patterns. |
+| `SYSTEM-PROMPT.md` | Defines top-level agent identity, operating loop, decision-making priorities, and hard constraints. |
 | `WORDPRESS-RULES.md` | Defines WordPress-specific implementation baseline rules. |
 
 The component roster must match files that actually exist in this directory.
