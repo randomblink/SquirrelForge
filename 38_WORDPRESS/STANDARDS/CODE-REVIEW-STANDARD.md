@@ -82,7 +82,7 @@ In addition to tooling, the agent must perform a logical review:
 
 ## Agent Rules
 
-1.  **Follow the Pipeline**: The Code Reviewer stage in the `AGENT-PIPELINE.md` must be executed after code generation and validation.
+1.  **Follow the Pipeline**: The Code Review stage in `38_WORDPRESS/PIPELINE.md` must be executed after code generation and validation.
 2.  **Use Checklists**: Systematically check the generated code against the security, architecture, and readability checklists.
 3.  **Classify Findings**: Assign a severity level to every identified issue.
 4.  **Reject Critical Issues**: If any "Critical" issues are found, the pipeline must halt, and the code must be sent back to the Code Generator or Refactoring Advisor for a fix.
