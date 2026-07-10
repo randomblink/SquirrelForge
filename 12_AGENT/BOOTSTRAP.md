@@ -50,6 +50,7 @@ SquirrelForge must not perform project-changing execution until the applicable b
 5. **Project Initialization**
    - Execute or consult `14_ENGINE/PROJECT-LOADER.md`.
    - Verify the project root, project type, current state, available interfaces, and relevant local instructions.
+   - Run the Repository Identity Verification Procedure in `14_ENGINE/PROJECT-LOADER.md` before any write operation, and re-run it after any `cd` into a different project.
 
 6. **Request Intake**
    - Capture the user goal, expected output, constraints, acceptance criteria, and missing information.
@@ -93,6 +94,7 @@ SquirrelForge must not perform project-changing execution until the applicable b
 - [ ] Mandatory general rules loaded
 - [ ] Domain-specific rules loaded only when applicable
 - [ ] Project root and settings validated
+- [ ] Repository identity verified against the requested project, re-verified after any project switch
 - [ ] Permissions and tools known
 - [ ] Goal and acceptance criteria recorded
 - [ ] Request risk classification identified
