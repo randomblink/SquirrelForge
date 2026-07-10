@@ -229,6 +229,99 @@ Use:
 
 If the fix is part of a release, the `Release Engineer` packages it into a new version, following all release readiness checks.
 
+### Validation Commands
+
+These commands support Stage 3 (Root Cause Analysis) through Stage 7 (Fix Verification). Exact availability depends on the target plugin's setup and installed tooling, not on SquirrelForge itself. Run every command from the target plugin's own repository.
+
+`<plugin-directory>` is the plugin's root directory. `<wordpress-root>` is the WordPress installation root, when it differs from the current directory.
+
+#### Reproduce the Failure
+
+Reproduction ultimately follows the `Steps to Reproduce` recorded in the Plugin Debugging Request — no single command reproduces every bug. For activation-triggered failures specifically, WP-CLI's `--debug` flag surfaces PHP errors and warnings immediately.
+
+`<plugin-slug>` is the plugin's folder/slug as registered with WordPress.
+
+Shell commands for Terminal
+
+```sh
+if command -v wp >/dev/null 2>&1; then
+  wp plugin activate <plugin-slug> --path=<wordpress-root> --debug
+else
+  echo "WP-CLI not found -- reproduce manually using the reported steps."
+fi
+```
+
+#### PHP Syntax Check
+
+Shell commands for Terminal
+
+```sh
+find <plugin-directory> -name "*.php" -print0 | xargs -0 -n1 php -l
+```
+
+#### Smallest Focused Test
+
+`<TestClassName>` and `<testMethodName>` identify the specific PHPUnit test covering the affected behavior. `vendor/bin/phpunit` only exists when PHPUnit is installed as a dev dependency of the target plugin.
+
+Shell commands for Terminal
+
+```sh
+if [ -x <plugin-directory>/vendor/bin/phpunit ]; then
+  (cd <plugin-directory> && vendor/bin/phpunit --filter <testMethodName> tests/<TestClassName>.php)
+else
+  echo "PHPUnit not found in <plugin-directory>/vendor/bin -- skipping focused test."
+fi
+```
+
+#### Full Test Suite
+
+Shell commands for Terminal
+
+```sh
+if [ -x <plugin-directory>/vendor/bin/phpunit ]; then
+  (cd <plugin-directory> && vendor/bin/phpunit)
+else
+  echo "PHPUnit not found in <plugin-directory>/vendor/bin -- skipping full suite."
+fi
+```
+
+#### WordPress Debug Log, When WP_DEBUG_LOG Is Enabled
+
+This only produces output when `WP_DEBUG_LOG` is enabled in `wp-config.php`.
+
+Shell commands for Terminal
+
+```sh
+if [ -f <wordpress-root>/wp-content/debug.log ]; then
+  tail -n 100 <wordpress-root>/wp-content/debug.log
+else
+  echo "debug.log not found -- confirm WP_DEBUG_LOG is enabled in wp-config.php."
+fi
+```
+
+#### Plugin Activation Test, When WP-CLI Is Available
+
+Shell commands for Terminal
+
+```sh
+if command -v wp >/dev/null 2>&1; then
+  wp plugin activate <plugin-slug> --path=<wordpress-root>
+else
+  echo "WP-CLI not found -- skipping activation test."
+fi
+```
+
+#### Git Checks
+
+These are read-only checks; they do not modify the working tree.
+
+Shell commands for Terminal
+
+```sh
+git diff --check
+git status --short
+```
+
 ### Required Handoff Contract
 
 Every role transition must use:

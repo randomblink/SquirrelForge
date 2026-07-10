@@ -546,6 +546,76 @@ The final decision must be one of:
 
 ---
 
+## Validation Commands
+
+These commands support Stage 9 (Security Validation), Stage 10 (Performance Validation), and Stage 11 (QA Validation). They are examples for a typical local WordPress plugin project — exact availability depends on the target project's setup and installed tooling, not on SquirrelForge itself. Run every command from the target plugin's own repository.
+
+`<plugin-directory>` is the plugin's root directory in the target WordPress project. Replace it with the actual path before running these commands.
+
+### PHP Syntax Validation
+
+Shell commands for Terminal
+
+```sh
+find <plugin-directory> -name "*.php" -print0 | xargs -0 -n1 php -l
+```
+
+### PHPUnit, When Available
+
+`vendor/bin/phpunit` only exists when PHPUnit is installed as a dev dependency of the target plugin; do not assume it is present.
+
+Shell commands for Terminal
+
+```sh
+if [ -x <plugin-directory>/vendor/bin/phpunit ]; then
+  (cd <plugin-directory> && vendor/bin/phpunit)
+else
+  echo "PHPUnit not found in <plugin-directory>/vendor/bin -- skipping unit tests."
+fi
+```
+
+### PHPCS with WordPress Standards, When Available
+
+The `WordPress` PHPCS ruleset is installed separately from WordPress itself (for example via the `wp-coding-standards/wpcs` Composer package); do not assume it is present.
+
+Shell commands for Terminal
+
+```sh
+if command -v phpcs >/dev/null 2>&1 && phpcs -i | grep -q WordPress; then
+  phpcs --standard=WordPress <plugin-directory>
+else
+  echo "phpcs or the WordPress ruleset is not available -- skipping style check."
+fi
+```
+
+### Plugin Activation/Deactivation Smoke Test, When WP-CLI Is Available
+
+`<plugin-slug>` is the plugin's folder/slug as registered with WordPress. `<wordpress-root>` is the WordPress installation root; `--path` may be omitted when run from inside it.
+
+Shell commands for Terminal
+
+```sh
+if command -v wp >/dev/null 2>&1; then
+  wp plugin activate <plugin-slug> --path=<wordpress-root>
+  wp plugin deactivate <plugin-slug> --path=<wordpress-root>
+else
+  echo "WP-CLI not found -- skipping activation smoke test."
+fi
+```
+
+### Git Checks
+
+These are read-only checks; they do not modify the working tree.
+
+Shell commands for Terminal
+
+```sh
+git diff --check
+git status --short
+```
+
+---
+
 ## Required Handoff Contract
 
 Every role transition must use:
