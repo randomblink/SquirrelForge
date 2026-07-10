@@ -11,16 +11,16 @@ This checklist determines whether the SquirrelForge WordPress Layer is ready to 
 
 ## Core Readiness
 
-- [ ] `WORDPRESS-MANAGER.md` exists.
-- [ ] `PIPELINE.md` exists.
-- [ ] `SKILLS/SKILL-ROUTING-MAP.md` exists.
-- [ ] `KNOWLEDGE/KNOWLEDGE-MANAGER.md` exists.
+- [ ] `38_WORDPRESS/WORDPRESS-MANAGER.md` exists.
+- [ ] `38_WORDPRESS/PIPELINE.md` exists.
+- [ ] `38_WORDPRESS/SKILLS/SKILL-ROUTING-MAP.md` exists.
+- [ ] `38_WORDPRESS/KNOWLEDGE/KNOWLEDGE-MANAGER.md` exists.
 - [ ] `33_WORDPRESS_ROLES/ROLE-MANAGER.md` exists.
 - [ ] `33_WORDPRESS_ROLES/ROLE-ROUTING-MATRIX.md` exists.
 - [ ] `38_WORDPRESS/SECURITY-VALIDATOR.md` exists.
-- [ ] `STANDARDS/` exists.
-- [ ] `SKILLS/` exists.
-- [ ] `KNOWLEDGE/` exists.
+- [ ] `38_WORDPRESS/STANDARDS/` exists.
+- [ ] `38_WORDPRESS/SKILLS/` exists.
+- [ ] `38_WORDPRESS/KNOWLEDGE/` exists.
 
 ---
 
@@ -39,17 +39,17 @@ This checklist determines whether the SquirrelForge WordPress Layer is ready to 
 
 ## Skill Readiness
 
-- [ ] `CREATE-PLUGIN.md`
-- [ ] `CREATE-THEME.md`
-- [ ] `CREATE-BLOCK.md`
-- [ ] `CREATE-REST-ENDPOINT.md`
-- [ ] `CREATE-WIDGET.md`
-- [ ] `REVIEW-CODE.md`
-- [ ] `REFACTOR-CODE.md`
-- [ ] `DEBUG-PLUGIN.md`
-- [ ] `OPTIMIZE-PERFORMANCE.md`
-- [ ] `CREATE-TESTS.md`
-- [ ] `WRITE-DOCUMENTATION.md`
+- [ ] `38_WORDPRESS/SKILLS/CREATE-PLUGIN.md`
+- [ ] `38_WORDPRESS/SKILLS/CREATE-THEME.md`
+- [ ] `38_WORDPRESS/SKILLS/CREATE-BLOCK.md`
+- [ ] `38_WORDPRESS/SKILLS/CREATE-REST-ENDPOINT.md`
+- [ ] `38_WORDPRESS/SKILLS/CREATE-WIDGET.md`
+- [ ] `38_WORDPRESS/SKILLS/REVIEW-CODE.md`
+- [ ] `38_WORDPRESS/SKILLS/REFACTOR-CODE.md`
+- [ ] `38_WORDPRESS/SKILLS/DEBUG-PLUGIN.md`
+- [ ] `38_WORDPRESS/SKILLS/OPTIMIZE-PERFORMANCE.md`
+- [ ] `38_WORDPRESS/SKILLS/CREATE-TESTS.md`
+- [ ] `38_WORDPRESS/SKILLS/WRITE-DOCUMENTATION.md`
 
 ---
 
