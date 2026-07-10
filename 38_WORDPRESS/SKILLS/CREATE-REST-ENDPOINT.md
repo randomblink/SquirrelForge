@@ -183,6 +183,20 @@ Produce a final report summarizing the status of all stages.
 
 ---
 
+## Completion Criteria
+
+This Skill is complete only when:
+
+- the namespace, route, methods, and argument schema are defined;
+- a `permission_callback` is defined for every registered route;
+- Stage 4 (Security Validation) has passed;
+- Stage 5 (Performance Validation) has passed or was not required;
+- Stage 6 (QA Validation) has passed;
+- Stage 7 (Documentation) is complete;
+- and the REST Endpoint Final Report is produced.
+
+---
+
 ## Rule
 
 1.  **Mandatory `permission_callback`**: The agent must always generate a `permission_callback` for every endpoint. For public, read-only endpoints, it can be `__return_true`, but it must be explicitly defined.

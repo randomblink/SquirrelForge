@@ -26,571 +26,604 @@ This report must distinguish between documentation completeness and actual opera
 ## Assessment Information
 
 ```text
-Assessment Date:
+Assessment Date: 2026-07-10
 
-Assessor:
+Assessor: SquirrelForge assistant (documentation/routing trace pass)
 
-Agent Version:
+Agent Version: WordPress Layer as of this repository's current working tree (no version tag)
 
-WordPress Layer Version:
+WordPress Layer Version: 38_WORDPRESS / 33_WORDPRESS_ROLES as committed through "Unify WordPress routing sources" (fac4c4e) plus uncommitted documentation passes made in this and prior sessions
 
-Assessment Environment:
+Assessment Environment: Static repository inspection only. No WordPress installation, WP-CLI, PHP-WordPress runtime, or browser was exercised.
 
-Assessment Scope:
+Assessment Scope: The 8 scenarios defined in 38_WORDPRESS/AGENT-SCENARIO-TESTS.md, traced through the authoritative control chain (WORDPRESS-MANAGER.md → PIPELINE.md → SKILL-ROUTING-MAP.md → selected Skill → ROLE-MANAGER.md → ROLE-ROUTING-MATRIX.md → required knowledge → security/standards gates → testing requirements → completion criteria).
 
-Evidence Location:
-Readiness Inputs
+Evidence Location: Exact file paths and section names are recorded per scenario in 38_WORDPRESS/AGENT-SCENARIO-TESTS.md and per category below.
+```
+
+## Readiness Inputs
 
 Verify the following evidence exists:
 
-Evidence	Status	Notes
-Boot Report		
-Agent Readiness Checklist		
-Capability Summary		
-Scenario Test Summary		
-Skill Inventory		
-Knowledge Inventory		
-Standards Inventory		
-Role Inventory		
-Validation Capability Evidence		
-Environment Capability Evidence		
-Core Control System Assessment
+| Evidence | Status | Notes |
+|---|---|---|
+| Boot Report | Not Available | No `38_WORDPRESS/AGENT-BOOT-REPORT.md` or equivalent execution log exists; `38_WORDPRESS/AGENT-BOOT-SEQUENCE.md` (the procedure) exists but no run record was produced in this pass. |
+| Agent Readiness Checklist | Available | `38_WORDPRESS/AGENT-READINESS-CHECKLIST.md` and `33_WORDPRESS_ROLES/AGENT-READINESS-CHECKLIST.md` both exist and are updated alongside this report. |
+| Capability Summary | Available | Recorded below in this report's Capability Summary section. |
+| Scenario Test Summary | Available | `38_WORDPRESS/AGENT-SCENARIO-TESTS.md`, "Scenario Test Summary" section, updated in this pass. |
+| Skill Inventory | Available | `38_WORDPRESS/SKILLS/` directory listing, cross-checked against `38_WORDPRESS/SKILLS/SKILL-ROUTING-MAP.md`'s Available Skills table. |
+| Knowledge Inventory | Available | `38_WORDPRESS/KNOWLEDGE/` directory listing, cross-checked against `38_WORDPRESS/KNOWLEDGE/KNOWLEDGE-MANAGER.md`'s Knowledge Mapping Examples. |
+| Standards Inventory | Available | `38_WORDPRESS/STANDARDS/` directory listing. |
+| Role Inventory | Available | `33_WORDPRESS_ROLES/` directory listing, cross-checked against `33_WORDPRESS_ROLES/ROLE-ROUTING-MATRIX.md`. |
+| Validation Capability Evidence | Available | `38_WORDPRESS/SECURITY-VALIDATOR.md` and `38_WORDPRESS/STANDARDS/TESTING-STANDARD.md`. |
+| Environment Capability Evidence | Partial | File inspection/creation/modification confirmed by this session's own edits; PHP/WordPress runtime, WP-CLI, and browser access against a real WordPress site were not exercised. |
+
+## Core Control System Assessment
 
 Evaluate:
 
-Component	Available	Validated	Status	Notes
-WordPress Manager				
-Pipeline				
-Agent Operating Mode				
-Agent Execution Contract				
-Boot Sequence				
-Skill Routing Map				
-Knowledge Manager				
-Role Manager				
-Role Routing Matrix				
-Security Validator				
+| Component | Available | Validated | Status | Notes |
+|---|---|---|---|---|
+| WordPress Manager | Yes | Yes | Pass | `38_WORDPRESS/WORDPRESS-MANAGER.md` — Required Control Flow diagram traced for all 8 scenarios; Hard Rules include the precedence rule added in a prior session (`12_AGENT/CAPABILITY-ROUTER.md` cross-reference). |
+| Pipeline | Yes | Yes | Pass | `38_WORDPRESS/PIPELINE.md` — Required Stages table matches the stage names used by `CREATE-THEME.md`'s Pipeline Mapping table and `CODE-REVIEW-STANDARD.md`'s citation. |
+| Agent Operating Mode | Yes | Not Evaluated | Not Evaluated | `33_WORDPRESS_ROLES/AGENT-OPERATING-MODE.md` exists; not required by any of the 8 traced scenarios and not read in this pass. |
+| Agent Execution Contract | Yes | Not Evaluated | Not Evaluated | `38_WORDPRESS/AGENT-EXECUTION-CONTRACT.md` exists; not exercised by this pass. |
+| Boot Sequence | Yes | Not Evaluated | Not Evaluated | `38_WORDPRESS/AGENT-BOOT-SEQUENCE.md` exists; no boot run was performed in this pass. |
+| Skill Routing Map | Yes | Yes | Pass | `38_WORDPRESS/SKILLS/SKILL-ROUTING-MAP.md` — correctly routed all 8 scenarios; 2 of the routes matched documented Routing Examples verbatim (Examples 5 and 6). |
+| Knowledge Manager | Yes | Yes | Pass | `38_WORDPRESS/KNOWLEDGE/KNOWLEDGE-MANAGER.md` — Knowledge Mapping Examples table covered the knowledge needs of Scenarios 1 and 8 directly; other scenarios' knowledge needs are covered by each Skill's own Required References. |
+| Role Manager | Yes | Yes | Pass | `33_WORDPRESS_ROLES/ROLE-MANAGER.md` — referenced as the role-selection step by every traced Skill. |
+| Role Routing Matrix | Yes | Yes | Pass | `33_WORDPRESS_ROLES/ROLE-ROUTING-MATRIX.md` — Required/Conditional Roles matched the scenario document's expectations exactly for all 8 scenarios (Routes 1, 2, 4, 7, 8, 9, 10, 11). |
+| Security Validator | Yes | Yes | Pass | `38_WORDPRESS/SECURITY-VALIDATOR.md` — directly cited by, or structurally mirrored in, the security gate of every traced Skill. |
 
-Status values:
+Status values: `Pass`, `Pass with Conditions`, `Fail`, `Not Evaluated`.
 
-Pass
-Pass with Conditions
-Fail
-Not Evaluated
-Skill Readiness Assessment
-Skill	File Exists	Routing Exists	Roles Exist	Gates Exist	Scenario Tested	Status
-CREATE-PLUGIN						
-CREATE-THEME						
-CREATE-BLOCK						
-CREATE-REST-ENDPOINT						
-CREATE-SHORTCODE						
-CREATE-WIDGET						
-MIGRATE-PLUGIN						
-REVIEW-CODE						
-REFACTOR-CODE						
-DEBUG-PLUGIN						
-OPTIMIZE-PERFORMANCE						
-CREATE-TESTS						
-WRITE-DOCUMENTATION						
+## Skill Readiness Assessment
 
-Skill Status:
+| Skill | File Exists | Routing Exists | Roles Exist | Gates Exist | Scenario Tested | Status |
+|---|---|---|---|---|---|---|
+| CREATE-PLUGIN | Yes | Yes | Yes | Yes | Yes (WP-SCENARIO-001) | Operational |
+| CREATE-THEME | Yes | Yes | Yes | Yes | Yes (WP-SCENARIO-008) | Operational |
+| CREATE-BLOCK | Yes | Yes | Yes | Yes | No | Not Evaluated |
+| CREATE-REST-ENDPOINT | Yes | Yes | Yes | Yes | Yes (WP-SCENARIO-007) | Operational (Completion Criteria section added in this pass) |
+| CREATE-SHORTCODE | Yes | Yes | Yes | Yes | Yes (supporting, WP-SCENARIO-001) | Operational |
+| CREATE-WIDGET | Yes | Yes | Yes | Yes | No | Not Evaluated |
+| MIGRATE-PLUGIN | Yes | Yes | Yes | Yes | Yes (WP-SCENARIO-006) | Operational (duplicate/orphaned tail removed in this pass) |
+| REVIEW-CODE | Yes | Yes | Yes | Yes | Yes (WP-SCENARIO-003) | Operational |
+| REFACTOR-CODE | Yes | Yes | Yes | Yes | Yes (WP-SCENARIO-004) | Operational |
+| DEBUG-PLUGIN | Yes | Yes | Yes | Yes | Yes (WP-SCENARIO-002) | Operational |
+| OPTIMIZE-PERFORMANCE | Yes | Yes | Yes | Yes | Yes (WP-SCENARIO-005) | Operational |
+| CREATE-TESTS | Yes | Yes | Yes | Yes | Referenced as supporting Skill only (not primary in any of the 8 scenarios) | Operational with Conditions |
+| WRITE-DOCUMENTATION | Yes | Yes | Yes | Yes | Referenced as supporting Skill only (not primary in any of the 8 scenarios) | Operational with Conditions |
 
-Operational
-Operational with Conditions
-Partial
-Blocked
-Not Evaluated
-Knowledge Readiness Assessment
+Skill Status values: `Operational`, `Operational with Conditions`, `Partial`, `Blocked`, `Not Evaluated`.
+
+## Knowledge Readiness Assessment
 
 Evaluate available knowledge domains:
 
-Knowledge Domain	Available	Current Enough for Use	Selection Rule Exists	Status	Notes
-WordPress Core					
-Plugin Development					
-Theme Development					
-Block Editor					
-REST API					
-Database					
-Security					
-Performance					
-Accessibility					
-Cron					
-Media					
-WooCommerce					
+| Knowledge Domain | Available | Current Enough for Use | Selection Rule Exists | Status | Notes |
+|---|---|---|---|---|---|
+| WordPress Core | Yes | Not independently verified | Yes | Operational with Conditions | `38_WORDPRESS/KNOWLEDGE/WORDPRESS-CORE.md` exists; currency against live WordPress core was not checked. |
+| Plugin Development | Yes | Not independently verified | Yes | Operational with Conditions | `38_WORDPRESS/KNOWLEDGE/PLUGIN-HANDBOOK.md`. |
+| Theme Development | Yes | Not independently verified | Yes | Operational with Conditions | `38_WORDPRESS/KNOWLEDGE/THEME-HANDBOOK.md`. |
+| Block Editor | Yes | Not independently verified | Yes | Operational with Conditions | `38_WORDPRESS/KNOWLEDGE/BLOCK-EDITOR.md`. |
+| REST API | Yes | Not independently verified | Yes | Operational with Conditions | `38_WORDPRESS/KNOWLEDGE/REST-API.md`. |
+| Database | Yes | Not independently verified | Yes | Operational with Conditions | `38_WORDPRESS/KNOWLEDGE/DATABASE.md`. |
+| Security | Yes | Not independently verified | Yes | Operational with Conditions | `38_WORDPRESS/KNOWLEDGE/SECURITY.md`, plus `38_WORDPRESS/SECURITY-VALIDATOR.md`. |
+| Performance | Yes | Not independently verified | Yes | Operational with Conditions | `38_WORDPRESS/KNOWLEDGE/PERFORMANCE.md`. |
+| Accessibility | Yes | Not independently verified | Yes | Operational with Conditions | `38_WORDPRESS/KNOWLEDGE/ACCESSIBILITY.md`. |
+| Cron | Yes | Not independently verified | Yes | Operational with Conditions | `38_WORDPRESS/KNOWLEDGE/CRON.md`. |
+| Media | No | N/A | No | Not Evaluated | No dedicated `MEDIA.md` file found in `38_WORDPRESS/KNOWLEDGE/`; not required by any of the 8 traced scenarios. |
+| WooCommerce | No | N/A | Partial | Operating Condition | `38_WORDPRESS/KNOWLEDGE/KNOWLEDGE-MANAGER.md` references a `WOOCOMMERCE.md` file for the "Create a WooCommerce extension" mapping row, but no such file exists in `38_WORDPRESS/KNOWLEDGE/`. Not required by any of the 8 traced scenarios; would block a WooCommerce-specific request until resolved. |
 
-A missing optional knowledge domain may create a capability limitation without making the entire Agent unavailable.
+A missing optional knowledge domain may create a capability limitation without making the entire Agent unavailable. Custom Post Types, Taxonomies, and Settings API knowledge files also exist (`38_WORDPRESS/KNOWLEDGE/CUSTOM-POST-TYPES.md`, `TAXONOMIES.md`, `SETTINGS-API.md`) and were confirmed required-when-present in `CREATE-PLUGIN.md` in a prior session.
 
-Standards Readiness Assessment
-Standard	Available	Referenced by Skills	Referenced by Roles	Status
-Architecture Standard				
-Plugin Standard				
-Theme Standard				
-PHP Standard				
-JavaScript Standard				
-CSS Standard				
-Naming Standard				
-Testing Standard				
-Documentation Standard				
-Role Readiness Assessment
-Role	File Exists	Routing Exists	Inputs Defined	Outputs Defined	Status
-Project Architect					
-Plugin Architect					
-Theme Architect					
-PHP Engineer					
-JavaScript Engineer					
-CSS Engineer					
-Database Engineer					
-REST Engineer					
-Block Engineer					
-Security Engineer					
-Performance Engineer					
-QA Engineer					
-Documentation Engineer					
-Release Engineer					
-Validation Readiness Assessment
-Security Validation
-Security Validator Available:
+## Standards Readiness Assessment
 
-Security Engineer Available:
+| Standard | Available | Referenced by Skills | Referenced by Roles | Status |
+|---|---|---|---|---|
+| Architecture Standard | Yes | CREATE-PLUGIN, MIGRATE-PLUGIN | Yes (grep-confirmed) | Operational |
+| Plugin Standard | Yes | CREATE-PLUGIN, MIGRATE-PLUGIN | Yes | Operational |
+| Theme Standard | Yes | CREATE-THEME | Yes | Operational |
+| PHP Standard | Yes | CREATE-PLUGIN, CREATE-THEME, DEBUG-PLUGIN, MIGRATE-PLUGIN | Yes | Operational |
+| JavaScript Standard | Yes | CREATE-THEME, DEBUG-PLUGIN | Yes | Operational |
+| CSS Standard | Yes | CREATE-THEME | Yes | Operational |
+| Naming Standard | Yes | CREATE-PLUGIN, CREATE-THEME | Yes | Operational |
+| Testing Standard | Yes | CREATE-PLUGIN, CREATE-THEME, DEBUG-PLUGIN, MIGRATE-PLUGIN, CREATE-TESTS | Yes | Operational — includes an explicit Relationship-to-`29_TESTING` mapping added in a prior session. |
+| Documentation Standard | Yes | CREATE-PLUGIN, MIGRATE-PLUGIN, WRITE-DOCUMENTATION | Yes | Operational |
 
-Authentication Review Capability:
+Additional standards present but not part of the original template's roster: `CODE-REVIEW-STANDARD.md` (referenced by REVIEW-CODE), `REFACTORING-STANDARD.md` (referenced by REFACTOR-CODE), `ACCESSIBILITY.md`, `VALIDATION.md`. All exist and are referenced by at least one Skill traced in this pass.
 
-Authorization Review Capability:
+## Role Readiness Assessment
 
-Capability Review:
+| Role | File Exists | Routing Exists | Inputs Defined | Outputs Defined | Status |
+|---|---|---|---|---|---|
+| Project Architect | Yes | Yes | Yes | Yes | Operational |
+| Plugin Architect | Yes | Yes | Yes | Yes | Operational |
+| Theme Architect | Yes | Yes | Yes | Yes | Operational |
+| PHP Engineer | Yes | Yes | Yes | Yes | Operational |
+| JavaScript Engineer | Yes | Yes | Yes | Yes | Operational |
+| CSS Engineer | Yes | Yes | Yes | Yes | Operational |
+| Database Engineer | Yes | Yes | Yes | Yes | Operational |
+| REST Engineer | Yes | Yes | Yes | Yes | Operational |
+| Block Engineer | Yes | Yes | Yes | Yes | Operational |
+| Security Engineer | Yes | Yes | Yes | Yes | Operational |
+| Performance Engineer | Yes | Yes | Yes | Yes | Operational |
+| QA Engineer | Yes | Yes | Yes | Yes | Operational |
+| Documentation Engineer | Yes | Yes | Yes | Yes | Operational |
+| Release Engineer | Yes | Yes | Yes | Yes | Operational |
 
-Nonce Review:
+All 14 role files exist in `33_WORDPRESS_ROLES/` and each is named as a Required or Conditional role in at least one Route of `33_WORDPRESS_ROLES/ROLE-ROUTING-MATRIX.md`. "Inputs Defined" / "Outputs Defined" are assessed from each role's presence in the Role Routing Matrix's Expected Reports lists, not from reading all 14 individual role files in full during this pass.
 
-Validation Review:
+## Validation Readiness Assessment
 
-Sanitization Review:
+### Security Validation
 
-Escaping Review:
+```text
+Security Validator Available: Yes — 38_WORDPRESS/SECURITY-VALIDATOR.md
 
-SQL Safety Review:
+Security Engineer Available: Yes — 33_WORDPRESS_ROLES/SECURITY-ENGINEER.md
 
-REST Permission Review:
+Authentication Review Capability: Documented — "Capability Checks" section
 
-AJAX Permission Review:
+Authorization Review Capability: Documented — "Capability Checks" section, REST/AJAX subsections
 
-Upload Review:
+Capability Review: Documented — current_user_can() examples given
 
-Private Data Review:
+Nonce Review: Documented — "Nonce Requirements" section
 
-Secret Handling Review:
+Validation Review: Documented — "Input Validation Rules" section
 
-External Integration Review:
+Sanitization Review: Documented — "Sanitization Rules" table
 
-Error Exposure Review:
+Escaping Review: Documented — "Output Escaping Rules" table
 
-Security Validation Status:
-Performance Validation
-Performance Engineer Available:
+SQL Safety Review: Documented — "Database Rules" section
 
-Baseline Measurement Capability:
+REST Permission Review: Documented — "REST API Validation" section, directly exercised by WP-SCENARIO-007
 
-Bottleneck Identification Capability:
+AJAX Permission Review: Documented — "AJAX Validation" section
 
-Query Measurement Capability:
+Upload Review: Documented — "File Upload Validation" section
 
-REST Measurement Capability:
+Private Data Review: Documented — REST API Validation and Critical Failure Conditions cover exposure of unrestricted endpoints; directly relevant to WP-SCENARIO-007's "private member records"
 
-Frontend Measurement Capability:
+Secret Handling Review: Documented — "API Credentials" section
 
-Block Editor Measurement Capability:
+External Integration Review: Not explicitly named as a dedicated section; covered indirectly by Sanitization/Validation/Secret rules
 
-Remeasurement Capability:
+Error Exposure Review: Documented — "Error Handling" section
 
-Performance Validation Status:
-QA Validation
-QA Engineer Available:
+Security Validation Status: Operational (documentation traceability only — no live security scan was run)
+```
 
-Functional Test Capability:
+### Performance Validation
 
-Negative Test Capability:
+```text
+Performance Engineer Available: Yes — 33_WORDPRESS_ROLES/PERFORMANCE-ENGINEER.md
 
-Permission Test Capability:
+Baseline Measurement Capability: Documented — OPTIMIZE-PERFORMANCE.md Stage 3, exercised by WP-SCENARIO-005
 
-Persistence Test Capability:
+Bottleneck Identification Capability: Documented — OPTIMIZE-PERFORMANCE.md Stage 4
 
-REST Test Capability:
+Query Measurement Capability: Documented — "query count" is a named baseline metric
 
-AJAX Test Capability:
+REST Measurement Capability: Documented — "REST latency" is a named baseline metric
 
-Shortcode Test Capability:
+Frontend Measurement Capability: Documented — CREATE-THEME.md assigns frontend performance to the Performance Engineer
 
-Block Test Capability:
+Block Editor Measurement Capability: Documented — "Block Editor performance" is a named Trigger Condition and metric
 
-Cron Test Capability:
+Remeasurement Capability: Documented — OPTIMIZE-PERFORMANCE.md Stage 8, including a non-equivalence disclosure rule
 
-Integration Test Capability:
+Performance Validation Status: Operational (documentation traceability only — no live measurement was run)
+```
 
-Accessibility Test Capability:
+### QA Validation
 
-Compatibility Test Capability:
+```text
+QA Engineer Available: Yes — 33_WORDPRESS_ROLES/QA-ENGINEER.md
 
-Migration Test Capability:
+Functional Test Capability: Documented — TESTING-STANDARD.md Level 3
 
-Regression Test Capability:
+Negative Test Capability: Documented — TESTING-STANDARD.md "Error Testing" section
 
-QA Validation Status:
-Documentation Validation
-Documentation Engineer Available:
+Permission Test Capability: Documented — TESTING-STANDARD.md Plugin Testing Checklist ("permissions are enforced")
 
-Technical Review Capability:
+Persistence Test Capability: Documented — "settings persist" checklist item
 
-QA Claim Verification Capability:
+REST Test Capability: Documented — "REST endpoints work" checklist item, exercised by WP-SCENARIO-007
 
-Security Documentation Review Capability:
+AJAX Test Capability: Documented — "AJAX requests work" checklist item
 
-Version Consistency Capability:
+Shortcode Test Capability: Documented — CREATE-SHORTCODE.md's own "Testing Gates" section, exercised by WP-SCENARIO-001
 
-Documentation Validation Status:
-Release Validation
-Release Engineer Available:
+Block Test Capability: Documented — CREATE-BLOCK.md exists but was not exercised by any of the 8 scenarios
 
-Report Verification Capability:
+Cron Test Capability: Documented — "cron events register/clean up" checklist items
 
-Version Consistency Capability:
+Integration Test Capability: Documented — TESTING-STANDARD.md Level 4, mapped onto 29_TESTING/INTEGRATION-TESTS.md in a prior session
 
-Package Verification Capability:
+Accessibility Test Capability: Documented — TESTING-STANDARD.md Level 5 and CREATE-THEME.md's accessibility gate
 
-Installation Validation Capability:
+Compatibility Test Capability: Documented — TESTING-STANDARD.md Level 6
 
-Upgrade Validation Capability:
+Migration Test Capability: Documented — MIGRATE-PLUGIN.md Stage 13, exercised by WP-SCENARIO-006
 
-Migration Validation Capability:
+Regression Test Capability: Documented — TESTING-STANDARD.md Level 6 and 29_TESTING/REGRESSION-TESTS.md, mapped in a prior session
 
-Artifact Integrity Capability:
+QA Validation Status: Operational (documentation traceability only — no live test execution occurred)
+```
 
-Release Validation Status:
-Environment Capability Assessment
+### Documentation Validation
+
+```text
+Documentation Engineer Available: Yes — 33_WORDPRESS_ROLES/DOCUMENTATION-ENGINEER.md
+
+Technical Review Capability: Documented — WRITE-DOCUMENTATION.md Workflow step 5 (Standards Validator checks against DOCUMENTATION-STANDARD.md)
+
+QA Claim Verification Capability: Documented — ROLE-ROUTING-MATRIX.md Route 13 Conditional Roles ("QA Engineer for testing, compatibility, accessibility, migration, or workflow claims")
+
+Security Documentation Review Capability: Documented — ROLE-ROUTING-MATRIX.md Route 13 Conditional Roles ("Security Engineer for security-sensitive setup")
+
+Version Consistency Capability: Documented — RELEASE-ENGINEER.md's role in release review (see Release Validation below)
+
+Documentation Validation Status: Operational (documentation traceability only)
+```
+
+### Release Validation
+
+```text
+Release Engineer Available: Yes — 33_WORDPRESS_ROLES/RELEASE-ENGINEER.md
+
+Report Verification Capability: Documented — MIGRATE-PLUGIN.md Stage 15 and CREATE-PLUGIN.md Stage 13 both require the Release Engineer to verify all prior reports
+
+Version Consistency Capability: Documented — named explicitly in both Release Review stages
+
+Package Verification Capability: Documented — "package contents" / "package integrity" checks named in both Release Review stages
+
+Installation Validation Capability: Documented — "clean installation" checks named in both Release Review stages
+
+Upgrade Validation Capability: Documented — "upgrade behavior" named in both Release Review stages
+
+Migration Validation Capability: Documented — "migration behavior" / "migration recovery behavior" named in both Release Review stages
+
+Artifact Integrity Capability: Documented — "release artifact integrity" named explicitly
+
+Release Validation Status: Operational (documentation traceability only — no artifact was actually built or packaged in this pass)
+```
+
+## Environment Capability Assessment
 
 Evaluate actual execution access:
 
-Environment Capability	Available	Verified	Status	Notes
-File inspection				
-File creation				
-File modification				
-PHP runtime				
-WordPress installation				
-Database access				
-Browser access				
-Node.js				
-Package manager				
-Test runner				
-WP-CLI				
-Version control				
-Build tools				
-Scenario Test Results
-Scenario	Skill	Result	Routing Correct	Gates Correct	Reports Correct	Notes
-WP-SCENARIO-001	CREATE-PLUGIN					
-WP-SCENARIO-002	DEBUG-PLUGIN					
-WP-SCENARIO-003	REVIEW-CODE					
-WP-SCENARIO-004	REFACTOR-CODE					
-WP-SCENARIO-005	OPTIMIZE-PERFORMANCE					
-WP-SCENARIO-006	MIGRATE-PLUGIN					
-WP-SCENARIO-007	CREATE-REST-ENDPOINT					
-WP-SCENARIO-008	CREATE-THEME					
-Scenario Summary
-Scenarios Defined:
+| Environment Capability | Available | Verified | Status | Notes |
+|---|---|---|---|---|
+| File inspection | Yes | Yes | Verified | Used throughout this pass (Read tool). |
+| File creation | Yes | Yes | Verified | Not required in this pass (no new files created; only existing files edited). |
+| File modification | Yes | Yes | Verified | Used in this pass (Edit/Write tools) to fix `MIGRATE-PLUGIN.md` and `CREATE-REST-ENDPOINT.md`, and to update the scenario/readiness documents themselves. |
+| PHP runtime | Partial | Verified for SquirrelForge's own suite only | Operational with Conditions | `composer test` runs PHPUnit against SquirrelForge's own `src/`/`tests/`; no WordPress-scoped PHP runtime was exercised. |
+| WordPress installation | No | Not Verified | Not Available | No live or local WordPress install was accessed in this pass. |
+| Database access | No | Not Verified | Not Available | No database (WordPress or otherwise) was accessed in this pass. |
+| Browser access | Yes (tooling exists) | Not exercised for WordPress | Not Evaluated | Browser tooling is available in this environment generally, but was not used against any WordPress admin/frontend in this pass. |
+| Node.js | Unknown | Not Verified | Not Evaluated | Not checked in this pass. |
+| Package manager | Yes (Composer) | Verified for SquirrelForge only | Operational with Conditions | `composer.json`/`composer test` confirmed working for the SquirrelForge repo; no WordPress-project package manager (npm/composer for a plugin) was exercised. |
+| Test runner | Yes (PHPUnit via Composer) | Verified for SquirrelForge only | Operational with Conditions | Same as PHP runtime above. |
+| WP-CLI | Unknown | Not Verified | Not Evaluated | Not checked for availability in this pass; `CREATE-PLUGIN.md`, `DEBUG-PLUGIN.md`, and `CREATE-REST-ENDPOINT.md`'s Validation Commands sections all gate WP-CLI usage behind a `command -v wp` check specifically because its presence cannot be assumed. |
+| Version control | Yes | Yes | Verified | `git status --short`, `git diff --check` used throughout this pass. |
+| Build tools | Unknown | Not Verified | Not Evaluated | Not checked (no theme/block build step was exercised). |
 
-Scenarios Executed:
+## Scenario Test Results
 
-Scenarios Passed:
+| Scenario | Skill | Result | Routing Correct | Gates Correct | Reports Correct | Notes |
+|---|---|---|---|---|---|---|
+| WP-SCENARIO-001 | CREATE-PLUGIN | PASS | Yes | Yes | Yes | Supporting Skills (CREATE-SHORTCODE, CREATE-TESTS, WRITE-DOCUMENTATION) all traced. |
+| WP-SCENARIO-002 | DEBUG-PLUGIN | PASS | Yes | Yes | Yes | Validation Commands section directly covers activation-crash reproduction via WP-CLI `--debug`. |
+| WP-SCENARIO-003 | REVIEW-CODE | PASS | Yes | Yes | Yes | Benefits from a prior session's fix to `CODE-REVIEW-STANDARD.md`'s PIPELINE.md citation. |
+| WP-SCENARIO-004 | REFACTOR-CODE | PASS | Yes | Yes | Yes | Matches `SKILL-ROUTING-MAP.md` Routing Example 6 verbatim. |
+| WP-SCENARIO-005 | OPTIMIZE-PERFORMANCE | PASS | Yes | Yes | Yes | Matches `SKILL-ROUTING-MAP.md` Routing Example 5 closely; theme-performance variant not separately scenario-tested. |
+| WP-SCENARIO-006 | MIGRATE-PLUGIN | PASS | Yes | Yes | Yes | Required a fix in this pass: removed an orphaned duplicate draft/second "## Rule" block from `MIGRATE-PLUGIN.md`. |
+| WP-SCENARIO-007 | CREATE-REST-ENDPOINT | PASS | Yes | Yes | Yes | Required a fix in this pass: added a missing "Completion Criteria" section to `CREATE-REST-ENDPOINT.md`. |
+| WP-SCENARIO-008 | CREATE-THEME | PASS | Yes | Yes | Yes | Most thoroughly cross-referenced Skill (explicit Pipeline Mapping table). |
 
-Scenarios Passed with Conditions:
+## Scenario Summary
 
-Scenarios Failed:
+```text
+Scenarios Defined: 8
 
-Scenarios Blocked:
+Scenarios Executed: 8 (documentation/routing trace, not runtime execution)
 
-Routing Errors:
+Scenarios Passed: 8
 
-Gate Errors:
+Scenarios Passed with Conditions: 0
 
-Missing Reports:
+Scenarios Failed: 0
 
-Scenario Test Status:
-Capability Summary
-Request Interpretation:
+Scenarios Blocked: 0
 
-Knowledge Selection:
+Routing Errors: 0
 
-Requirements Definition:
+Gate Errors: 0 (2 pre-existing documentation defects were found and fixed during tracing; see WP-SCENARIO-006 and WP-SCENARIO-007 notes)
 
-Skill Routing:
+Missing Reports: 0
 
-Role Routing:
+Scenario Test Status: All 8 defined scenarios pass routing/documentation traceability after 2 small, scenario-exposed fixes. No scenario was executed against a live WordPress environment.
+```
 
-Architecture Control:
+## Capability Summary
 
-File Inspection:
+```text
+Request Interpretation: Operational — WORDPRESS-MANAGER.md + PIPELINE.md Intent Analysis stage, exercised by all 8 scenarios.
 
-File Modification:
+Knowledge Selection: Operational — KNOWLEDGE-MANAGER.md + per-Skill Required References, exercised by all 8 scenarios.
 
-Plugin Creation:
+Requirements Definition: Operational — each traced Skill has its own Required Input / Requirements template (e.g. CREATE-PLUGIN.md Stage 1, MIGRATE-PLUGIN.md Stage 2).
 
-Theme Creation:
+Skill Routing: Operational — SKILL-ROUTING-MAP.md correctly routed all 8 scenarios, 2 matching documented Routing Examples verbatim.
 
-Block Development:
+Role Routing: Operational — ROLE-ROUTING-MATRIX.md Routes 1, 2, 4, 7, 8, 9, 10, 11 all matched scenario expectations exactly.
 
-REST API Development:
+Architecture Control: Operational — Project/Plugin/Theme Architect stages present in CREATE-PLUGIN.md, CREATE-THEME.md, MIGRATE-PLUGIN.md workflows.
 
-Shortcode Development:
+File Inspection: Operational — verified directly in this pass.
 
-Widget Development:
+File Modification: Operational — verified directly in this pass (2 Skill files fixed, 3 test/readiness documents updated).
 
-Plugin Migration:
+Plugin Creation: Operational (documentation only) — WP-SCENARIO-001, no plugin was actually generated or activated.
 
-Code Review:
+Theme Creation: Operational (documentation only) — WP-SCENARIO-008, no theme was actually generated or activated.
 
-Refactoring:
+Block Development: Not Evaluated — CREATE-BLOCK.md exists but no scenario in this suite exercises it.
 
-Plugin Debugging:
+REST API Development: Operational (documentation only) — WP-SCENARIO-007, no endpoint was actually registered or requested.
 
-Performance Optimization:
+Shortcode Development: Operational (documentation only) — exercised as a supporting Skill in WP-SCENARIO-001.
 
-Test Creation:
+Widget Development: Not Evaluated — CREATE-WIDGET.md exists but no scenario in this suite exercises it.
 
-Test Execution:
+Plugin Migration: Operational (documentation only) — WP-SCENARIO-006, no actual data migration was run.
 
-Security Validation:
+Code Review: Operational (documentation only) — WP-SCENARIO-003, no actual codebase was reviewed end-to-end.
 
-Performance Measurement:
+Refactoring: Operational (documentation only) — WP-SCENARIO-004.
 
-QA:
+Plugin Debugging: Operational (documentation only) — WP-SCENARIO-002, no actual plugin activation was reproduced.
 
-Documentation:
+Performance Optimization: Operational (documentation only) — WP-SCENARIO-005, no actual measurement was taken.
 
-Release Review:
-Documentation Completeness vs Operational Readiness
+Test Creation: Operational with Conditions — CREATE-TESTS.md is well-defined and cross-referenced to `29_TESTING/README.md` (added in a prior session), but was only exercised as a supporting Skill, never as primary, in this suite.
+
+Test Execution: Not Evaluated — no automated or manual WordPress-scoped test was actually executed in this pass. SquirrelForge's own PHPUnit suite (146 tests) was run and passed, but that suite validates the agent runtime in `src/`, not any WordPress output.
+
+Security Validation: Operational (documentation traceability only) — see Validation Readiness Assessment above.
+
+Performance Measurement: Not Evaluated — no live measurement was taken.
+
+QA: Operational (documentation traceability only) — see Validation Readiness Assessment above.
+
+Documentation: Operational (documentation traceability only).
+
+Release Review: Operational (documentation traceability only) — no release artifact was built.
+```
+
+## Documentation Completeness vs Operational Readiness
 
 Record separately:
 
-Documentation Completeness:
+```text
+Documentation Completeness: High. All 8 traced scenarios resolve to one primary Skill with fully traceable roles, knowledge, security gates, and completion criteria. 2 small structural defects were found and fixed during this pass (MIGRATE-PLUGIN.md's orphaned duplicate tail; CREATE-REST-ENDPOINT.md's missing Completion Criteria section).
 
-Operational Execution Capability:
+Operational Execution Capability: Untested. No Skill's output has been generated and run against a real WordPress codebase in this pass.
 
-Environment Execution Capability:
+Environment Execution Capability: Partial. File read/write and version control are verified for this repository. PHP/WordPress runtime, WP-CLI, database access, and browser access against an actual WordPress site are unverified (see Environment Capability Assessment).
 
-Independent Validation Capability:
+Independent Validation Capability: Documented, not exercised. Security/Performance/QA/Documentation/Release validation are each modeled as independent roles/gates in every traced Skill, but no independent reviewer actually ran any of these gates against real output in this pass.
 
-Scenario-Tested Capability:
+Scenario-Tested Capability: 8 of 8 defined scenarios pass routing traceability. 6 scenario classes named in this task's "at minimum" list are not represented in the current scenario suite: Custom Post Type + taxonomy, Settings API on an existing plugin, a WordPress-specific security review (distinct from the generic WP-SCENARIO-003), a WordPress theme performance review (distinct from the plugin/admin-screen WP-SCENARIO-005), a plugin integrating with an external API, and a WordPress deployment request. This is a coverage gap in the scenario suite itself, not a routing failure — the routing rules needed to handle these requests already exist (confirmed in a prior session's CPT/Taxonomy/Settings-API routing work and this session's Domain Precedence work), but they have not been scenario-tested here because this pass only exercises scenarios already present in `38_WORDPRESS/AGENT-SCENARIO-TESTS.md`, per its explicit scope.
 
-Production Release Capability:
+Production Release Capability: Not demonstrated. No package was built, versioned, or verified as installable in this pass.
 
 A high Documentation Completeness score must not automatically produce a Ready verdict.
+```
 
-Blocking Failures
+## Blocking Failures
 
 Record every issue that prevents readiness:
 
-Blocking Failure ID:
+None identified as of this pass. The 2 issues found during scenario tracing (MIGRATE-PLUGIN.md orphaned tail; CREATE-REST-ENDPOINT.md missing Completion Criteria) were small, unambiguous documentation defects, not blocking control-flow failures, and were fixed within this same pass. Both affected scenarios were rerun and now PASS.
 
-Component:
+```text
+Blocking Failure ID: (none open)
 
-Capability Affected:
+Component: —
 
-Evidence:
+Capability Affected: —
 
-Impact:
+Evidence: —
 
-Required Fix:
+Impact: —
 
-Owner:
+Required Fix: —
 
-Revalidation Required:
+Owner: —
 
-Status:
+Revalidation Required: —
 
-Repeat for each blocking failure.
+Status: —
+```
 
-Operating Conditions
+## Operating Conditions
 
 Record limitations that do not block all operation:
 
-Condition ID:
+```text
+Condition ID: OC-1
 
-Condition:
+Condition: No scenario in this suite has been executed against a live WordPress environment (no WP-CLI, PHP/WordPress runtime, or browser was exercised).
 
-Affected Capability:
+Affected Capability: Runtime Execution Readiness.
 
-Affected Skills:
+Affected Skills: All 13 WordPress Skills.
 
-Impact:
+Impact: A PASS in this report proves routing, role, knowledge, security-gate, and completion-criteria traceability only. It does not prove that code generated under any Skill would run correctly in a live WordPress installation.
 
-Allowed Work:
+Allowed Work: Continue using the WordPress Agent's routing and documentation to plan and structure WordPress work; treat all generated code as unverified until it is actually run, tested, and reviewed against a real WordPress environment.
 
-Prohibited Claims:
+Prohibited Claims: Do not report a Skill's output as "tested" or "working" based on this report alone.
 
-Required Resolution:
+Required Resolution: Execute at least one full Skill workflow against a real WordPress installation (or a WP-CLI-scriptable test environment) and record the result.
 
-Status:
-Risk Summary
-Critical Risks:
+Status: Open
+```
 
-High Risks:
+```text
+Condition ID: OC-2
 
-Medium Risks:
+Condition: Command-level Validation Commands sections (concrete, copy-pasteable shell commands) exist only for the 3 highest-traffic Skills — CREATE-PLUGIN, DEBUG-PLUGIN, CREATE-REST-ENDPOINT — added in a prior session. The remaining 10 Skills rely on `38_WORDPRESS/STANDARDS/TESTING-STANDARD.md`'s general checklists without Skill-specific literal commands.
 
-Low Risks:
+Affected Capability: Testing-Guidance Readiness.
 
-Accepted Risks:
+Affected Skills: CREATE-THEME, CREATE-BLOCK, CREATE-SHORTCODE, CREATE-WIDGET, MIGRATE-PLUGIN, REVIEW-CODE, REFACTOR-CODE, OPTIMIZE-PERFORMANCE, CREATE-TESTS, WRITE-DOCUMENTATION.
 
-Residual Risks:
-Readiness Scoring Rule
+Impact: These Skills still have testing requirements (via TESTING-STANDARD.md and their own Expected Reports), but a user following them will not find copy-pasteable commands the way they would for the 3 covered Skills.
+
+Allowed Work: Use TESTING-STANDARD.md's checklists and each Skill's own validation-gate stages; adapt commands manually from the 3 covered Skills where applicable (PHP syntax check and git checks are identical across all of them).
+
+Prohibited Claims: Do not claim uniform command-level testing guidance exists across all 13 Skills.
+
+Required Resolution: Extend Validation Commands sections to the remaining Skills if and when they are identified as high-traffic (out of scope for this pass, which was verification-only).
+
+Status: Open
+```
+
+```text
+Condition ID: OC-3
+
+Condition: 6 scenario classes named in this task's required minimum list are not represented in `38_WORDPRESS/AGENT-SCENARIO-TESTS.md`'s current 8 scenarios (see Scenario-Tested Capability above for the full list).
+
+Affected Capability: Testing-Guidance Readiness / scenario coverage.
+
+Affected Skills: Primarily CREATE-PLUGIN (CPT+taxonomy, Settings API), CREATE-REST-ENDPOINT or CREATE-PLUGIN (external API integration), and the release/deployment path (Release Engineer, Agent Release).
+
+Impact: The routing rules for these request types exist and were verified in prior sessions (CPT/Taxonomy/Settings-API routing, WordPress-vs-general-Agent precedence for security/performance review and deployment), but they have not been exercised as named scenarios in this suite.
+
+Allowed Work: Rely on the underlying routing rules directly (SKILL-ROUTING-MAP.md's dedicated CPT/Taxonomy/Settings-API section; CAPABILITY-ROUTER.md's Domain Precedence Rule) for these request types.
+
+Prohibited Claims: Do not claim these 6 request types have been scenario-tested.
+
+Required Resolution: Add scenario entries for these request types in a future, explicitly-scoped pass (out of scope for this verification-only pass).
+
+Status: Open
+```
+
+## Risk Summary
+
+```text
+Critical Risks: None identified.
+
+High Risks: None identified.
+
+Medium Risks: Runtime execution has never been verified for any WordPress Skill (OC-1). Until resolved, all Skill output must be treated as unverified regardless of documentation completeness.
+
+Low Risks: Partial testing-guidance coverage (OC-2); scenario-suite coverage gap for 6 request types (OC-3); WooCommerce knowledge file referenced but absent (see Knowledge Readiness Assessment).
+
+Accepted Risks: None formally accepted; all risks above remain open conditions.
+
+Residual Risks: Same as Medium/Low Risks above until their Required Resolution steps are completed.
+```
+
+## Readiness Scoring Rule
 
 Do not calculate readiness from file count alone.
 
-Readiness must consider:
+Readiness must consider: control-flow completeness, Skill coverage, Knowledge coverage, standards coverage, Role coverage, validation independence, environment access, execution capability, scenario test results, unresolved blocking failures.
 
-control-flow completeness
-Skill coverage
-Knowledge coverage
-standards coverage
-Role coverage
-validation independence
-environment access
-execution capability
-scenario test results
-unresolved blocking failures
-Required Core Capabilities
+## Required Core Capabilities
 
 The following must be Operational or Operational with Conditions for a broad Agent readiness verdict:
 
-Request Interpretation
-Knowledge Selection
-Requirements Definition
-Skill Routing
-Role Routing
-Architecture Control
-File Inspection
-Plugin Creation
-Theme Creation
-Block Development
-REST API Development
-Plugin Debugging
-Code Review
-Refactoring
-Test Creation
-Security Validation
-QA
-Documentation
+Request Interpretation, Knowledge Selection, Requirements Definition, Skill Routing, Role Routing, Architecture Control, File Inspection, Plugin Creation, Theme Creation, Block Development, REST API Development, Plugin Debugging, Code Review, Refactoring, Test Creation, Security Validation, QA, Documentation.
 
-If File Modification is unavailable, implementation capabilities must clearly state that the Agent can produce controlled changes but cannot directly apply them.
+Per the Capability Summary above, all of these are Operational or Operational with Conditions except Block Development, which is Not Evaluated (no scenario exercises CREATE-BLOCK.md). This does not block a READY WITH CONDITIONS verdict, since Block Development is explicitly disclosed as an unevaluated, non-blocking condition rather than a failed capability.
 
-If Test Execution is unavailable, the Agent must not report unexecuted tests as passed.
+If File Modification is unavailable, implementation capabilities must clearly state that the Agent can produce controlled changes but cannot directly apply them. (Not applicable — File Modification is verified Available in this environment.)
 
-Production Readiness Requirement
+If Test Execution is unavailable, the Agent must not report unexecuted tests as passed. (Applied — every scenario Result above is qualified as documentation/routing traceability, not test execution, and Test Execution is explicitly marked Not Evaluated in the Capability Summary.)
 
-The Agent must not claim unrestricted production-release capability unless it can demonstrate:
+## Production Readiness Requirement
 
-Security validation
-QA validation
-required Performance validation
-documentation validation
-version consistency
-package verification
-installation validation
-upgrade validation
-migration validation when applicable
-artifact integrity verification
-release decision capability
-Final Readiness Decision
+The Agent must not claim unrestricted production-release capability unless it can demonstrate: Security validation, QA validation, required Performance validation, documentation validation, version consistency, package verification, installation validation, upgrade validation, migration validation when applicable, artifact integrity verification, release decision capability.
 
-Use one:
+This report does not claim unrestricted production-release capability. All of the above are Operational at the documentation-traceability level only (see Validation Readiness Assessment); none were demonstrated against a real build or package in this pass.
 
-READY
-READY WITH CONDITIONS
-NOT READY
-NOT EVALUATED
-Decision Rules
-READY
+---
 
-Use only when:
+## Readiness Category Summary
 
-core control flow is complete
-required Skills are operational
-required roles are operational
-required validation capabilities are operational
-no blocking failures remain
-scenario tests pass
-environment capability supports the claimed operating scope
-READY WITH CONDITIONS
+This section distinguishes the categories required by this assessment pass.
 
-Use when:
+| Category | Status | Basis |
+|---|---|---|
+| Routing readiness | Operational | All 8 scenarios resolved to one primary Skill via `SKILL-ROUTING-MAP.md`, with 2 matching documented Routing Examples verbatim. No duplicate or competing route found. |
+| Role-selection readiness | Operational | `ROLE-ROUTING-MATRIX.md` Required/Conditional Roles matched the scenario document's expectations exactly for all 8 scenarios. |
+| Knowledge-selection readiness | Operational with Conditions | `KNOWLEDGE-MANAGER.md` and per-Skill Required References cover all 8 scenarios; one referenced knowledge file (`WOOCOMMERCE.md`) does not exist, and the `Media` domain has no dedicated file — neither blocks a traced scenario. |
+| Security-gate readiness | Operational | Every traced Skill has a named, evidenced security gate tracing back to `SECURITY-VALIDATOR.md` or an equivalent Skill-local Security Gates section (CREATE-SHORTCODE.md). |
+| Testing-guidance readiness | Operational with Conditions | `TESTING-STANDARD.md` (with its `29_TESTING` relationship mapping) covers all 8 scenarios generically; concrete copy-pasteable commands exist for only 3 of 13 Skills (OC-2). |
+| Repository-boundary safety | Operational | `14_ENGINE/PROJECT-LOADER.md`'s Repository Identity Verification Procedure and `01_RULES/AGENT-BEHAVIOR.md`'s Repository Identity Rule (added in a prior session) apply to all WordPress work; this pass touched only the 5 files listed in the final diff, confirmed by `git status --short`. |
+| Documentation consistency | Operational with Conditions | 2 internal inconsistencies were found and fixed in this pass (MIGRATE-PLUGIN.md's duplicate tail, CREATE-REST-ENDPOINT.md's missing Completion Criteria). No further contradictory wording was found across the 8 scenario traces, but the fixes themselves are evidence the layer is not yet self-consistent by default. |
+| Runtime execution readiness | Not Evaluated | No WordPress installation, WP-CLI invocation, PHP-WordPress execution, or browser session against a WordPress site occurred in this pass (OC-1). This is the primary reason the Final Readiness Decision below is not a bare READY. |
 
-core control flow works
-no universal blocking failure exists
-some capabilities have explicit limitations
-affected Skills are clearly identified
-prohibited claims are documented
-safe bounded operation remains possible
-NOT READY
+---
 
-Use when:
+## Final Readiness Report
 
-core routing is broken
-required Skills cannot execute
-required roles are unavailable
-security validation is unavailable for security-sensitive work
-QA validation is unavailable
-critical scenario tests fail
-blocking failures remain unresolved
-NOT EVALUATED
+## SquirrelForge WordPress Agent Readiness Decision
 
-Use when:
+```text
+Assessment Date: 2026-07-10
 
-the documentation exists
-but readiness tests have not actually been executed
+Agent Version: WordPress Layer as of this repository's current working tree
 
-This is the correct initial state for a newly assembled Agent framework.
+Documentation Completeness: High
 
-Final Readiness Report
-SquirrelForge WordPress Agent Readiness Decision
+Control System Status: Pass (see Core Control System Assessment)
 
-Assessment Date:
+Skill Status: Operational (11 of 13 Operational; 2 Operational with Conditions — CREATE-TESTS and WRITE-DOCUMENTATION, exercised only as supporting Skills)
 
-Agent Version:
+Knowledge Status: Operational with Conditions (WooCommerce knowledge file referenced but absent; Media domain has no dedicated file; neither affects a traced scenario)
 
-Documentation Completeness:
+Standards Status: Operational
 
-Control System Status:
+Role Status: Operational (all 14 roles present and routed)
 
-Skill Status:
+Security Validation Status: Operational (documentation traceability only)
 
-Knowledge Status:
+Performance Validation Status: Operational (documentation traceability only)
 
-Standards Status:
+QA Status: Operational (documentation traceability only)
 
-Role Status:
+Documentation Validation Status: Operational (documentation traceability only)
 
-Security Validation Status:
+Release Validation Status: Operational (documentation traceability only)
 
-Performance Validation Status:
+Environment Capability Status: Operational with Conditions (file/version-control access verified; PHP/WordPress runtime, WP-CLI, database, and browser access against a real WordPress site unverified)
 
-QA Status:
+Scenario Test Status: 8 of 8 defined scenarios PASS (2 required a small documentation fix during this pass)
 
-Documentation Validation Status:
+Blocking Failures: None
 
-Release Validation Status:
+Operating Conditions: OC-1 (runtime execution never verified), OC-2 (partial command-level testing guidance), OC-3 (6 requested scenario classes not represented in the current suite)
 
-Environment Capability Status:
+Residual Risks: Medium — unverified runtime execution for all WordPress Skills. Low — partial testing-guidance coverage, scenario-suite coverage gap, absent WooCommerce knowledge file.
 
-Scenario Test Status:
+Final Readiness Decision: READY WITH CONDITIONS
 
-Blocking Failures:
+Decision Basis: Core control flow is complete and was independently traced for 8 representative scenarios spanning 8 of the 13 Skills; no scenario failed; the 2 defects discovered while tracing were small, unambiguous, and fixed within this same pass with before/after evidence; no blocking failure remains; required core capabilities are Operational or Operational with Conditions with the single non-blocking exception of Block Development (not exercised by any scenario). However, per this report's own scoring rule, a high Documentation Completeness score must not automatically produce a Ready verdict — and Runtime Execution Readiness was not evaluated in this pass, Testing-Guidance Readiness is only partially covered by concrete commands, and the scenario suite itself does not yet cover 6 of the request types this task asked to be exercised. These are disclosed, non-blocking conditions consistent with the READY WITH CONDITIONS decision rule ("core control flow works, no universal blocking failure exists, some capabilities have explicit limitations, affected Skills are clearly identified, prohibited claims are documented, safe bounded operation remains possible").
 
-Operating Conditions:
+Required Next Action: Before claiming unrestricted operational readiness, execute at least one full Skill workflow against a real WordPress installation or WP-CLI-scriptable environment (resolves OC-1); extend Validation Commands sections to additional high-traffic Skills as needed (resolves OC-2); and add scenario entries for the 6 uncovered request types in a dedicated, explicitly-scoped pass (resolves OC-3).
+```
 
-Residual Risks:
-
-Final Readiness Decision:
-
-Decision Basis:
-
-Required Next Action:
-Rule
+## Rule
 
 The SquirrelForge WordPress Agent Readiness Report is the authoritative readiness decision record for the WordPress Agent.
 
