@@ -138,6 +138,8 @@ Possible selections include:
 - Plugin Handbook
 - Security
 - Custom Post Types
+- Taxonomies
+- Settings API
 - Database
 - REST API
 - Block Editor
@@ -146,6 +148,8 @@ Possible selections include:
 - Performance
 - Accessibility
 - WooCommerce
+
+Custom Post Types, Taxonomies, and Settings API are required knowledge, not optional, whenever the request involves a custom post type, a custom taxonomy, or a Settings API options page.
 
 Produce:
 
