@@ -78,6 +78,7 @@ Before managing WordPress work, consult:
 - QA validation is mandatory before production release approval.
 - Documentation must reflect actual validated behavior.
 - Release review is required for production-ready deliverables.
+- General `16_AGENTS` specialists act only as supporting specialists on WordPress work, invoked explicitly by the WordPress Manager; per `12_AGENT/CAPABILITY-ROUTER.md`, they do not independently select WordPress Skills or Roles.
 
 ### Final Manager Report
 
