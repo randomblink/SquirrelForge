@@ -28,7 +28,7 @@ Evidence:
 Gap:
 ```
 
-Result must be one of `PASS`, `PARTIAL`, `FAIL`, or `NOT EXECUTABLE`. This suite verifies documentation and routing traceability through the authoritative control chain (`38_WORDPRESS/WORDPRESS-MANAGER.md` → `38_WORDPRESS/PIPELINE.md` → `38_WORDPRESS/SKILLS/SKILL-ROUTING-MAP.md` → selected Skill → `33_WORDPRESS_ROLES/ROLE-MANAGER.md` → `33_WORDPRESS_ROLES/ROLE-ROUTING-MATRIX.md` → required knowledge → security and standards gates → testing requirements → completion criteria). A `PASS` proves the route, roles, knowledge, gates, and completion criteria are explicitly traceable in the repository — by itself it does not prove that code generated under that route would actually run correctly in a live WordPress environment. One scenario, WP-SCENARIO-001, has additionally been runtime-validated once against a live WordPress installation; see the "Runtime Evidence" section below. That result is bounded to WP-SCENARIO-001's specific request and does not extend runtime-validated status to any other scenario in this suite. See `38_WORDPRESS/AGENT-READINESS-REPORT.md`'s Runtime Execution Readiness category for the full distinction between traceability and execution.
+Result must be one of `PASS`, `PARTIAL`, `FAIL`, or `NOT EXECUTABLE`. This suite verifies documentation and routing traceability through the authoritative control chain (`38_WORDPRESS/WORDPRESS-MANAGER.md` → `38_WORDPRESS/PIPELINE.md` → `38_WORDPRESS/SKILLS/SKILL-ROUTING-MAP.md` → selected Skill → `33_WORDPRESS_ROLES/ROLE-MANAGER.md` → `33_WORDPRESS_ROLES/ROLE-ROUTING-MATRIX.md` → required knowledge → security and standards gates → testing requirements → completion criteria). A `PASS` proves the route, roles, knowledge, gates, and completion criteria are explicitly traceable in the repository — by itself it does not prove that code generated under that route would actually run correctly in a live WordPress environment. Two scenarios, WP-SCENARIO-001 and WP-SCENARIO-009, have additionally been runtime-validated against a live WordPress installation; see the "Runtime Evidence" section below. Those results are bounded to each scenario's specific request and do not extend runtime-validated status to any other scenario in this suite. See `38_WORDPRESS/AGENT-READINESS-REPORT.md`'s Runtime Execution Readiness category for the full distinction between traceability and execution.
 
 ---
 
@@ -370,7 +370,7 @@ Gap: FOUND AND FIXED. Before this pass, `12_AGENT/CAPABILITY-ROUTER.md`'s own pr
 
 ## Runtime Evidence
 
-Documentation/routing traceability (recorded per scenario above) is distinct from runtime execution evidence. This section records the first, and so far only, scenario that has actually been run against a live WordPress installation. It supplements WP-SCENARIO-001's traceability result above — it does not replace that result, and it does not extend runtime-validated status to any other scenario in this suite.
+Documentation/routing traceability (recorded per scenario above) is distinct from runtime execution evidence. This section records the two scenarios, so far, that have actually been run against a live WordPress installation. It supplements WP-SCENARIO-001's and WP-SCENARIO-009's traceability results above — it does not replace either result, and it does not extend runtime-validated status to any other scenario in this suite.
 
 ### Runtime Validation — WP-SCENARIO-001 (Create a WordPress plugin with an administrator Settings API page and frontend shortcode)
 
@@ -410,8 +410,105 @@ Scope of This Evidence:
   (CREATE-PLUGIN with a Settings API page and a shortcode), executed once
   against one WordPress installation. It does not runtime-validate
   CREATE-PLUGIN for other request shapes, and it does not runtime-validate
-  any other Skill or any of the remaining 13 documentation scenarios in
+  any other Skill or any of the remaining 12 documentation scenarios in
   this suite.
+```
+
+### Runtime Validation — WP-SCENARIO-009 (Add a Custom Post Type and Taxonomy)
+
+```text
+Scenario Reference: WP-SCENARIO-009
+Runtime Target: Hospital WordPress installation ($HOME/Local Sites/hospital/app/public)
+Plugin Path: wp-content/plugins/squirrelforge-cpt-taxonomy-validation
+Plugin Created As: standalone plugin, no runtime dependency on Composer or another plugin
+
+PHP Syntax Lint: PASS (all three authored plugin PHP files)
+Focused PHPUnit: PASS — 2 tests, 6 assertions
+Full Plugin PHPUnit Suite: PASS — 10 tests, 27 assertions
+SquirrelForge Full Suite: PASS — 146 tests, 338 assertions (unaffected)
+
+Live Environment: Hospital WordPress installation; WP-CLI unavailable; execution
+  performed through fresh PHP processes bootstrapping wp-load.php, using Local's
+  site-matched PHP binary and database socket; strict runtime error capture
+  enabled throughout; no debug.log was created (WP_DEBUG_LOG not enabled).
+
+Activation and Registration: PASS
+  - Activation completed without a fatal error; plugin became active.
+  - Rewrite rules were flushed by the activation routine.
+  - `sfctv_testimonial` registered successfully on a fresh bootstrap.
+  - `sfctv_category` registered successfully on a fresh bootstrap.
+  - Both were absent after deactivation, confirmed on a fresh bootstrap.
+  - Both returned after reactivation, confirmed on another fresh bootstrap.
+
+Custom Post Type Evidence:
+  - public: true; show_ui: true; has_archive: true; show_in_rest: true
+  - REST base: sfctv_testimonial
+  - capability type: standard post capabilities (no custom capability introduced);
+    edit_posts capability resolved to the core edit_posts capability
+  - supports: title, editor, thumbnail
+  - rewrite slug: testimonials
+
+Taxonomy Evidence:
+  - taxonomy: sfctv_category
+  - hierarchical: true; show_in_rest: true
+  - attached only to: sfctv_testimonial
+  - rewrite slug: testimonial-category
+
+REST Evidence: Built-in WordPress REST routes were confirmed for both the CPT and
+  the taxonomy, including their collection and single-item routes. No custom REST
+  endpoint was required or created; built-in exposure via show_in_rest was
+  sufficient for this scenario's scope.
+
+Rewrite and Permalink Evidence:
+  - 23 rewrite rules matched the testimonial CPT pattern
+  - 5 rewrite rules matched the testimonial taxonomy pattern
+  - active site permalink structure: /%postname%/
+  - testimonial URLs use the /testimonials/ structure
+  - taxonomy URLs use the /testimonial-category/ structure
+  - rewrite rules were not flushed during ordinary init execution (flushing is
+    isolated to the activation and deactivation hooks only)
+
+Persistence Evidence: Runtime validation created exactly one testimonial post,
+  one taxonomy term, and one term assignment connecting them. Verified: post
+  type, title, and content were correct and retrievable; the term existed in the
+  expected taxonomy; the assignment was confirmed through both
+  wp_get_object_terms() and get_the_terms(); the assignment remained intact
+  through the deactivation/reactivation cycle; unrelated core `post` and
+  `category` counts were unchanged before and after (proving isolation from
+  core content types).
+
+Deactivation and Reactivation Evidence:
+  - Deactivation removed the plugin's runtime registration, confirmed on a
+    fresh bootstrap. Deactivation did not delete the stored post row — a
+    direct database query confirmed the row remained present with its
+    `sfctv_testimonial` post_type value intact even while the type was
+    unregistered. Deactivation must not be read as deleting content.
+  - Reactivation restored both registrations on another fresh bootstrap, and
+    the stored term assignment remained intact. Repeated activation and
+    rewrite-rule flushing completed without any fatal error.
+
+Cleanup and Boundaries:
+  - All temporary post and term data created during validation was deleted;
+    final counts confirmed zero remaining validation-CPT posts and zero
+    remaining validation-taxonomy terms.
+  - Zero PHP warnings, notices, deprecations, or errors were captured at any
+    step.
+  - CSHD remained clean and unchanged (`git status --short` / `git diff --check`
+    both clean before and after).
+  - The existing squirrelforge-runtime-validation plugin (WP-SCENARIO-001)
+    remained untouched and active throughout.
+  - All other Hospital plugins remained untouched.
+  - The SquirrelForge repository remained unchanged during runtime execution;
+    no routing, Skill, Role, knowledge, or scenario-definition file was
+    modified as part of running this scenario.
+
+Scope of This Evidence:
+  This runtime result applies only to WP-SCENARIO-009's specific request
+  (CREATE-PLUGIN registering a custom post type and an attached hierarchical
+  taxonomy), executed once against one WordPress installation. It does not
+  runtime-validate CREATE-PLUGIN for other request shapes beyond this and
+  WP-SCENARIO-001, and it does not runtime-validate any other Skill or any of
+  the remaining 12 documentation scenarios in this suite.
 ```
 
 ---
@@ -427,7 +524,7 @@ Routing Errors: 0 (1 pre-existing routing contradiction found and fixed — see 
 Missing Skills: 0
 Missing Roles: 0
 Missing Validation Gates: 0
-Overall Scenario Status: All 14 defined scenarios pass documentation/routing traceability, including the 6 scenario classes (Custom Post Type + taxonomy, Settings API on an existing plugin, a WordPress-specific security review, a WordPress theme performance review, a plugin integrating with an external API, and a WordPress deployment request) that were previously absent from this suite. This status covers routing readiness for all 14 scenarios. One of the 14, WP-SCENARIO-001, has additionally been runtime-validated once against a live WordPress installation (see "Runtime Evidence" above); the remaining 13 scenarios have not been executed against a live WordPress environment. See 38_WORDPRESS/AGENT-READINESS-REPORT.md for the full readiness breakdown, including the Runtime Execution Readiness category.
+Overall Scenario Status: All 14 defined scenarios pass documentation/routing traceability, including the 6 scenario classes (Custom Post Type + taxonomy, Settings API on an existing plugin, a WordPress-specific security review, a WordPress theme performance review, a plugin integrating with an external API, and a WordPress deployment request) that were previously absent from this suite. This status covers routing readiness for all 14 scenarios. Two of the 14, WP-SCENARIO-001 and WP-SCENARIO-009, have additionally been runtime-validated against a live WordPress installation (see "Runtime Evidence" above); the remaining 12 scenarios have not been executed against a live WordPress environment. See 38_WORDPRESS/AGENT-READINESS-REPORT.md for the full readiness breakdown, including the Runtime Execution Readiness category.
 ```
 
 ---
