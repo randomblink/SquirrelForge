@@ -34,7 +34,7 @@ Agent Version: WordPress Layer as of this repository's current working tree (no 
 
 WordPress Layer Version: 38_WORDPRESS / 33_WORDPRESS_ROLES as committed through "Unify WordPress routing sources" (fac4c4e) plus uncommitted documentation passes made across this and prior sessions
 
-Assessment Environment: Static repository inspection only. No WordPress installation, WP-CLI, PHP-WordPress runtime, or browser was exercised.
+Assessment Environment: Primarily static repository inspection. One exception: WP-SCENARIO-001 was additionally executed against the live Hospital WordPress installation (see "Runtime Execution Evidence"); WP-CLI was confirmed unavailable there and a direct wp-load.php PHP runtime script was used instead. No browser session was exercised, and no other WordPress installation was accessed.
 
 Assessment Scope: The 14 scenarios defined in 38_WORDPRESS/AGENT-SCENARIO-TESTS.md (the original 8 plus 6 added in this pass), traced through the authoritative control chain (WORDPRESS-MANAGER.md → PIPELINE.md → SKILL-ROUTING-MAP.md → selected Skill → ROLE-MANAGER.md → ROLE-ROUTING-MATRIX.md → required knowledge → security/standards gates → testing requirements → completion criteria).
 
@@ -56,7 +56,7 @@ Verify the following evidence exists:
 | Standards Inventory | Available | `38_WORDPRESS/STANDARDS/` directory listing. |
 | Role Inventory | Available | `33_WORDPRESS_ROLES/` directory listing, cross-checked against `33_WORDPRESS_ROLES/ROLE-ROUTING-MATRIX.md`. |
 | Validation Capability Evidence | Available | `38_WORDPRESS/SECURITY-VALIDATOR.md` and `38_WORDPRESS/STANDARDS/TESTING-STANDARD.md`. |
-| Environment Capability Evidence | Partial | File inspection/creation/modification confirmed by this session's own edits; PHP/WordPress runtime, WP-CLI, and browser access against a real WordPress site were not exercised. |
+| Environment Capability Evidence | Partial | File inspection/creation/modification confirmed by this session's own edits; PHP/WordPress runtime, WP-CLI presence-check, and database access were verified once against the Hospital installation for WP-SCENARIO-001. Browser access against a real WordPress site was not exercised. |
 
 ## Core Control System Assessment
 
@@ -81,7 +81,7 @@ Status values: `Pass`, `Pass with Conditions`, `Fail`, `Not Evaluated`.
 
 | Skill | File Exists | Routing Exists | Roles Exist | Gates Exist | Scenario Tested | Status |
 |---|---|---|---|---|---|---|
-| CREATE-PLUGIN | Yes | Yes | Yes | Yes | Yes (WP-SCENARIO-001) | Operational |
+| CREATE-PLUGIN | Yes | Yes | Yes | Yes | Yes (WP-SCENARIO-001, documentation trace + one bounded runtime execution — see Runtime Execution Evidence) | Operational |
 | CREATE-THEME | Yes | Yes | Yes | Yes | Yes (WP-SCENARIO-008) | Operational |
 | CREATE-BLOCK | Yes | Yes | Yes | Yes | No | Not Evaluated |
 | CREATE-REST-ENDPOINT | Yes | Yes | Yes | Yes | Yes (WP-SCENARIO-007) | Operational (Completion Criteria section added in this pass) |
@@ -302,14 +302,14 @@ Evaluate actual execution access:
 | File inspection | Yes | Yes | Verified | Used throughout this pass (Read tool). |
 | File creation | Yes | Yes | Verified | Not required in this pass (no new files created; only existing files edited). |
 | File modification | Yes | Yes | Verified | Used in this pass (Edit/Write tools) to fix `MIGRATE-PLUGIN.md` and `CREATE-REST-ENDPOINT.md`, and to update the scenario/readiness documents themselves. |
-| PHP runtime | Partial | Verified for SquirrelForge's own suite only | Operational with Conditions | `composer test` runs PHPUnit against SquirrelForge's own `src/`/`tests/`; no WordPress-scoped PHP runtime was exercised. |
-| WordPress installation | No | Not Verified | Not Available | No live or local WordPress install was accessed in this pass. |
-| Database access | No | Not Verified | Not Available | No database (WordPress or otherwise) was accessed in this pass. |
+| PHP runtime | Yes | Verified for SquirrelForge's own suite and, once, for a WordPress-scoped run | Operational with Conditions | `composer test` runs PHPUnit against SquirrelForge's own `src/`/`tests/`. Additionally, a WordPress-scoped PHP runtime (Local's site-matched PHP binary) was exercised once for WP-SCENARIO-001's runtime validation; see Runtime Execution Evidence. Not verified for any other Skill or scenario. |
+| WordPress installation | Yes, for one target | Verified once (Hospital installation) | Operational with Conditions | The Hospital WordPress installation was bootstrapped and exercised once for WP-SCENARIO-001. No other WordPress installation or scenario has been accessed. |
+| Database access | Yes, for one target | Verified once (Hospital installation's MySQL, via Local's site-specific socket) | Operational with Conditions | Read and write access (options table) was exercised once for WP-SCENARIO-001. Not verified for any other scenario. |
 | Browser access | Yes (tooling exists) | Not exercised for WordPress | Not Evaluated | Browser tooling is available in this environment generally, but was not used against any WordPress admin/frontend in this pass. |
 | Node.js | Unknown | Not Verified | Not Evaluated | Not checked in this pass. |
 | Package manager | Yes (Composer) | Verified for SquirrelForge only | Operational with Conditions | `composer.json`/`composer test` confirmed working for the SquirrelForge repo; no WordPress-project package manager (npm/composer for a plugin) was exercised. |
 | Test runner | Yes (PHPUnit via Composer) | Verified for SquirrelForge only | Operational with Conditions | Same as PHP runtime above. |
-| WP-CLI | Unknown | Not Verified | Not Evaluated | Not checked for availability in this pass; `CREATE-PLUGIN.md`, `DEBUG-PLUGIN.md`, and `CREATE-REST-ENDPOINT.md`'s Validation Commands sections all gate WP-CLI usage behind a `command -v wp` check specifically because its presence cannot be assumed. |
+| WP-CLI | No, confirmed unavailable on the Hospital target | Verified (checked and absent) | Not Available | Confirmed unavailable during WP-SCENARIO-001's runtime validation; a direct `wp-load.php` PHP runtime script was used instead, consistent with `CREATE-PLUGIN.md`'s Validation Commands section, which gates WP-CLI usage behind a `command -v wp` check specifically because its presence cannot be assumed. |
 | Version control | Yes | Yes | Verified | `git status --short`, `git diff --check` used throughout this pass. |
 | Build tools | Unknown | Not Verified | Not Evaluated | Not checked (no theme/block build step was exercised). |
 
@@ -336,6 +336,26 @@ Fix notes:
 - **WP-SCENARIO-012**: `12_AGENT/CAPABILITY-ROUTER.md`'s own precedence example incorrectly routed a WordPress theme performance review through `CREATE-THEME` instead of `OPTIMIZE-PERFORMANCE`, contradicting `SKILL-ROUTING-MAP.md`'s general "Performance Work" rule and the already-passing WP-SCENARIO-005 pattern. Corrected the example, and added a Theme/Plugin Architect conditional role plus a conditional `THEME-HANDBOOK.md` reference to `OPTIMIZE-PERFORMANCE.md` and `ROLE-ROUTING-MATRIX.md` Route 11.
 - **WP-SCENARIO-014**: `12_AGENT/CAPABILITY-ROUTER.md`'s precedence example for a WordPress deployment request named the Role Routing Matrix and Release Engineer without naming the triggering Skill, breaking the required Skill-before-Role sequence. Corrected the example to name `REVIEW-CODE` explicitly, and added "Release Engineer when the review's objective is release or deployment readiness" to `ROLE-ROUTING-MATRIX.md` Route 8's Conditional Roles.
 
+## Runtime Execution Evidence
+
+All 14 scenario results above are documentation/routing traceability, not runtime proof. One bounded exception now exists: WP-SCENARIO-001 has been executed once against a live WordPress installation. Full evidence, including the disclosed validation-harness defect and its fix, is recorded in `38_WORDPRESS/AGENT-SCENARIO-TESTS.md`'s "Runtime Evidence" section. Summary:
+
+```text
+Scenario: WP-SCENARIO-001 (CREATE-PLUGIN with a Settings API page and a shortcode)
+Runtime Target: Hospital WordPress installation
+Plugin Path: wp-content/plugins/squirrelforge-runtime-validation
+Result: PASS — PHP lint, focused PHPUnit, full suite (11 tests, 20 assertions), activation,
+        setting registration, saved-value shortcode read, HTML-escaping, deactivation, and
+        reactivation all verified against the live installation. No corrected-run PHP errors
+        captured. WP-CLI was unavailable; a direct wp-load.php runtime script was used instead.
+        debug.log was unavailable (WP_DEBUG_LOG not enabled).
+Scope: This validates CREATE-PLUGIN for this one bounded request only. It does not
+       runtime-validate CREATE-PLUGIN for other request shapes, and it does not
+       runtime-validate any other Skill.
+```
+
+This is the only Skill/scenario pairing in this report with runtime evidence. Every other Skill and scenario remains at documentation/routing traceability only — see Skill Readiness Assessment and Scenario Test Results above, and Runtime Execution Readiness in the Readiness Category Summary below.
+
 ## Scenario Summary
 
 ```text
@@ -357,7 +377,7 @@ Gate Errors: 0 (4 pre-existing documentation defects were found and fixed across
 
 Missing Reports: 0
 
-Scenario Test Status: All 14 defined scenarios pass routing/documentation traceability, including the 6 scenario classes added in this pass, after 4 small, scenario-exposed fixes total. No scenario was executed against a live WordPress environment.
+Scenario Test Status: All 14 defined scenarios pass routing/documentation traceability, including the 6 scenario classes added in this pass, after 4 small, scenario-exposed fixes total. One of the 14 (WP-SCENARIO-001) has additionally been executed once against a live WordPress environment, with a PASS result; see "Runtime Execution Evidence" above. The remaining 13 scenarios have not been executed against a live WordPress environment.
 ```
 
 ## Capability Summary
@@ -379,7 +399,7 @@ File Inspection: Operational — verified directly in this pass.
 
 File Modification: Operational — verified directly in this pass (2 Skill files fixed, 3 test/readiness documents updated).
 
-Plugin Creation: Operational (documentation only) — WP-SCENARIO-001, no plugin was actually generated or activated.
+Plugin Creation: Operational — WP-SCENARIO-001. Documentation traceability plus one bounded runtime validation: a real standalone plugin was generated, activated, exercised, deactivated, and reactivated against the Hospital WordPress installation (see Runtime Execution Evidence). Not yet demonstrated for any other plugin-creation request shape.
 
 Theme Creation: Operational (documentation only) — WP-SCENARIO-008, no theme was actually generated or activated.
 
@@ -403,7 +423,7 @@ Performance Optimization: Operational (documentation only) — WP-SCENARIO-005, 
 
 Test Creation: Operational with Conditions — CREATE-TESTS.md is well-defined and cross-referenced to `29_TESTING/README.md` (added in a prior session), but was only exercised as a supporting Skill, never as primary, in this suite.
 
-Test Execution: Not Evaluated — no automated or manual WordPress-scoped test was actually executed in this pass. SquirrelForge's own PHPUnit suite (146 tests) was run and passed, but that suite validates the agent runtime in `src/`, not any WordPress output.
+Test Execution: Operational with Conditions — SquirrelForge's own PHPUnit suite (146 tests) validates the agent runtime in `src/`, not any WordPress output. Separately, a WordPress-scoped PHPUnit suite (11 tests, 20 assertions) was actually created and executed for WP-SCENARIO-001's generated plugin, both in isolation and immediately after live activation against the Hospital installation (see Runtime Execution Evidence). No other Skill's generated output has had a test suite executed against it.
 
 Security Validation: Operational (documentation traceability only) — see Validation Readiness Assessment above.
 
@@ -423,11 +443,11 @@ Record separately:
 ```text
 Documentation Completeness: High. All 14 traced scenarios resolve to one primary Skill with fully traceable roles, knowledge, security gates, and completion criteria. 4 small structural or routing defects were found and fixed across two tracing passes (MIGRATE-PLUGIN.md's orphaned duplicate tail; CREATE-REST-ENDPOINT.md's missing Completion Criteria section; CAPABILITY-ROUTER.md's theme-performance and deployment precedence examples, corrected to match SKILL-ROUTING-MAP.md's actual rules).
 
-Operational Execution Capability: Untested. No Skill's output has been generated and run against a real WordPress codebase in this pass.
+Operational Execution Capability: Demonstrated once, narrowly. CREATE-PLUGIN's output was generated and run against a real WordPress codebase (Hospital installation) for WP-SCENARIO-001; see Runtime Execution Evidence. No other Skill's output has been generated and run against a real WordPress codebase in this pass.
 
-Environment Execution Capability: Partial. File read/write and version control are verified for this repository. PHP/WordPress runtime, WP-CLI, database access, and browser access against an actual WordPress site are unverified (see Environment Capability Assessment).
+Environment Execution Capability: Partial. File read/write and version control are verified for this repository. PHP/WordPress runtime, WP-CLI (confirmed absent), and database access were verified once against the Hospital installation for WP-SCENARIO-001 (see Environment Capability Assessment). Browser access against an actual WordPress site remains unverified.
 
-Independent Validation Capability: Documented, not exercised. Security/Performance/QA/Documentation/Release validation are each modeled as independent roles/gates in every traced Skill, but no independent reviewer actually ran any of these gates against real output in this pass.
+Independent Validation Capability: Documented, and exercised once. Security/Performance/QA/Documentation/Release validation are each modeled as independent roles/gates in every traced Skill. For WP-SCENARIO-001 specifically, QA-equivalent validation (focused and full PHPUnit, capability checks) was actually run against real output, and security-relevant behavior (capability gating, output escaping, sanitize-then-escape defense in depth) was observed live. No independent reviewer has exercised these gates against real output for any other Skill.
 
 Scenario-Tested Capability: 14 of 14 defined scenarios pass routing traceability, now including all 6 scenario classes previously absent from the suite (Custom Post Type + taxonomy, Settings API on an existing plugin, a WordPress-specific security review, a WordPress theme performance review, a plugin integrating with an external API, and a WordPress deployment request). Tracing these 6 scenarios surfaced and closed 2 additional routing gaps beyond the 2 found in the original 8-scenario pass (see WP-SCENARIO-012 and WP-SCENARIO-014 fix notes above).
 
@@ -467,23 +487,25 @@ Status: —
 Record limitations that do not block all operation:
 
 ```text
-Condition ID: OC-1
+Condition ID: OC-1 (NARROWED — one bounded scenario evaluated)
 
-Condition: No scenario in this suite has been executed against a live WordPress environment (no WP-CLI, PHP/WordPress runtime, or browser was exercised).
+Condition: Reduced in scope from "no scenario in this suite has been executed against a live WordPress environment" to "one scenario (WP-SCENARIO-001) has been executed once against a live WordPress environment; the remaining 13 have not." See "Runtime Execution Evidence" above for the full result.
 
 Affected Capability: Runtime Execution Readiness.
 
-Affected Skills: All 13 WordPress Skills.
+Affected Skills: 12 of 13 WordPress Skills remain runtime-unevaluated (CREATE-THEME, CREATE-BLOCK, CREATE-REST-ENDPOINT, CREATE-SHORTCODE, CREATE-WIDGET, MIGRATE-PLUGIN, REVIEW-CODE, REFACTOR-CODE, DEBUG-PLUGIN, OPTIMIZE-PERFORMANCE, CREATE-TESTS, WRITE-DOCUMENTATION). CREATE-PLUGIN is runtime-evaluated for exactly one bounded request shape (a Settings API page plus a shortcode) and remains unevaluated for its other request shapes (e.g. custom post types and taxonomies, database tables, block/JavaScript features).
 
-Impact: A PASS in this report proves routing, role, knowledge, security-gate, and completion-criteria traceability only. It does not prove that code generated under any Skill would run correctly in a live WordPress installation.
+Remaining Unexecuted Scenario Classes: WP-SCENARIO-002 through WP-SCENARIO-014 (debug a plugin activation crash; review code; refactor a class; optimize performance; migrate a plugin; create a REST endpoint; create a theme; add a CPT + taxonomy; add a Settings API page to an existing plugin; a WordPress security review; a WordPress theme performance review; a plugin integrating with an external API; a WordPress deployment request).
 
-Allowed Work: Continue using the WordPress Agent's routing and documentation to plan and structure WordPress work; treat all generated code as unverified until it is actually run, tested, and reviewed against a real WordPress environment.
+Impact: A PASS in this report proves routing, role, knowledge, security-gate, and completion-criteria traceability for all 14 scenarios. For 13 of them, it does not additionally prove that code generated under that Skill would run correctly in a live WordPress installation. For WP-SCENARIO-001 alone, live execution has now been demonstrated once.
 
-Prohibited Claims: Do not report a Skill's output as "tested" or "working" based on this report alone.
+Allowed Work: Continue using the WordPress Agent's routing and documentation to plan and structure WordPress work; treat all generated code as unverified until it is actually run, tested, and reviewed against a real WordPress environment, except for the one bounded CREATE-PLUGIN request shape validated in WP-SCENARIO-001.
 
-Required Resolution: Execute at least one full Skill workflow against a real WordPress installation (or a WP-CLI-scriptable test environment) and record the result.
+Prohibited Claims: Do not report any Skill's output as "tested" or "working" based on documentation traceability alone. Do not extend WP-SCENARIO-001's runtime result to any other Skill, or to other CREATE-PLUGIN request shapes.
 
-Status: Open
+Required Resolution: Execute additional Skill workflows against a real WordPress installation (or a WP-CLI-scriptable test environment) to reduce the remaining 13 unevaluated scenarios, and record each result the same way.
+
+Status: Open (narrowed)
 ```
 
 ```text
@@ -529,7 +551,7 @@ Critical Risks: None identified.
 
 High Risks: None identified.
 
-Medium Risks: Runtime execution has never been verified for any WordPress Skill (OC-1). Until resolved, all Skill output must be treated as unverified regardless of documentation completeness.
+Medium Risks: Runtime execution has been verified for exactly one bounded scenario (WP-SCENARIO-001 / CREATE-PLUGIN with a Settings API page and a shortcode) and remains unverified for the other 13 scenarios and 12 of 13 Skills (OC-1, narrowed). Until further resolved, all other Skill output must be treated as unverified regardless of documentation completeness.
 
 Low Risks: Partial testing-guidance coverage (OC-2); WooCommerce knowledge file referenced but absent (see Knowledge Readiness Assessment).
 
@@ -577,7 +599,7 @@ This section distinguishes the categories required by this assessment pass.
 | Testing-guidance readiness | Operational with Conditions | `TESTING-STANDARD.md` (with its `29_TESTING` relationship mapping) covers all 14 scenarios generically; concrete copy-pasteable commands exist for only 3 of 13 Skills (OC-2). The scenario-coverage gap from the prior pass (OC-3) is now resolved. |
 | Repository-boundary safety | Operational | `14_ENGINE/PROJECT-LOADER.md`'s Repository Identity Verification Procedure and `01_RULES/AGENT-BEHAVIOR.md`'s Repository Identity Rule apply to all WordPress work; this pass touched only the files listed in the final diff, confirmed by `git status --short`. |
 | Documentation consistency | Operational with Conditions | 4 internal inconsistencies have now been found and fixed across two tracing passes (MIGRATE-PLUGIN.md's duplicate tail, CREATE-REST-ENDPOINT.md's missing Completion Criteria, and 2 CAPABILITY-ROUTER.md precedence examples that contradicted SKILL-ROUTING-MAP.md's actual rules). No further contradictory wording was found across the 14 scenario traces, but the recurrence of fixable defects across two passes is evidence the layer is not yet self-consistent by default. |
-| Runtime execution readiness | Not Evaluated | No WordPress installation, WP-CLI invocation, PHP-WordPress execution, or browser session against a WordPress site occurred in this pass (OC-1). This is the primary reason the Final Readiness Decision below is not a bare READY. |
+| Runtime execution readiness | Partially Evaluated | One bounded scenario, WP-SCENARIO-001 (CREATE-PLUGIN with a Settings API page and a shortcode), was executed against the live Hospital WordPress installation and passed — see "Runtime Execution Evidence" above. The remaining 13 scenarios and 12 of 13 Skills remain Not Evaluated (OC-1, narrowed). This partial, single-scenario result is the primary reason the Final Readiness Decision below is not a bare READY. |
 
 ---
 
@@ -612,21 +634,21 @@ Documentation Validation Status: Operational (documentation traceability only)
 
 Release Validation Status: Operational (documentation traceability only)
 
-Environment Capability Status: Operational with Conditions (file/version-control access verified; PHP/WordPress runtime, WP-CLI, database, and browser access against a real WordPress site unverified)
+Environment Capability Status: Operational with Conditions (file/version-control access verified; PHP/WordPress runtime, WP-CLI presence-check, and database access verified once against the Hospital installation for WP-SCENARIO-001; browser access against a real WordPress site remains unverified)
 
-Scenario Test Status: 14 of 14 defined scenarios PASS (4 required a small documentation or routing fix across two tracing passes)
+Scenario Test Status: 14 of 14 defined scenarios PASS for documentation/routing traceability (4 required a small documentation or routing fix across two tracing passes). 1 of the 14 (WP-SCENARIO-001) additionally PASSES runtime execution against the live Hospital WordPress installation; the other 13 remain traceability-only.
 
 Blocking Failures: None
 
-Operating Conditions: OC-1 (runtime execution never verified), OC-2 (partial command-level testing guidance). OC-3 (scenario-suite coverage gap) is Resolved.
+Operating Conditions: OC-1 (narrowed — runtime execution verified for one bounded scenario, WP-SCENARIO-001; 13 scenarios and 12 of 13 Skills remain unverified), OC-2 (partial command-level testing guidance). OC-3 (scenario-suite coverage gap) is Resolved.
 
-Residual Risks: Medium — unverified runtime execution for all WordPress Skills. Low — partial testing-guidance coverage, absent WooCommerce knowledge file.
+Residual Risks: Medium — runtime execution remains unverified for 13 of 14 scenarios and 12 of 13 Skills. Low — partial testing-guidance coverage, absent WooCommerce knowledge file.
 
 Final Readiness Decision: READY WITH CONDITIONS
 
-Decision Basis: Core control flow is complete and was independently traced for all 14 defined scenarios, now spanning 9 of the 13 Skills (CREATE-BLOCK and CREATE-WIDGET remain unexercised as primary Skills); no scenario failed; the 4 defects discovered while tracing across two passes were small, unambiguous, and each fixed within the same pass with before/after evidence; no blocking failure remains; required core capabilities are Operational or Operational with Conditions with the single non-blocking exception of Block Development (not exercised by any scenario). However, per this report's own scoring rule, a high Documentation Completeness score must not automatically produce a Ready verdict — Runtime Execution Readiness was not evaluated in this pass, and Testing-Guidance Readiness is only partially covered by concrete commands (3 of 13 Skills). These are disclosed, non-blocking conditions consistent with the READY WITH CONDITIONS decision rule ("core control flow works, no universal blocking failure exists, some capabilities have explicit limitations, affected Skills are clearly identified, prohibited claims are documented, safe bounded operation remains possible").
+Decision Basis: Core control flow is complete and was independently traced for all 14 defined scenarios, now spanning 9 of the 13 Skills (CREATE-BLOCK and CREATE-WIDGET remain unexercised as primary Skills); no scenario failed; the 4 defects discovered while tracing across two passes were small, unambiguous, and each fixed within the same pass with before/after evidence; no blocking failure remains; required core capabilities are Operational or Operational with Conditions with the single non-blocking exception of Block Development (not exercised by any scenario). One scenario, WP-SCENARIO-001, has now additionally been executed once against a live WordPress installation and passed, narrowing Runtime Execution Readiness from "none evaluated" to "one bounded scenario evaluated." However, per this report's own scoring rule, a high Documentation Completeness score must not automatically produce a Ready verdict — Runtime Execution Readiness remains Partially Evaluated, not Operational, for the layer as a whole (12 of 13 Skills and 13 of 14 scenarios are still runtime-unverified), and Testing-Guidance Readiness is only partially covered by concrete commands (3 of 13 Skills). These are disclosed, non-blocking conditions consistent with the READY WITH CONDITIONS decision rule ("core control flow works, no universal blocking failure exists, some capabilities have explicit limitations, affected Skills are clearly identified, prohibited claims are documented, safe bounded operation remains possible").
 
-Required Next Action: Before claiming unrestricted operational readiness, execute at least one full Skill workflow against a real WordPress installation or WP-CLI-scriptable environment (resolves OC-1); extend Validation Commands sections to additional high-traffic Skills as needed (resolves OC-2).
+Required Next Action: Before claiming broader operational readiness, execute additional Skill workflows against a real WordPress installation or WP-CLI-scriptable environment to reduce the remaining 13 unevaluated scenarios (continues resolving OC-1); extend Validation Commands sections to additional high-traffic Skills as needed (resolves OC-2).
 ```
 
 ## Rule

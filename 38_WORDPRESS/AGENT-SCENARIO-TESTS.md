@@ -28,7 +28,7 @@ Evidence:
 Gap:
 ```
 
-Result must be one of `PASS`, `PARTIAL`, `FAIL`, or `NOT EXECUTABLE`. This suite verifies documentation and routing traceability through the authoritative control chain (`38_WORDPRESS/WORDPRESS-MANAGER.md` → `38_WORDPRESS/PIPELINE.md` → `38_WORDPRESS/SKILLS/SKILL-ROUTING-MAP.md` → selected Skill → `33_WORDPRESS_ROLES/ROLE-MANAGER.md` → `33_WORDPRESS_ROLES/ROLE-ROUTING-MATRIX.md` → required knowledge → security and standards gates → testing requirements → completion criteria). A `PASS` proves the route, roles, knowledge, gates, and completion criteria are explicitly traceable in the repository — it does not prove that code generated under that route would actually run correctly in a live WordPress environment. No scenario in this suite has been executed against a real WordPress installation; see `38_WORDPRESS/AGENT-READINESS-REPORT.md`'s Runtime Execution Readiness category for that distinction.
+Result must be one of `PASS`, `PARTIAL`, `FAIL`, or `NOT EXECUTABLE`. This suite verifies documentation and routing traceability through the authoritative control chain (`38_WORDPRESS/WORDPRESS-MANAGER.md` → `38_WORDPRESS/PIPELINE.md` → `38_WORDPRESS/SKILLS/SKILL-ROUTING-MAP.md` → selected Skill → `33_WORDPRESS_ROLES/ROLE-MANAGER.md` → `33_WORDPRESS_ROLES/ROLE-ROUTING-MATRIX.md` → required knowledge → security and standards gates → testing requirements → completion criteria). A `PASS` proves the route, roles, knowledge, gates, and completion criteria are explicitly traceable in the repository — by itself it does not prove that code generated under that route would actually run correctly in a live WordPress environment. One scenario, WP-SCENARIO-001, has additionally been runtime-validated once against a live WordPress installation; see the "Runtime Evidence" section below. That result is bounded to WP-SCENARIO-001's specific request and does not extend runtime-validated status to any other scenario in this suite. See `38_WORDPRESS/AGENT-READINESS-REPORT.md`'s Runtime Execution Readiness category for the full distinction between traceability and execution.
 
 ---
 
@@ -368,6 +368,54 @@ Gap: FOUND AND FIXED. Before this pass, `12_AGENT/CAPABILITY-ROUTER.md`'s own pr
 
 ---
 
+## Runtime Evidence
+
+Documentation/routing traceability (recorded per scenario above) is distinct from runtime execution evidence. This section records the first, and so far only, scenario that has actually been run against a live WordPress installation. It supplements WP-SCENARIO-001's traceability result above — it does not replace that result, and it does not extend runtime-validated status to any other scenario in this suite.
+
+### Runtime Validation — WP-SCENARIO-001 (Create a WordPress plugin with an administrator Settings API page and frontend shortcode)
+
+```text
+Scenario Reference: WP-SCENARIO-001
+Runtime Target: Hospital WordPress installation ($HOME/Local Sites/hospital/app/public)
+Plugin Path: wp-content/plugins/squirrelforge-runtime-validation
+Plugin Created As: standalone plugin
+
+PHP Syntax Lint: PASS (all plugin PHP files)
+Focused PHPUnit: PASS
+Full Plugin PHPUnit Suite: PASS — 11 tests, 20 assertions
+Plugin Activation: PASS — activated successfully, appeared active
+Setting Registration: PASS — setting registered through the Settings API
+Shortcode Reads Saved Value: PASS — saved setting value was retrieved by the shortcode
+Output Escaping: PASS — shortcode output escaped unexpected stored HTML
+Plugin Deactivation: PASS — deactivated successfully
+Plugin Reactivation: PASS — reactivated successfully
+Corrected-Run PHP Errors: None captured
+WP-CLI Availability: Unavailable
+Runtime Method Used: a safe, direct wp-load.php PHP runtime script, in place of WP-CLI
+Debug Log: Unavailable — WP_DEBUG_LOG was not enabled on the target installation
+Repository Boundary: CSHD, WordPress core, themes, and other plugins were untouched
+
+Validation-Harness Issue (disclosed):
+  The first harness run fired admin_init without first loading the real
+  admin template functions, so add_settings_section() was undefined and
+  that run failed. The harness was corrected to load the same wp-admin
+  include (wp-admin/includes/template.php) that WordPress itself
+  guarantees is loaded before admin_init ever fires in a real request.
+  The corrected run passed. This was a defect in the validation harness,
+  not in the plugin or in any SquirrelForge routing document, and is not
+  counted as a plugin or routing defect.
+
+Scope of This Evidence:
+  This runtime result applies only to WP-SCENARIO-001's specific request
+  (CREATE-PLUGIN with a Settings API page and a shortcode), executed once
+  against one WordPress installation. It does not runtime-validate
+  CREATE-PLUGIN for other request shapes, and it does not runtime-validate
+  any other Skill or any of the remaining 13 documentation scenarios in
+  this suite.
+```
+
+---
+
 ## Scenario Test Summary
 
 ```text
@@ -379,7 +427,7 @@ Routing Errors: 0 (1 pre-existing routing contradiction found and fixed — see 
 Missing Skills: 0
 Missing Roles: 0
 Missing Validation Gates: 0
-Overall Scenario Status: All 14 defined scenarios pass documentation/routing traceability, including the 6 scenario classes (Custom Post Type + taxonomy, Settings API on an existing plugin, a WordPress-specific security review, a WordPress theme performance review, a plugin integrating with an external API, and a WordPress deployment request) that were previously absent from this suite. This status covers routing readiness only — no scenario was executed against a live WordPress environment (no WP-CLI, PHP/WordPress runtime, or browser was exercised in this pass). See 38_WORDPRESS/AGENT-READINESS-REPORT.md for the full readiness breakdown, including the Runtime Execution Readiness category.
+Overall Scenario Status: All 14 defined scenarios pass documentation/routing traceability, including the 6 scenario classes (Custom Post Type + taxonomy, Settings API on an existing plugin, a WordPress-specific security review, a WordPress theme performance review, a plugin integrating with an external API, and a WordPress deployment request) that were previously absent from this suite. This status covers routing readiness for all 14 scenarios. One of the 14, WP-SCENARIO-001, has additionally been runtime-validated once against a live WordPress installation (see "Runtime Evidence" above); the remaining 13 scenarios have not been executed against a live WordPress environment. See 38_WORDPRESS/AGENT-READINESS-REPORT.md for the full readiness breakdown, including the Runtime Execution Readiness category.
 ```
 
 ---
