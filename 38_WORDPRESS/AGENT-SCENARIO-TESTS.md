@@ -28,7 +28,7 @@ Evidence:
 Gap:
 ```
 
-Result must be one of `PASS`, `PARTIAL`, `FAIL`, or `NOT EXECUTABLE`. This suite verifies documentation and routing traceability through the authoritative control chain (`38_WORDPRESS/WORDPRESS-MANAGER.md` → `38_WORDPRESS/PIPELINE.md` → `38_WORDPRESS/SKILLS/SKILL-ROUTING-MAP.md` → selected Skill → `33_WORDPRESS_ROLES/ROLE-MANAGER.md` → `33_WORDPRESS_ROLES/ROLE-ROUTING-MATRIX.md` → required knowledge → security and standards gates → testing requirements → completion criteria). A `PASS` proves the route, roles, knowledge, gates, and completion criteria are explicitly traceable in the repository — by itself it does not prove that code generated under that route would actually run correctly in a live WordPress environment. Three scenarios, WP-SCENARIO-001, WP-SCENARIO-009, and WP-SCENARIO-010, have additionally been runtime-validated against a live WordPress installation; see the "Runtime Evidence" section below. Those results are bounded to each scenario's specific request and do not extend runtime-validated status to any other scenario in this suite. See `38_WORDPRESS/AGENT-READINESS-REPORT.md`'s Runtime Execution Readiness category for the full distinction between traceability and execution.
+Result must be one of `PASS`, `PARTIAL`, `FAIL`, or `NOT EXECUTABLE`. This suite verifies documentation and routing traceability through the authoritative control chain (`38_WORDPRESS/WORDPRESS-MANAGER.md` → `38_WORDPRESS/PIPELINE.md` → `38_WORDPRESS/SKILLS/SKILL-ROUTING-MAP.md` → selected Skill → `33_WORDPRESS_ROLES/ROLE-MANAGER.md` → `33_WORDPRESS_ROLES/ROLE-ROUTING-MATRIX.md` → required knowledge → security and standards gates → testing requirements → completion criteria). A `PASS` proves the route, roles, knowledge, gates, and completion criteria are explicitly traceable in the repository — by itself it does not prove that code generated under that route would actually run correctly in a live WordPress environment. Four scenarios, WP-SCENARIO-001, WP-SCENARIO-006, WP-SCENARIO-009, and WP-SCENARIO-010, have additionally been runtime-validated against a live WordPress installation; see the "Runtime Evidence" section below. Those results are bounded to each scenario's specific request and do not extend runtime-validated status to any other scenario in this suite. See `38_WORDPRESS/AGENT-READINESS-REPORT.md`'s Runtime Execution Readiness category for the full distinction between traceability and execution.
 
 ---
 
@@ -370,7 +370,7 @@ Gap: FOUND AND FIXED. Before this pass, `12_AGENT/CAPABILITY-ROUTER.md`'s own pr
 
 ## Runtime Evidence
 
-Documentation/routing traceability (recorded per scenario above) is distinct from runtime execution evidence. This section records the three scenarios, so far, that have actually been run against a live WordPress installation. It supplements WP-SCENARIO-001's, WP-SCENARIO-009's, and WP-SCENARIO-010's traceability results above — it does not replace any of those results, and it does not extend runtime-validated status to any other scenario in this suite.
+Documentation/routing traceability (recorded per scenario above) is distinct from runtime execution evidence. This section records the four scenarios, so far, that have actually been run against a live WordPress installation. It supplements WP-SCENARIO-001's, WP-SCENARIO-006's, WP-SCENARIO-009's, and WP-SCENARIO-010's traceability results above — it does not replace any of those results, and it does not extend runtime-validated status to any other scenario in this suite.
 
 ### Runtime Validation — WP-SCENARIO-001 (Create a WordPress plugin with an administrator Settings API page and frontend shortcode)
 
@@ -630,6 +630,183 @@ Scope of This Evidence:
   broadly proven.
 ```
 
+### Runtime Validation — WP-SCENARIO-006 (Plugin Migration)
+
+```text
+Scenario Reference: WP-SCENARIO-006
+Runtime Target: Hospital WordPress installation ($HOME/Local Sites/hospital/app/public)
+Plugin Path: wp-content/plugins/squirrelforge-migration-validation
+Plugin Created As: standalone plugin representing the "move plugin data from
+  options storage into a custom database table" request shape.
+
+Primary Skill: MIGRATE-PLUGIN. This is the first bounded runtime execution of
+  a primary Skill other than CREATE-PLUGIN; WP-SCENARIO-001, WP-SCENARIO-009,
+  and WP-SCENARIO-010 all runtime-validated CREATE-PLUGIN.
+
+PHP Syntax Lint: PASS (all four authored plugin PHP files)
+Focused PHPUnit: PASS — 3 tests, 6 assertions
+Full Plugin PHPUnit Suite: PASS — 20 tests, 51 assertions
+SquirrelForge Full Suite: PASS — 146 tests, 338 assertions (unaffected)
+
+Pre-Execution Implementation Defect (disclosed):
+  Automated testing found a real dead-code logic defect in verify_migration()
+  before live execution began: a blanket row-count comparison short-circuited
+  ahead of the per-record "missing target row" check and made the final
+  "unexpected target row" check mathematically unreachable whenever the
+  count check passed. This was a genuine defect in the validation plugin's
+  implementation, not a test-authoring mistake, and it was corrected rather
+  than hidden or accommodated through weakened tests -- the count check was
+  replaced with independent set-difference checks for missing and unexpected
+  identifiers. Focused verification tests passed after the correction (3
+  tests, 6 assertions), and the full plugin suite passed after the
+  correction (20 tests, 51 assertions). Live execution used only the
+  corrected implementation. No readiness or routing defect was involved.
+  This was a pre-execution implementation defect, not a live runtime
+  failure.
+
+Live Environment: Hospital WordPress installation; single-site; MySQL 8.4.0;
+  live table prefix wp_; utf8mb4 charset and live database collation;
+  WP-CLI unavailable; execution performed through fresh PHP processes
+  bootstrapping wp-load.php, using Local's site-matched PHP binary and
+  database socket; strict runtime error capture enabled throughout; no
+  debug.log was created (WP_DEBUG_LOG not enabled).
+
+Source State:
+  The bounded legacy source used option sfmig_legacy_records holding five
+  source records with fields legacy_id, label, value, and created_at. Test
+  data included ordinary text, punctuation and quotation marks, Unicode and
+  emoji, a value longer than 1,400 characters, distinct identifiers, and
+  distinct timestamps. No production secrets or personal data were used.
+
+Target State:
+  Custom table {$wpdb->prefix}sfmig_records with columns id, legacy_id,
+  label, value, created_at, and migrated_at. id is the primary key;
+  legacy_id carries a unique key. Schema was created with dbDelta(); table
+  naming used $wpdb->prefix; charset and collation used
+  $wpdb->get_charset_collate().
+
+Clean-Install Path: PASS
+  Activation with no legacy option present created the schema, created zero
+  target rows, did not invent a legacy option, and did not falsely mark a
+  migration complete.
+
+Upgrade Path: PASS
+  The legacy option was staged before activation of the upgrade path.
+  Activation then created/confirmed the schema, migrated all five records,
+  reached migration status complete, stored database version 1.0.0, and
+  left the source option intact.
+
+Exhaustive Fidelity Evidence:
+  All five source records were compared exhaustively, not sampled, across
+  legacy_id, label, value, and created_at. All five source identifiers
+  appeared exactly once in the target; no unexpected target identifiers
+  existed; row count matched the source count; no duplicate legacy_id
+  values existed; no values were lost, truncated, duplicated, or
+  reinterpreted. A serialized representation of the complete source option
+  was captured before migration and re-compared after every later sequence;
+  it remained unchanged throughout migration testing. The literal hash
+  value is not recorded here as it is not needed to demonstrate this
+  result.
+
+Database Write Behavior:
+  Implementation used a prepared lookup by legacy_id, $wpdb->insert() for
+  new rows, $wpdb->update() for existing rows, and checked both the
+  database return value and $wpdb->last_error on every write. Raw
+  INSERT ... ON DUPLICATE KEY UPDATE was not used.
+
+Idempotency: PASS
+  Re-running migration after completion did not add rows, did not
+  duplicate identifiers, did not alter source data, did not change verified
+  target values, and remained safely complete.
+
+Partial Batch and Resume: PASS
+  A validation-only batch limit migrated three of five records; migration
+  status remained in_progress; the source stayed unchanged. A subsequent
+  unlimited run migrated the remaining two records; existing rows were not
+  duplicated; all five records then passed exhaustive verification; status
+  reached complete. This proves resumability from a controlled batch
+  boundary, not recovery from every possible crash.
+
+Controlled Failure: PASS
+  One scenario-owned malformed source record was introduced with a missing
+  required value field. Migration returned a structured WP_Error
+  identifying the malformed record and the missing field; migration status
+  changed to failed; no false complete state was recorded; the five
+  already-valid rows stayed unchanged; source data was restored; recovery
+  returned cleanly to complete.
+
+Migration States Observed: not_started, in_progress, complete, failed.
+  Partial batches remained in_progress; successful verification reached
+  complete; duplicate execution remained safely complete; malformed input
+  produced failed; failure was not silently overwritten.
+
+Rollback: PASS
+  Rollback dropped the custom table, reset migration status to
+  not_started, removed the database-version option, left the original
+  legacy source option unchanged, and did not affect unrelated tables or
+  options. This validates database-state rollback while the source remains
+  available; it does not prove reversal of production traffic, deployed
+  application code, or every production upgrade condition.
+
+Cleanup and Boundaries:
+  - the target table was removed
+  - sfmig_legacy_records was removed during final cleanup
+  - all scenario-owned sfmig_* metadata options were removed
+  - zero scenario-owned database artifacts remained afterward
+  - the temporary harness file was removed
+  - baseline wp_options count immediately before execution was 293; final
+    count was 292; direct inspection proved zero scenario-owned sfmig_*
+    options remained; the one-row difference was attributed to unrelated
+    WordPress transient/background option churn observed live during the
+    session and was not treated as scenario residue (a global options-row
+    count alone is not a reliable cleanup test; the absence check above is
+    the actual evidence)
+  - zero PHP warnings, notices, deprecations, or errors were captured at
+    any step
+  - CSHD remained clean and unchanged (git status --short / git diff
+    --check both clean before and after)
+  - the WP-SCENARIO-001, WP-SCENARIO-009, and WP-SCENARIO-010 validation
+    plugins remained untouched
+  - all other Hospital plugins remained untouched
+  - the SquirrelForge repository remained unchanged during runtime
+    execution; no routing, Skill, Role, knowledge, or scenario-definition
+    file was modified as part of running this scenario
+
+Security and Database Review:
+  - direct-access guard present
+  - no hardcoded table prefix ($wpdb->prefix used throughout)
+  - no public migration endpoint; no AJAX handler; no REST route; no
+    $_GET, $_POST, or $_REQUEST migration trigger
+  - the validation batch limit existed only as an internal PHP argument
+  - no user-controlled SQL identifiers; reads used prepared SQL; writes
+    used WordPress database APIs
+  - destructive operations targeted only the scenario-owned table and
+    options
+  - migration never deleted the legacy source option
+
+Multisite: NOT EXECUTABLE IN THIS ENVIRONMENT — single-site installation.
+  Multisite-specific table-prefix and network migration behavior was not
+  runtime exercised. This is a scoped environment limitation and does not
+  change the overall scenario classification from PASS.
+
+Scope of This Evidence:
+  This runtime result applies only to WP-SCENARIO-006's specific request
+  (moving plugin data from options storage into a custom database table,
+  including clean-install, upgrade, duplicate-run, partial-batch/resume,
+  controlled-failure, and rollback behavior), executed once against one
+  WordPress installation using a standalone validation plugin. It is the
+  first runtime evidence for MIGRATE-PLUGIN and does not runtime-validate
+  MIGRATE-PLUGIN for other request shapes, does not runtime-validate any
+  other Skill, and does not runtime-validate any of the remaining 10
+  documentation scenarios in this suite. It does not prove that arbitrary
+  production migrations are safe, that large data volumes have been
+  performance tested, that concurrent migration execution has been tested,
+  that every MySQL or WordPress version is supported, that multisite
+  migrations are proven, that production traffic cutover is proven, that
+  destructive source cleanup is proven safe, or that rollback of deployed
+  application code is proven.
+```
+
 ---
 
 ## Scenario Test Summary
@@ -643,7 +820,7 @@ Routing Errors: 0 (1 pre-existing routing contradiction found and fixed — see 
 Missing Skills: 0
 Missing Roles: 0
 Missing Validation Gates: 0
-Overall Scenario Status: All 14 defined scenarios pass documentation/routing traceability, including the 6 scenario classes (Custom Post Type + taxonomy, Settings API on an existing plugin, a WordPress-specific security review, a WordPress theme performance review, a plugin integrating with an external API, and a WordPress deployment request) that were previously absent from this suite. This status covers routing readiness for all 14 scenarios. Three of the 14, WP-SCENARIO-001, WP-SCENARIO-009, and WP-SCENARIO-010, have additionally been runtime-validated against a live WordPress installation (see "Runtime Evidence" above); the remaining 11 scenarios have not been executed against a live WordPress environment. See 38_WORDPRESS/AGENT-READINESS-REPORT.md for the full readiness breakdown, including the Runtime Execution Readiness category.
+Overall Scenario Status: All 14 defined scenarios pass documentation/routing traceability, including the 6 scenario classes (Custom Post Type + taxonomy, Settings API on an existing plugin, a WordPress-specific security review, a WordPress theme performance review, a plugin integrating with an external API, and a WordPress deployment request) that were previously absent from this suite. This status covers routing readiness for all 14 scenarios. Four of the 14, WP-SCENARIO-001, WP-SCENARIO-006, WP-SCENARIO-009, and WP-SCENARIO-010, have additionally been runtime-validated against a live WordPress installation (see "Runtime Evidence" above); the remaining 10 scenarios have not been executed against a live WordPress environment. See 38_WORDPRESS/AGENT-READINESS-REPORT.md for the full readiness breakdown, including the Runtime Execution Readiness category.
 ```
 
 ---
