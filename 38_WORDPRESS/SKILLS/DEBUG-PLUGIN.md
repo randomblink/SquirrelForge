@@ -40,6 +40,7 @@ Before execution, consult:
 - `38_WORDPRESS/KNOWLEDGE/KNOWLEDGE-MANAGER.md`
 - `38_WORDPRESS/KNOWLEDGE/PLUGIN-HANDBOOK.md`
 - `38_WORDPRESS/KNOWLEDGE/SECURITY.md`
+- `38_WORDPRESS/KNOWLEDGE/ERROR-CODES.md` — standardized WordPress engineering error classifications, consulted when the defect matches a documented classification
 - `38_WORDPRESS/STANDARDS/PHP-STANDARD.md`
 - `38_WORDPRESS/STANDARDS/JAVASCRIPT-STANDARD.md`
 - `38_WORDPRESS/STANDARDS/ARCHITECTURE-STANDARD.md`
