@@ -28,7 +28,7 @@ Evidence:
 Gap:
 ```
 
-Result must be one of `PASS`, `PARTIAL`, `FAIL`, or `NOT EXECUTABLE`. This suite verifies documentation and routing traceability through the authoritative control chain (`38_WORDPRESS/WORDPRESS-MANAGER.md` → `38_WORDPRESS/PIPELINE.md` → `38_WORDPRESS/SKILLS/SKILL-ROUTING-MAP.md` → selected Skill → `33_WORDPRESS_ROLES/ROLE-MANAGER.md` → `33_WORDPRESS_ROLES/ROLE-ROUTING-MATRIX.md` → required knowledge → security and standards gates → testing requirements → completion criteria). A `PASS` proves the route, roles, knowledge, gates, and completion criteria are explicitly traceable in the repository — by itself it does not prove that code generated under that route would actually run correctly in a live WordPress environment. Six scenarios, WP-SCENARIO-001, WP-SCENARIO-002, WP-SCENARIO-003, WP-SCENARIO-006, WP-SCENARIO-009, and WP-SCENARIO-010, have additionally been runtime-validated against a live WordPress installation; see the "Runtime Evidence" section below. Those results are bounded to each scenario's specific request and do not extend runtime-validated status to any other scenario in this suite. See `38_WORDPRESS/AGENT-READINESS-REPORT.md`'s Runtime Execution Readiness category for the full distinction between traceability and execution.
+Result must be one of `PASS`, `PARTIAL`, `FAIL`, or `NOT EXECUTABLE`. This suite verifies documentation and routing traceability through the authoritative control chain (`38_WORDPRESS/WORDPRESS-MANAGER.md` → `38_WORDPRESS/PIPELINE.md` → `38_WORDPRESS/SKILLS/SKILL-ROUTING-MAP.md` → selected Skill → `33_WORDPRESS_ROLES/ROLE-MANAGER.md` → `33_WORDPRESS_ROLES/ROLE-ROUTING-MATRIX.md` → required knowledge → security and standards gates → testing requirements → completion criteria). A `PASS` proves the route, roles, knowledge, gates, and completion criteria are explicitly traceable in the repository — by itself it does not prove that code generated under that route would actually run correctly in a live WordPress environment. Seven scenarios, WP-SCENARIO-001, WP-SCENARIO-002, WP-SCENARIO-003, WP-SCENARIO-004, WP-SCENARIO-006, WP-SCENARIO-009, and WP-SCENARIO-010, have additionally been runtime-validated against a live WordPress installation; see the "Runtime Evidence" section below. Those results are bounded to each scenario's specific request and do not extend runtime-validated status to any other scenario in this suite. See `38_WORDPRESS/AGENT-READINESS-REPORT.md`'s Runtime Execution Readiness category for the full distinction between traceability and execution.
 
 ---
 
@@ -370,7 +370,7 @@ Gap: FOUND AND FIXED. Before this pass, `12_AGENT/CAPABILITY-ROUTER.md`'s own pr
 
 ## Runtime Evidence
 
-Documentation/routing traceability (recorded per scenario above) is distinct from runtime execution evidence. This section records the six scenarios, so far, that have actually been run against a live WordPress installation. It supplements WP-SCENARIO-001's, WP-SCENARIO-002's, WP-SCENARIO-003's, WP-SCENARIO-006's, WP-SCENARIO-009's, and WP-SCENARIO-010's traceability results above — it does not replace any of those results, and it does not extend runtime-validated status to any other scenario in this suite.
+Documentation/routing traceability (recorded per scenario above) is distinct from runtime execution evidence. This section records the seven scenarios, so far, that have actually been run against a live WordPress installation. It supplements WP-SCENARIO-001's, WP-SCENARIO-002's, WP-SCENARIO-003's, WP-SCENARIO-004's, WP-SCENARIO-006's, WP-SCENARIO-009's, and WP-SCENARIO-010's traceability results above — it does not replace any of those results, and it does not extend runtime-validated status to any other scenario in this suite.
 
 ### Runtime Validation — WP-SCENARIO-001 (Create a WordPress plugin with an administrator Settings API page and frontend shortcode)
 
@@ -1060,6 +1060,115 @@ Scope of This Evidence:
   production review might need to surface.
 ```
 
+### Runtime Validation — WP-SCENARIO-004 (Refactor Plugin)
+
+```text
+Scenario Reference: WP-SCENARIO-004
+Runtime Target: Hospital WordPress installation ($HOME/Local Sites/hospital/app/public)
+Plugin Path: wp-content/plugins/squirrelforge-refactor-fixture
+Plugin Created As: a small, runnable single-file "God Class" fixture plugin
+  (80 lines) conflating four responsibilities -- shortcode presentation,
+  admin-post request handling, option-based persistence, and email
+  notification -- a textbook "Large Class" code smell, refactored into
+  smaller collaborators without changing any public behavior.
+
+Primary Skill: REFACTOR-CODE. This is the first bounded runtime execution of
+  this Skill; unlike every prior runtime scenario, the objective was neither
+  to build new working code nor to fix a defect, but to prove SquirrelForge
+  can restructure existing working code while provably preserving its
+  observable behavior.
+
+Behavior Baseline (established before any structural change):
+  A characterization-test suite (6 tests, 25 assertions) was authored
+  against the original God Class and passed. Live behavior was then
+  independently captured against the Hospital installation across three
+  paths -- shortcode render, a valid submission, and a rejected submission
+  -- including the exact stored option contents, the captured notification
+  recipient/subject/body (via pre_wp_mail, so no real mail transport was
+  attempted), and the captured redirect destination (via the wp_redirect
+  filter, since a CLI harness's own earlier output would otherwise make a
+  real header() call fail with an unrelated "headers already sent"
+  warning -- a disclosed harness-capture detail, not a fixture defect).
+
+Structural Extraction Performed:
+  Three single-responsibility collaborators were extracted --
+  SquirrelForge_Feedback_Renderer (presentation), SquirrelForge_Feedback_
+  Repository (persistence), SquirrelForge_Feedback_Notifier (notification)
+  -- leaving the original class as a thin coordinator that validates input,
+  delegates to the three collaborators, and manages the redirect flow. No
+  public entry point (the shortcode tag, either admin-post hook name, the
+  stored option name/shape, the validation rule, the sanitization function,
+  the notification content, or the sfref_get_feedback_count() helper)
+  changed.
+
+Regression Result: PASS -- the identical, byte-for-byte-unchanged
+  characterization test file (SHA-256 confirmed matching before and after)
+  passed with the identical result, 6 tests and 25 assertions, against
+  both the original and the refactored code.
+
+Live Post-Refactor Verification: the plugin was deactivated and
+  reactivated to load the new file structure (activation succeeded with no
+  throwable), and the identical three live behavior paths were re-captured.
+  A direct diff of the pre-refactor and post-refactor capture output showed
+  zero differences -- rendered HTML, stored option data, notification
+  content, and redirect destination were all identical, not merely
+  asserted to be.
+
+PHP Syntax Lint: PASS (all four authored/modified plugin PHP files, before
+  and after the refactor)
+Full Plugin PHPUnit Suite: PASS -- 6 tests, 25 assertions (both runs)
+SquirrelForge Full Suite: PASS -- 146 tests, 338 assertions (unaffected)
+
+Live Environment: Hospital WordPress installation; single-site; WP-CLI
+  unavailable; execution performed through fresh PHP processes bootstrapping
+  wp-load.php, using Local's site-matched PHP binary and database socket;
+  strict runtime error capture enabled throughout; zero PHP warnings,
+  notices, deprecations, or errors were captured at any step of the final
+  harness.
+
+Comparison Metrics:
+  Files inspected: 1 (the original God Class)
+  Lines inspected: 80
+  Files changed: 1 (main plugin file)
+  Files added: 3 (extracted collaborators)
+  Main file lines (before -> after): 80 -> 86
+  New collaborator lines added: 63 (20 + 27 + 16)
+  Test count / assertion count: 6 tests / 25 assertions (identical, both runs)
+  Observable behavior changes: 0
+
+Cleanup and Boundaries:
+  - the scenario-owned option (sfref_feedback_entries) was removed; a
+    direct query confirmed zero sfref_* options remained afterward
+  - the temporary harness script and pre/post behavior capture files were
+    deleted from the scratchpad directory
+  - the fixture plugin remains installed but inactive, consistent with the
+    zero-scenario-owned-residue precedent established in WP-SCENARIO-002
+  - CSHD remained clean and unchanged (git status --short / git diff
+    --check both clean before and after)
+  - the WP-SCENARIO-001, WP-SCENARIO-002, WP-SCENARIO-003, WP-SCENARIO-006,
+    WP-SCENARIO-009, and WP-SCENARIO-010 validation/fixture plugins
+    remained untouched
+  - all other Hospital plugins remained untouched
+  - the SquirrelForge repository remained unchanged during runtime
+    execution; no routing, Skill, Role, knowledge, or scenario-definition
+    file was modified as part of running this scenario
+
+Scope of This Evidence:
+  This runtime result applies only to WP-SCENARIO-004's specific request (a
+  single God Class split into cohesive single-responsibility collaborators
+  with fully preserved public behavior), executed once against one
+  deliberately-monolithic fixture. It is the first runtime evidence for
+  REFACTOR-CODE and does not runtime-validate REFACTOR-CODE for other
+  refactor shapes (e.g. a multi-class or multi-file starting point, a
+  refactor spanning database schema, a refactor of code without any
+  existing test coverage to build from, or a much larger codebase), and
+  does not runtime-validate any other Skill or any of the remaining 7
+  documentation scenarios in this suite. It does not prove that behavior
+  preservation is achievable for arbitrarily large or poorly-bounded
+  refactors, or that this reflects every kind of structural extraction a
+  production refactor might require.
+```
+
 ---
 
 ## Scenario Test Summary
@@ -1073,7 +1182,7 @@ Routing Errors: 0 (1 pre-existing routing contradiction found and fixed — see 
 Missing Skills: 0
 Missing Roles: 0
 Missing Validation Gates: 0
-Overall Scenario Status: All 14 defined scenarios pass documentation/routing traceability, including the 6 scenario classes (Custom Post Type + taxonomy, Settings API on an existing plugin, a WordPress-specific security review, a WordPress theme performance review, a plugin integrating with an external API, and a WordPress deployment request) that were previously absent from this suite. This status covers routing readiness for all 14 scenarios. Six of the 14, WP-SCENARIO-001, WP-SCENARIO-002, WP-SCENARIO-003, WP-SCENARIO-006, WP-SCENARIO-009, and WP-SCENARIO-010, have additionally been runtime-validated against a live WordPress installation (see "Runtime Evidence" above); the remaining 8 scenarios have not been executed against a live WordPress environment. See 38_WORDPRESS/AGENT-READINESS-REPORT.md for the full readiness breakdown, including the Runtime Execution Readiness category.
+Overall Scenario Status: All 14 defined scenarios pass documentation/routing traceability, including the 6 scenario classes (Custom Post Type + taxonomy, Settings API on an existing plugin, a WordPress-specific security review, a WordPress theme performance review, a plugin integrating with an external API, and a WordPress deployment request) that were previously absent from this suite. This status covers routing readiness for all 14 scenarios. Seven of the 14, WP-SCENARIO-001, WP-SCENARIO-002, WP-SCENARIO-003, WP-SCENARIO-004, WP-SCENARIO-006, WP-SCENARIO-009, and WP-SCENARIO-010, have additionally been runtime-validated against a live WordPress installation (see "Runtime Evidence" above); the remaining 7 scenarios have not been executed against a live WordPress environment. See 38_WORDPRESS/AGENT-READINESS-REPORT.md for the full readiness breakdown, including the Runtime Execution Readiness category.
 ```
 
 ---
