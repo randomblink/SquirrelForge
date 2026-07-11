@@ -28,7 +28,7 @@ Evidence:
 Gap:
 ```
 
-Result must be one of `PASS`, `PARTIAL`, `FAIL`, or `NOT EXECUTABLE`. This suite verifies documentation and routing traceability through the authoritative control chain (`38_WORDPRESS/WORDPRESS-MANAGER.md` → `38_WORDPRESS/PIPELINE.md` → `38_WORDPRESS/SKILLS/SKILL-ROUTING-MAP.md` → selected Skill → `33_WORDPRESS_ROLES/ROLE-MANAGER.md` → `33_WORDPRESS_ROLES/ROLE-ROUTING-MATRIX.md` → required knowledge → security and standards gates → testing requirements → completion criteria). A `PASS` proves the route, roles, knowledge, gates, and completion criteria are explicitly traceable in the repository — by itself it does not prove that code generated under that route would actually run correctly in a live WordPress environment. Five scenarios, WP-SCENARIO-001, WP-SCENARIO-002, WP-SCENARIO-006, WP-SCENARIO-009, and WP-SCENARIO-010, have additionally been runtime-validated against a live WordPress installation; see the "Runtime Evidence" section below. Those results are bounded to each scenario's specific request and do not extend runtime-validated status to any other scenario in this suite. See `38_WORDPRESS/AGENT-READINESS-REPORT.md`'s Runtime Execution Readiness category for the full distinction between traceability and execution.
+Result must be one of `PASS`, `PARTIAL`, `FAIL`, or `NOT EXECUTABLE`. This suite verifies documentation and routing traceability through the authoritative control chain (`38_WORDPRESS/WORDPRESS-MANAGER.md` → `38_WORDPRESS/PIPELINE.md` → `38_WORDPRESS/SKILLS/SKILL-ROUTING-MAP.md` → selected Skill → `33_WORDPRESS_ROLES/ROLE-MANAGER.md` → `33_WORDPRESS_ROLES/ROLE-ROUTING-MATRIX.md` → required knowledge → security and standards gates → testing requirements → completion criteria). A `PASS` proves the route, roles, knowledge, gates, and completion criteria are explicitly traceable in the repository — by itself it does not prove that code generated under that route would actually run correctly in a live WordPress environment. Six scenarios, WP-SCENARIO-001, WP-SCENARIO-002, WP-SCENARIO-003, WP-SCENARIO-006, WP-SCENARIO-009, and WP-SCENARIO-010, have additionally been runtime-validated against a live WordPress installation; see the "Runtime Evidence" section below. Those results are bounded to each scenario's specific request and do not extend runtime-validated status to any other scenario in this suite. See `38_WORDPRESS/AGENT-READINESS-REPORT.md`'s Runtime Execution Readiness category for the full distinction between traceability and execution.
 
 ---
 
@@ -370,7 +370,7 @@ Gap: FOUND AND FIXED. Before this pass, `12_AGENT/CAPABILITY-ROUTER.md`'s own pr
 
 ## Runtime Evidence
 
-Documentation/routing traceability (recorded per scenario above) is distinct from runtime execution evidence. This section records the five scenarios, so far, that have actually been run against a live WordPress installation. It supplements WP-SCENARIO-001's, WP-SCENARIO-002's, WP-SCENARIO-006's, WP-SCENARIO-009's, and WP-SCENARIO-010's traceability results above — it does not replace any of those results, and it does not extend runtime-validated status to any other scenario in this suite.
+Documentation/routing traceability (recorded per scenario above) is distinct from runtime execution evidence. This section records the six scenarios, so far, that have actually been run against a live WordPress installation. It supplements WP-SCENARIO-001's, WP-SCENARIO-002's, WP-SCENARIO-003's, WP-SCENARIO-006's, WP-SCENARIO-009's, and WP-SCENARIO-010's traceability results above — it does not replace any of those results, and it does not extend runtime-validated status to any other scenario in this suite.
 
 ### Runtime Validation — WP-SCENARIO-001 (Create a WordPress plugin with an administrator Settings API page and frontend shortcode)
 
@@ -949,6 +949,117 @@ Scope of This Evidence:
   multi-plugin-conflict debugging is proven.
 ```
 
+### Runtime Validation — WP-SCENARIO-003 (Review Code)
+
+```text
+Scenario Reference: WP-SCENARIO-003
+Runtime Target: Hospital WordPress installation ($HOME/Local Sites/hospital/app/public)
+Plugin Path: wp-content/plugins/squirrelforge-review-fixture
+Plugin Created As: a deliberately flawed but runnable single-file fixture plugin
+  (56 lines) containing exactly five deterministic, independently-locatable
+  seeded issues -- not a plugin intended to demonstrate correct behavior, but
+  a fixed inspection target.
+
+Primary Skill: REVIEW-CODE. This is the first bounded runtime execution of
+  this Skill; unlike every prior runtime scenario, the objective was not to
+  build or fix working code but to prove SquirrelForge can accurately inspect
+  existing code and report evidence-based findings without modifying it.
+
+Pre-Review Environment Check: the fixture was activated against the live
+  installation in a fresh wp-load.php process; activation completed with no
+  throwable, confirming the plugin loads before review (a pre-review
+  environment check, not part of the review itself).
+
+Review Process (locked before any runtime validation):
+  A structured Code Review Report was produced by static inspection of the
+  fixture's actual source, citing exact file and line for every finding,
+  before any live validation step was run. The five findings were:
+    - F-1 (Critical): permission_callback set to __return_true on a
+      data-writing REST route (line 23)
+    - F-2 (Warning): unsanitized REST request data passed directly to
+      update_option() (lines 29-31)
+    - F-3 (Critical): the stored value echoed with no escaping (line 53)
+    - F-4 (Critical): a destructive admin-post action gated by
+      current_user_can('read') instead of an admin-level capability
+      (line 39)
+    - F-5 (Notice): a single camelCase variable name against an otherwise
+      snake_case file (line 50) -- correctly classified as non-blocking,
+      not inflated to a defect
+  No-Invented-Findings Statement: the review identified exactly the five
+  seeded deterministic findings. No additional blocking defects were
+  reported, and no additional non-blocking recommendations were reported.
+  Final Review Status (the review's own verdict on the fixture, distinct
+  from this scenario's PASS classification below): NOT APPROVED FOR
+  PRODUCTION -- three Critical and one Warning finding require correction.
+
+Independent Runtime Validation of Locked Findings (performed only after the
+  review above was locked, and explicitly kept separate from the review
+  itself -- this validates the findings, it is not part of how they were
+  produced):
+  - F-1/F-2: an unauthenticated WP_REST_Request POST to /sfrev/v1/notes
+    succeeded (HTTP 200, {"saved":true}) and stored the literal payload
+    <script>alert(1)</script> verbatim in the option -- confirming both the
+    unauthenticated-write and missing-sanitization findings live.
+  - F-3: the render function emitted the stored value with no escaping,
+    producing <div class="sfrev-notes-panel"><script>alert(1)</script></div>
+    -- confirming the unescaped-output finding live.
+  - F-4: a freshly created Subscriber-level user (confirmed to hold 'read'
+    but not 'manage_options') successfully passed the plugin's own
+    capability gate and deleted the option -- confirming the wrong-capability
+    finding is genuinely exploitable, not merely textually incorrect.
+
+Quantitative Metrics:
+  Seeded deterministic findings: 5
+  Correctly identified: 5
+  False positives: 0
+  False negatives: 0
+  Blocking findings correctly classified: Yes (3 Critical + 1 Warning)
+  Non-blocking findings correctly classified: Yes (1 Notice)
+  Critical findings independently validated live: 3 of 3
+  Source modified during review: No
+
+Non-Modification Proof: SHA-256 of the fixture's source file was recorded
+  before the review (67803c2b8926f505c67bf411f4a7ea1056cd99935fca27b7e8a645e1
+  b1c906f6) and re-verified identical after the review and all runtime
+  validation steps completed.
+
+Live Environment: Hospital WordPress installation; single-site; WP-CLI
+  unavailable; execution performed through fresh PHP processes bootstrapping
+  wp-load.php, using Local's site-matched PHP binary and database socket;
+  strict runtime error capture enabled throughout; zero PHP warnings,
+  notices, deprecations, or errors were captured at any step.
+
+Cleanup and Boundaries:
+  - the scenario-owned option (sfrev_notes) and the temporary Subscriber-
+    level check user created for F-4 validation were both removed; a direct
+    query confirmed zero sfrev_* options remained afterward
+  - the fixture plugin was deactivated; the plugin file itself remains
+    installed (harmless, single-file, no runtime side effects when inactive)
+  - the temporary harness script was deleted from the scratchpad directory
+  - CSHD remained clean and unchanged (git status --short / git diff
+    --check both clean before and after)
+  - the WP-SCENARIO-001, WP-SCENARIO-002, WP-SCENARIO-006, WP-SCENARIO-009,
+    and WP-SCENARIO-010 validation plugins remained untouched
+  - all other Hospital plugins remained untouched
+  - the SquirrelForge repository remained unchanged during runtime
+    execution; no routing, Skill, Role, knowledge, or scenario-definition
+    file was modified as part of running this scenario
+
+Scope of This Evidence:
+  This runtime result applies only to WP-SCENARIO-003's specific request (a
+  full-plugin code review producing evidence-based, severity-ranked findings
+  without modifying the reviewed code), executed once against one
+  deliberately-seeded fixture. It is the first runtime evidence for
+  REVIEW-CODE and does not runtime-validate REVIEW-CODE for other review
+  shapes (e.g. a multi-file plugin, a theme, JavaScript/block code, a review
+  that also spans performance or accessibility concerns), and does not
+  runtime-validate any other Skill or any of the remaining 8 documentation
+  scenarios in this suite. It does not prove that every class of WordPress
+  defect is detectable this way, that reviews of larger or unfamiliar
+  codebases are proven, or that this reflects the full range of findings a
+  production review might need to surface.
+```
+
 ---
 
 ## Scenario Test Summary
@@ -962,7 +1073,7 @@ Routing Errors: 0 (1 pre-existing routing contradiction found and fixed — see 
 Missing Skills: 0
 Missing Roles: 0
 Missing Validation Gates: 0
-Overall Scenario Status: All 14 defined scenarios pass documentation/routing traceability, including the 6 scenario classes (Custom Post Type + taxonomy, Settings API on an existing plugin, a WordPress-specific security review, a WordPress theme performance review, a plugin integrating with an external API, and a WordPress deployment request) that were previously absent from this suite. This status covers routing readiness for all 14 scenarios. Five of the 14, WP-SCENARIO-001, WP-SCENARIO-002, WP-SCENARIO-006, WP-SCENARIO-009, and WP-SCENARIO-010, have additionally been runtime-validated against a live WordPress installation (see "Runtime Evidence" above); the remaining 9 scenarios have not been executed against a live WordPress environment. See 38_WORDPRESS/AGENT-READINESS-REPORT.md for the full readiness breakdown, including the Runtime Execution Readiness category.
+Overall Scenario Status: All 14 defined scenarios pass documentation/routing traceability, including the 6 scenario classes (Custom Post Type + taxonomy, Settings API on an existing plugin, a WordPress-specific security review, a WordPress theme performance review, a plugin integrating with an external API, and a WordPress deployment request) that were previously absent from this suite. This status covers routing readiness for all 14 scenarios. Six of the 14, WP-SCENARIO-001, WP-SCENARIO-002, WP-SCENARIO-003, WP-SCENARIO-006, WP-SCENARIO-009, and WP-SCENARIO-010, have additionally been runtime-validated against a live WordPress installation (see "Runtime Evidence" above); the remaining 8 scenarios have not been executed against a live WordPress environment. See 38_WORDPRESS/AGENT-READINESS-REPORT.md for the full readiness breakdown, including the Runtime Execution Readiness category.
 ```
 
 ---
