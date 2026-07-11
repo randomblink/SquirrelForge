@@ -28,7 +28,7 @@ Evidence:
 Gap:
 ```
 
-Result must be one of `PASS`, `PARTIAL`, `FAIL`, or `NOT EXECUTABLE`. This suite verifies documentation and routing traceability through the authoritative control chain (`38_WORDPRESS/WORDPRESS-MANAGER.md` → `38_WORDPRESS/PIPELINE.md` → `38_WORDPRESS/SKILLS/SKILL-ROUTING-MAP.md` → selected Skill → `33_WORDPRESS_ROLES/ROLE-MANAGER.md` → `33_WORDPRESS_ROLES/ROLE-ROUTING-MATRIX.md` → required knowledge → security and standards gates → testing requirements → completion criteria). A `PASS` proves the route, roles, knowledge, gates, and completion criteria are explicitly traceable in the repository — by itself it does not prove that code generated under that route would actually run correctly in a live WordPress environment. Two scenarios, WP-SCENARIO-001 and WP-SCENARIO-009, have additionally been runtime-validated against a live WordPress installation; see the "Runtime Evidence" section below. Those results are bounded to each scenario's specific request and do not extend runtime-validated status to any other scenario in this suite. See `38_WORDPRESS/AGENT-READINESS-REPORT.md`'s Runtime Execution Readiness category for the full distinction between traceability and execution.
+Result must be one of `PASS`, `PARTIAL`, `FAIL`, or `NOT EXECUTABLE`. This suite verifies documentation and routing traceability through the authoritative control chain (`38_WORDPRESS/WORDPRESS-MANAGER.md` → `38_WORDPRESS/PIPELINE.md` → `38_WORDPRESS/SKILLS/SKILL-ROUTING-MAP.md` → selected Skill → `33_WORDPRESS_ROLES/ROLE-MANAGER.md` → `33_WORDPRESS_ROLES/ROLE-ROUTING-MATRIX.md` → required knowledge → security and standards gates → testing requirements → completion criteria). A `PASS` proves the route, roles, knowledge, gates, and completion criteria are explicitly traceable in the repository — by itself it does not prove that code generated under that route would actually run correctly in a live WordPress environment. Three scenarios, WP-SCENARIO-001, WP-SCENARIO-009, and WP-SCENARIO-010, have additionally been runtime-validated against a live WordPress installation; see the "Runtime Evidence" section below. Those results are bounded to each scenario's specific request and do not extend runtime-validated status to any other scenario in this suite. See `38_WORDPRESS/AGENT-READINESS-REPORT.md`'s Runtime Execution Readiness category for the full distinction between traceability and execution.
 
 ---
 
@@ -370,7 +370,7 @@ Gap: FOUND AND FIXED. Before this pass, `12_AGENT/CAPABILITY-ROUTER.md`'s own pr
 
 ## Runtime Evidence
 
-Documentation/routing traceability (recorded per scenario above) is distinct from runtime execution evidence. This section records the two scenarios, so far, that have actually been run against a live WordPress installation. It supplements WP-SCENARIO-001's and WP-SCENARIO-009's traceability results above — it does not replace either result, and it does not extend runtime-validated status to any other scenario in this suite.
+Documentation/routing traceability (recorded per scenario above) is distinct from runtime execution evidence. This section records the three scenarios, so far, that have actually been run against a live WordPress installation. It supplements WP-SCENARIO-001's, WP-SCENARIO-009's, and WP-SCENARIO-010's traceability results above — it does not replace any of those results, and it does not extend runtime-validated status to any other scenario in this suite.
 
 ### Runtime Validation — WP-SCENARIO-001 (Create a WordPress plugin with an administrator Settings API page and frontend shortcode)
 
@@ -506,9 +506,128 @@ Scope of This Evidence:
   This runtime result applies only to WP-SCENARIO-009's specific request
   (CREATE-PLUGIN registering a custom post type and an attached hierarchical
   taxonomy), executed once against one WordPress installation. It does not
-  runtime-validate CREATE-PLUGIN for other request shapes beyond this and
-  WP-SCENARIO-001, and it does not runtime-validate any other Skill or any of
-  the remaining 12 documentation scenarios in this suite.
+  runtime-validate CREATE-PLUGIN for other request shapes beyond this,
+  WP-SCENARIO-001, and WP-SCENARIO-010, and it does not runtime-validate any
+  other Skill or any of the remaining 11 documentation scenarios in this
+  suite.
+```
+
+### Runtime Validation — WP-SCENARIO-010 (Add a Settings API Page to an Existing Plugin)
+
+```text
+Scenario Reference: WP-SCENARIO-010
+Runtime Target: Hospital WordPress installation ($HOME/Local Sites/hospital/app/public)
+Plugin Path: wp-content/plugins/squirrelforge-settings-api-validation
+Plugin Created As: standalone plugin representing the "add a Settings API page to
+  an existing plugin" request shape. This scenario's own request describes adding
+  a Settings API page to an existing plugin; the runtime validation used an
+  isolated, standalone validation plugin rather than modifying a real existing
+  plugin (CSHD or otherwise), consistent with the repository-boundary
+  restrictions and the precedent set by WP-SCENARIO-001 and WP-SCENARIO-009.
+  This validates the Settings API request shape itself, not the act of
+  modifying a specific production plugin.
+
+PHP Syntax Lint: PASS (all three authored plugin PHP files)
+Focused PHPUnit: PASS — 1 test, 2 assertions
+Full Plugin PHPUnit Suite: PASS — 17 tests, 28 assertions
+SquirrelForge Full Suite: PASS — 146 tests, 338 assertions (unaffected)
+
+Live Environment: Hospital WordPress installation; WP-CLI unavailable; execution
+  performed through fresh PHP processes bootstrapping wp-load.php, using Local's
+  site-matched PHP binary and database socket; strict runtime error capture
+  enabled throughout; no debug.log was created (WP_DEBUG_LOG not enabled).
+
+Settings Registration Evidence:
+  - register_setting() registration confirmed on a fresh bootstrap
+  - settings group: sfsav_settings_group
+  - sanitization callback attached
+  - settings section registered (add_settings_section)
+  - settings field registered (add_settings_field)
+  - settings page rendered successfully under an authenticated administrator
+    context
+  - page access is protected by the manage_options capability
+
+Capability Behavior (disclosed harness note, not a plugin defect):
+  The first rendering attempt correctly reached a real wp_die() when the
+  page's manage_options capability check ran against the CLI bootstrap's
+  unauthenticated default context. This was a gap in the validation harness'
+  own context, not a defect in the plugin: the settings page enforcing its
+  capability check against an unauthenticated request is the correct,
+  intended behavior. The harness was corrected by looking up an existing
+  administrator through a read-only get_users() query and calling
+  wp_set_current_user() to give that one process an in-memory authenticated
+  context only -- no user account, option, or other persistent data was
+  modified by this step. The corrected render then completed successfully.
+  This is positive evidence that the manage_options gate is enforced, not a
+  runtime failure.
+
+Sanitization Evidence (a save-time control, distinct from output escaping):
+  The live sanitize_callback executed on every save. sanitize_text_field()
+  removed a submitted <script>...</script> payload entirely (this is bounded
+  evidence for this plugin's text-field sanitization path; it is not a
+  general claim that sanitize_text_field() is a universal sanitizer for
+  every context). Because the result was empty after stripping, this
+  plugin's own sanitize_value() then returned its defined default per its
+  documented empty-value fallback behavior. No unsafe script value was
+  persisted through the normal Settings API save path.
+
+Persistence and Update-Lifecycle Evidence:
+  - the option value persisted and get_option() retrieved it correctly
+  - an existing saved value was updated from a generic "Value A" to a
+    generic "Value B", confirmed overwritten
+  - the replacement value ("Value B") remained correct across a fresh
+    WordPress bootstrap
+  - this update lifecycle -- changing an already-saved value, not just
+    creating one -- is the principal additional runtime behavior this
+    scenario demonstrates beyond WP-SCENARIO-001
+
+Output Escaping Evidence (an output-time control, distinct from sanitization):
+  Rendering was tested using a raw value written directly to the database
+  (bypassing the normal save path's sanitize callback) so the output layer
+  could be verified on its own terms. The payload contained script markup,
+  an ampersand, and quotation marks. Confirmed:
+  - the field input escaped its value with esc_attr()
+  - the page preview escaped its value with esc_html()
+  - the raw markup was not emitted as executable HTML in either location
+  - the value was restored to a benign state immediately after the check
+
+Activation, Deactivation, and Reactivation Evidence:
+  - activation completed without a fatal error
+  - activation seeds a default value via add_option() (a no-op when the
+    option already exists)
+  - activation did not overwrite an existing saved value
+  - deactivation removed the setting's Settings API registration, confirmed
+    on a fresh bootstrap
+  - deactivation did not delete the stored option value
+  - reactivation restored the registration, confirmed on another fresh
+    bootstrap, and preserved the existing value unchanged
+
+Cleanup and Boundaries:
+  - the validation option was explicitly deleted; zero remaining
+    scenario-created option data was confirmed afterward
+  - zero PHP warnings, notices, deprecations, or errors were captured on the
+    corrected runs
+  - no debug.log was created
+  - CSHD remained clean and unchanged (git status --short / git diff --check
+    both clean before and after)
+  - the WP-SCENARIO-001 validation plugin remained untouched
+  - the WP-SCENARIO-009 validation plugin remained untouched
+  - all other Hospital plugins remained untouched
+  - the SquirrelForge repository remained unchanged and at HEAD abf7ef0
+    during runtime execution; no routing, Skill, Role, knowledge, or
+    scenario-definition file was modified as part of running this scenario
+
+Scope of This Evidence:
+  This runtime result applies only to WP-SCENARIO-010's specific request
+  (a Settings API options page, including its update lifecycle), executed
+  once against one WordPress installation using a standalone validation
+  plugin. It does not runtime-validate modifying an actual existing
+  production plugin, it does not runtime-validate CREATE-PLUGIN for other
+  request shapes beyond this, WP-SCENARIO-001, and WP-SCENARIO-009, and it
+  does not runtime-validate any other Skill or any of the remaining 11
+  documentation scenarios in this suite. It does not establish that all
+  settings pages, all sanitization contexts, or all capability models are
+  broadly proven.
 ```
 
 ---
@@ -524,7 +643,7 @@ Routing Errors: 0 (1 pre-existing routing contradiction found and fixed — see 
 Missing Skills: 0
 Missing Roles: 0
 Missing Validation Gates: 0
-Overall Scenario Status: All 14 defined scenarios pass documentation/routing traceability, including the 6 scenario classes (Custom Post Type + taxonomy, Settings API on an existing plugin, a WordPress-specific security review, a WordPress theme performance review, a plugin integrating with an external API, and a WordPress deployment request) that were previously absent from this suite. This status covers routing readiness for all 14 scenarios. Two of the 14, WP-SCENARIO-001 and WP-SCENARIO-009, have additionally been runtime-validated against a live WordPress installation (see "Runtime Evidence" above); the remaining 12 scenarios have not been executed against a live WordPress environment. See 38_WORDPRESS/AGENT-READINESS-REPORT.md for the full readiness breakdown, including the Runtime Execution Readiness category.
+Overall Scenario Status: All 14 defined scenarios pass documentation/routing traceability, including the 6 scenario classes (Custom Post Type + taxonomy, Settings API on an existing plugin, a WordPress-specific security review, a WordPress theme performance review, a plugin integrating with an external API, and a WordPress deployment request) that were previously absent from this suite. This status covers routing readiness for all 14 scenarios. Three of the 14, WP-SCENARIO-001, WP-SCENARIO-009, and WP-SCENARIO-010, have additionally been runtime-validated against a live WordPress installation (see "Runtime Evidence" above); the remaining 11 scenarios have not been executed against a live WordPress environment. See 38_WORDPRESS/AGENT-READINESS-REPORT.md for the full readiness breakdown, including the Runtime Execution Readiness category.
 ```
 
 ---
