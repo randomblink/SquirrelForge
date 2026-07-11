@@ -28,7 +28,7 @@ Evidence:
 Gap:
 ```
 
-Result must be one of `PASS`, `PARTIAL`, `FAIL`, or `NOT EXECUTABLE`. This suite verifies documentation and routing traceability through the authoritative control chain (`38_WORDPRESS/WORDPRESS-MANAGER.md` → `38_WORDPRESS/PIPELINE.md` → `38_WORDPRESS/SKILLS/SKILL-ROUTING-MAP.md` → selected Skill → `33_WORDPRESS_ROLES/ROLE-MANAGER.md` → `33_WORDPRESS_ROLES/ROLE-ROUTING-MATRIX.md` → required knowledge → security and standards gates → testing requirements → completion criteria). A `PASS` proves the route, roles, knowledge, gates, and completion criteria are explicitly traceable in the repository — by itself it does not prove that code generated under that route would actually run correctly in a live WordPress environment. Seven scenarios, WP-SCENARIO-001, WP-SCENARIO-002, WP-SCENARIO-003, WP-SCENARIO-004, WP-SCENARIO-006, WP-SCENARIO-009, and WP-SCENARIO-010, have additionally been runtime-validated against a live WordPress installation; see the "Runtime Evidence" section below. Those results are bounded to each scenario's specific request and do not extend runtime-validated status to any other scenario in this suite. See `38_WORDPRESS/AGENT-READINESS-REPORT.md`'s Runtime Execution Readiness category for the full distinction between traceability and execution.
+Result must be one of `PASS`, `PARTIAL`, `FAIL`, or `NOT EXECUTABLE`. This suite verifies documentation and routing traceability through the authoritative control chain (`38_WORDPRESS/WORDPRESS-MANAGER.md` → `38_WORDPRESS/PIPELINE.md` → `38_WORDPRESS/SKILLS/SKILL-ROUTING-MAP.md` → selected Skill → `33_WORDPRESS_ROLES/ROLE-MANAGER.md` → `33_WORDPRESS_ROLES/ROLE-ROUTING-MATRIX.md` → required knowledge → security and standards gates → testing requirements → completion criteria). A `PASS` proves the route, roles, knowledge, gates, and completion criteria are explicitly traceable in the repository — by itself it does not prove that code generated under that route would actually run correctly in a live WordPress environment. Eight scenarios, WP-SCENARIO-001, WP-SCENARIO-002, WP-SCENARIO-003, WP-SCENARIO-004, WP-SCENARIO-005, WP-SCENARIO-006, WP-SCENARIO-009, and WP-SCENARIO-010, have additionally been runtime-validated against a live WordPress installation; see the "Runtime Evidence" section below. Those results are bounded to each scenario's specific request and do not extend runtime-validated status to any other scenario in this suite. See `38_WORDPRESS/AGENT-READINESS-REPORT.md`'s Runtime Execution Readiness category for the full distinction between traceability and execution.
 
 ---
 
@@ -370,7 +370,7 @@ Gap: FOUND AND FIXED. Before this pass, `12_AGENT/CAPABILITY-ROUTER.md`'s own pr
 
 ## Runtime Evidence
 
-Documentation/routing traceability (recorded per scenario above) is distinct from runtime execution evidence. This section records the seven scenarios, so far, that have actually been run against a live WordPress installation. It supplements WP-SCENARIO-001's, WP-SCENARIO-002's, WP-SCENARIO-003's, WP-SCENARIO-004's, WP-SCENARIO-006's, WP-SCENARIO-009's, and WP-SCENARIO-010's traceability results above — it does not replace any of those results, and it does not extend runtime-validated status to any other scenario in this suite.
+Documentation/routing traceability (recorded per scenario above) is distinct from runtime execution evidence. This section records the eight scenarios, so far, that have actually been run against a live WordPress installation. It supplements WP-SCENARIO-001's, WP-SCENARIO-002's, WP-SCENARIO-003's, WP-SCENARIO-004's, WP-SCENARIO-005's, WP-SCENARIO-006's, WP-SCENARIO-009's, and WP-SCENARIO-010's traceability results above — it does not replace any of those results, and it does not extend runtime-validated status to any other scenario in this suite.
 
 ### Runtime Validation — WP-SCENARIO-001 (Create a WordPress plugin with an administrator Settings API page and frontend shortcode)
 
@@ -1169,6 +1169,123 @@ Scope of This Evidence:
   production refactor might require.
 ```
 
+### Runtime Validation — WP-SCENARIO-005 (Optimize Performance)
+
+```text
+Scenario Reference: WP-SCENARIO-005
+Runtime Target: Hospital WordPress installation ($HOME/Local Sites/hospital/app/public)
+Plugin Path: wp-content/plugins/squirrelforge-performance-fixture
+Plugin Created As: a small, runnable fixture plugin (86 lines) containing one
+  deliberately inefficient but functionally correct N+1 database-query path
+  -- a textbook WordPress meta-cache-priming omission -- against a fixed,
+  deterministic 100-item workload.
+
+Primary Skill: OPTIMIZE-PERFORMANCE. This is the first bounded runtime
+  execution of this Skill; unlike every prior runtime scenario, the
+  objective was to prove SquirrelForge can measure a performance problem,
+  confirm its cause, apply a targeted fix, and quantitatively demonstrate
+  improvement without changing behavior.
+
+Behavior Baseline (established before any structural change):
+  A six-test, 13-assertion functional regression suite was authored against
+  the original implementation and passed, verifying output correctness
+  only (item values, ordering, empty-state handling, and the admin
+  screen's capability check) -- not query cost, which was verified
+  separately, live.
+
+Bottleneck Verification: a single fresh-process call, with SAVEQUERIES
+  enabled, captured the exact SQL statements before any code change: 1
+  post-fetch query plus 100 individual "SELECT post_id, meta_key,
+  meta_value FROM wp_postmeta WHERE post_id IN (X)" queries, one per post
+  ID -- directly demonstrating, not merely asserting, that the
+  'update_post_meta_cache' => false argument was the cause.
+
+Benchmark Methodology (disclosed correction): the original design used one
+  discarded warm-up call followed by 5 measured calls within a single PHP
+  process. This produced a query delta of 0 on every measured run, which
+  was correctly not accepted as valid: WordPress's per-request,
+  non-persistent object cache caches each post's meta after its first
+  lookup, so the discarded warm-up call had already silently eliminated
+  the very N+1 cost being measured for all subsequent calls in that same
+  process. The methodology was corrected so that each of the 5 measured
+  runs is its own fresh PHP process (matching how a real WordPress request
+  behaves, since no persistent object-cache backend is installed at
+  Hospital, confirmed during planning) -- no warm-up call is used, since
+  every fresh process is already cold.
+
+Baseline Measurement (5 independent fresh-process runs):
+  Query count: 101, 101, 101, 101, 101 (identical across all 5 runs)
+  Wall-clock: min 0.015701s, median 0.016364s, max 0.016526s
+
+Optimization Applied: one line changed, 'update_post_meta_cache' => false
+  to true, in the fixture's single query-building function -- enabling
+  WordPress's own built-in batched meta-cache priming. No other line was
+  touched; no feature added; no unrelated cleanup performed.
+
+Post-Optimization Regression: PASS -- the identical, byte-for-byte-
+  unchanged functional test file (SHA-256 confirmed matching before and
+  after) passed with the identical result, 6 tests and 13 assertions,
+  against the optimized code.
+
+Post-Optimization Measurement (5 independent fresh-process runs):
+  Query count: 2, 2, 2, 2, 2 (identical across all 5 runs)
+  Wall-clock: min 0.004332s, median 0.004415s, max 0.004933s
+
+Primary Success Criterion (structural, evaluated first): the query
+  behavior changed from N+1 (scaling with the 100-item dataset) to a small
+  constant (2 queries) that does not scale with N -- confirmed directly,
+  not inferred from the percentage alone.
+Supporting Quantitative Confirmation: absolute improvement of 99 queries;
+  98.02% reduction; comfortably exceeding the >=90% threshold.
+
+Equivalence Verification:
+  - the function's returned data was confirmed byte-for-byte identical
+    (JSON comparison) between the pre- and post-optimization runs
+  - the underlying 100-item dataset itself was confirmed unchanged after
+    optimization (same item count, same titles), ruling out the
+    improvement being an artifact of reduced or altered data
+  - PHP lint remained clean on the modified file
+  - SquirrelForge's own full suite (146 tests, 338 assertions) remained
+    unaffected throughout
+
+Live Environment: Hospital WordPress installation; single-site; WP-CLI
+  unavailable; SAVEQUERIES enabled for the harness; execution performed
+  through fresh PHP processes bootstrapping wp-load.php, using Local's
+  site-matched PHP binary and database socket; zero PHP warnings, notices,
+  deprecations, or errors were captured at any step.
+
+Cleanup and Boundaries:
+  - all 100 scenario-owned items and their postmeta were removed; a direct
+    query confirmed zero sfperf_* options remained afterward
+  - the fixture plugin was deactivated
+  - the temporary harness script and capture files were deleted from the
+    scratchpad directory
+  - CSHD remained clean and unchanged (git status --short / git diff
+    --check both clean before and after)
+  - the WP-SCENARIO-001, WP-SCENARIO-002, WP-SCENARIO-003, WP-SCENARIO-004,
+    WP-SCENARIO-006, WP-SCENARIO-009, and WP-SCENARIO-010 validation/
+    fixture plugins remained untouched
+  - all other Hospital plugins remained untouched
+  - the SquirrelForge repository remained unchanged during runtime
+    execution; no routing, Skill, Role, knowledge, or scenario-definition
+    file was modified as part of running this scenario
+
+Scope of This Evidence:
+  This runtime result applies only to WP-SCENARIO-005's specific request (a
+  measured N+1 database-query problem on an admin screen, diagnosed,
+  fixed, and quantitatively revalidated without changing output), executed
+  once against one deterministic fixture and workload. It is the first
+  runtime evidence for OPTIMIZE-PERFORMANCE and does not runtime-validate
+  OPTIMIZE-PERFORMANCE for other performance-problem shapes (e.g. REST
+  latency, cron workload duration, asset delivery cost, JavaScript/Block
+  Editor execution cost, or a bottleneck that is not a database query
+  pattern), and does not runtime-validate any other Skill or any of the
+  remaining 6 documentation scenarios in this suite. It does not prove
+  that every class of WordPress performance problem is measurable or
+  fixable this way, or that this reflects the full range of optimization
+  techniques a production performance task might require.
+```
+
 ---
 
 ## Scenario Test Summary
@@ -1182,7 +1299,7 @@ Routing Errors: 0 (1 pre-existing routing contradiction found and fixed — see 
 Missing Skills: 0
 Missing Roles: 0
 Missing Validation Gates: 0
-Overall Scenario Status: All 14 defined scenarios pass documentation/routing traceability, including the 6 scenario classes (Custom Post Type + taxonomy, Settings API on an existing plugin, a WordPress-specific security review, a WordPress theme performance review, a plugin integrating with an external API, and a WordPress deployment request) that were previously absent from this suite. This status covers routing readiness for all 14 scenarios. Seven of the 14, WP-SCENARIO-001, WP-SCENARIO-002, WP-SCENARIO-003, WP-SCENARIO-004, WP-SCENARIO-006, WP-SCENARIO-009, and WP-SCENARIO-010, have additionally been runtime-validated against a live WordPress installation (see "Runtime Evidence" above); the remaining 7 scenarios have not been executed against a live WordPress environment. See 38_WORDPRESS/AGENT-READINESS-REPORT.md for the full readiness breakdown, including the Runtime Execution Readiness category.
+Overall Scenario Status: All 14 defined scenarios pass documentation/routing traceability, including the 6 scenario classes (Custom Post Type + taxonomy, Settings API on an existing plugin, a WordPress-specific security review, a WordPress theme performance review, a plugin integrating with an external API, and a WordPress deployment request) that were previously absent from this suite. This status covers routing readiness for all 14 scenarios. Eight of the 14, WP-SCENARIO-001, WP-SCENARIO-002, WP-SCENARIO-003, WP-SCENARIO-004, WP-SCENARIO-005, WP-SCENARIO-006, WP-SCENARIO-009, and WP-SCENARIO-010, have additionally been runtime-validated against a live WordPress installation (see "Runtime Evidence" above); the remaining 6 scenarios have not been executed against a live WordPress environment. See 38_WORDPRESS/AGENT-READINESS-REPORT.md for the full readiness breakdown, including the Runtime Execution Readiness category.
 ```
 
 ---
