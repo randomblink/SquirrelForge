@@ -28,7 +28,7 @@ Evidence:
 Gap:
 ```
 
-Result must be one of `PASS`, `PARTIAL`, `FAIL`, or `NOT EXECUTABLE`. This suite verifies documentation and routing traceability through the authoritative control chain (`38_WORDPRESS/WORDPRESS-MANAGER.md` → `38_WORDPRESS/PIPELINE.md` → `38_WORDPRESS/SKILLS/SKILL-ROUTING-MAP.md` → selected Skill → `33_WORDPRESS_ROLES/ROLE-MANAGER.md` → `33_WORDPRESS_ROLES/ROLE-ROUTING-MATRIX.md` → required knowledge → security and standards gates → testing requirements → completion criteria). A `PASS` proves the route, roles, knowledge, gates, and completion criteria are explicitly traceable in the repository — by itself it does not prove that code generated under that route would actually run correctly in a live WordPress environment. Eight scenarios, WP-SCENARIO-001, WP-SCENARIO-002, WP-SCENARIO-003, WP-SCENARIO-004, WP-SCENARIO-005, WP-SCENARIO-006, WP-SCENARIO-009, and WP-SCENARIO-010, have additionally been runtime-validated against a live WordPress installation; see the "Runtime Evidence" section below. Those results are bounded to each scenario's specific request and do not extend runtime-validated status to any other scenario in this suite. See `38_WORDPRESS/AGENT-READINESS-REPORT.md`'s Runtime Execution Readiness category for the full distinction between traceability and execution.
+Result must be one of `PASS`, `PARTIAL`, `FAIL`, or `NOT EXECUTABLE`. This suite verifies documentation and routing traceability through the authoritative control chain (`38_WORDPRESS/WORDPRESS-MANAGER.md` → `38_WORDPRESS/PIPELINE.md` → `38_WORDPRESS/SKILLS/SKILL-ROUTING-MAP.md` → selected Skill → `33_WORDPRESS_ROLES/ROLE-MANAGER.md` → `33_WORDPRESS_ROLES/ROLE-ROUTING-MATRIX.md` → required knowledge → security and standards gates → testing requirements → completion criteria). A `PASS` proves the route, roles, knowledge, gates, and completion criteria are explicitly traceable in the repository — by itself it does not prove that code generated under that route would actually run correctly in a live WordPress environment. Nine scenarios, WP-SCENARIO-001, WP-SCENARIO-002, WP-SCENARIO-003, WP-SCENARIO-004, WP-SCENARIO-005, WP-SCENARIO-006, WP-SCENARIO-007, WP-SCENARIO-009, and WP-SCENARIO-010, have additionally been runtime-validated against a live WordPress installation; see the "Runtime Evidence" section below. Those results are bounded to each scenario's specific request and do not extend runtime-validated status to any other scenario in this suite. See `38_WORDPRESS/AGENT-READINESS-REPORT.md`'s Runtime Execution Readiness category for the full distinction between traceability and execution.
 
 ---
 
@@ -370,7 +370,7 @@ Gap: FOUND AND FIXED. Before this pass, `12_AGENT/CAPABILITY-ROUTER.md`'s own pr
 
 ## Runtime Evidence
 
-Documentation/routing traceability (recorded per scenario above) is distinct from runtime execution evidence. This section records the eight scenarios, so far, that have actually been run against a live WordPress installation. It supplements WP-SCENARIO-001's, WP-SCENARIO-002's, WP-SCENARIO-003's, WP-SCENARIO-004's, WP-SCENARIO-005's, WP-SCENARIO-006's, WP-SCENARIO-009's, and WP-SCENARIO-010's traceability results above — it does not replace any of those results, and it does not extend runtime-validated status to any other scenario in this suite.
+Documentation/routing traceability (recorded per scenario above) is distinct from runtime execution evidence. This section records the nine scenarios, so far, that have actually been run against a live WordPress installation. It supplements WP-SCENARIO-001's, WP-SCENARIO-002's, WP-SCENARIO-003's, WP-SCENARIO-004's, WP-SCENARIO-005's, WP-SCENARIO-006's, WP-SCENARIO-007's, WP-SCENARIO-009's, and WP-SCENARIO-010's traceability results above — it does not replace any of those results, and it does not extend runtime-validated status to any other scenario in this suite.
 
 ### Runtime Validation — WP-SCENARIO-001 (Create a WordPress plugin with an administrator Settings API page and frontend shortcode)
 
@@ -1286,6 +1286,189 @@ Scope of This Evidence:
   techniques a production performance task might require.
 ```
 
+### Runtime Validation — WP-SCENARIO-007 (Secure REST Endpoint Engineering)
+
+```text
+Scenario Reference: WP-SCENARIO-007
+Capability: Secure REST Endpoint Engineering
+Result: PASS
+Locked Plan Commit: 3aaa2f32a5d8eaeb6d3bf7e04760e38dab19f85e
+Runtime Target: Hospital WordPress installation ($HOME/Local Sites/hospital/app/public)
+Plugin Path: wp-content/plugins/squirrelforge-rest-fixture
+Plugin Created As: standalone plugin representing the "add a REST endpoint
+  that returns private member records to authorized admins" request shape.
+WordPress: 7.0.1
+PHP: 8.5.3
+
+Primary Skill: CREATE-REST-ENDPOINT. This is the first bounded runtime
+  execution of this Skill; WP-SCENARIO-001, WP-SCENARIO-009, and
+  WP-SCENARIO-010 runtime-validated CREATE-PLUGIN, WP-SCENARIO-006
+  runtime-validated MIGRATE-PLUGIN, WP-SCENARIO-002 runtime-validated
+  DEBUG-PLUGIN, WP-SCENARIO-003 runtime-validated REVIEW-CODE,
+  WP-SCENARIO-004 runtime-validated REFACTOR-CODE, and WP-SCENARIO-005
+  runtime-validated OPTIMIZE-PERFORMANCE.
+
+Methodology (ordered evidence chain):
+  1. The API contract (namespace, route, method, argument schema,
+     permission model, five-case status/body matrix) was defined and
+     locked in 38_WORDPRESS/WP-SCENARIO-007-PLAN.md before any fixture
+     or implementation code existed.
+  2. A deterministic fixture (three seed member records, a fixed
+     nonexistent ID, a read-only existing administrator lookup, a
+     temporary low-capability subscriber) was prepared and validated
+     separately, before the endpoint itself was implemented.
+  3. The five endpoint responsibilities -- route registration,
+     validate_callback, sanitize_callback, permission_callback, and the
+     request callback -- were implemented as five distinct, independently
+     testable named functions, never combined or closures.
+  4. Direct callback and registration logic were exercised through a
+     fake-WordPress-bootstrap PHPUnit suite (12 tests, 37 assertions)
+     before any live request was issued.
+  5. Live REST registration was inspected directly against the real
+     WordPress REST server, before any endpoint request was made.
+  6. The five-case API Contract Record was executed through the real
+     WordPress REST server (WP_REST_Server::dispatch() against real
+     WP_REST_Request objects), not the fake bootstrap.
+  7. A malformed, non-digit route segment was tested separately from the
+     validate_callback-rejected case, proving routing-layer rejection and
+     validation-layer rejection are distinct failure modes.
+  8. Callback reach was independently verified for every case, confirming
+     exactly which cases actually executed the request callback's code.
+  9. The focused fixture suite and the full SquirrelForge suite were
+     rerun after live execution to confirm no regression.
+  10. Runtime cleanup and repository boundaries were verified, including
+      an idempotency rerun of cleanup itself.
+  11. This documentation was written only after every check above had
+      passed.
+
+REST Registration Evidence:
+  Real public REST index (dispatched through the real WP_REST_Server, not
+  raw HTTP, not the fake PHPUnit bootstrap) exposed:
+    - namespace: sfrest/v1
+    - route: /sfrest/v1/members/(?P<id>[\d]+)
+    - method: GET
+    - argument: id, type integer, required true
+    - endpoint visible in the index
+  WordPress's public REST index does not publish callback or
+  permission-callback names by design. Those were verified separately
+  from the live internal route-registration object
+  ($server->get_routes()), which confirmed:
+    - callback: sfrest_get_member
+    - permission callback: sfrest_check_member_permission
+    - validate_callback: sfrest_validate_member_id (present)
+    - sanitize_callback: sfrest_sanitize_member_id (present)
+    - show_in_index: true
+  These callback names are attributed to the internal route-registration
+  object, not to the public index, which never exposes them.
+
+API Contract Matrix (executed live, real WP_REST_Server::dispatch()):
+
+  | Request                             |                   Expected |                        Actual | Result |
+  | ------------------------------------ | --------------------------: | ------------------------------: | ------ |
+  | Administrator, member ID 1           |        200 member record    |     200 exact member record     | PASS   |
+  | Anonymous, member ID 1                | 401 authentication error   |  401 sfrest_unauthenticated     | PASS   |
+  | Subscriber, member ID 1               |  403 authorization error   |        403 sfrest_forbidden     | PASS   |
+  | Administrator, invalid ID 0           |     400 validation error   |      400 rest_invalid_param     | PASS   |
+  | Administrator, nonexistent ID 999     |            404 not found   | 404 sfrest_member_not_found     | PASS   |
+
+  Separately, as routing evidence (not one of the five contract rows):
+  a malformed non-digit route, /sfrest/v1/members/abc, returned
+  404 rest_no_route -- proving the route regex itself, not
+  validate_callback, is what rejects non-digit input.
+
+Callback Reach Evidence:
+  Using WordPress's own real option_{$option} filter on the fixture's
+  seeded option (a live hook, not a fixture-source modification) as an
+  invocation tracer, the request callback (sfrest_get_member) was
+  confirmed reached only for:
+    - the valid administrator request (member ID 1)
+    - the authorized nonexistent-record request (member ID 999)
+  It was confirmed NOT reached for:
+    - the anonymous request
+    - the forbidden (subscriber) request
+    - the invalid-ID request
+    - the malformed-route request
+  This proves the permission callback and the validate_callback/routing
+  layer both gate access before the request callback -- and therefore
+  before any member data is read -- for every rejected case.
+
+Security Conclusions:
+  - __return_true was confirmed absent, both by direct source reading and
+    by an independent PHP tokenizer scan (token_get_all()) counting
+    executable __return_true string literals outside of comments: 0.
+  - Anonymous access was denied (401).
+  - Authenticated access without the required capability was denied (403).
+  - No unauthorized response (401, 403, 400, 404, or the malformed-route
+    404) contained any member data -- only code/message/status fields.
+  - Validation failure (400, id fails validate_callback) and routing
+    failure (404 rest_no_route, id fails the route regex) were kept
+    distinct and were not conflated into a single failure mode.
+  - The successful (200) response body contained exactly the four
+    intended public fields: id, name, email, tier -- no additional
+    fields, no internal data.
+
+Automated Evidence:
+  - Focused fixture PHPUnit suite: 12 tests, 37 assertions, PASS.
+  - SquirrelForge full suite: 146 tests, 338 assertions, PASS (unaffected).
+  - PHP lint: clean on all authored/changed files.
+  - The fixture source SHA-256 hash was unchanged across live execution
+    (0b56879ce36abadd163ded2278b386c2aa383f95510e29bc3006d956c214f230
+    before and after) -- no implementation change was required.
+  - An independent PHP tokenizer scan confirmed exactly one executable
+    register_rest_route() call and zero executable __return_true
+    literals, ignoring comment text (grep-based evidence was explicitly
+    avoided per this scenario's own requirement).
+
+Cleanup and Boundary Evidence:
+  - the scenario-owned member option (sfrest_test_members) was removed
+  - the temporary subscriber (sfrest_subscriber_check) was deleted
+  - the fixture plugin was deactivated
+  - a direct database scan confirmed zero sfrest_* options remained
+  - cleanup was rerun a second time and completed safely with nothing
+    left to clean (idempotent)
+  - the existing Hospital administrator account and its capabilities
+    (allcaps) were confirmed unchanged before and after
+  - no temporary harness script or capture file remained in the
+    scratchpad directory or the Hospital plugin directory afterward
+  - no unrelated Hospital plugin, theme, or content was touched
+  - the SquirrelForge working tree was confirmed clean (git status
+    --short, git diff --check) both before this scenario's live
+    execution and before this documentation was written
+
+Live Environment: Hospital WordPress installation; single-site; WordPress
+  7.0.1; PHP 8.5.3; WP-CLI unavailable; execution performed through fresh
+  PHP processes bootstrapping wp-load.php and dispatching real
+  WP_REST_Request objects through the real WP_REST_Server, using Local's
+  site-matched PHP binary and database socket. Zero PHP warnings,
+  notices, deprecations, or errors were captured at any step.
+
+Capability Progression:
+
+  | Scenario        | Demonstrated capability          |
+  | --------------- | --------------------------------- |
+  | WP-SCENARIO-001 | Plugin creation                   |
+  | WP-SCENARIO-002 | Runtime debugging                 |
+  | WP-SCENARIO-003 | Static code review                |
+  | WP-SCENARIO-004 | Behavior-preserving refactoring    |
+  | WP-SCENARIO-005 | Performance optimization           |
+  | WP-SCENARIO-006 | Plugin Migration                  |
+  | WP-SCENARIO-007 | Secure REST Endpoint Engineering   |
+
+Scope of This Evidence:
+  This runtime result applies only to WP-SCENARIO-007's specific request
+  (a single capability-gated GET endpoint returning private member
+  records to authorized administrators, including its five-case
+  authorization/validation/response contract), executed once against one
+  WordPress installation using a standalone fixture plugin. It is the
+  first runtime evidence for CREATE-REST-ENDPOINT and does not
+  runtime-validate CREATE-REST-ENDPOINT for other request shapes (e.g. a
+  writable/POST endpoint, a public read-only endpoint using
+  __return_true, an endpoint backed by a custom database table rather
+  than a single option, pagination, or nested/collection routes), does
+  not runtime-validate any other Skill, and does not runtime-validate any
+  of the remaining 5 documentation scenarios in this suite.
+```
+
 ---
 
 ## Scenario Test Summary
@@ -1299,7 +1482,7 @@ Routing Errors: 0 (1 pre-existing routing contradiction found and fixed — see 
 Missing Skills: 0
 Missing Roles: 0
 Missing Validation Gates: 0
-Overall Scenario Status: All 14 defined scenarios pass documentation/routing traceability, including the 6 scenario classes (Custom Post Type + taxonomy, Settings API on an existing plugin, a WordPress-specific security review, a WordPress theme performance review, a plugin integrating with an external API, and a WordPress deployment request) that were previously absent from this suite. This status covers routing readiness for all 14 scenarios. Eight of the 14, WP-SCENARIO-001, WP-SCENARIO-002, WP-SCENARIO-003, WP-SCENARIO-004, WP-SCENARIO-005, WP-SCENARIO-006, WP-SCENARIO-009, and WP-SCENARIO-010, have additionally been runtime-validated against a live WordPress installation (see "Runtime Evidence" above); the remaining 6 scenarios have not been executed against a live WordPress environment. See 38_WORDPRESS/AGENT-READINESS-REPORT.md for the full readiness breakdown, including the Runtime Execution Readiness category.
+Overall Scenario Status: All 14 defined scenarios pass documentation/routing traceability, including the 6 scenario classes (Custom Post Type + taxonomy, Settings API on an existing plugin, a WordPress-specific security review, a WordPress theme performance review, a plugin integrating with an external API, and a WordPress deployment request) that were previously absent from this suite. This status covers routing readiness for all 14 scenarios. Nine of the 14, WP-SCENARIO-001, WP-SCENARIO-002, WP-SCENARIO-003, WP-SCENARIO-004, WP-SCENARIO-005, WP-SCENARIO-006, WP-SCENARIO-007, WP-SCENARIO-009, and WP-SCENARIO-010, have additionally been runtime-validated against a live WordPress installation (see "Runtime Evidence" above); the remaining 5 scenarios have not been executed against a live WordPress environment. See 38_WORDPRESS/AGENT-READINESS-REPORT.md for the full readiness breakdown, including the Runtime Execution Readiness category.
 ```
 
 ---
