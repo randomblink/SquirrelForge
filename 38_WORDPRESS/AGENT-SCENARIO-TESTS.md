@@ -28,7 +28,7 @@ Evidence:
 Gap:
 ```
 
-Result must be one of `PASS`, `PARTIAL`, `FAIL`, or `NOT EXECUTABLE`. This suite verifies documentation and routing traceability through the authoritative control chain (`38_WORDPRESS/WORDPRESS-MANAGER.md` → `38_WORDPRESS/PIPELINE.md` → `38_WORDPRESS/SKILLS/SKILL-ROUTING-MAP.md` → selected Skill → `33_WORDPRESS_ROLES/ROLE-MANAGER.md` → `33_WORDPRESS_ROLES/ROLE-ROUTING-MATRIX.md` → required knowledge → security and standards gates → testing requirements → completion criteria). A `PASS` proves the route, roles, knowledge, gates, and completion criteria are explicitly traceable in the repository — by itself it does not prove that code generated under that route would actually run correctly in a live WordPress environment. Four scenarios, WP-SCENARIO-001, WP-SCENARIO-006, WP-SCENARIO-009, and WP-SCENARIO-010, have additionally been runtime-validated against a live WordPress installation; see the "Runtime Evidence" section below. Those results are bounded to each scenario's specific request and do not extend runtime-validated status to any other scenario in this suite. See `38_WORDPRESS/AGENT-READINESS-REPORT.md`'s Runtime Execution Readiness category for the full distinction between traceability and execution.
+Result must be one of `PASS`, `PARTIAL`, `FAIL`, or `NOT EXECUTABLE`. This suite verifies documentation and routing traceability through the authoritative control chain (`38_WORDPRESS/WORDPRESS-MANAGER.md` → `38_WORDPRESS/PIPELINE.md` → `38_WORDPRESS/SKILLS/SKILL-ROUTING-MAP.md` → selected Skill → `33_WORDPRESS_ROLES/ROLE-MANAGER.md` → `33_WORDPRESS_ROLES/ROLE-ROUTING-MATRIX.md` → required knowledge → security and standards gates → testing requirements → completion criteria). A `PASS` proves the route, roles, knowledge, gates, and completion criteria are explicitly traceable in the repository — by itself it does not prove that code generated under that route would actually run correctly in a live WordPress environment. Five scenarios, WP-SCENARIO-001, WP-SCENARIO-002, WP-SCENARIO-006, WP-SCENARIO-009, and WP-SCENARIO-010, have additionally been runtime-validated against a live WordPress installation; see the "Runtime Evidence" section below. Those results are bounded to each scenario's specific request and do not extend runtime-validated status to any other scenario in this suite. See `38_WORDPRESS/AGENT-READINESS-REPORT.md`'s Runtime Execution Readiness category for the full distinction between traceability and execution.
 
 ---
 
@@ -370,7 +370,7 @@ Gap: FOUND AND FIXED. Before this pass, `12_AGENT/CAPABILITY-ROUTER.md`'s own pr
 
 ## Runtime Evidence
 
-Documentation/routing traceability (recorded per scenario above) is distinct from runtime execution evidence. This section records the four scenarios, so far, that have actually been run against a live WordPress installation. It supplements WP-SCENARIO-001's, WP-SCENARIO-006's, WP-SCENARIO-009's, and WP-SCENARIO-010's traceability results above — it does not replace any of those results, and it does not extend runtime-validated status to any other scenario in this suite.
+Documentation/routing traceability (recorded per scenario above) is distinct from runtime execution evidence. This section records the five scenarios, so far, that have actually been run against a live WordPress installation. It supplements WP-SCENARIO-001's, WP-SCENARIO-002's, WP-SCENARIO-006's, WP-SCENARIO-009's, and WP-SCENARIO-010's traceability results above — it does not replace any of those results, and it does not extend runtime-validated status to any other scenario in this suite.
 
 ### Runtime Validation — WP-SCENARIO-001 (Create a WordPress plugin with an administrator Settings API page and frontend shortcode)
 
@@ -807,6 +807,148 @@ Scope of This Evidence:
   application code is proven.
 ```
 
+### Runtime Validation — WP-SCENARIO-002 (Debug Plugin)
+
+```text
+Scenario Reference: WP-SCENARIO-002
+Runtime Target: Hospital WordPress installation ($HOME/Local Sites/hospital/app/public)
+Plugin Path: wp-content/plugins/squirrelforge-debug-validation
+Plugin Created As: standalone validation plugin, intentionally shipped in a
+  defective activation state first, then corrected in place -- the first
+  runtime scenario in this suite whose evidence is a debugging cycle
+  (reproduce, diagnose, fix, regression-test) rather than building working
+  output from a clean start.
+
+Primary Skill: DEBUG-PLUGIN. This is the first bounded runtime execution of
+  this Skill; it demonstrates that SquirrelForge can diagnose and correct
+  existing defective WordPress code, distinct from WP-SCENARIO-001,
+  WP-SCENARIO-009, and WP-SCENARIO-010 (CREATE-PLUGIN) and WP-SCENARIO-006
+  (MIGRATE-PLUGIN).
+
+PHP Syntax Lint: PASS (all three authored plugin PHP files, before and after
+  the fix)
+Pre-Fix Targeted Regression Test: FAILED as expected -- 1 test, 1 assertion,
+  1 error (the intentional defect, confirmed reproducing in the automated
+  suite before any correction was applied)
+Post-Fix Targeted Regression Test: PASS -- 1 test, 2 assertions
+Full Plugin PHPUnit Suite (post-fix): PASS -- 10 tests, 14 assertions
+SquirrelForge Full Suite: PASS -- 146 tests, 338 assertions (unaffected)
+
+Live Environment: Hospital WordPress installation; single-site; WP-CLI
+  unavailable; execution performed through fresh PHP processes bootstrapping
+  wp-load.php, using Local's site-matched PHP binary and database socket;
+  strict runtime error capture (error_reporting(E_ALL), a custom error
+  handler, and a try/catch around every activation attempt with a
+  shutdown-function fallback) enabled throughout; no debug.log was created
+  or fabricated (WP_DEBUG_LOG not enabled).
+
+Intentional Defect: The activation callback read a scenario-owned option
+  with get_option() and, without validating its type, passed the result
+  directly to an array-only operation. On a fresh installation the option
+  is absent and get_option() returns false, so activation threw.
+
+Disclosed Adjustment To The Planned Defect Shape (not a live runtime
+  failure; found and handled before finalizing the defect): the originally
+  planned direct array-offset dereference ($config['mode'] on a false
+  value) was tested directly first and found to only emit a PHP warning in
+  PHP 8 (return value null), not a thrown error. An equivalent array
+  operation, array_key_exists() against the same false value, was
+  confirmed by direct test to throw a genuine uncaught TypeError
+  deterministically, and was used instead so the scenario's requirement of
+  a real, deterministic PHP 8 error was actually satisfied rather than
+  assumed.
+
+Pre-Fix Reproduction Evidence:
+  - activation was attempted via activate_plugin() inside a try/catch on a
+    fresh bootstrap with no scenario-owned option present
+  - a TypeError was caught: "array_key_exists(): Argument #2 ($array) must
+    be of type array, false given"
+  - file and line pinpointed the exact defective statement in the plugin's
+    own activation callback
+  - a full stack trace was captured showing propagation through
+    WP_Hook->do_action() and activate_plugin()
+  - the plugin did not remain active after the failed attempt
+  - the Hospital site remained reachable and operational in a subsequent
+    fresh process (confirmed via get_bloginfo())
+  - the active-plugins list was confirmed unchanged from before the attempt
+  - zero unrelated PHP warnings, notices, or deprecations were captured
+
+Diagnosis:
+  - Symptom: activation throws when the callback treats a non-array option
+    value as an array.
+  - Root Cause: the callback assumed get_option() always returns a valid
+    configuration array, but a fresh installation returns false, and the
+    callback never validated the returned type before using it as an array.
+  - Rejected symptom-masking alternatives: error suppression, a broad
+    try/catch that silently ignores the failure, disabling the activation
+    routine, the @ operator, and blind unchecked casting were all rejected
+    in favor of explicit type validation and a bounded default.
+
+Smallest Safe Fix: the defective line was replaced with an explicit
+  is_array() check and a bounded 'safe' default, applied only inside the
+  one affected method -- no other method, file, or behavior was changed.
+
+Post-Fix Runtime Verification (all against the live installation):
+  - Missing option: activation succeeded, no throwable, default mode
+    'safe' applied, zero captured PHP issues
+  - Malformed option (string): activation succeeded, default mode applied,
+    zero captured PHP issues
+  - Malformed option (boolean false, the exact original crash shape):
+    activation succeeded, default mode applied, zero captured PHP issues --
+    directly disproving recurrence of the original defect
+  - Valid option (a configured mode value): activation succeeded, the
+    configured value was used and confirmed unchanged on a subsequent
+    fresh-process read
+  - Deactivation: succeeded; plugin became inactive; scenario-owned option
+    data was left untouched by deactivation itself (no deactivation hook is
+    registered, by design)
+  - Reactivation: repeated across three full reactivate/deactivate cycles;
+    every reactivation succeeded, the configured value remained correct,
+    and the original TypeError never recurred
+
+Cleanup and Boundaries:
+  - all scenario-owned options (the configuration option and the resolved-
+    mode option) were deleted; a direct query confirmed zero sfdbg_*
+    options remained afterward
+  - the temporary harness script was deleted from the scratchpad directory
+  - the corrected plugin remains installed but was deliberately left
+    inactive, to satisfy the explicit requirement that zero scenario-owned
+    options remain afterward (reactivating once more would have recreated
+    the resolved-mode option as harmless-but-real state)
+  - zero PHP warnings, notices, deprecations, or errors were captured on
+    any post-fix run
+  - CSHD remained clean and unchanged (git status --short / git diff
+    --check both clean before and after)
+  - the WP-SCENARIO-001, WP-SCENARIO-006, WP-SCENARIO-009, and
+    WP-SCENARIO-010 validation plugins remained untouched
+  - all other Hospital plugins remained untouched
+  - the SquirrelForge repository remained unchanged during runtime
+    execution; no routing, Skill, Role, knowledge, or scenario-definition
+    file was modified as part of running this scenario
+
+Security and Boundary Review:
+  - direct-access guard present
+  - no public debugging trigger; no AJAX handler; no REST route; no
+    $_GET, $_POST, or $_REQUEST usage anywhere in the plugin
+  - no database-table work, no raw SQL
+  - no external network access
+  - no destructive operations; the plugin touches only its own two options
+
+Scope of This Evidence:
+  This runtime result applies only to WP-SCENARIO-002's specific request (an
+  activation-time crash caused by an unvalidated non-array option value,
+  diagnosed and corrected on a standalone validation plugin), executed once
+  against one WordPress installation. It is the first runtime evidence for
+  DEBUG-PLUGIN and does not runtime-validate DEBUG-PLUGIN for other defect
+  shapes (e.g. a runtime-only defect outside activation, a defect spanning
+  multiple files, a database-related defect, a JavaScript defect), and does
+  not runtime-validate any other Skill or any of the remaining 9
+  documentation scenarios in this suite. It does not prove that every class
+  of WordPress plugin defect is diagnosable this way, that defects requiring
+  WP-CLI or a browser-driven reproduction are covered, or that multi-file or
+  multi-plugin-conflict debugging is proven.
+```
+
 ---
 
 ## Scenario Test Summary
@@ -820,7 +962,7 @@ Routing Errors: 0 (1 pre-existing routing contradiction found and fixed — see 
 Missing Skills: 0
 Missing Roles: 0
 Missing Validation Gates: 0
-Overall Scenario Status: All 14 defined scenarios pass documentation/routing traceability, including the 6 scenario classes (Custom Post Type + taxonomy, Settings API on an existing plugin, a WordPress-specific security review, a WordPress theme performance review, a plugin integrating with an external API, and a WordPress deployment request) that were previously absent from this suite. This status covers routing readiness for all 14 scenarios. Four of the 14, WP-SCENARIO-001, WP-SCENARIO-006, WP-SCENARIO-009, and WP-SCENARIO-010, have additionally been runtime-validated against a live WordPress installation (see "Runtime Evidence" above); the remaining 10 scenarios have not been executed against a live WordPress environment. See 38_WORDPRESS/AGENT-READINESS-REPORT.md for the full readiness breakdown, including the Runtime Execution Readiness category.
+Overall Scenario Status: All 14 defined scenarios pass documentation/routing traceability, including the 6 scenario classes (Custom Post Type + taxonomy, Settings API on an existing plugin, a WordPress-specific security review, a WordPress theme performance review, a plugin integrating with an external API, and a WordPress deployment request) that were previously absent from this suite. This status covers routing readiness for all 14 scenarios. Five of the 14, WP-SCENARIO-001, WP-SCENARIO-002, WP-SCENARIO-006, WP-SCENARIO-009, and WP-SCENARIO-010, have additionally been runtime-validated against a live WordPress installation (see "Runtime Evidence" above); the remaining 9 scenarios have not been executed against a live WordPress environment. See 38_WORDPRESS/AGENT-READINESS-REPORT.md for the full readiness breakdown, including the Runtime Execution Readiness category.
 ```
 
 ---
