@@ -77,7 +77,7 @@ Not Ready
 Ready with Conditions
 ```
 
-Basis: all checklist items above are satisfied with repository evidence, and all 8 scenarios in `38_WORDPRESS/AGENT-SCENARIO-TESTS.md` pass routing/documentation traceability. This checklist covers control-flow and inventory completeness only; it does not cover runtime execution. See `38_WORDPRESS/AGENT-READINESS-REPORT.md`'s Readiness Category Summary and Final Readiness Decision for the full assessment, including the open Operating Conditions (unverified runtime execution, partial command-level testing guidance, and a scenario-suite coverage gap).
+Basis: all checklist items above are satisfied with repository evidence, and all 14 scenarios in `38_WORDPRESS/AGENT-SCENARIO-TESTS.md` (the original 8 plus 6 added in a follow-up pass covering CPT+taxonomy, Settings API on an existing plugin, a WordPress security review, a WordPress theme performance review, external API integration, and a WordPress deployment request) pass routing/documentation traceability. This checklist covers control-flow and inventory completeness only; it does not cover runtime execution. See `38_WORDPRESS/AGENT-READINESS-REPORT.md`'s Readiness Category Summary and Final Readiness Decision for the full assessment, including the open Operating Conditions (unverified runtime execution and partial command-level testing guidance).
 ## Rule
 
 SquirrelForge is not ready to operate as a WordPress Agent until this checklist passes or all remaining gaps are explicitly documented.

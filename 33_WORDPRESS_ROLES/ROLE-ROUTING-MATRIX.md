@@ -537,6 +537,7 @@ Release Engineer
 - Additional Engineers for languages and components reviewed.
 - Performance Engineer for performance-sensitive behavior.
 - Documentation Engineer for documentation accuracy or impact.
+- Release Engineer when the review's objective is release or deployment readiness.
 
 ### Standard Route
 
@@ -681,7 +682,7 @@ Release Engineer when applicable
 
 The implementation owner may be PHP, Database, REST, JavaScript, CSS, or Block Engineer.
 
-Add Security Engineer when security controls or private-data caching are affected, Documentation Engineer when operational behavior changes, and Release Engineer for production release.
+Add Security Engineer when security controls or private-data caching are affected, Documentation Engineer when operational behavior changes, Release Engineer for production release, and Theme Architect or Plugin Architect when the performance work requires template, block, or structural boundary changes rather than a bounded implementation fix.
 
 ### Standard Route
 

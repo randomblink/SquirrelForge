@@ -45,6 +45,7 @@ Before execution, consult:
 - `38_WORDPRESS/KNOWLEDGE/REST-API.md` when REST behavior is involved
 - `38_WORDPRESS/KNOWLEDGE/CRON.md` when scheduled work is involved
 - `38_WORDPRESS/KNOWLEDGE/BLOCK-EDITOR.md` when editor behavior is involved
+- `38_WORDPRESS/KNOWLEDGE/THEME-HANDBOOK.md` when the target is a theme
 - `38_WORDPRESS/KNOWLEDGE/SECURITY.md`
 - applicable standards in `38_WORDPRESS/STANDARDS/`
 - `33_WORDPRESS_ROLES/ROLE-MANAGER.md`
@@ -140,6 +141,8 @@ Possible implementation owners:
 - JavaScript Engineer
 - CSS Engineer
 - Block Engineer
+
+Add Theme Architect or Plugin Architect when the optimization requires template, block, or structural boundary changes rather than a bounded implementation fix.
 
 Produce:
 

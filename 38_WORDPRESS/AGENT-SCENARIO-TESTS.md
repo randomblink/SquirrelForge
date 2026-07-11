@@ -224,18 +224,162 @@ Gap: None. This is the most thoroughly cross-referenced Skill of the eight trace
 
 ---
 
+### Scenario 9 — Add a Custom Post Type and Taxonomy
+
+```text
+Scenario ID: WP-SCENARIO-009
+User Request: Add a custom post type for testimonials with a custom taxonomy.
+Expected Primary Skill: CREATE-PLUGIN
+Expected Supporting Skills: CREATE-TESTS, WRITE-DOCUMENTATION
+Expected Required Roles: Project Architect, Plugin Architect, PHP Engineer, Security Engineer, QA Engineer, Documentation Engineer
+Expected Conditional Roles: CSS Engineer, JavaScript Engineer, Release Engineer
+Expected Validation Gates: Security, QA, Documentation
+Expected Reports: Skill Selection Decision, Role Routing Decision, PHP Implementation Report, Security Review Report, QA Report, Documentation Report
+Pass Criteria: Agent selects CREATE-PLUGIN regardless of new-or-existing project, and required knowledge includes Custom Post Types and Taxonomies.
+Result: PASS
+Evidence:
+  - 38_WORDPRESS/SKILLS/SKILL-ROUTING-MAP.md, "Custom Post Types, Taxonomies, and Settings Pages" section — this exact request is the section's first listed example, resolving to CREATE-PLUGIN as primary regardless of new-or-existing project.
+  - 38_WORDPRESS/SKILLS/CREATE-PLUGIN.md, Stage 2 "Knowledge Selection" — Custom Post Types and Taxonomies are listed and required when their concept is present in the request.
+  - 33_WORDPRESS_ROLES/ROLE-ROUTING-MATRIX.md, "Route 1 — CREATE-PLUGIN" — Required/Conditional Roles match the scenario's expected lists exactly.
+  - 38_WORDPRESS/KNOWLEDGE/CUSTOM-POST-TYPES.md and 38_WORDPRESS/KNOWLEDGE/TAXONOMIES.md — both exist.
+  - 38_WORDPRESS/SKILLS/CREATE-PLUGIN.md, Stage 9 (Security, blocking), Stage 11 (QA), "Completion Criteria" section.
+Gap: None.
+```
+
+---
+
+### Scenario 10 — Add a Settings API Page to an Existing Plugin
+
+```text
+Scenario ID: WP-SCENARIO-010
+User Request: Add a Settings API options page to an existing plugin.
+Expected Primary Skill: CREATE-PLUGIN
+Expected Supporting Skills: CREATE-TESTS, WRITE-DOCUMENTATION
+Expected Required Roles: Project Architect, Plugin Architect, PHP Engineer, Security Engineer, QA Engineer, Documentation Engineer
+Expected Conditional Roles: CSS Engineer, JavaScript Engineer, Release Engineer
+Expected Validation Gates: Security, QA, Documentation
+Expected Reports: Skill Selection Decision, Role Routing Decision, PHP Implementation Report, Security Review Report, QA Report, Documentation Report
+Pass Criteria: Agent selects CREATE-PLUGIN for the existing project (recorded via the Existing or New Project field) and required knowledge includes Settings API.
+Result: PASS
+Evidence:
+  - 38_WORDPRESS/SKILLS/SKILL-ROUTING-MAP.md, "Custom Post Types, Taxonomies, and Settings Pages" section — this exact request is the section's second listed example; explicitly states CREATE-PLUGIN's Trigger Conditions cover "build plugin functionality" without restricting to new projects, so no separate Skill is needed.
+  - 38_WORDPRESS/SKILLS/CREATE-PLUGIN.md, Stage 2 "Knowledge Selection" — Settings API is listed and required when a Settings API options page is involved.
+  - 33_WORDPRESS_ROLES/ROLE-ROUTING-MATRIX.md, "Route 1 — CREATE-PLUGIN" — Required/Conditional Roles match the scenario's expected lists exactly.
+  - 38_WORDPRESS/KNOWLEDGE/SETTINGS-API.md — exists.
+  - 38_WORDPRESS/KNOWLEDGE/SECURITY.md, "Nonces" section — directly applicable to a settings-save form.
+  - 38_WORDPRESS/STANDARDS/TESTING-STANDARD.md, Plugin Testing Checklist — "settings persist" item.
+Gap: None.
+```
+
+---
+
+### Scenario 11 — WordPress Plugin Security Review
+
+```text
+Scenario ID: WP-SCENARIO-011
+User Request: Perform a security review of this WordPress plugin.
+Expected Primary Skill: REVIEW-CODE
+Expected Supporting Skills: None unless findings recommend them
+Expected Required Roles: Role Manager, relevant Implementation Engineer, Security Engineer, QA Engineer
+Expected Conditional Roles: Performance Engineer, Documentation Engineer, Architect roles
+Expected Validation Gates: Scope, Evidence, Security Review, QA/Test Gap Review
+Expected Reports: WordPress Code Review Report, Security Review Report
+Pass Criteria: The request follows WordPress routing precedence (not the general Security Agent) and Security Engineer is a required, not merely conditional, role.
+Result: PASS
+Evidence:
+  - 12_AGENT/CAPABILITY-ROUTER.md, "Domain Precedence Rule" → "Precedence Examples" → "Security review of a WordPress plugin" — Primary Owner WordPress Manager, Route REVIEW-CODE → 33_WORDPRESS_ROLES/SECURITY-ENGINEER.md; the general 16_AGENTS/AGENT-SECURITY.md is supporting-only and only if explicitly called.
+  - 38_WORDPRESS/SKILLS/SKILL-ROUTING-MAP.md, "Code Inspection" section — evidence-based assessment requests route to REVIEW-CODE.
+  - 33_WORDPRESS_ROLES/ROLE-ROUTING-MATRIX.md, "Route 8 — REVIEW-CODE" — Security Engineer is a Required Role (not conditional).
+  - 38_WORDPRESS/SECURITY-VALIDATOR.md and 38_WORDPRESS/STANDARDS/CODE-REVIEW-STANDARD.md, "Review Areas" #1 (Security) — full security checklist available to the review.
+  - 38_WORDPRESS/SKILLS/REVIEW-CODE.md, "Completion Criteria" section.
+Gap: None.
+```
+
+---
+
+### Scenario 12 — WordPress Theme Performance Review
+
+```text
+Scenario ID: WP-SCENARIO-012
+User Request: Perform a performance review of this WordPress theme.
+Expected Primary Skill: OPTIMIZE-PERFORMANCE
+Expected Supporting Skills: None initially
+Expected Required Roles: Role Manager, Performance Engineer, responsible Implementation Engineer, Performance Engineer Revalidation, QA Engineer
+Expected Conditional Roles: CSS Engineer as implementation owner, Theme Architect or Plugin Architect when structural/template changes are needed, Security Engineer, Documentation Engineer, Release Engineer
+Expected Validation Gates: Baseline, Bottleneck Confirmation, Remeasurement, QA
+Expected Reports: Performance Baseline, Performance Optimization Plan, Performance Result, QA Report
+Pass Criteria: The request follows WordPress routing precedence and resolves to OPTIMIZE-PERFORMANCE (not CREATE-THEME) with Theme and Performance roles both available and measurement gates present.
+Result: PASS (after fix — see Gap)
+Evidence:
+  - 38_WORDPRESS/SKILLS/SKILL-ROUTING-MAP.md, "Performance Work" section — "the primary objective is performance improvement" selects OPTIMIZE-PERFORMANCE regardless of subject (plugin or theme).
+  - 12_AGENT/CAPABILITY-ROUTER.md, "Precedence Examples" → "Performance review of a WordPress theme" — corrected in this pass to route through OPTIMIZE-PERFORMANCE rather than CREATE-THEME.
+  - 38_WORDPRESS/SKILLS/OPTIMIZE-PERFORMANCE.md, Stage 2 "Role Routing" — now explicitly adds "Theme Architect or Plugin Architect when the optimization requires template, block, or structural boundary changes"; Required References now include `38_WORDPRESS/KNOWLEDGE/THEME-HANDBOOK.md` when the target is a theme.
+  - 33_WORDPRESS_ROLES/ROLE-ROUTING-MATRIX.md, "Route 11 — OPTIMIZE-PERFORMANCE" — Conditional Roles now include Theme Architect/Plugin Architect.
+  - 38_WORDPRESS/SKILLS/OPTIMIZE-PERFORMANCE.md, Stage 3 (Baseline Measurement), Stage 4 (Bottleneck Identification), Stage 8 (Performance Revalidation) — measurement gates present.
+Gap: FOUND AND FIXED. Before this pass, `12_AGENT/CAPABILITY-ROUTER.md`'s own precedence example routed a WordPress theme performance review through CREATE-THEME + PERFORMANCE-ENGINEER.md, directly contradicting `SKILL-ROUTING-MAP.md`'s general "Performance Work" rule (which selects OPTIMIZE-PERFORMANCE for any performance-improvement objective) and the already-passing WP-SCENARIO-005 pattern. Neither `OPTIMIZE-PERFORMANCE.md` nor `ROLE-ROUTING-MATRIX.md` Route 11 mentioned a Theme Architect role or theme-specific knowledge at all. Fixed by (1) correcting the CAPABILITY-ROUTER.md example to route through OPTIMIZE-PERFORMANCE, (2) adding "Theme Architect or Plugin Architect when the optimization requires template, block, or structural boundary changes" to both `OPTIMIZE-PERFORMANCE.md`'s Stage 2 and `ROLE-ROUTING-MATRIX.md` Route 11's Conditional Roles, and (3) adding `THEME-HANDBOOK.md` as a conditional required reference in `OPTIMIZE-PERFORMANCE.md` when the target is a theme. Rerun after fix: PASS.
+```
+
+---
+
+### Scenario 13 — WordPress Plugin Integrating with an External API
+
+```text
+Scenario ID: WP-SCENARIO-013
+User Request: Build a WordPress plugin that integrates with an external API.
+Expected Primary Skill: CREATE-PLUGIN
+Expected Supporting Skills: CREATE-REST-ENDPOINT when the plugin also exposes its own REST route, CREATE-TESTS, WRITE-DOCUMENTATION
+Expected Required Roles: Project Architect, Plugin Architect, PHP Engineer, Security Engineer, QA Engineer, Documentation Engineer
+Expected Conditional Roles: REST Engineer, Release Engineer
+Expected Validation Gates: Security, QA, Documentation
+Expected Reports: Skill Selection Decision, Role Routing Decision, PHP Implementation Report, Security Review Report, QA Report, Documentation Report
+Pass Criteria: One primary WordPress owner is identified; explicit API/security boundaries, credential handling, error handling, and validation requirements are all traceable.
+Result: PASS
+Evidence:
+  - 12_AGENT/CAPABILITY-ROUTER.md, "Precedence Examples" → "WordPress plugin integrating with an external API" — Primary Owner WordPress Manager, Route CREATE-PLUGIN (supporting CREATE-REST-ENDPOINT), Supporting Boundary Owner 26_INTEGRATIONS/Integration Agent for the external service's own auth/contract/failure-mode requirements only — one primary owner, no duplicate ownership of the plugin itself.
+  - 38_WORDPRESS/KNOWLEDGE/PLUGIN-HANDBOOK.md, "Performance Considerations" ("Use Transients for Caching... external API calls") and "Best Practices" ("Error Handling: Use the WP_Error class").
+  - 38_WORDPRESS/SECURITY-VALIDATOR.md, "API Credentials" section — secrets must come from options, environment variables, or secure configuration, never hardcoded.
+  - 38_WORDPRESS/KNOWLEDGE/SECURITY.md, Core Principle — "Never trust any data... whether from users, third-party APIs, or even the database."
+  - 33_WORDPRESS_ROLES/ROLE-ROUTING-MATRIX.md, "Route 1 — CREATE-PLUGIN" Conditional Roles — REST Engineer "for REST routes, API contracts, authenticated operations, or public operations."
+Gap: None. Minor observation, not blocking: no single dedicated "external API integration" knowledge file exists; coverage is distributed across PLUGIN-HANDBOOK.md, SECURITY.md, and SECURITY-VALIDATOR.md.
+```
+
+---
+
+### Scenario 14 — WordPress Plugin Deployment Request
+
+```text
+Scenario ID: WP-SCENARIO-014
+User Request: Prepare this WordPress plugin for deployment.
+Expected Primary Skill: REVIEW-CODE
+Expected Supporting Skills: None
+Expected Required Roles: Role Manager, relevant Implementation Engineer, Security Engineer, QA Engineer, Release Engineer
+Expected Conditional Roles: Performance Engineer, Documentation Engineer, Architect roles
+Expected Validation Gates: Scope, Evidence, Security Review, QA/Test Gap Review, Release Readiness
+Expected Reports: WordPress Code Review Report, Security Review Report, Release Readiness Report
+Pass Criteria: The request routes through the WordPress release path (REVIEW-CODE → Release Engineer), not through the general Release Agent as primary owner.
+Result: PASS (after fix — see Gap)
+Evidence:
+  - 38_WORDPRESS/SKILLS/SKILL-ROUTING-MAP.md, "Code Inspection" section — "assess release readiness" is a listed example routing to REVIEW-CODE.
+  - 12_AGENT/CAPABILITY-ROUTER.md, "Precedence Examples" → "WordPress deployment request" — corrected in this pass to name REVIEW-CODE explicitly as the triggering Skill before Role Routing Matrix selects Release Engineer; the general 16_AGENTS/AGENT-RELEASE.md is supporting-only, invoked to perform actual release-action execution once WordPress readiness is approved.
+  - 33_WORDPRESS_ROLES/ROLE-ROUTING-MATRIX.md, "Route 8 — REVIEW-CODE" — Conditional Roles now include "Release Engineer when the review's objective is release or deployment readiness."
+  - 33_WORDPRESS_ROLES/RELEASE-ENGINEER.md — "Required Approval Gates" table, "Final Release Decisions" (GO/CONDITIONAL GO/NO-GO/HOLD), and "Handoff" section ("approved release status returns to the WordPress Role Manager and WordPress Manager").
+Gap: FOUND AND FIXED. Before this pass, `12_AGENT/CAPABILITY-ROUTER.md`'s own precedence example for a WordPress deployment request named the Role Routing Matrix and Release Engineer directly without naming which Skill selects them first, breaking the required Skill-before-Role sequencing in the authoritative control chain. `ROLE-ROUTING-MATRIX.md` Route 8 (REVIEW-CODE) also did not list Release Engineer as a role at all, even though "assess release readiness" is one of REVIEW-CODE's own documented trigger examples. Fixed by naming REVIEW-CODE explicitly as the triggering Skill in the CAPABILITY-ROUTER.md example, and adding "Release Engineer when the review's objective is release or deployment readiness" to Route 8's Conditional Roles. Rerun after fix: PASS.
+```
+
+---
+
 ## Scenario Test Summary
 
 ```text
-Scenarios Run: 8
-Scenarios Passed: 8 (6 passed directly; 2 passed after a small, scenario-exposed documentation fix — see Scenario 6 and Scenario 7 Gap fields)
+Scenarios Run: 14
+Scenarios Passed: 14 (10 passed directly; 4 passed after a small, scenario-exposed documentation fix — see Scenario 6, Scenario 7, Scenario 12, and Scenario 14 Gap fields)
 Scenarios Failed: 0
 Blocked Scenarios: 0
-Routing Errors: 0
+Routing Errors: 0 (1 pre-existing routing contradiction found and fixed — see Scenario 12)
 Missing Skills: 0
 Missing Roles: 0
 Missing Validation Gates: 0
-Overall Scenario Status: All 8 defined scenarios pass documentation/routing traceability. This status covers routing readiness only — no scenario was executed against a live WordPress environment (no WP-CLI, PHP/WordPress runtime, or browser was exercised in this pass). See 38_WORDPRESS/AGENT-READINESS-REPORT.md for the full readiness breakdown, including the Runtime Execution Readiness category and the scenario-coverage gap for request types not represented in this suite (Custom Post Type + taxonomy, Settings API on an existing plugin, a WordPress-specific security review, a WordPress theme performance review, a plugin integrating with an external API, and a WordPress deployment request).
+Overall Scenario Status: All 14 defined scenarios pass documentation/routing traceability, including the 6 scenario classes (Custom Post Type + taxonomy, Settings API on an existing plugin, a WordPress-specific security review, a WordPress theme performance review, a plugin integrating with an external API, and a WordPress deployment request) that were previously absent from this suite. This status covers routing readiness only — no scenario was executed against a live WordPress environment (no WP-CLI, PHP/WordPress runtime, or browser was exercised in this pass). See 38_WORDPRESS/AGENT-READINESS-REPORT.md for the full readiness breakdown, including the Runtime Execution Readiness category.
 ```
 
 ---

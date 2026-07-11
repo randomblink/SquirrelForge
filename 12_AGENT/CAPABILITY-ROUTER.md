@@ -87,9 +87,9 @@ Reason: The request is WordPress-specific; the WordPress Security Engineer role,
 
 ```text
 Primary Owner: WordPress Manager (38_WORDPRESS/WORDPRESS-MANAGER.md)
-Route: CREATE-THEME Skill → 33_WORDPRESS_ROLES/PERFORMANCE-ENGINEER.md
+Route: OPTIMIZE-PERFORMANCE Skill → 33_WORDPRESS_ROLES/PERFORMANCE-ENGINEER.md
 Supporting: 16_AGENTS/AGENT-PERFORMANCE.md only if explicitly called by the WordPress route
-Reason: The request is WordPress-specific; the WordPress Performance Engineer role owns the finding.
+Reason: The request is WordPress-specific and its primary objective is performance improvement, so `38_WORDPRESS/SKILLS/SKILL-ROUTING-MAP.md`'s "Performance Work" rule selects OPTIMIZE-PERFORMANCE regardless of whether the target is a plugin or a theme; CREATE-THEME governs building a new theme, not reviewing an existing one's performance. The WordPress Performance Engineer role owns the finding.
 ```
 
 **Generic PHP security review unrelated to WordPress**
@@ -113,9 +113,9 @@ Reason: The deliverable is a WordPress plugin, so the WordPress Manager owns the
 
 ```text
 Primary Owner: WordPress Manager (38_WORDPRESS/WORDPRESS-MANAGER.md)
-Route: Role Routing Matrix → 33_WORDPRESS_ROLES/RELEASE-ENGINEER.md for WordPress production readiness
-Supporting: 16_AGENTS/AGENT-RELEASE.md, invoked explicitly by the WordPress Manager, to perform the actual release action execution
-Reason: WordPress deployment is a WordPress-domain trigger, so the WordPress Manager owns readiness; the general Release Agent supports execution because it is the only implemented release-action mechanism, not a competing owner.
+Route: REVIEW-CODE Skill (per 38_WORDPRESS/SKILLS/SKILL-ROUTING-MAP.md's "Code Inspection" → "assess release readiness" example) → Role Routing Matrix → 33_WORDPRESS_ROLES/RELEASE-ENGINEER.md for WordPress production readiness
+Supporting: 16_AGENTS/AGENT-RELEASE.md, invoked explicitly by the WordPress Manager, to perform the actual release action execution once readiness is approved
+Reason: A standalone "prepare for deployment" request with no accompanying feature or fix work is a readiness assessment, not new implementation, so it routes as REVIEW-CODE; Release Engineer is the conditional role that owns WordPress production readiness within that review. The general Release Agent supports execution because it is the only implemented release-action mechanism, not a competing owner.
 ```
 
 ---
