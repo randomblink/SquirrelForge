@@ -415,6 +415,45 @@ Determined from actual repository precedent, not invented:
 
 ---
 
+## 17. Harness Isolation Addendum (post-implementation, confirmed defect and fix)
+
+This addendum records a harness-only defect discovered during the first live-execution attempt, and its fix. It does not revise Sections 1–16 above, and it changes none of the frozen schema, migration logic, fixture data, or PASS/FAIL criteria. It exists because a live execution attempt found that Section 4's original suppression design (`SFSCHEMA_SUPPRESS_AUTO_UPGRADE`) was incomplete, and a follow-up diagnostic investigation determined exactly why and what closes the gap.
+
+### Confirmed cross-process WP-Cron interference
+
+A dedicated investigation (temporary, non-production instrumentation; no fixture or harness behavior changed at the time) proved, with captured backtraces from two controlled conditions, that:
+
+- Every harness script boots `wp-load.php`, which runs WordPress's normal shutdown sequence. That sequence can call `spawn_cron()`, which issues a real, separate, non-blocking HTTP request to the Hospital site's own live `wp-cron.php` — a **different PHP process** from the harness script that triggered it.
+- With WP-Cron enabled and the live site reachable (the default, unmodified condition), that separate process was directly observed, via full backtrace, executing `sfschema_maybe_upgrade() → sfschema_migrate_to_v2() → dbDelta()`, issuing the exact three Version 2 `ALTER TABLE` statements against a table that a moment earlier had been independently verified as pure Version 1.
+- That same separate process's logged activity stopped immediately after the third `ALTER TABLE`, before the verifier's `INFORMATION_SCHEMA` queries or either `update_option()` call — which is exactly why the resulting state showed Version 2 columns already present while `sfschema_db_version` remained `1` and `sfschema_last_upgrade_result` was absent.
+- With `DISABLE_WP_CRON` defined for the harness's own processes (identical install/inspect sequence otherwise), zero cron-triggered processes appeared, and the Version 1 structure remained pure across a fresh-process re-inspection.
+
+One controlled condition reproducibly caused the mutation; the other reliably prevented it.
+
+### Why `SFSCHEMA_SUPPRESS_AUTO_UPGRADE` alone cannot isolate this
+
+`SFSCHEMA_SUPPRESS_AUTO_UPGRADE` is a PHP constant, meaningful only inside the single PHP process where it is defined. The `wp-cron.php` request that `spawn_cron()` issues is a **new, independent HTTP request**, handled by a separate PHP-FPM worker process that boots WordPress from scratch. It has no way to inherit a constant defined in the harness script's own process — there is no shared memory or IPC between them. A per-process suppression flag can only ever protect the process that defines it; it cannot protect against a second process the first one causes to exist. Closing this gap requires preventing the second process from being spawned at all, not adding more in-process guards.
+
+### Selected isolation mechanism
+
+Define `DISABLE_WP_CRON` as `true` before any harness script requires `wp-load.php`. WordPress's own `wp_cron()`/`spawn_cron()` logic checks this constant and, when true, never issues the loopback request in the first place — the correct point of prevention, matching WordPress's own documented mechanism for disabling pseudo-cron.
+
+Implemented in exactly one shared location: `harness/_harness-common.php`'s `sfschema_harness_bootstrap()` function, which every one of the 15 numbered harness scripts already calls before requiring `wp-load.php` (confirmed: `wp-load.php` is required in exactly one place in the entire harness, inside this function). No script duplicates the definition; no script bypasses this shared helper.
+
+### Affected harness phases
+
+All of them. `DISABLE_WP_CRON` is defined unconditionally inside `sfschema_harness_bootstrap()`, independent of the `$suppress_auto_upgrade` parameter, so it applies identically to every phase: baseline check, defensive cleanup, Version 1 installation, Version 1/Version 2 structural capture, fixture-data seeding, pre/post-upgrade data capture, the real migration-trigger bootstrap (Phase 7/script 08), the repeat-migration bootstrap (Phase 11/script 12), the error summary, and final cleanup verification. Defining `DISABLE_WP_CRON` does not suppress or alter scripts 08's and 12's own intended real `plugins_loaded` firing within their own process — that still fires normally, exactly as the frozen migration gate (Section 4) requires. It only prevents that same process from additionally spawning a second, independent background request that could interfere with a later phase.
+
+### Validation requirements
+
+- Confirm `DISABLE_WP_CRON` is defined, with value `true`, before `wp-load.php` is required, in the shared bootstrap only.
+- Confirm every numbered harness script calls the shared bootstrap rather than requiring `wp-load.php` directly.
+- Confirm `SFSCHEMA_SUPPRESS_AUTO_UPGRADE` behavior is unchanged where it was already required (scripts other than 08 and 12).
+- Confirm, via a bounded runtime check (clean → install Version 1 → verify immediately → re-inspect from a fresh process), that no `wp-cron.php` process appears and the Version 1 structure remains unmutated across that fresh-process inspection.
+- This addendum authorizes only the isolation fix described above. It does not authorize proceeding into the full WP-SCENARIO-008 live-evidence execution; that remains a separate, later task.
+
+---
+
 ## GO / NO-GO Recommendation: **GO** (implementation design only, pending review)
 
 This design is fully bounded, every schema/trigger/data/cleanup decision is frozen, and every PASS criterion from the approved plan has mapped evidence. No implementation, fixture, test, or runtime work has occurred. Awaiting review before any further phase begins.
