@@ -454,6 +454,26 @@ All of them. `DISABLE_WP_CRON` is defined unconditionally inside `sfschema_harne
 
 ---
 
+## 18. Verifier-Argument Addendum (post-implementation, confirmed defect and fix)
+
+This addendum records a fixture-level defect discovered during the first real Phase 7 migration-trigger attempt, and its fix. It does not revise Sections 1–17 above, and it changes none of the frozen schema, migration version numbers, frozen rows, or PASS/FAIL criteria.
+
+### Confirmed defect
+
+Real WordPress's `do_action( 'plugins_loaded' )`, when fired with no extra arguments (the normal case, including every prior harness invocation once the Section 17 cron fix let this trigger actually run), passes a literal empty string `''` to a callback registered for one argument — not `null`. `sfschema_maybe_upgrade( $verifier = null )` therefore received `$verifier = ''`, passed it unchanged to `sfschema_migrate_to_v2( $verifier = null )`, whose `if ( null === $verifier )` guard does not match `''`, leaving `$verifier` as `''` and causing `call_user_func( '' )` to throw an uncaught `TypeError`. `dbDelta()` had already committed the Version 2 DDL correctly (including correct data preservation and default backfill) before this fatal; the stored version and migration-result option were never written because execution stopped first.
+
+### Fix
+
+`sfschema_migrate_to_v2()` now normalizes both `null` and `''` (and only those two values) to the real default verifier name before use, and routes any other non-callable verifier value through the same controlled-failure path already used for a verifier that runs and reports mismatches — rather than ever passing a non-callable value to `call_user_func()`. The fake bootstrap's `do_action()` (`tests/bootstrap.php`) was updated to reproduce WordPress's real empty-string argument behavior, so the focused suite can catch this class of bug without a live bootstrap.
+
+### Validation
+
+Regression tests were added proving: omitted/`null`/`''` verifiers all use the default and do not fatal; the real hook-shaped `do_action( 'plugins_loaded' )` call does not fatal and still attempts the real migration; an explicit valid custom verifier is still used; an explicit invalid non-empty verifier (including the string `'0'`) is treated as invalid, not silently defaulted; and the stored version advances only after successful verification. A bounded real-runtime validation against the live Hospital installation confirmed: no fatal error on the real unsuppressed `plugins_loaded` trigger; Version 2 structure matching the frozen specification exactly; all three frozen rows preserved byte-for-byte (identical pre/post-migration data hash); `status`/`updated_at` correctly backfilled; stored version advanced from `1` to `2`; migration-result recorded `v2_migration_succeeded`.
+
+This addendum authorizes only this fixture-level correction. It does not authorize proceeding into the full WP-SCENARIO-008 live-evidence execution; that remains a separate, later task.
+
+---
+
 ## GO / NO-GO Recommendation: **GO** (implementation design only, pending review)
 
 This design is fully bounded, every schema/trigger/data/cleanup decision is frozen, and every PASS criterion from the approved plan has mapped evidence. No implementation, fixture, test, or runtime work has occurred. Awaiting review before any further phase begins.
