@@ -199,37 +199,6 @@ Gap: FOUND AND FIXED. Before this pass, 38_WORDPRESS/SKILLS/CREATE-REST-ENDPOINT
 
 ---
 
-### Scenario 8 — Create Theme
-
-```text
-Scenario ID: WP-SCENARIO-008
-Note: this ID is also used, separately, by a later Runtime Validation
-  entry below ("WP-SCENARIO-008 — Database Schema Lifecycle
-  Engineering"), added in a later session as a distinct scenario. That
-  entry documents a bounded runtime scenario unrelated to the "Create
-  Theme" traceability scenario recorded here; the two are cross-
-  referenced, not merged.
-User Request: Create a block theme for a small business website.
-Expected Primary Skill: CREATE-THEME
-Expected Supporting Skills: CREATE-TESTS, WRITE-DOCUMENTATION
-Expected Required Roles: Project Architect, Theme Architect, PHP Engineer, CSS Engineer, Security Engineer, Performance Engineer, QA Engineer, Documentation Engineer
-Expected Conditional Roles: Block Engineer, JavaScript Engineer, Release Engineer
-Expected Validation Gates: Architecture, Security, Performance, QA, Documentation
-Expected Reports: Theme Architecture Specification, CSS Implementation Report, Security Review Report, Performance Review Report, QA Report
-Pass Criteria: Agent routes theme work through Theme Architect and does not place persistent business logic in the theme.
-Result: PASS
-Evidence:
-  - 38_WORDPRESS/SKILLS/SKILL-ROUTING-MAP.md, "New Theme" section — "create a block theme" is a listed example routing to CREATE-THEME.
-  - 38_WORDPRESS/SKILLS/CREATE-THEME.md, "Pipeline Mapping" table — maps every `38_WORDPRESS/PIPELINE.md` stage one-to-one to a responsible role, theme activity, and required output/gate, explicitly marking Security Validation and Standards Validation as BLOCKING GATEs and Final Approval as the FINAL GATE.
-  - 38_WORDPRESS/KNOWLEDGE/KNOWLEDGE-MANAGER.md, Knowledge Mapping Examples — "Build a block theme" row lists THEME-HANDBOOK.md, BLOCK-EDITOR.md, CODING-STANDARDS.md, ACCESSIBILITY.md, all of which exist.
-  - 33_WORDPRESS_ROLES/ROLE-ROUTING-MATRIX.md, "Route 2 — CREATE-THEME" — Required and Conditional Roles match the scenario's expected lists exactly; Block Engineer is correctly triggered for a block theme.
-  - 38_WORDPRESS/SKILLS/CREATE-THEME.md, "Theme Boundary Rules" — "Themes must not own critical business logic or durable data behavior that must survive a theme change" matches the Pass Criteria verbatim.
-  - 38_WORDPRESS/SKILLS/CREATE-THEME.md, "Completion Criteria" — 12-item checklist covering roles, architecture, implementation, accessibility, security, standards, performance, testing, documentation, and release.
-Gap: None. This is the most thoroughly cross-referenced Skill of the eight traced (explicit Pipeline Mapping table).
-```
-
----
-
 ### Scenario 9 — Add a Custom Post Type and Taxonomy
 
 ```text
@@ -374,9 +343,56 @@ Gap: FOUND AND FIXED. Before this pass, `12_AGENT/CAPABILITY-ROUTER.md`'s own pr
 
 ---
 
+### Scenario 15 — Create Theme
+
+```text
+Scenario ID: WP-SCENARIO-015
+Identifier History: This scenario was originally recorded under
+  WP-SCENARIO-008. That ID was later reused, independently, for a
+  different, later-defined bounded scenario ("WP-SCENARIO-008 —
+  Database Schema Lifecycle Engineering," see the Runtime Evidence
+  section below), creating a genuine identifier collision once both
+  entries existed side by side under the same ID. The collision was
+  discovered and resolved after the schema-lifecycle scenario's live
+  evidence execution and documentation had already been committed under
+  WP-SCENARIO-008; WP-SCENARIO-008 was retained for the schema-lifecycle
+  scenario because it had the deeper established planning and execution
+  history (a locked plan and implementation plan, two diagnosed-and-
+  fixed live execution attempts, and committed runtime evidence), and
+  this Create Theme scenario was reassigned to WP-SCENARIO-015 to
+  restore one-to-one scenario identification. See "Scenario ID
+  Collision Resolution" below for the full record. No other content on
+  this scenario changed as a result of the reassignment.
+User Request: Create a block theme for a small business website.
+Expected Primary Skill: CREATE-THEME
+Expected Supporting Skills: CREATE-TESTS, WRITE-DOCUMENTATION
+Expected Required Roles: Project Architect, Theme Architect, PHP Engineer, CSS Engineer, Security Engineer, Performance Engineer, QA Engineer, Documentation Engineer
+Expected Conditional Roles: Block Engineer, JavaScript Engineer, Release Engineer
+Expected Validation Gates: Architecture, Security, Performance, QA, Documentation
+Expected Reports: Theme Architecture Specification, CSS Implementation Report, Security Review Report, Performance Review Report, QA Report
+Pass Criteria: Agent routes theme work through Theme Architect and does not place persistent business logic in the theme.
+Result: PASS
+Evidence:
+  - 38_WORDPRESS/SKILLS/SKILL-ROUTING-MAP.md, "New Theme" section — "create a block theme" is a listed example routing to CREATE-THEME.
+  - 38_WORDPRESS/SKILLS/CREATE-THEME.md, "Pipeline Mapping" table — maps every `38_WORDPRESS/PIPELINE.md` stage one-to-one to a responsible role, theme activity, and required output/gate, explicitly marking Security Validation and Standards Validation as BLOCKING GATEs and Final Approval as the FINAL GATE.
+  - 38_WORDPRESS/KNOWLEDGE/KNOWLEDGE-MANAGER.md, Knowledge Mapping Examples — "Build a block theme" row lists THEME-HANDBOOK.md, BLOCK-EDITOR.md, CODING-STANDARDS.md, ACCESSIBILITY.md, all of which exist.
+  - 33_WORDPRESS_ROLES/ROLE-ROUTING-MATRIX.md, "Route 2 — CREATE-THEME" — Required and Conditional Roles match the scenario's expected lists exactly; Block Engineer is correctly triggered for a block theme.
+  - 38_WORDPRESS/SKILLS/CREATE-THEME.md, "Theme Boundary Rules" — "Themes must not own critical business logic or durable data behavior that must survive a theme change" matches the Pass Criteria verbatim.
+  - 38_WORDPRESS/SKILLS/CREATE-THEME.md, "Completion Criteria" — 12-item checklist covering roles, architecture, implementation, accessibility, security, standards, performance, testing, documentation, and release.
+Gap: None. This is the most thoroughly cross-referenced Skill of the scenarios originally traced in this suite (explicit Pipeline Mapping table).
+```
+
+---
+
+## Scenario ID Collision Resolution
+
+`WP-SCENARIO-008` was assigned twice: first to this file's original "Create Theme" traceability scenario, and later, in a separate session, to a newly-defined "Database Schema Lifecycle Engineering" bounded runtime scenario, without checking for a prior assignment. The collision was discovered only after the schema-lifecycle scenario had already been fully executed live and its evidence committed under the WP-SCENARIO-008 identifier. Resolution: `WP-SCENARIO-008` was retained for Database Schema Lifecycle Engineering, since it carried the deeper established history (a locked plan and implementation plan with two addenda, two diagnosed-and-fixed live execution attempts, and committed runtime evidence, all under that identifier). The Create Theme scenario, which had no dedicated filenames of its own tied to the ID, was reassigned to `WP-SCENARIO-015` — the lowest scenario identifier not already in use anywhere in this repository — with no change to its content, result, evidence, or status. Every scenario ID in this file now maps to exactly one scenario, and every scenario maps to exactly one ID.
+
+---
+
 ## Runtime Evidence
 
-Documentation/routing traceability (recorded per scenario above) is distinct from runtime execution evidence. This section records the ten scenarios, so far, that have actually been run against a live WordPress installation. It supplements WP-SCENARIO-001's, WP-SCENARIO-002's, WP-SCENARIO-003's, WP-SCENARIO-004's, WP-SCENARIO-005's, WP-SCENARIO-006's, WP-SCENARIO-007's, WP-SCENARIO-008's, WP-SCENARIO-009's, and WP-SCENARIO-010's traceability results above — it does not replace any of those results, and it does not extend runtime-validated status to any other scenario in this suite. (WP-SCENARIO-008's runtime evidence below is for the distinct "Database Schema Lifecycle Engineering" scenario, not the "Create Theme" scenario recorded under the same ID earlier in this file — see that entry's cross-reference note.)
+Documentation/routing traceability (recorded per scenario above) is distinct from runtime execution evidence. This section records the ten scenarios, so far, that have actually been run against a live WordPress installation. It supplements WP-SCENARIO-001's, WP-SCENARIO-002's, WP-SCENARIO-003's, WP-SCENARIO-004's, WP-SCENARIO-005's, WP-SCENARIO-006's, WP-SCENARIO-007's, WP-SCENARIO-008's, WP-SCENARIO-009's, and WP-SCENARIO-010's traceability results above — it does not replace any of those results, and it does not extend runtime-validated status to any other scenario in this suite.
 
 ### Runtime Validation — WP-SCENARIO-001 (Create a WordPress plugin with an administrator Settings API page and frontend shortcode)
 
@@ -1477,7 +1493,7 @@ Scope of This Evidence:
 
 ### Runtime Validation — WP-SCENARIO-008 (Database Schema Lifecycle Engineering)
 
-This ID is shared with, but distinct from, the "Scenario 8 — Create Theme" documentation-traceability entry earlier in this file (see the cross-reference note there). This entry records a separate, later-defined bounded scenario: a real versioned structural upgrade against an already-existing, already-populated WordPress database table, gated by explicit schema-version detection — planned in `38_WORDPRESS/WP-SCENARIO-008-PLAN.md`, designed in `38_WORDPRESS/WP-SCENARIO-008-IMPLEMENTATION-PLAN.md` (including its Harness Isolation Addendum and Verifier-Argument Addendum), and executed here.
+This ID was briefly reused by a "Scenario 8 — Create Theme" documentation-traceability entry that previously also occupied WP-SCENARIO-008 in this file; that collision has since been resolved by reassigning the Create Theme scenario to WP-SCENARIO-015 (see "Scenario ID Collision Resolution" below and "Scenario 15 — Create Theme" above). WP-SCENARIO-008 now identifies only this entry: a real versioned structural upgrade against an already-existing, already-populated WordPress database table, gated by explicit schema-version detection — planned in `38_WORDPRESS/WP-SCENARIO-008-PLAN.md`, designed in `38_WORDPRESS/WP-SCENARIO-008-IMPLEMENTATION-PLAN.md` (including its Harness Isolation Addendum and Verifier-Argument Addendum), and executed here.
 
 ```text
 Scenario Reference: WP-SCENARIO-008
@@ -1686,15 +1702,15 @@ Scope of This Evidence:
 ## Scenario Test Summary
 
 ```text
-Scenarios Run: 14
-Scenarios Passed: 14 (10 passed directly; 4 passed after a small, scenario-exposed documentation fix — see Scenario 6, Scenario 7, Scenario 12, and Scenario 14 Gap fields)
+Scenarios Run: 15
+Scenarios Passed: 15 (11 passed directly; 4 passed after a small, scenario-exposed documentation fix — see Scenario 6, Scenario 7, Scenario 12, and Scenario 14 Gap fields)
 Scenarios Failed: 0
 Blocked Scenarios: 0
 Routing Errors: 0 (1 pre-existing routing contradiction found and fixed — see Scenario 12)
 Missing Skills: 0
 Missing Roles: 0
 Missing Validation Gates: 0
-Overall Scenario Status: All 14 defined scenarios pass documentation/routing traceability, including the 6 scenario classes (Custom Post Type + taxonomy, Settings API on an existing plugin, a WordPress-specific security review, a WordPress theme performance review, a plugin integrating with an external API, and a WordPress deployment request) that were previously absent from this suite. This status covers routing readiness for all 14 scenarios. Ten of the 14, WP-SCENARIO-001, WP-SCENARIO-002, WP-SCENARIO-003, WP-SCENARIO-004, WP-SCENARIO-005, WP-SCENARIO-006, WP-SCENARIO-007, WP-SCENARIO-008, WP-SCENARIO-009, and WP-SCENARIO-010, have additionally been runtime-validated against a live WordPress installation (see "Runtime Evidence" above); the remaining 4 scenarios have not been executed against a live WordPress environment. (WP-SCENARIO-008's runtime validation is for the distinct "Database Schema Lifecycle Engineering" scenario recorded in the Runtime Evidence section, not the "Create Theme" scenario recorded under the same ID above.) See 38_WORDPRESS/AGENT-READINESS-REPORT.md for the full readiness breakdown, including the Runtime Execution Readiness category.
+Overall Scenario Status: All 15 defined scenarios pass documentation/routing traceability, including the 6 scenario classes (Custom Post Type + taxonomy, Settings API on an existing plugin, a WordPress-specific security review, a WordPress theme performance review, a plugin integrating with an external API, and a WordPress deployment request) that were previously absent from this suite. (The count is 15, not 14, because the Create Theme scenario originally shared the WP-SCENARIO-008 identifier with the Database Schema Lifecycle Engineering scenario; resolving that collision by reassigning Create Theme to WP-SCENARIO-015 corrected the distinct-scenario count from 14 to the true 15 — see "Scenario ID Collision Resolution" above.) This status covers routing readiness for all 15 scenarios. Ten of the 15, WP-SCENARIO-001, WP-SCENARIO-002, WP-SCENARIO-003, WP-SCENARIO-004, WP-SCENARIO-005, WP-SCENARIO-006, WP-SCENARIO-007, WP-SCENARIO-008, WP-SCENARIO-009, and WP-SCENARIO-010, have additionally been runtime-validated against a live WordPress installation (see "Runtime Evidence" above); the remaining 5 scenarios (WP-SCENARIO-011, WP-SCENARIO-012, WP-SCENARIO-013, WP-SCENARIO-014, and WP-SCENARIO-015) have not been executed against a live WordPress environment. See 38_WORDPRESS/AGENT-READINESS-REPORT.md for the full readiness breakdown, including the Runtime Execution Readiness category.
 ```
 
 ---

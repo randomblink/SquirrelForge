@@ -40,7 +40,7 @@ This checklist determines whether the SquirrelForge WordPress Layer is ready to 
 ## Skill Readiness
 
 - [x] `38_WORDPRESS/SKILLS/CREATE-PLUGIN.md` — scenario-tested (WP-SCENARIO-001).
-- [x] `38_WORDPRESS/SKILLS/CREATE-THEME.md` — scenario-tested (WP-SCENARIO-008).
+- [x] `38_WORDPRESS/SKILLS/CREATE-THEME.md` — scenario-tested (WP-SCENARIO-015; originally recorded as WP-SCENARIO-008 before that ID's collision with the Database Schema Lifecycle Engineering scenario was resolved — see `38_WORDPRESS/AGENT-SCENARIO-TESTS.md`'s "Scenario ID Collision Resolution").
 - [x] `38_WORDPRESS/SKILLS/CREATE-BLOCK.md` — file exists; not scenario-tested in this pass.
 - [x] `38_WORDPRESS/SKILLS/CREATE-REST-ENDPOINT.md` — scenario-tested (WP-SCENARIO-007); Completion Criteria section added during this pass.
 - [x] `38_WORDPRESS/SKILLS/CREATE-WIDGET.md` — file exists; not scenario-tested in this pass.
@@ -77,7 +77,7 @@ Not Ready
 Ready with Conditions
 ```
 
-Basis: all checklist items above are satisfied with repository evidence, and all 14 scenarios in `38_WORDPRESS/AGENT-SCENARIO-TESTS.md` (the original 8 plus 6 added in a follow-up pass covering CPT+taxonomy, Settings API on an existing plugin, a WordPress security review, a WordPress theme performance review, external API integration, and a WordPress deployment request) pass routing/documentation traceability. This checklist covers control-flow and inventory completeness only; it does not cover runtime execution. See `38_WORDPRESS/AGENT-READINESS-REPORT.md`'s Readiness Category Summary and Final Readiness Decision for the full assessment, including the open Operating Conditions (unverified runtime execution and partial command-level testing guidance).
+Basis: all checklist items above are satisfied with repository evidence, and all 15 scenarios in `38_WORDPRESS/AGENT-SCENARIO-TESTS.md` (the original 8 plus 6 added in a follow-up pass covering CPT+taxonomy, Settings API on an existing plugin, a WordPress security review, a WordPress theme performance review, external API integration, and a WordPress deployment request, plus the Database Schema Lifecycle Engineering scenario added in a later pass whose identifier briefly collided with, and has since been disambiguated from, the original Create Theme scenario) pass routing/documentation traceability. This checklist covers control-flow and inventory completeness only; it does not cover runtime execution. See `38_WORDPRESS/AGENT-READINESS-REPORT.md`'s Readiness Category Summary and Final Readiness Decision for the full assessment, including the open Operating Conditions (unverified runtime execution and partial command-level testing guidance).
 ## Rule
 
 SquirrelForge is not ready to operate as a WordPress Agent until this checklist passes or all remaining gaps are explicitly documented.
