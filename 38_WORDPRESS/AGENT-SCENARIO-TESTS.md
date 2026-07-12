@@ -28,7 +28,7 @@ Evidence:
 Gap:
 ```
 
-Result must be one of `PASS`, `PARTIAL`, `FAIL`, or `NOT EXECUTABLE`. This suite verifies documentation and routing traceability through the authoritative control chain (`38_WORDPRESS/WORDPRESS-MANAGER.md` → `38_WORDPRESS/PIPELINE.md` → `38_WORDPRESS/SKILLS/SKILL-ROUTING-MAP.md` → selected Skill → `33_WORDPRESS_ROLES/ROLE-MANAGER.md` → `33_WORDPRESS_ROLES/ROLE-ROUTING-MATRIX.md` → required knowledge → security and standards gates → testing requirements → completion criteria). A `PASS` proves the route, roles, knowledge, gates, and completion criteria are explicitly traceable in the repository — by itself it does not prove that code generated under that route would actually run correctly in a live WordPress environment. Nine scenarios, WP-SCENARIO-001, WP-SCENARIO-002, WP-SCENARIO-003, WP-SCENARIO-004, WP-SCENARIO-005, WP-SCENARIO-006, WP-SCENARIO-007, WP-SCENARIO-009, and WP-SCENARIO-010, have additionally been runtime-validated against a live WordPress installation; see the "Runtime Evidence" section below. Those results are bounded to each scenario's specific request and do not extend runtime-validated status to any other scenario in this suite. See `38_WORDPRESS/AGENT-READINESS-REPORT.md`'s Runtime Execution Readiness category for the full distinction between traceability and execution.
+Result must be one of `PASS`, `PARTIAL`, `FAIL`, or `NOT EXECUTABLE`. This suite verifies documentation and routing traceability through the authoritative control chain (`38_WORDPRESS/WORDPRESS-MANAGER.md` → `38_WORDPRESS/PIPELINE.md` → `38_WORDPRESS/SKILLS/SKILL-ROUTING-MAP.md` → selected Skill → `33_WORDPRESS_ROLES/ROLE-MANAGER.md` → `33_WORDPRESS_ROLES/ROLE-ROUTING-MATRIX.md` → required knowledge → security and standards gates → testing requirements → completion criteria). A `PASS` proves the route, roles, knowledge, gates, and completion criteria are explicitly traceable in the repository — by itself it does not prove that code generated under that route would actually run correctly in a live WordPress environment. Ten scenarios, WP-SCENARIO-001, WP-SCENARIO-002, WP-SCENARIO-003, WP-SCENARIO-004, WP-SCENARIO-005, WP-SCENARIO-006, WP-SCENARIO-007, WP-SCENARIO-008, WP-SCENARIO-009, and WP-SCENARIO-010, have additionally been runtime-validated against a live WordPress installation; see the "Runtime Evidence" section below. Those results are bounded to each scenario's specific request and do not extend runtime-validated status to any other scenario in this suite. See `38_WORDPRESS/AGENT-READINESS-REPORT.md`'s Runtime Execution Readiness category for the full distinction between traceability and execution.
 
 ---
 
@@ -203,6 +203,12 @@ Gap: FOUND AND FIXED. Before this pass, 38_WORDPRESS/SKILLS/CREATE-REST-ENDPOINT
 
 ```text
 Scenario ID: WP-SCENARIO-008
+Note: this ID is also used, separately, by a later Runtime Validation
+  entry below ("WP-SCENARIO-008 — Database Schema Lifecycle
+  Engineering"), added in a later session as a distinct scenario. That
+  entry documents a bounded runtime scenario unrelated to the "Create
+  Theme" traceability scenario recorded here; the two are cross-
+  referenced, not merged.
 User Request: Create a block theme for a small business website.
 Expected Primary Skill: CREATE-THEME
 Expected Supporting Skills: CREATE-TESTS, WRITE-DOCUMENTATION
@@ -370,7 +376,7 @@ Gap: FOUND AND FIXED. Before this pass, `12_AGENT/CAPABILITY-ROUTER.md`'s own pr
 
 ## Runtime Evidence
 
-Documentation/routing traceability (recorded per scenario above) is distinct from runtime execution evidence. This section records the nine scenarios, so far, that have actually been run against a live WordPress installation. It supplements WP-SCENARIO-001's, WP-SCENARIO-002's, WP-SCENARIO-003's, WP-SCENARIO-004's, WP-SCENARIO-005's, WP-SCENARIO-006's, WP-SCENARIO-007's, WP-SCENARIO-009's, and WP-SCENARIO-010's traceability results above — it does not replace any of those results, and it does not extend runtime-validated status to any other scenario in this suite.
+Documentation/routing traceability (recorded per scenario above) is distinct from runtime execution evidence. This section records the ten scenarios, so far, that have actually been run against a live WordPress installation. It supplements WP-SCENARIO-001's, WP-SCENARIO-002's, WP-SCENARIO-003's, WP-SCENARIO-004's, WP-SCENARIO-005's, WP-SCENARIO-006's, WP-SCENARIO-007's, WP-SCENARIO-008's, WP-SCENARIO-009's, and WP-SCENARIO-010's traceability results above — it does not replace any of those results, and it does not extend runtime-validated status to any other scenario in this suite. (WP-SCENARIO-008's runtime evidence below is for the distinct "Database Schema Lifecycle Engineering" scenario, not the "Create Theme" scenario recorded under the same ID earlier in this file — see that entry's cross-reference note.)
 
 ### Runtime Validation — WP-SCENARIO-001 (Create a WordPress plugin with an administrator Settings API page and frontend shortcode)
 
@@ -1469,6 +1475,212 @@ Scope of This Evidence:
   of the remaining 5 documentation scenarios in this suite.
 ```
 
+### Runtime Validation — WP-SCENARIO-008 (Database Schema Lifecycle Engineering)
+
+This ID is shared with, but distinct from, the "Scenario 8 — Create Theme" documentation-traceability entry earlier in this file (see the cross-reference note there). This entry records a separate, later-defined bounded scenario: a real versioned structural upgrade against an already-existing, already-populated WordPress database table, gated by explicit schema-version detection — planned in `38_WORDPRESS/WP-SCENARIO-008-PLAN.md`, designed in `38_WORDPRESS/WP-SCENARIO-008-IMPLEMENTATION-PLAN.md` (including its Harness Isolation Addendum and Verifier-Argument Addendum), and executed here.
+
+```text
+Scenario Reference: WP-SCENARIO-008
+Capability: Secure Database Schema Lifecycle Engineering
+Result: PASS
+Locked Plan: 38_WORDPRESS/WP-SCENARIO-008-PLAN.md
+Implementation Plan: 38_WORDPRESS/WP-SCENARIO-008-IMPLEMENTATION-PLAN.md
+  (Sections 17-18: harness cross-process cron-isolation fix, verifier-
+  argument fix -- both validated in dedicated bounded checks before this
+  execution, not re-derived here)
+SquirrelForge HEAD at execution time: 741e0f357a245e505f329fc3b1e7207b9e7228d6
+Runtime Target: Hospital WordPress installation ($HOME/Local Sites/hospital/app/public)
+Plugin Path: wp-content/plugins/squirrelforge-schema-lifecycle-fixture
+Plugin Created As: standalone plugin representing the "safely evolve an
+  existing, populated plugin database table from one schema version to
+  the next" request shape.
+WordPress: 7.0.1
+PHP: 8.5.3
+Database: MySQL 8.4.0
+
+Primary Skill: MIGRATE-PLUGIN. This is the second bounded runtime
+  execution of this Skill (the first was WP-SCENARIO-006's one-time
+  options-to-table migration); this scenario exercises a materially
+  different and harder request shape -- a real, versioned structural
+  upgrade against a table that already exists and already holds live
+  data, gated by explicit schema-version detection, rather than a
+  one-time create-and-migrate from a flat option.
+
+Evidence Provenance: This PASS reflects one single, clean,
+  uninterrupted execution of the complete evidence sequence below,
+  performed after two earlier, separate live-execution attempts had
+  each stopped on a genuine gate failure (a cross-process WP-Cron
+  interference issue, then a verifier-argument defect), each diagnosed
+  and fixed in its own dedicated task, each fix independently validated
+  by its own bounded runtime check, and each fully cleaned up before
+  being closed. Those two earlier attempts are diagnostic history,
+  recorded in the Implementation Plan's Sections 17-18; their evidence
+  is not combined with, and does not contribute to, the PASS recorded
+  here -- this entry reflects only the final clean run.
+
+Methodology (ordered evidence chain, actually executed in this run,
+  start to finish, without interruption or code change):
+  1. Pre-flight: SquirrelForge repository identity/HEAD/clean-tree
+     confirmed; PHP lint on the fixture, shared harness bootstrap, all
+     15 numbered harness scripts, and all 3 focused test files (all
+     clean); focused fixture/harness PHPUnit suite (34 tests, 114
+     assertions, OK); SquirrelForge composer test (146 tests, 338
+     assertions, OK); git diff --check (clean).
+  2. Initial Hospital baseline captured: fixture inactive, scenario
+     table absent, scenario options absent, zero PHP/database errors.
+  3. Defensive cleanup run and confirmed a safe no-op.
+  4. Version 1 installed through the real activation path
+     (register_activation_hook -> sfschema_activate() ->
+     sfschema_install_v1()); stored version confirmed 1; internal
+     Version 1 structural verification confirmed true, all within the
+     same process, immediately after installation.
+  5. Version 1 structure independently re-captured from a separate
+     fresh process and compared field-by-field against the frozen
+     Version 1 specification: zero mismatches.
+  6. The three frozen fixture rows inserted in their documented order;
+     exactly three rows confirmed, with the expected auto-increment IDs
+     1, 2, 3.
+  7. Pre-upgrade data independently captured from a separate fresh
+     process: all three rows exactly matching the frozen values, with a
+     deterministic SHA-256 content hash recorded.
+  8. Pre-upgrade stored version independently captured from a further
+     separate fresh process: confirmed 1, with no migration-result
+     option present -- proving no premature migration had occurred.
+  9. The real migration triggered via a fresh, unsuppressed
+     'plugins_loaded' bootstrap (the harness's DISABLE_WP_CRON
+     safeguard active throughout, preventing any cross-process
+     interference): completed with no fatal error, no uncaught
+     exception, and no premature process termination.
+  10. Version 2 structure independently re-captured from a separate
+      fresh process and compared field-by-field against the frozen
+      Version 2 specification: zero mismatches.
+  11. Post-migration data independently captured from a separate fresh
+      process: exactly three rows, identical IDs, identical original
+      field values, and a content hash byte-for-byte identical to the
+      pre-upgrade hash -- proving the migration altered no original
+      data. New fields correctly initialized on every row.
+  12. Post-migration version and migration-result state independently
+      captured: stored version confirmed 2, migration-result option
+      confirmed the successful status.
+  13. Error evidence captured for the full migration window: zero PHP
+      warnings/notices/deprecations/errors, zero $wpdb->last_error, no
+      WordPress debug.log present or needed.
+  14. A second real 'plugins_loaded' bootstrap triggered from a further
+      separate fresh process, to test idempotence.
+  15. The complete post-repeat structural and data snapshot captured
+      from a separate fresh process and formally compared, field-for-
+      field, against the first post-migration snapshot.
+  16. Final scenario cleanup run and independently verified: zero
+      scenario-owned tables, zero scenario-owned options, fixture
+      confirmed inactive.
+  17. Focused fixture/harness PHPUnit suite, SquirrelForge composer
+      test, and git diff --check all re-run after cleanup, before this
+      documentation was written, with identical passing results to
+      step 1.
+
+Version 1 Structural Result: PASS -- zero mismatches. Exactly four
+  columns (id BIGINT UNSIGNED AUTO_INCREMENT, item_key VARCHAR(191),
+  item_value TEXT, created_at DATETIME DEFAULT '1970-01-01 00:00:00'),
+  PRIMARY KEY (id), UNIQUE KEY item_key, utf8mb4/utf8mb4_unicode_520_ci
+  charset/collation, no status/updated_at/status_idx present.
+
+Pre-Upgrade Row and Hash Result: PASS -- exactly 3 rows (ids 1, 2, 3),
+  exact frozen item_key/item_value/created_at values (plain text,
+  quoted/unicode/emoji text, and a fixed 1,500-character repeated
+  string), content hash
+  0f6cbc7f3674475b661dffd72c6fc6c7071c3a23092df5f042e11e475c942468.
+
+Migration-Trigger Result: PASS -- the real, fresh, unsuppressed
+  'plugins_loaded' bootstrap completed with zero fatal errors, zero
+  uncaught exceptions, and no premature termination; dbDelta() reached
+  and completed against the Version 2 target schema; the independent
+  structural verifier ran and passed before the stored version was
+  advanced.
+
+Version 2 Structural Result: PASS -- zero mismatches. All four Version
+  1 columns unchanged; status VARCHAR(20) NOT NULL DEFAULT 'active';
+  updated_at DATETIME NULL DEFAULT NULL; KEY status_idx (status);
+  PRIMARY KEY and UNIQUE KEY item_key unchanged; no missing or
+  additional columns or indexes; charset/collation unchanged.
+
+Data-Preservation Result: PASS -- exactly 3 rows remain; all IDs
+  unchanged; all original item_key/item_value/created_at values
+  unchanged; post-upgrade content hash
+  0f6cbc7f3674475b661dffd72c6fc6c7071c3a23092df5f042e11e475c942468,
+  identical to the pre-upgrade hash; every row shows status = 'active'
+  and updated_at = NULL, exactly the frozen expected values; no
+  duplicate, dropped, reordered, or rewritten rows.
+
+Version and Migration-Result State: PASS -- stored version advanced
+  from 1 to 2 only after successful independent verification;
+  migration-result option recorded { "status":
+  "v2_migration_succeeded" }; no contradictory or incomplete state at
+  any captured point.
+
+Error Result: PASS -- zero PHP warnings, notices, deprecations, or
+  fatal errors at any phase; zero $wpdb->last_error at any phase; zero
+  failed SQL statements; zero partial-upgrade indications; no
+  WordPress debug.log file present (WP_DEBUG_LOG not enabled, matching
+  every prior runtime scenario in this portfolio).
+
+Idempotence Result: PASS (strict, not merely "table still exists") --
+  a second real, fresh, unsuppressed 'plugins_loaded' bootstrap
+  produced: an identical structural snapshot (byte-for-byte identical
+  SHOW CREATE TABLE, columns, and indexes); an identical data snapshot
+  (identical rows, identical content hash); the stored version
+  unchanged at 2; the migration-result option unchanged at {"status":
+  "v2_migration_succeeded"} (correctly retained from the first
+  successful migration, since the no-op gate branch returns before
+  touching that option -- not evidence of a second migration attempt);
+  and zero new PHP or database errors. No repeated or destructive DDL
+  occurred: the gate correctly recognized Version 2 as already current
+  and never re-invoked dbDelta().
+
+Cleanup Result: PASS -- scenario table dropped, both scenario-owned
+  options removed, fixture confirmed inactive, temporary runtime-
+  evidence workspace removed, zero unrelated Hospital state changed
+  (all nine prior scenario fixture plugins confirmed present and
+  untouched).
+
+Live Environment: Hospital WordPress installation; single-site;
+  WordPress 7.0.1; PHP 8.5.3; MySQL 8.4.0; WP-CLI unavailable;
+  execution performed through fresh PHP processes bootstrapping
+  wp-load.php via the shared harness helper (which defines
+  DISABLE_WP_CRON before every bootstrap), using Local's site-matched
+  PHP binary and database socket.
+
+Capability Progression (from the locked plan, Section 17):
+
+  | Scenario        | Demonstrated capability          |
+  | --------------- | --------------------------------- |
+  | WP-SCENARIO-001 | Plugin creation                   |
+  | WP-SCENARIO-002 | Runtime debugging                 |
+  | WP-SCENARIO-003 | Static code review                |
+  | WP-SCENARIO-004 | Behavior-preserving refactoring    |
+  | WP-SCENARIO-005 | Performance optimization           |
+  | WP-SCENARIO-006 | Plugin Migration                  |
+  | WP-SCENARIO-007 | Secure REST Endpoint Engineering   |
+  | WP-SCENARIO-008 | Secure Database Schema Lifecycle Engineering |
+
+Scope of This Evidence:
+  This runtime result applies only to WP-SCENARIO-008's specific
+  request (a single, bounded Version 1 -> Version 2 structural upgrade
+  of one custom table, including explicit schema-version detection,
+  data preservation, and idempotence on a second real bootstrap),
+  executed once against one WordPress installation using a standalone
+  fixture plugin. It is the second runtime evidence for MIGRATE-PLUGIN
+  and does not runtime-validate MIGRATE-PLUGIN for other request shapes
+  (e.g. a third schema version, a rollback path, multisite migrations,
+  larger data volumes, or concurrent execution), does not runtime-
+  validate any other Skill, and does not runtime-validate any of the
+  remaining 5 documentation scenarios in this suite. The two earlier,
+  diagnostic-only live-execution attempts that preceded this run (a
+  cross-process WP-Cron interference gate failure, and a verifier-
+  argument fatal-error gate failure) are recorded in the Implementation
+  Plan's Sections 17-18, not here; neither contributes evidence to this
+  PASS.
+```
+
 ---
 
 ## Scenario Test Summary
@@ -1482,7 +1694,7 @@ Routing Errors: 0 (1 pre-existing routing contradiction found and fixed — see 
 Missing Skills: 0
 Missing Roles: 0
 Missing Validation Gates: 0
-Overall Scenario Status: All 14 defined scenarios pass documentation/routing traceability, including the 6 scenario classes (Custom Post Type + taxonomy, Settings API on an existing plugin, a WordPress-specific security review, a WordPress theme performance review, a plugin integrating with an external API, and a WordPress deployment request) that were previously absent from this suite. This status covers routing readiness for all 14 scenarios. Nine of the 14, WP-SCENARIO-001, WP-SCENARIO-002, WP-SCENARIO-003, WP-SCENARIO-004, WP-SCENARIO-005, WP-SCENARIO-006, WP-SCENARIO-007, WP-SCENARIO-009, and WP-SCENARIO-010, have additionally been runtime-validated against a live WordPress installation (see "Runtime Evidence" above); the remaining 5 scenarios have not been executed against a live WordPress environment. See 38_WORDPRESS/AGENT-READINESS-REPORT.md for the full readiness breakdown, including the Runtime Execution Readiness category.
+Overall Scenario Status: All 14 defined scenarios pass documentation/routing traceability, including the 6 scenario classes (Custom Post Type + taxonomy, Settings API on an existing plugin, a WordPress-specific security review, a WordPress theme performance review, a plugin integrating with an external API, and a WordPress deployment request) that were previously absent from this suite. This status covers routing readiness for all 14 scenarios. Ten of the 14, WP-SCENARIO-001, WP-SCENARIO-002, WP-SCENARIO-003, WP-SCENARIO-004, WP-SCENARIO-005, WP-SCENARIO-006, WP-SCENARIO-007, WP-SCENARIO-008, WP-SCENARIO-009, and WP-SCENARIO-010, have additionally been runtime-validated against a live WordPress installation (see "Runtime Evidence" above); the remaining 4 scenarios have not been executed against a live WordPress environment. (WP-SCENARIO-008's runtime validation is for the distinct "Database Schema Lifecycle Engineering" scenario recorded in the Runtime Evidence section, not the "Create Theme" scenario recorded under the same ID above.) See 38_WORDPRESS/AGENT-READINESS-REPORT.md for the full readiness breakdown, including the Runtime Execution Readiness category.
 ```
 
 ---
