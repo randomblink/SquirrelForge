@@ -49,7 +49,7 @@ This entry applies only when verified evidence establishes that the network path
 It is distinct from:
 
 - **WP-ERROR-002 — WordPress Database Authentication Failure**: presumes the database server was actually reached over the network, and the failure occurs afterward when the server actively rejects the supplied credentials. This entry's condition ends before that point is ever reached — the server has no opportunity to evaluate credentials it never received a connection attempt for.
-- **WP-ERROR-003 — Database Does Not Exist** (conceptual reference; no corresponding document currently exists in this repository): presumes successful network connectivity and successful authentication, with the failure occurring afterward when selecting a specific, named database that is not present. This is a much later step than this entry's boundary.
+- **WP-ERROR-003 — Database Does Not Exist**: presumes successful network connectivity and successful authentication, with the failure occurring afterward when selecting a specific, named database that is not present. This is a much later step than this entry's boundary.
 - **WP-ERROR-004 — Database Permission Denied** (conceptual reference; no corresponding document currently exists in this repository): presumes successful network connectivity, successful authentication, and a selected database, with the failure occurring because the authenticated user lacks privileges for a specific operation. This is a much later step than this entry's boundary.
 - **WP-ERROR-007 — Database Connection Limit Exceeded**: the database server is reached over the network — a TCP connection to it succeeds — and the server itself then actively refuses the new connection at the protocol level because it has reached its maximum permitted connections. This is a materially different failure point from this entry's condition: WP-ERROR-007 involves a real response from a reachable, running server process; this entry involves no response from the server at all, because the network path to it never completes.
 - **WP-ERROR-009 — Database Query Timeout** (conceptual reference; no corresponding document currently exists in this repository): presumes successful network connectivity, successful authentication, and an established connection, with the failure occurring later when a specific query does not complete in time. This is unrelated to network reachability.
@@ -195,7 +195,7 @@ Recovery is successful when:
 The following are cited as they exist in this repository, or as conceptual distinctions where noted.
 
 1. [WP-ERROR-002 — WordPress Database Authentication Failure](WP-ERROR-002-WORDPRESS-DATABASE-AUTHENTICATION-FAILURE.md) — exists in this repository; see Section 6 (Distinction) above.
-2. WP-ERROR-003 — Database Does Not Exist (conceptual reference; no corresponding document currently exists in this repository; no link is provided).
+2. [WP-ERROR-003 — Database Does Not Exist](WP-ERROR-003-DATABASE-DOES-NOT-EXIST.md) — exists in this repository; see Section 6 (Distinction) above.
 3. WP-ERROR-004 — Database Permission Denied (conceptual reference; no corresponding document currently exists in this repository; no link is provided).
 4. [WP-ERROR-007 — Database Connection Limit Exceeded](WP-ERROR-007-WORDPRESS-DATABASE-CONNECTION-LIMIT-EXCEEDED.md) — exists in this repository; see Section 6 (Distinction) above.
 5. WP-ERROR-009 — Database Query Timeout (conceptual reference; no corresponding document currently exists in this repository; no link is provided).
