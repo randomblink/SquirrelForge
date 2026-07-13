@@ -52,7 +52,7 @@ It is distinct from:
 - **WP-ERROR-004 — Database Permission Denied**: presumes the named database does exist, with the failure occurring because the authenticated user lacks privileges over it. This entry's condition is that the database itself is absent, not merely inaccessible to this account.
 - **WP-ERROR-007 — Database Connection Limit Exceeded**: the server refuses the connection itself due to exhausted capacity, before authentication or database selection can be reached at all. This entry presumes a connection was successfully granted.
 - **WP-ERROR-008 — WordPress Database Server Unreachable**: the network path to the server itself fails, so the server is never reached and neither authentication nor database selection is ever attempted.
-- **WP-ERROR-009 — Database Query Timeout** (conceptual reference; no corresponding document currently exists in this repository): presumes a database was already successfully selected, with the failure occurring later because a specific query does not complete in time.
+- **WP-ERROR-009 — Database Query Timeout**: presumes a database was already successfully selected, with the failure occurring later because a specific query does not complete in time.
 - **WP-ERROR-018 — WordPress Database Connection Failure**: WP-ERROR-018 owns the general, verified-but-unspecified-cause condition where WordPress cannot establish a database connection, and explicitly identifies the named database not existing as one specific, verified cause that belongs to this entry once confirmed. This entry owns that specific, verified cause; WP-ERROR-018 owns the general condition and the diagnostic process for narrowing it to a specific cause, along with this entry's relationship to WP-ERROR-013, WP-ERROR-014, and WP-ERROR-016, which this entry does not restate.
 
 ---
@@ -183,7 +183,7 @@ The following are cited as they exist in this repository, or as conceptual disti
 2. [WP-ERROR-004 — Database Permission Denied](WP-ERROR-004-DATABASE-PERMISSION-DENIED.md) — exists in this repository; see Section 6 (Distinction) above.
 3. [WP-ERROR-007 — Database Connection Limit Exceeded](WP-ERROR-007-WORDPRESS-DATABASE-CONNECTION-LIMIT-EXCEEDED.md) — exists in this repository; see Section 6 (Distinction) above.
 4. [WP-ERROR-008 — WordPress Database Server Unreachable](WP-ERROR-008-WORDPRESS-DATABASE-SERVER-UNREACHABLE.md) — exists in this repository; see Section 6 (Distinction) above.
-5. WP-ERROR-009 — Database Query Timeout (conceptual reference; no corresponding document currently exists in this repository; no link is provided).
+5. [WP-ERROR-009 — Database Query Timeout](WP-ERROR-009-DATABASE-QUERY-TIMEOUT.md) — exists in this repository; see Section 6 (Distinction) above.
 6. [WP-ERROR-018 — WordPress Database Connection Failure](WP-ERROR-018-WORDPRESS-DATABASE-CONNECTION-FAILURE.md) — exists in this repository; see Section 6 (Distinction) above.
 
 ---

@@ -52,7 +52,7 @@ It is distinct from:
 - **WP-ERROR-003 — Database Does Not Exist**: the named database itself does not exist. This is the most important distinction to verify carefully: MySQL/MariaDB's client-visible failure when selecting a database is the same whether the database does not exist or the connecting account has no privileges over it at all — both fail identically at the same step, deliberately, so that an unprivileged connection cannot use the failure itself to confirm whether a given database exists. The two conditions require independent, administrative-level verification to distinguish (for example, an administrator confirming the database's existence directly), not inference from the WordPress-visible symptom alone — the same class of deliberate ambiguity already documented for WP-ERROR-002's credential-rejection message.
 - **WP-ERROR-007 — Database Connection Limit Exceeded**: the server refuses the connection itself due to exhausted capacity, before authentication or database selection is reached at all. This entry presumes a connection was successfully granted.
 - **WP-ERROR-008 — WordPress Database Server Unreachable**: the network path to the server itself fails, so the server is never reached and neither authentication nor a privilege check is ever attempted.
-- **WP-ERROR-009 — Database Query Timeout** (conceptual reference; no corresponding document currently exists in this repository): presumes the account's privileges are sufficient and a query is actually executing, with the failure occurring because that query does not complete in time. Privilege sufficiency is not in question there.
+- **WP-ERROR-009 — Database Query Timeout**: presumes the account's privileges are sufficient and a query is actually executing, with the failure occurring because that query does not complete in time. Privilege sufficiency is not in question there.
 - **WP-ERROR-018 — WordPress Database Connection Failure**: WP-ERROR-018 owns the general, verified-but-unspecified-cause condition where WordPress cannot establish a database connection, and explicitly identifies insufficient privileges as one specific, verified cause that belongs to this entry once confirmed. This entry owns that specific, verified cause; WP-ERROR-018 owns the general condition and the diagnostic process for narrowing it to a specific cause, along with this entry's relationship to WP-ERROR-013, WP-ERROR-014, and WP-ERROR-016, which this entry does not restate.
 
 ---
@@ -184,7 +184,7 @@ The following are cited as they exist in this repository, or as conceptual disti
 2. [WP-ERROR-003 — Database Does Not Exist](WP-ERROR-003-DATABASE-DOES-NOT-EXIST.md) — exists in this repository; see Section 6 (Distinction) above.
 3. [WP-ERROR-007 — Database Connection Limit Exceeded](WP-ERROR-007-WORDPRESS-DATABASE-CONNECTION-LIMIT-EXCEEDED.md) — exists in this repository; see Section 6 (Distinction) above.
 4. [WP-ERROR-008 — WordPress Database Server Unreachable](WP-ERROR-008-WORDPRESS-DATABASE-SERVER-UNREACHABLE.md) — exists in this repository; see Section 6 (Distinction) above.
-5. WP-ERROR-009 — Database Query Timeout (conceptual reference; no corresponding document currently exists in this repository; no link is provided).
+5. [WP-ERROR-009 — Database Query Timeout](WP-ERROR-009-DATABASE-QUERY-TIMEOUT.md) — exists in this repository; see Section 6 (Distinction) above.
 6. [WP-ERROR-018 — WordPress Database Connection Failure](WP-ERROR-018-WORDPRESS-DATABASE-CONNECTION-FAILURE.md) — exists in this repository; see Section 6 (Distinction) above.
 
 ---
