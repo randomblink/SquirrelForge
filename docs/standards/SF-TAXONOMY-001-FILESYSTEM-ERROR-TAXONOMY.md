@@ -10,7 +10,7 @@
 
 **Status:** Frozen — the entry set in Section 3 is fixed until this document is deliberately revised (see Section 6). "Frozen" here is an informal, self-defined term describing this document's own adopted-plan state; it is not a claim of the `Version Frozen` WP-ERROR lifecycle stage defined by **SF-SPEC-001** Section 18, nor of any status in the closed list **SF-SPEC-008** Section 6 defines for versioned engineering artifacts. This document carries a `Version` and `Revision History` for traceability only; it does not present itself as a "versioned engineering artifact" within **SF-SPEC-008**'s own scope (Section 2.1), in the same way `FRAMEWORK-OBSERVATIONS.md` explicitly disclaims being versioned. No conflict with either specification's own status vocabulary is intended or created.
 
-**Version:** 1.1
+**Version:** 1.2
 
 **Owner:** SquirrelForge
 
@@ -47,9 +47,9 @@ This document does not itself contain any `WP-ERROR` knowledge content and is no
 |---|---|---|---|
 | `WP-ERROR-016` | WordPress Core Files Missing or Corrupted | File integrity — content is missing, incomplete, or altered from its expected state | Existing, Production Ready |
 | `WP-ERROR-019` | WordPress Filesystem Permission Denied | File accessibility — an existing file or directory cannot be read, written, or executed because the OS denies the requested access, **or** a required path does not exist and cannot be created because of a permission constraint on an ancestor directory | Planned |
-| `WP-ERROR-020` | WordPress Disk Space Exhausted | Storage capacity — a write cannot be satisfied because the volume has no free space, **or** because an applicable filesystem quota or inode limit has been reached even though raw byte capacity remains | Planned |
+| `WP-ERROR-020` | WordPress Disk Space Exhausted | Storage capacity — a write cannot be satisfied because the volume has no free space, **or** because an applicable filesystem quota or inode limit has been reached even though raw byte capacity remains | Existing, Production Ready |
 
-Nothing else is currently planned for this category. Any future addition to this table is a revision to this document (Section 6), not an ad hoc decision made while authoring an unrelated entry.
+All three entries now exist and are Production Ready; the Filesystem category's planned baseline is complete. Nothing else is currently planned for this category. Any future addition to this table is a revision to this document (Section 6), not an ad hoc decision made while authoring an unrelated entry.
 
 ---
 
@@ -80,3 +80,4 @@ Two additional candidates were proposed and deliberately excluded from Section 3
 |---|---|---|---|
 | 1.0 | 2026-07-13 | Initial taxonomy: WP-ERROR-016 (existing) plus WP-ERROR-019 and WP-ERROR-020 (planned). "Direct Filesystem Method Unavailable" and "uploads directory misconfigured" considered and rejected as separate entries, per Section 5. | Frozen |
 | 1.1 | 2026-07-13 | Corrected per `SF-REVIEW-034` (independent review): clarified this document's non-versioned status relative to SF-SPEC-008; added three missing Category Boundary exclusions (Configuration, HTTP/web-server, Authentication/deployment-tool behavior); broadened WP-ERROR-019's declared boundary to explicitly include a required-but-missing path blocked by a permission constraint; broadened WP-ERROR-020's declared boundary to include quota/inode exhaustion and explicitly exclude PHP upload-size limits; updated the rejected-candidates reasoning to stay consistent with the broadened boundaries. | Frozen |
+| 1.2 | 2026-07-13 | WP-ERROR-019 and WP-ERROR-020 both reached Production Ready (per `SF-REVIEW-036` and `SF-REVIEW-038` respectively). Updated WP-ERROR-020's Status cell from `Planned` to `Existing, Production Ready`, completing the three-entry Filesystem baseline. No boundary content changed. | Frozen |
