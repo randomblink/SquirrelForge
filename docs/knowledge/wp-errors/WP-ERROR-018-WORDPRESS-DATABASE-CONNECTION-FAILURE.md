@@ -185,7 +185,7 @@ Recovery is successful when:
 
 # 16. Related Errors
 
-The following are cited as conceptual distinctions only unless a repository link is noted.
+The following are cited as they exist in this repository, or as conceptual distinctions where noted.
 
 1. [WP-ERROR-002 — WordPress Database Authentication Failure](WP-ERROR-002-WORDPRESS-DATABASE-AUTHENTICATION-FAILURE.md) — exists in this repository; see Section 6 (Distinction) above.
 2. [WP-ERROR-003 — Database Does Not Exist](WP-ERROR-003-DATABASE-DOES-NOT-EXIST.md) — exists in this repository; see Section 6 (Distinction) above.
