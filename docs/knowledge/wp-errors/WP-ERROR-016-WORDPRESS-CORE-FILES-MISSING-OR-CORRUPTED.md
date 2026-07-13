@@ -57,8 +57,8 @@ It is distinct from:
 - **WP-ERROR-014 — Required PHP Extension Missing**: conceptually independent. A fully intact WordPress core installation can still be missing a required PHP extension, and a corrupted core installation can have every extension present. Evidence shall establish which condition is actually present before concluding this entry applies.
 - **WP-ERROR-015 — Unsupported PHP Version**: conceptually independent. A fully supported PHP version can run atop a corrupted core installation, and an unsupported-version failure can occur on a perfectly intact core installation.
 - **Plugin, theme, must-use plugin, and drop-in files**: files under `wp-content/` are not part of the official WordPress core distribution and are not in scope for this entry, regardless of whether they are missing or corrupted. A corrupted plugin, theme, must-use plugin, or drop-in is a related but distinct condition that may be documented by a separate `WP-ERROR` entry. WP-CLI provides a separate, parallel capability for verifying installed plugins from the WordPress.org repository (`wp plugin verify-checksums`), distinct from the core-file verification this entry documents.
-- **Filesystem permission failures on an otherwise intact file**: a core file that exists, is unaltered, and matches its official content, but cannot be read due to filesystem permissions, produces similar symptoms (the code cannot be loaded) but is not the condition this entry documents; the corrective action (permission repair) differs from restoring file content.
-- **Database corruption**: corruption or damage to the WordPress database is a distinct condition from corruption of the core file set on disk, and is excluded from this entry.
+- **Filesystem permission failures on an otherwise intact file** (see `WP-ERROR-019 — WordPress Filesystem Permission Denied`): a core file that exists, is unaltered, and matches its official content, but cannot be read due to filesystem permissions, produces similar symptoms (the code cannot be loaded) but is not the condition this entry documents; the corrective action (permission repair) differs from restoring file content.
+- **Database corruption** (see `WP-ERROR-006 — WordPress Database Table Corruption`): corruption or damage to the WordPress database is a distinct condition from corruption of the core file set on disk, and is excluded from this entry.
 
 ---
 
@@ -74,8 +74,8 @@ It is distinct from:
 - An unsupported or incompatible PHP runtime version, independent of core-file integrity (see WP-ERROR-015).
 - Missing or corrupted plugin, theme, must-use plugin, or drop-in files under `wp-content/`.
 - A core file that differs from its official release but is never loaded or executed by the site's actual configuration.
-- Filesystem permission failures on files whose content is otherwise intact.
-- Database corruption, as distinct from filesystem-level core-file corruption.
+- Filesystem permission failures on files whose content is otherwise intact (see [WP-ERROR-019](WP-ERROR-019-FILESYSTEM-PERMISSION-DENIED.md)).
+- Database corruption, as distinct from filesystem-level core-file corruption (see [WP-ERROR-006](WP-ERROR-006-DATABASE-TABLE-CORRUPTION.md)).
 
 ---
 
@@ -192,14 +192,16 @@ Recovery is successful when:
 
 # 16. Related Errors
 
-The following are cited as conceptual distinctions only unless a repository link is noted.
+The following are cited as they exist in this repository, or as conceptual distinctions where noted.
 
-1. WP-ERROR-010 — WordPress Configuration File Missing (conceptual reference; no corresponding document currently exists in this repository; no link is provided).
-2. WP-ERROR-011 — WordPress Configuration File Invalid (conceptual reference; no corresponding document currently exists in this repository; no link is provided).
-3. WP-ERROR-012 — WordPress Configuration File PHP Syntax Error (conceptual reference; no corresponding document currently exists in this repository; no link is provided).
-4. [WP-ERROR-013 — WordPress Bootstrap PHP Fatal Error](WP-ERROR-013-WORDPRESS-BOOTSTRAP-PHP-FATAL-ERROR.md) — exists in this repository; see Section 6 (Distinction) above.
-5. [WP-ERROR-014 — Required PHP Extension Missing](WP-ERROR-014-REQUIRED-PHP-EXTENSION-MISSING.md) — exists in this repository; see Section 6 (Distinction) above.
-6. [WP-ERROR-015 — Unsupported PHP Version](WP-ERROR-015-UNSUPPORTED-PHP-VERSION.md) — exists in this repository; see Section 6 (Distinction) above.
+1. [WP-ERROR-006 — WordPress Database Table Corruption](WP-ERROR-006-DATABASE-TABLE-CORRUPTION.md) — exists in this repository (Database category); see Section 6 (Distinction) above.
+2. WP-ERROR-010 — WordPress Configuration File Missing (conceptual reference; no corresponding document currently exists in this repository; no link is provided).
+3. WP-ERROR-011 — WordPress Configuration File Invalid (conceptual reference; no corresponding document currently exists in this repository; no link is provided).
+4. WP-ERROR-012 — WordPress Configuration File PHP Syntax Error (conceptual reference; no corresponding document currently exists in this repository; no link is provided).
+5. [WP-ERROR-013 — WordPress Bootstrap PHP Fatal Error](WP-ERROR-013-WORDPRESS-BOOTSTRAP-PHP-FATAL-ERROR.md) — exists in this repository; see Section 6 (Distinction) above.
+6. [WP-ERROR-014 — Required PHP Extension Missing](WP-ERROR-014-REQUIRED-PHP-EXTENSION-MISSING.md) — exists in this repository; see Section 6 (Distinction) above.
+7. [WP-ERROR-015 — Unsupported PHP Version](WP-ERROR-015-UNSUPPORTED-PHP-VERSION.md) — exists in this repository; see Section 6 (Distinction) above.
+8. [WP-ERROR-019 — WordPress Filesystem Permission Denied](WP-ERROR-019-FILESYSTEM-PERMISSION-DENIED.md) — exists in this repository (Filesystem category); see Section 6 (Distinction) above.
 
 ---
 
