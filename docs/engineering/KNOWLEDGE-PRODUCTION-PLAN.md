@@ -50,7 +50,7 @@ Seven approved categories have **zero entries yet** and require no specification
 | Caching / Performance | `Performance` | **Ready** — approved, zero entries |
 | WP-CLI | `CLI` | **Ready** — approved, zero entries |
 | Filesystem & Updates (remaining gaps) | `Filesystem` | **Partially ready** — category is already `Baseline Certified`; a new entry here is a *post-certification change* under **SF-SPEC-013** Section 5.6, not a fresh start, and must go through that section's own four-step process (taxonomy revision, standard authoring sequence, new consistency review, new baseline certification) |
-| HTTP / Networking | `Networking` | **Ready** — approved `SF-SPEC-001` Version 1.2, zero entries |
+| HTTP / Networking | `Networking` | **In progress** — taxonomy `SF-TAXONOMY-004` reviewed (`SF-REVIEW-080`), zero entries authored yet |
 | Media | `Media` | **Ready** — approved `SF-SPEC-001` Version 1.2, zero entries |
 | Cron / Scheduled Tasks | `Cron` | **Ready** — approved `SF-SPEC-001` Version 1.2, zero entries |
 | Email | `Email` | **Ready** — approved `SF-SPEC-001` Version 1.2, zero entries |
@@ -117,7 +117,9 @@ Empty scaffold. Per the project owner's own direction, this is the evidence base
 
 ## 8. Active Category
 
-None. **Authentication is complete and Baseline Certified** (`SF-REVIEW-079`) — the fifth category to reach that designation, and the second (after REST API) built from a dedicated taxonomy from the outset. Category Work Order: `SF-TAXONOMY-003` (Authentication Error Taxonomy), Version 1.5. Entries: `WP-ERROR-024` (Login Authentication Failure), `WP-ERROR-025` (Authentication Cookie Invalid or Expired), `WP-ERROR-026` (Capability or Role Authorization Denied), `WP-ERROR-027` (Nonce Verification Failure, Non-REST), all Production Ready.
+**Networking.** Category Work Order: `SF-TAXONOMY-004` (Networking Error Taxonomy), independently reviewed per `SF-REVIEW-080` (Approved). Planned entries: `WP-ERROR-028` (Outbound HTTP Request Failure), `WP-ERROR-029` (Outbound SSL/TLS Certificate Verification Failure), `WP-ERROR-030` (CORS Policy Failure — resolving the forward-reference `SF-TAXONOMY-002` made when REST API was built). Entry authoring has not yet begun.
+
+Authentication is complete and Baseline Certified (`SF-REVIEW-079`) — the fifth category to reach that designation, and the second (after REST API) built from a dedicated taxonomy from the outset. Category Work Order: `SF-TAXONOMY-003` (Authentication Error Taxonomy), Version 1.5. Entries: `WP-ERROR-024` (Login Authentication Failure), `WP-ERROR-025` (Authentication Cookie Invalid or Expired), `WP-ERROR-026` (Capability or Role Authorization Denied), `WP-ERROR-027` (Nonce Verification Failure, Non-REST), all Production Ready.
 
 - `WP-ERROR-024` (`SF-REVIEW-070`/`071`) — the first entry in the category and the first authored entirely after `SF-BASELINE-001`. Its independent review caught a real internal-consistency gap in the entry's own lockout-plugin exclusion; its author review caught and fixed a bug in `scripts/validate-repo.sh` itself (Check B was flagging a false-positive "Planned vs. Draft" mismatch; it now only flags once an entry reaches Production Ready, matching established taxonomy-update convention).
 - `WP-ERROR-025` (`SF-REVIEW-072`/`073`) — its independent review caught a cross-document attribution error: the entry claimed a boundary case (browser with cookies entirely disabled) belonged to `WP-ERROR-024`, a claim `WP-ERROR-024`'s own text never made and that, on independent technical review, was likely misattributed (credential verification succeeds in that scenario; only cookie persistence fails). Reattributed to `WP-ERROR-025`'s own domain.
@@ -126,4 +128,3 @@ None. **Authentication is complete and Baseline Certified** (`SF-REVIEW-079`) �
 - **Consistency review** (`SF-REVIEW-078`) treated all four as a system: found `WP-ERROR-025`'s Diagnosis lacked the REST-context ruling-out step its siblings already had, and that the specifically-flagged `WP-ERROR-024`-cookies-disabled and `WP-ERROR-025`/`WP-ERROR-027` nonce-before-session-change overlaps were correctly implemented but not stated as explicit rules — added one to `SF-TAXONOMY-003` Section 4. Also tested whether the `WP-ERROR-022`/`SF-TAXONOMY-002` stale-hedge defect (`SF-REVIEW-075`) recurred anywhere else in the category: it did not — the five other similar-looking matches all correctly reference the still-taxonomy-less Security category. Logged as a negative result in `FRAMEWORK-OBSERVATIONS.md`, not yet enough evidence to extend the validator.
 - **Baseline certification** (`SF-REVIEW-079`) required no correction of its own, since the consistency review had already caught what would otherwise have surfaced here.
 
-Next: pick the next candidate from Section 4 (`Networking` is the top-ranked remaining category), or extend an existing certified category — no active category is currently in progress.
