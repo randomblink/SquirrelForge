@@ -40,6 +40,8 @@ Not acted on now; disclosed per `SF-REVIEW-052`'s own recommendation to record i
 
 **Remediated 2026-07-14:** `SF-REVIEW-056` (PHP Runtime category consistency review) corrected the stale citation and a related terminology inconsistency; `SF-REVIEW-057` certified PHP Runtime Knowledge Baseline v1. `scripts/validate-repo.sh` confirmed clean before and after.
 
+**Second data point, 2026-07-14 (`SF-REVIEW-087`, Networking category consistency review):** a related but narrower variant recurred — not a "conceptual reference" placeholder (`scripts/validate-repo.sh` Check A's own target), but a sibling entry's own prose (an inline title in `WP-ERROR-028` Section 6, a `(currently Draft)` status parenthetical in `WP-ERROR-028` Section 16) going stale the moment `WP-ERROR-029` was retitled and later promoted — a *resolving link* whose accompanying text nonetheless drifted, which Check A's own pattern-matching (scoped to unresolved `(conceptual reference...)` citations) does not check and was not designed to. Corrected within `SF-REVIEW-087` itself. Disclosed here as a second, narrower data point in the same general failure family Section 5.7 names (a point-in-time snapshot going stale the instant a later commit changes what it describes), not yet meeting the evidentiary bar for a validator change on its own.
+
 ---
 
 ## 2026-07-14 — Revision History section missing from eleven of thirteen specifications

@@ -54,7 +54,7 @@ This entry applies only when verified evidence establishes that a connection was
 
 It is distinct from:
 
-- **`WP-ERROR-029` — WordPress Outbound SSL/TLS Certificate Verification Failure**: presumes a TCP connection was already established, and the failure is specifically in the TLS handshake/certificate-verification stage that follows. This entry ends, and `WP-ERROR-029` begins, exactly at the point a connection is confirmed established.
+- **`WP-ERROR-029` — WordPress Outbound TLS Negotiation Failure**: presumes a TCP connection was already established, and the failure is specifically in the TLS handshake stage that follows (certificate trust or protocol/cipher negotiation). This entry ends, and `WP-ERROR-029` begins, exactly at the point a connection is confirmed established.
 - **`WP-ERROR-021`/`022`/`023` — WordPress REST API entries**: own WordPress's own *inbound* REST API request-handling pipeline — a fundamentally different direction of communication, using `WP_REST_Server` rather than `WP_Http`. This entry owns only requests WordPress itself *initiates outward*.
 - **`WP-ERROR-007`/`008` — Database entries**: own network-layer symptoms (timeout, unreachability) specifically as they affect WordPress's own configured MySQL/MariaDB connection, regardless of whether the underlying mechanism (DNS, TCP timeout) is identical in kind to this entry's own. The database connection is not made through `WP_Http` at all; it uses an entirely separate driver-level connection (`mysqli`, `PDO`, or the driver `WP-ERROR-002`/`007`/`008` document), per `SF-TAXONOMY-004` Section 2.
 - **`WP-ERROR-014` — Required PHP Extension Missing**: owns the condition of no working transport being *available at all* (for example, `curl` unavailable with no functioning streams fallback). This entry presumes at least one transport is available and capable, and the failure is in that transport's own attempt to reach the remote host — not in whether a transport exists to attempt it with.
@@ -191,7 +191,7 @@ Recovery is successful when:
 
 The following are cited as they exist in this repository, or as conceptual distinctions where noted.
 
-1. [WP-ERROR-029 — WordPress Outbound TLS Negotiation Failure](WP-ERROR-029-OUTBOUND-TLS-NEGOTIATION-FAILURE.md) — exists in this repository (currently `Draft`); see Section 6 (Distinction) above for how this entry ends exactly where connection establishment is confirmed.
+1. [WP-ERROR-029 — WordPress Outbound TLS Negotiation Failure](WP-ERROR-029-OUTBOUND-TLS-NEGOTIATION-FAILURE.md) — exists in this repository (`Production Ready`); see Section 6 (Distinction) above for how this entry ends exactly where connection establishment is confirmed.
 2. [WP-ERROR-030 — WordPress CORS (Cross-Origin) Policy Failure](WP-ERROR-030-CORS-CROSS-ORIGIN-POLICY-FAILURE.md) — see Section 7 (Scope) above.
 3. [WP-ERROR-007 — WordPress Database Connection Limit Exceeded](WP-ERROR-007-WORDPRESS-DATABASE-CONNECTION-LIMIT-EXCEEDED.md) and [WP-ERROR-008 — WordPress Database Server Unreachable](WP-ERROR-008-WORDPRESS-DATABASE-SERVER-UNREACHABLE.md) — exist in this repository; see Section 6 (Distinction) above for why the database connection is excluded regardless of shared underlying network mechanisms.
 4. [WP-ERROR-014 — Required PHP Extension Missing](WP-ERROR-014-REQUIRED-PHP-EXTENSION-MISSING.md) — exists in this repository; see Section 6 (Distinction) above for the boundary between transport availability and transport connection behavior.
