@@ -96,7 +96,7 @@ Listed as components commonly involved, not as a claim that a single PHP version
 
 - A PHP fatal error referencing a function, method, or syntax construct that was removed or changed in the running PHP version. Historical examples include: the curly-brace syntax for string and array offset access, deprecated since PHP 7.4 and removed in PHP 8.0; and the automatic creation of dynamic properties on classes that do not explicitly declare or allow them, deprecated in PHP 8.2. These are cited as real, dated examples of the general phenomenon this entry documents, not as an exhaustive or current list of every version-specific change.
 - A WordPress or Site Health notice reporting that the running PHP version is below the recommended or minimum supported version.
-- A plugin or theme activation blocked by a `Requires PHP` mismatch notice.
+- A plugin or theme activation blocked by a `Requires PHP` mismatch notice — see [WP-ERROR-031](WP-ERROR-031-PLUGIN-ACTIVATION-FAILURE.md) for the plugin-activation-specific diagnostic entry point.
 - A Composer install or update failing with a platform requirement error naming the `php` constraint.
 - A specific plugin or theme failing after a PHP upgrade, hosting migration, or automatic platform update, while other parts of the site continue to function, when only that component depends on the changed behavior.
 - WP-CLI commands behaving differently than web requests for the same site, when the CLI and web PHP versions differ.
