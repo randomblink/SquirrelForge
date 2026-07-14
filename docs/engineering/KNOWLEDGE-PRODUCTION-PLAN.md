@@ -23,9 +23,9 @@ It should be updated freely as production proceeds. It does not require engineer
 | Authentication | 4 (`WP-ERROR-024`–`027`) | Yes | `SF-TAXONOMY-003` | `SF-REVIEW-079` |
 | Networking | 3 (`WP-ERROR-028`–`030`) | Yes | `SF-TAXONOMY-004` | `SF-REVIEW-088` |
 | Bootstrap | 1 (`WP-ERROR-013`) | No — single-entry, degenerate for category review | None | — |
-| Plugin | 2 (`WP-ERROR-017`, `031`) | No — category in progress, `WP-ERROR-032` still planned | `SF-TAXONOMY-005` | — |
+| Plugin | 3 (`WP-ERROR-017`, `031`, `032`) | No — entries complete, consistency review and baseline certification pending | `SF-TAXONOMY-005` | — |
 
-27 entries, 8 categories, 6 Baseline Certified, across the 14-specification framework at `SF-BASELINE-001`.
+28 entries, 8 categories, 6 Baseline Certified, across the 14-specification framework at `SF-BASELINE-001`.
 
 ---
 
@@ -44,7 +44,7 @@ Seven approved categories have **zero entries yet** and require no specification
 | Candidate (roadmap label) | Approved `SF-SPEC-001` category value | Status |
 |---|---|---|
 | Authentication & Authorization | `Authentication` | **Done** — Baseline Certified (`SF-REVIEW-079`) |
-| Plugin Lifecycle | `Plugin` | **In progress** — `SF-TAXONOMY-005` frozen (`SF-REVIEW-089`); `WP-ERROR-017` and `WP-ERROR-031` Production Ready; `WP-ERROR-032` remaining |
+| Plugin Lifecycle | `Plugin` | **Entries complete** — all three planned entries (`WP-ERROR-017`/`031`/`032`) Production Ready; category consistency review and baseline certification pending |
 | Theme Lifecycle | `Theme` | **Ready** — approved, zero entries |
 | Caching / Performance | `Performance` | **Ready** — approved, zero entries |
 | WP-CLI | `CLI` | **Ready** — approved, zero entries |
@@ -116,11 +116,10 @@ Empty scaffold. Per the project owner's own direction, this is the evidence base
 
 ## 8. Active Category
 
-**Plugin Lifecycle.** Category Work Order: `SF-TAXONOMY-005` (Plugin Lifecycle Error Taxonomy), Version 1.1, independently reviewed per `SF-REVIEW-089` (Approved). Unlike every prior taxonomy in this catalog, this one was declared *after* an existing, unbaselined entry (`WP-ERROR-017`) already occupied part of the category — the first time this project has had to account for a pre-existing entry rather than starting from an empty category. Planned entries: `WP-ERROR-017` (Must-Use Plugin Fatal Error, existing), `WP-ERROR-031` (Plugin Activation Failure), `WP-ERROR-032` (Plugin Update Failure).
-
-Progress: `WP-ERROR-017` and `WP-ERROR-031` both **Production Ready**. `WP-ERROR-032` not yet authored.
+Plugin Lifecycle is complete and all three planned entries are **Production Ready**. Category Work Order: `SF-TAXONOMY-005` (Plugin Lifecycle Error Taxonomy), Version 1.3, independently reviewed per `SF-REVIEW-089` (Approved), corrected once (v1.1→1.2) before `WP-ERROR-032` was authored. Unlike every prior taxonomy in this catalog, this one was declared *after* an existing, unbaselined entry (`WP-ERROR-017`) already occupied part of the category — the first time this project has had to account for a pre-existing entry rather than starting from an empty category. Entries: `WP-ERROR-017` (Must-Use Plugin Fatal Error), `WP-ERROR-031` (Plugin Activation Failure), `WP-ERROR-032` (Plugin Update Failure). Category consistency review and baseline certification are the next steps (see Section 9 below).
 
 - `WP-ERROR-031` (`SF-REVIEW-090`/`091`) — drafted directly from `SF-TAXONOMY-005`'s own declared scope, per explicit project-owner direction, as a deliberate test of whether the taxonomy is complete enough to support entry authoring without a fresh boundary discussion. Keeps three causes distinct: WordPress's own native pre-activation requirement gate (`Requires PHP`/`Requires at least`/`Requires Plugins`, refused before any plugin code runs), an activation-time fatal error during the plugin's own file include (WordPress's own built-in protection, distinguished explicitly from a generic PHP-runtime fatal error), and the plugin's own `register_activation_hook()` callback failing or self-halting. Diagnosis starts from confirming activation actually failed and capturing WordPress's own exact message, before narrowing to which of the three mechanisms is responsible. Hands off to `WP-ERROR-014`/`015` for extension/version root causes rather than duplicating their own diagnostic content. Independent review caught one real finding, outside this entry's own text: `WP-ERROR-017`'s own "ordinary plugin activation/deactivation" exclusion bullet described this entry's own territory without citing it — corrected. `SF-TAXONOMY-005` itself required no revision to support this entry, satisfying the project owner's own stated completeness test.
+- `WP-ERROR-032` (`SF-REVIEW-092`/`093`) — required a pre-authoring taxonomy correction (`SF-TAXONOMY-005` v1.1→v1.2): research surfaced two real, previously unaddressed overlaps `SF-REVIEW-089` had not caught — `WP-ERROR-019`/`020` (Filesystem) already explicitly claim the `wp-content/upgrade` staging directory's own permission/capacity dimension of an update failure, and `WP-ERROR-028`/`029` (Networking) already explicitly claim the update package's own download-connection/TLS dimension. Narrowed the entry to the update *mechanism's* own process (pre-update compatibility gate, package integrity/extraction, non-permission/capacity file-swap interruption, automatic-update rollback) as the diagnostic entry point, handing off to all four sibling entries once root-caused. Flags a genuinely more severe risk profile than `WP-ERROR-031`: an interrupted update on an *already-active* plugin can leave the site attempting to load mismatched files on the very next request, a site-wide outage rather than a contained inactive-plugin state. Independent review caught one real finding: `WP-ERROR-013`'s own Common Causes list didn't name an interrupted-update-caused file inconsistency as one of its own downstream-symptom causes — added, cross-referencing this entry. Disclosed as a new `FRAMEWORK-OBSERVATIONS.md` entry: a taxonomy's own independent review verifies every claim it makes about entries it names, but can still miss a claim the artifact never thought to name in the first place.
 
 No category is currently active as of this update. Per the roadmap (Section 3), one Plugin entry (`WP-ERROR-032`) remains before that category can proceed to consistency review and baseline certification.
 

@@ -200,7 +200,7 @@ The following are cited as they exist in this repository.
 3. [WP-ERROR-014 — Required PHP Extension Missing](WP-ERROR-014-REQUIRED-PHP-EXTENSION-MISSING.md) — exists in this repository; see Section 6 (Distinction) above for the diagnose-then-hand-off relationship.
 4. [WP-ERROR-015 — Unsupported PHP Version](WP-ERROR-015-UNSUPPORTED-PHP-VERSION.md) — exists in this repository; see Section 6 (Distinction) above for the diagnose-then-hand-off relationship. That entry's own Section 9 (Typical Symptoms) already names "a plugin or theme activation blocked by a `Requires PHP` mismatch notice" as one of its own possible symptoms; this entry is now the more specific diagnostic entry point for that particular symptom.
 5. [WP-ERROR-019 — WordPress Filesystem Permission Denied](WP-ERROR-019-FILESYSTEM-PERMISSION-DENIED.md) — exists in this repository; see Section 6 (Distinction) above for the boundary between a plugin file that cannot be read at all and one that is read but fails during execution.
-6. WP-ERROR-032 — WordPress Plugin Update Failure (conceptual reference; planned per `SF-TAXONOMY-005` Section 3, no corresponding document currently exists in this repository; no link is provided) — see Section 6 (Distinction) above.
+6. [WP-ERROR-032 — WordPress Plugin Update Failure](WP-ERROR-032-PLUGIN-UPDATE-FAILURE.md) — see Section 6 (Distinction) above.
 
 ---
 

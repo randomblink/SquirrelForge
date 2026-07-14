@@ -122,6 +122,7 @@ Causes are grouped by category. Inclusion in this list identifies a category as 
 - A missing PHP function or class, commonly resulting from an unmet extension or dependency requirement. This condition is sometimes searched for as a "class not found" or "function not found" error; the corresponding literal PHP messages are `Class "X" not found` for an undefined class and `Call to undefined function X()` for an undefined function.
 - Memory exhaustion during bootstrap (`Allowed memory size ... exhausted`, an abbreviated form of the full PHP message, which includes the configured limit and the size of the failed allocation).
 - A duplicate function or class declaration, commonly caused by a duplicated plugin installation or a duplicated file.
+- A single plugin's own files left internally inconsistent by an interrupted update — see [WP-ERROR-032](WP-ERROR-032-PLUGIN-UPDATE-FAILURE.md).
 - An invalid callable registered and invoked too early in the bootstrap sequence.
 - A type error, particularly under PHP 8's stricter type-checking behavior.
 - An uncaught exception thrown by bootstrap-loaded code.
