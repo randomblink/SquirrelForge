@@ -10,7 +10,7 @@
 
 **Status:** Frozen — the entry set in Section 3 is fixed until this document is deliberately revised (see Section 6). "Frozen" here is an informal, self-defined term describing this document's own adopted-plan state; it is not a claim of the `Version Frozen` **SF-SPEC-001** Section 18 lifecycle stage, nor of any **SF-SPEC-008** Section 6 Version Status value, nor of the category-level `Baseline Certified` designation **SF-SPEC-013** Section 5.5 defines. This document carries a `Version` and `Revision History` for traceability only; it does not present itself as a "versioned engineering artifact" within **SF-SPEC-008**'s own scope, the same disclaimer `SF-TAXONOMY-001`/`002` make.
 
-**Version:** 1.4
+**Version:** 1.5
 
 **Owner:** SquirrelForge
 
@@ -69,6 +69,13 @@ The four conditions are nonetheless mutually exclusive by verified cause, not me
 
 Evidence shall establish which of the four conditions is actually present before an entry is applied; symptoms can overlap (both a cookie failure and a nonce failure can present as "you have been logged out" or "are you sure you want to do this?" style messaging) even though the underlying verified cause is disjoint.
 
+**Classification rule for the `WP-ERROR-025`/`WP-ERROR-027` overlap:** a nonce generated while logged out and submitted after a later login, or generated under one user/session and submitted under another, can superficially look like either a session problem or a nonce problem, since both involve the request's own session context having changed since the markup was rendered. The classification is decided by the *current* authentication session's own fate, not by the nonce's own history:
+
+* If WordPress rejects the current session or cookie itself — `wp_validate_auth_cookie()` fails — the condition is `WP-ERROR-025`, regardless of what the nonce would or would not have validated against.
+* If WordPress accepts the current session, but the submitted nonce does not match that session's own user context (because the nonce was generated under a different, earlier user/session state), the condition is `WP-ERROR-027`. The session having *changed* since the nonce was generated is the nonce's own problem to fail on, not evidence the current session itself is invalid.
+
+This rule is stated once, here, rather than duplicated with potentially drifting wording across both entries' own Distinction sections; each entry's own text cross-references this section rather than restating it.
+
 ---
 
 ## 5. Candidates Considered and Rejected
@@ -89,3 +96,4 @@ Evidence shall establish which of the four conditions is actually present before
 | 1.2 | 2026-07-14 | WP-ERROR-025 reached Production Ready (SF-REVIEW-072 author review, SF-REVIEW-073 independent review, which corrected an attribution error in WP-ERROR-025's own text about a WP-ERROR-024 boundary case rather than in this taxonomy). Status column updated from Planned to Existing, Production Ready in the same body of work as the promotion, per SF-SPEC-013 Section 5.7. No boundary content changed. | Frozen |
 | 1.3 | 2026-07-14 | WP-ERROR-026 reached Production Ready (SF-REVIEW-074 author review, SF-REVIEW-075 independent review, which also corrected a stale generic Authentication-category hedge in WP-ERROR-022 and SF-TAXONOMY-002, unrelated to this taxonomy's own content). Status column updated from Planned to Existing, Production Ready in the same body of work as the promotion, per SF-SPEC-013 Section 5.7. No boundary content changed. | Frozen |
 | 1.4 | 2026-07-14 | WP-ERROR-027 reached Production Ready (SF-REVIEW-076 author review, SF-REVIEW-077 independent review, all-Conforming). Status column updated from Planned to Existing, Production Ready in the same body of work as the promotion, per SF-SPEC-013 Section 5.7. All four planned entries now exist and are Production Ready; the Authentication category's initial planned baseline is complete. No boundary content changed. | Frozen |
+| 1.5 | 2026-07-14 | Corrected per `SF-REVIEW-078` (Authentication category consistency review), Finding C-2: added an explicit classification rule to Section 4 for the WP-ERROR-025/WP-ERROR-027 overlap (a nonce generated before a session change) — the current session's own acceptance or rejection decides classification, not the nonce's own history. No entry boundary changed; the rule formalizes a distinction both entries already implemented consistently. | Frozen |

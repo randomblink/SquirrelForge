@@ -66,4 +66,14 @@ Not acted on now; the two known instances (`SF-SPEC-004`, `SF-SPEC-005`) were co
 
 ---
 
+## 2026-07-14 — Generic category-hedge staleness: one occurrence, checked for recurrence, not (yet) found
+
+Observed across `SF-REVIEW-075` (`WP-ERROR-026` independent review, IF-1): `WP-ERROR-022` and `SF-TAXONOMY-002` both carried a stale "Authentication category (once a taxonomy exists for it)" hedge, invisible to `scripts/validate-repo.sh` because it matches no `WP-ERROR-XXX` ID and so falls outside Check A's pattern-matching. Corrected in both.
+
+Per explicit project-owner direction — "check whether the category-level review exposes enough repeated stale-hedge cases to justify extending the validator... repetition... would provide stronger evidence for a tooling change" — `SF-REVIEW-078` (Authentication category consistency review) deliberately searched for recurrence of this exact defect class across all four Authentication entries and `SF-TAXONOMY-003`. Result: **not found to recur**. Five other "once a taxonomy exists for it" matches exist in the repository (`WP-ERROR-021`, `SF-TAXONOMY-002` ×2, `WP-ERROR-024`, `SF-TAXONOMY-003`), but every one references the **Security** category specifically, which genuinely has no taxonomy or entries yet — those hedges remain accurate forward-references, not stale ones, and are not the same defect class.
+
+Not acted on now; one occurrence does not meet the evidentiary bar the project owner set for a validator change. Recorded here specifically so that a second real occurrence, if one ever surfaces, has this negative result already on record rather than requiring re-discovery — two data points (one positive, one deliberately-checked negative) will make a third occurrence's evidentiary weight easier to assess than starting from zero.
+
+---
+
 No further observations recorded.
