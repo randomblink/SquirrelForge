@@ -179,7 +179,7 @@ Recovery is successful when:
 
 # 16. Related Errors
 
-The following are cited as they exist in this repository; all are real, existing documents.
+The following are cited as they exist in this repository, or as conceptual distinctions where noted.
 
 1. [WP-ERROR-013 — WordPress Bootstrap PHP Fatal Error](WP-ERROR-013-WORDPRESS-BOOTSTRAP-PHP-FATAL-ERROR.md) — see Section 6 (Distinction) above.
 2. [WP-ERROR-014 — Required PHP Extension Missing](WP-ERROR-014-REQUIRED-PHP-EXTENSION-MISSING.md) — see Section 6 (Distinction) above.

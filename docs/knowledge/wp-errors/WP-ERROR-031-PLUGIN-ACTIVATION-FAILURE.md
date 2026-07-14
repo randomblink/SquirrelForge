@@ -193,7 +193,7 @@ Recovery is successful when:
 
 # 16. Related Errors
 
-The following are cited as they exist in this repository.
+The following are cited as they exist in this repository, or as conceptual distinctions where noted.
 
 1. [WP-ERROR-017 — WordPress Must-Use Plugin Fatal Error](WP-ERROR-017-MUST-USE-PLUGIN-FATAL-ERROR.md) — exists in this repository; see Section 6 (Distinction) above for how the two entries' ownership differs by the presence or absence of an activation mechanism entirely.
 2. [WP-ERROR-013 — WordPress Bootstrap PHP Fatal Error](WP-ERROR-013-WORDPRESS-BOOTSTRAP-PHP-FATAL-ERROR.md) — exists in this repository; see Section 6 (Distinction) above for why this entry's own condition, occurring only after bootstrap has already completed, falls outside that entry's own scope without requiring any correction to it.
