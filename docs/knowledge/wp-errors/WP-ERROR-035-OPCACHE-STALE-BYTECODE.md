@@ -186,7 +186,7 @@ Recovery is successful when:
 
 # 16. Related Errors
 
-The following are cited as they exist in this repository.
+The following are cited as they exist in this repository, or as conceptual distinctions where noted.
 
 1. [WP-ERROR-032 — WordPress Plugin Update Failure](WP-ERROR-032-PLUGIN-UPDATE-FAILURE.md) — exists in this repository; see Section 6 (Distinction) above for the boundary between this entry and that one.
 2. [WP-ERROR-014 — Required PHP Extension Missing](WP-ERROR-014-REQUIRED-PHP-EXTENSION-MISSING.md) — exists in this repository; see Section 6 (Distinction) above.
