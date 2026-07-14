@@ -26,4 +26,14 @@ Not acted on now; deferred per explicit direction to proceed with entry authorin
 
 ---
 
+## 2026-07-14 — SF-SPEC-013 Section 5.7 is correctly identified but not yet self-enforcing
+
+Observed across `SF-REVIEW-052` (REST API category consistency review): even in the first category authored entirely under `SF-SPEC-013`'s completed governance baseline, two defects recurred that are the exact classes Database's and Filesystem's own category reviews already found — a sibling entry citing a now-existing entry as a stale conceptual placeholder, and a taxonomy document's own status table going stale the moment a later sibling was promoted. `SF-SPEC-013` Section 5.7 already names this second failure mode explicitly and requires it not happen, yet it happened anyway, in the very category meant to demonstrate the specification working end to end.
+
+This suggests the requirement is correctly identified but currently depends entirely on a dedicated, later consistency review to catch a violation — it is not self-enforcing at the moment the violating commit is made (an entry's own promotion, or a sibling's own cross-reference, is a point-in-time snapshot that goes stale the instant a later commit changes what it describes). Worth considering, when time permits: whether a lighter-weight, mechanical check (for example, a `grep` step run as part of every entry-promotion commit, checking whether any other file in the repository cites the entry being promoted as `(conceptual reference...)`) could catch this at the moment of the violation rather than requiring a full category consistency review to surface it after the fact.
+
+Not acted on now; disclosed per `SF-REVIEW-052`'s own recommendation to record it as a framework observation rather than act on it mid-review. Does not block REST API's own baseline certification, since it describes a process characteristic of this catalog's authoring workflow generally, not a defect specific to the REST API category's own entries.
+
+---
+
 No further observations recorded.
