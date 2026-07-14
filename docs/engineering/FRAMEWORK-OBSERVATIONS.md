@@ -62,6 +62,8 @@ This is the same underlying failure mode `SF-REVIEW-042`'s IF-1 and `SF-REVIEW-0
 
 Not acted on now; the two known instances (`SF-SPEC-004`, `SF-SPEC-005`) were corrected directly within `SF-REVIEW-059` and a follow-up disclosure row (`SF-SPEC-005` Version 1.2). Assessed as low risk for the ten specifications `SF-REVIEW-060` migrated, since that review's own Section 5/6 independently re-checked each citation against `SF-REVIEW-002`'s and `SF-REVIEW-005`'s actual text rather than repeating the unverified-absence pattern.
 
+**Classified 2026-07-14:** formally assessed as an **accepted limitation**, not a blocking defect, under `SF-SPEC-014` Section 5.5 (`SF-REVIEW-064`) — it has a stated resolution path above and both known instances are already corrected. Not required to be resolved before a Framework Baseline may be declared.
+
 ---
 
 No further observations recorded.
