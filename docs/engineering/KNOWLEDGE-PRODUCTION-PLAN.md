@@ -114,4 +114,6 @@ Empty scaffold. Per the project owner's own direction, this is the evidence base
 
 ## 8. Active Category
 
-**Authentication.** Category Work Order: `SF-TAXONOMY-003` (Authentication Error Taxonomy), independently reviewed per `SF-REVIEW-069` (Approved with Minor Revisions). Planned entries: `WP-ERROR-024` (Login Authentication Failure), `WP-ERROR-025` (Authentication Cookie Invalid or Expired), `WP-ERROR-026` (Capability or Role Authorization Denied), `WP-ERROR-027` (Nonce Verification Failure, Non-REST). Entry authoring has not yet begun.
+**Authentication.** Category Work Order: `SF-TAXONOMY-003` (Authentication Error Taxonomy), independently reviewed per `SF-REVIEW-069` (Approved with Minor Revisions). Planned entries: `WP-ERROR-024` (Login Authentication Failure), `WP-ERROR-025` (Authentication Cookie Invalid or Expired), `WP-ERROR-026` (Capability or Role Authorization Denied), `WP-ERROR-027` (Nonce Verification Failure, Non-REST).
+
+Progress: `WP-ERROR-024` **Production Ready** (`SF-REVIEW-070`/`071`) — the first entry in the category and the first authored entirely after `SF-BASELINE-001`. Its independent review caught a real internal-consistency gap in the entry's own lockout-plugin exclusion, and its author review caught and fixed a bug in `scripts/validate-repo.sh` itself (Check B was flagging a false-positive "Planned vs. Draft" mismatch; it now only flags once an entry reaches Production Ready, matching established taxonomy-update convention). `WP-ERROR-025`, `026`, `027` not yet authored.

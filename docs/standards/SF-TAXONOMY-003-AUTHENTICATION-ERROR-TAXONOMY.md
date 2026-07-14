@@ -10,7 +10,7 @@
 
 **Status:** Frozen — the entry set in Section 3 is fixed until this document is deliberately revised (see Section 6). "Frozen" here is an informal, self-defined term describing this document's own adopted-plan state; it is not a claim of the `Version Frozen` **SF-SPEC-001** Section 18 lifecycle stage, nor of any **SF-SPEC-008** Section 6 Version Status value, nor of the category-level `Baseline Certified` designation **SF-SPEC-013** Section 5.5 defines. This document carries a `Version` and `Revision History` for traceability only; it does not present itself as a "versioned engineering artifact" within **SF-SPEC-008**'s own scope, the same disclaimer `SF-TAXONOMY-001`/`002` make.
 
-**Version:** 1.0
+**Version:** 1.1
 
 **Owner:** SquirrelForge
 
@@ -47,7 +47,7 @@ This document does not itself contain any `WP-ERROR` knowledge content and is no
 
 | Entry | Title | Owns | Status |
 |---|---|---|---|
-| `WP-ERROR-024` | WordPress Login Authentication Failure | Credential verification — `wp_authenticate()`/`wp_signon()` correctly reject a login attempt (or accept one that should have been rejected) due to a verified cause in WordPress's own credential-checking logic, across every entry point that ultimately calls this same core pipeline (`wp-login.php`, XML-RPC, a plugin's own programmatic `wp_signon()` call) | Planned |
+| `WP-ERROR-024` | WordPress Login Authentication Failure | Credential verification — `wp_authenticate()`/`wp_signon()` correctly reject a login attempt (or accept one that should have been rejected) due to a verified cause in WordPress's own credential-checking logic, across every entry point that ultimately calls this same core pipeline (`wp-login.php`, XML-RPC, a plugin's own programmatic `wp_signon()` call) | Existing, Production Ready |
 | `WP-ERROR-025` | WordPress Authentication Cookie Invalid or Expired | Session persistence — a user previously authenticated successfully, but a *subsequent* request's own auth-cookie validation (`wp_validate_auth_cookie()`) fails: cookie expiration, tampering, a scheme/domain mismatch (`COOKIE_DOMAIN`, `SECURE_AUTH_COOKIE`), or invalidation caused by a secret-key/salt rotation or a forced logout | Planned |
 | `WP-ERROR-026` | WordPress Capability or Role Authorization Denied | Post-authentication authorization, non-REST — a user is verifiably authenticated (Section 2's boundary with `WP-ERROR-024`/`025` already crossed successfully), but `current_user_can()` or an equivalent role/capability check denies access to a `wp-admin` page, an admin-ajax action, or a plugin/theme-defined capability gate | Planned |
 | `WP-ERROR-027` | WordPress Nonce Verification Failure (Non-REST) | Request-origin/freshness verification, non-REST — `wp_verify_nonce()`/`check_admin_referer()`/`check_ajax_referer()` reject a request as stale, forged, or mismatched to the acting user's own session, outside the REST API pipeline `WP-ERROR-022` already owns | Planned |
@@ -85,3 +85,4 @@ Evidence shall establish which of the four conditions is actually present before
 | Version | Date | Summary of Changes | Status |
 |---|---|---|---|
 | 1.0 | 2026-07-14 | Initial taxonomy: WP-ERROR-024 (Login Authentication Failure), WP-ERROR-025 (Authentication Cookie Invalid or Expired), WP-ERROR-026 (Capability or Role Authorization Denied), WP-ERROR-027 (Nonce Verification Failure, Non-REST), forming four mutually-exclusive-by-cause conditions rather than a strict pipeline. Explicitly disambiguated from WP-ERROR-002 (Database Authentication Failure, an unrelated concept sharing only a name) and from WP-ERROR-022 (REST API Access Denied, which already reserved this category's territory by name in SF-TAXONOMY-002 Section 2 and WP-ERROR-022 Section 6). Two-factor authentication, password reset, XML-RPC as a separate entry, and CAPTCHA/bot-mitigation considered and rejected or deferred, per Section 5. | Frozen |
+| 1.1 | 2026-07-14 | WP-ERROR-024 reached Production Ready (SF-REVIEW-070 author review, SF-REVIEW-071 independent review). Status column updated from Planned to Existing, Production Ready in the same body of work as the promotion, per SF-SPEC-013 Section 5.7. No boundary content changed. | Frozen |

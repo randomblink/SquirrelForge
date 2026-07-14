@@ -82,8 +82,8 @@ for tax in "$STANDARDS_DIR"/SF-TAXONOMY-*.md; do
 
         actual_status=$(grep -m1 -E '^\*?[[:space:]]*\*\*Status:\*\*' "$entry_file" | sed -E 's/^\*?[[:space:]]*\*\*Status:\*\*[[:space:]]*//')
 
-        if [[ "$tax_status" == Planned* ]] && [ -n "$actual_status" ]; then
-            echo "MISMATCH: $tax lists $id as \"$tax_status\" but $entry_file's own Status is \"$actual_status\" (entry now exists)."
+        if [[ "$tax_status" == Planned* ]] && [ "$actual_status" == "Production Ready" ]; then
+            echo "MISMATCH: $tax lists $id as \"$tax_status\" but $entry_file's own Status is \"$actual_status\"."
             issues=$((issues + 1))
         elif [[ "$tax_status" == Existing* ]] && [ -n "$actual_status" ] && [[ "$tax_status" != *"$actual_status"* ]]; then
             echo "MISMATCH: $tax lists $id as \"$tax_status\" but $entry_file's own Status is \"$actual_status\"."
