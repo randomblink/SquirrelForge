@@ -78,4 +78,16 @@ Not acted on now; one occurrence does not meet the evidentiary bar the project o
 
 ---
 
+## 2026-07-14 — A taxonomy's independent review verifies claims against the entries it names, not against every category a boundary section might silently encroach on
+
+Observed while drafting `WP-ERROR-032` (Plugin category): `SF-TAXONOMY-005` Version 1.0/1.1's own Section 2 claimed that a plugin update's own file-replacement step failing due to a permission or capacity constraint was this category's own condition. This was wrong — `WP-ERROR-019` (Filesystem Permission Denied) and `WP-ERROR-020` (Disk Space Exhausted), both predating this taxonomy, already explicitly name the `wp-content/upgrade` staging directory and WordPress's own "Installation Failed: Could Not Create Directory." message as their own territory. A second overlap existed for the same reason: `WP-ERROR-028`/`029` (Networking) already explicitly name "plugin/theme/core update checks" and the `api.wordpress.org` outbound request as their own territory — the update package's own download step.
+
+`SF-REVIEW-089`, the taxonomy's own independent review, did not catch either overlap. Its own evidence-gathering (per its Section 5) independently re-verified every claim the taxonomy made about `WP-ERROR-013`, `016`, and `017` — the entries the taxonomy's own text named directly — but the taxonomy's Section 2 never named `WP-ERROR-019`/`020`/`028`/`029` at all; it asserted a boundary claim about "filesystem" and "update" territory in the abstract without citing the specific entries that might already occupy it. A review that verifies every *named* claim can still miss a claim the artifact never thought to name in the first place.
+
+This is a related but distinct failure mode from the `SF-SPEC-013` Section 5.7 staleness family (a citation going stale after the fact) and from the generic-hedge pattern (`SF-REVIEW-075`/`078`/`087`) — this is a taxonomy asserting ownership of territory without first checking whether an *existing, unrelated* category already claimed it, because the relevant entries were never on the reviewer's own checklist to begin with. Worth considering, when time permits: whether a taxonomy's own independent review should include a mandatory sweep — for every category the taxonomy's own boundary section touches even implicitly (not only the categories/entries it explicitly cites) — checking whether an existing entry in that category already makes a conflicting claim, rather than relying on the taxonomy's own text to have already flagged every relevant neighbor.
+
+Not acted on now; corrected directly in `SF-TAXONOMY-005` Version 1.2, before `WP-ERROR-032` was authored, the same pre-authoring correction pattern `SF-TAXONOMY-004`'s own WP-ERROR-014 boundary received. Disclosed here as a first data point on this specific failure mode, distinct enough from the prior three staleness/hedge findings to track separately rather than folding into one of them.
+
+---
+
 No further observations recorded.
