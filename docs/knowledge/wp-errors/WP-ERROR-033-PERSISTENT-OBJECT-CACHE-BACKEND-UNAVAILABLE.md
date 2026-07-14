@@ -207,7 +207,7 @@ The following are cited as they exist in this repository, or as conceptual disti
 4. [WP-ERROR-030 — WordPress CORS (Cross-Origin) Policy Failure](WP-ERROR-030-CORS-CROSS-ORIGIN-POLICY-FAILURE.md) — exists in this repository; see Section 6 (Distinction) above.
 5. [WP-ERROR-009 — WordPress Database Query Timeout](WP-ERROR-009-DATABASE-QUERY-TIMEOUT.md) — exists in this repository; see Section 6 (Distinction) above for the dependency/consequence relationship.
 6. [WP-ERROR-014 — Required PHP Extension Missing](WP-ERROR-014-REQUIRED-PHP-EXTENSION-MISSING.md) — exists in this repository; see Section 6 (Distinction) above for the diagnose-then-hand-off relationship.
-7. WP-ERROR-034 — WordPress Page Cache Not Active (conceptual reference; planned per `SF-TAXONOMY-006` Section 3, no corresponding document currently exists in this repository; no link is provided) — see Section 7 (Scope) above.
+7. [WP-ERROR-034 — WordPress Page Cache Not Active](WP-ERROR-034-PAGE-CACHE-NOT-ACTIVE.md) — see Section 7 (Scope) above.
 
 ---
 
