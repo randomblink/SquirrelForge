@@ -38,6 +38,8 @@ Not acted on now; disclosed per `SF-REVIEW-052`'s own recommendation to record i
 
 **Acted on 2026-07-14:** added `scripts/validate-repo.sh`, a standalone, manually-run mechanical check for both named defect classes. It intentionally scopes its "conceptual reference" sweep to *live* citing documents only (`docs/knowledge/wp-errors/*.md`, `docs/standards/SF-TAXONOMY-*.md`) and excludes `docs/reviews/*.md`, whose point-in-time text is preserved by design per **SF-SPEC-012** Section 4.3 and **SF-SPEC-013** Section 5.8 — a scoping refinement of this entry's own "any other file in the repository" phrasing, made explicit in the script's own header comment. On its first run against the current repository, Check B (taxonomy/entry status drift) was clean, but Check A found a real, previously undetected defect: `WP-ERROR-014` (PHP Runtime category) still cites `WP-ERROR-015` as a conceptual reference at two locations, even though `WP-ERROR-015` has existed and been Production Ready since `SF-REVIEW-009`. Unlike Database, Filesystem, and REST API, the PHP Runtime category (`WP-ERROR-013`/`014`/`015`) has never had a dedicated category consistency review under **SF-SPEC-013** Section 5.4, which is almost certainly why this went uncaught. Not remediated in this pass — remediating a knowledge entry's own content is out of scope for a framework-observation closure and belongs to a dedicated category consistency review, matching the `SF-REVIEW-032`/`039`/`052` precedent.
 
+**Remediated 2026-07-14:** `SF-REVIEW-056` (PHP Runtime category consistency review) corrected the stale citation and a related terminology inconsistency; `SF-REVIEW-057` certified PHP Runtime Knowledge Baseline v1. `scripts/validate-repo.sh` confirmed clean before and after.
+
 ---
 
 ## 2026-07-14 — Revision History section missing from eleven of thirteen specifications
@@ -47,6 +49,18 @@ Observed across `SF-REVIEW-055` (`SF-SPEC-005` independent review, IF-1): a repo
 This gap was found while independently re-verifying `SF-REVIEW-054`'s F-1 (which fixed the same gap in `SF-SPEC-005` alone, without performing the cross-specification sweep its own Recommendations section flagged as unperformed). It is disclosed here rather than fixed in that review, consistent with `SF-SPEC-005` Section 5.4's prohibition on a review recommendation introducing an unrelated architectural change.
 
 Not acted on now. Worth considering, when time permits: a dedicated pass adding a Revision History section (with an honest, undated-review-disclosing Version 1.0 row, matching the pattern `SF-SPEC-005`'s own Version 1.0 row now sets) to each of the eleven affected specifications — likely low-risk, mechanical work suited to the validation-script direction already under consideration for the `SF-SPEC-013` Section 5.7 observation above.
+
+**Acted on 2026-07-14:** ownership, scope, and disclosure policy defined first (per explicit user direction not to patch quietly): `SF-SPEC-004` Section 5.9, added and reviewed via `SF-REVIEW-058`/`059`, now owns the requirement that a Revision History section exist, and establishes that its earliest row shall accurately state whether a dedicated review record exists rather than either inventing one or wrongly claiming none exists. The eleven-specification gap was then migrated: `SF-SPEC-004` via its own review cycle; the remaining ten (`SF-SPEC-001`, `002`, `003`, `006`–`012`) via a single batch pass verified by `SF-REVIEW-060`. `scripts/validate-repo.sh` gained a third check (Check C) mechanically enforcing this requirement going forward.
+
+---
+
+## 2026-07-14 — "No dedicated review record" is a claim that requires a full-text search, not a filename check
+
+Observed across `SF-REVIEW-059` (`SF-SPEC-004` independent review, IF-1): both `SF-REVIEW-054` (for `SF-SPEC-005`) and the initial draft of `SF-REVIEW-058` (for `SF-SPEC-004`) concluded "no dedicated engineering review record was produced for this version" by checking for a review file named after the artifact (`SF-REVIEW-XXX-SF-SPEC-NNN-*`) and finding none. Both conclusions were wrong: `SF-REVIEW-002` ("Specification Library Review") is a real, six-phase, substantive review record covering `SF-SPEC-001` through `011` — including both files — under a title that does not embed either artifact's ID. A filename-pattern search cannot find a review filed under a different organizing name.
+
+This is the same underlying failure mode `SF-REVIEW-042`'s IF-1 and `SF-REVIEW-055`'s IF-1 each independently found in a different form: a claim of thoroughness ("all citations accurate," "no dedicated review record") that had not actually been tested by the specific search that would falsify it. Worth considering, when time permits: whether `scripts/validate-repo.sh` or a documented review-preparation checklist should require a full-text `grep` for the artifact's own ID across all of `docs/reviews/` before a Revision History row may claim no review record exists, rather than relying on filename convention alone.
+
+Not acted on now; the two known instances (`SF-SPEC-004`, `SF-SPEC-005`) were corrected directly within `SF-REVIEW-059` and a follow-up disclosure row (`SF-SPEC-005` Version 1.2). Assessed as low risk for the ten specifications `SF-REVIEW-060` migrated, since that review's own Section 5/6 independently re-checked each citation against `SF-REVIEW-002`'s and `SF-REVIEW-005`'s actual text rather than repeating the unverified-absence pattern.
 
 ---
 

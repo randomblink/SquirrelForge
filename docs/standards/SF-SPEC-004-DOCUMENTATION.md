@@ -8,9 +8,9 @@
 
 **Classification:** Engineering Specification
 
-**Status:** Draft
+**Status:** Production Ready
 
-**Version:** 1.0
+**Version:** 1.1
 
 **Owner:** SquirrelForge
 
@@ -182,6 +182,16 @@ Documentation shall undergo engineering review in accordance with **SF-SPEC-005 
 
 ---
 
+## 5.9 Revision History Section
+
+Every engineering specification, and every other document type within this specification's Section 2.1 scope that carries a version identifier under **SF-SPEC-008 — Versioning Specification**, shall contain its own dedicated Revision History section, structured per **SF-TEMPLATE-001** Section 11 (or the equivalent section a governing template for that document type defines). This specification owns the requirement that this section exist and where it belongs in a document's structure (Section 7); **SF-SPEC-008** Section 5.3 continues to own what each row within it must contain.
+
+A Revision History section's earliest row shall accurately state whether a dedicated engineering review record exists for that version. Where a document's original authoring predates this catalog's practice of recording one, that absence shall be disclosed in the row itself rather than corrected by reconstructing or inventing a review that did not occur, consistent with the accuracy principle Section 4.1 of this specification already requires and with the disclosure precedent **SF-SPEC-013** Section 5.8 (Revision History Preservation) establishes for correcting, rather than concealing, an artifact's own history.
+
+**Evidentiary basis:** `SF-REVIEW-055` (`SF-SPEC-005` independent review, IF-1) found that eleven of the thirteen specifications then in this library lacked this section entirely, in violation of **SF-TEMPLATE-001** Section 11's required structure — a gap traceable to this specification never having actually stated the requirement normatively: Section 7 (Documentation Structure) omitted Revision History from its own required-sections list, while Section 5.7 (prior to this revision) disclaimed defining "revision-history mechanics" and pointed to **SF-SPEC-008** — which does not itself require a dedicated section to exist, only that a revision's fields (Section 5.3) be documented somewhere. Neither specification, prior to this revision, actually closed that gap; this section closes it, and Section 7 is revised accordingly.
+
+---
+
 # 6. Documentation Quality
 
 Engineering documentation shall be:
@@ -208,6 +218,7 @@ Where applicable, engineering documents shall include:
 * Review Requirements
 * Change Control
 * Reference Implementations (if applicable)
+* Revision History, per Section 5.9
 
 Individual document types may define additional required sections through their own specifications.
 
@@ -277,3 +288,13 @@ Reference Implementations may be designated following successful engineering rev
 The authoritative version of every Reference Implementation remains the individual engineering document.
 
 Reference Implementations are informative and do not supersede the normative requirements defined by this specification.
+
+---
+
+# 13. Revision History
+
+| Version | Date | Summary of Changes | Approval Status |
+|---|---|---|---|
+| 1.0 | 2026-07-13 | Initial specification, established as part of the framework's initial authoring pass (commit `7f29178`), then reviewed and corrected by `SF-REVIEW-002` (Specification Library Review) as part of a unified pass across `SF-SPEC-001` through `011` (Phases 1–6, 2026-07-12): Entry 2 of that review changed this specification's §4.7 (now §5.7) to cite **SF-SPEC-008** for version numbering/revision-history mechanics, and its §4.8 (now §5.8) to cite **SF-SPEC-005** for engineering review; Entry 5 (Phase 6) authorized this specification's Version 1.0 freeze alongside ten siblings. `SF-REVIEW-002` predates, and does not use, the Class A/Class B/Class C reviewer-classification system **SF-SPEC-012** later introduced (first applied in `SF-REVIEW-005`). | Draft — reviewed via `SF-REVIEW-002` (predates Class A/B system) |
+| 1.1 | 2026-07-14 | Added Section 5.9 (Revision History Section), resolving a circular gap this revision itself found: Section 7 previously omitted Revision History from its required-sections list, while Section 5.7 disclaimed defining "revision-history mechanics" and pointed to **SF-SPEC-008**, which does not itself require a dedicated section to exist. Section 7 amended to require Revision History. This specification is accordingly now the explicit owner of the requirement that every in-scope document contain this section, and of the truthful-baseline-row disclosure policy this section documents. | Draft — author-reviewed, see `SF-REVIEW-058` |
+| 1.1 | 2026-07-14 | Class B independent review (`SF-REVIEW-059`) found one Minor finding (IF-1): the Version 1.0 row above originally claimed no dedicated review record exists, when `SF-REVIEW-002` (Specification Library Review) in fact covers `SF-SPEC-001` through `011` and specifically corrected this file twice. The Version 1.0 row was corrected accordingly (in place, since this file had not yet been committed at the time of correction). Status changed to Production Ready — the third specification in this library to reach that designation. | Production Ready — Approved with Minor Revisions |

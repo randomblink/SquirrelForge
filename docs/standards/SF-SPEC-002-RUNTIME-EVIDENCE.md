@@ -10,7 +10,7 @@
 
 **Status:** Draft
 
-**Version:** 1.0
+**Version:** 1.1
 
 **Owner:** SquirrelForge
 
@@ -378,3 +378,12 @@ Every runtime scenario shall satisfy the following review checklist:
 No Reference Implementation is currently designated. WP-SCENARIO-003, WP-SCENARIO-004, WP-SCENARIO-005, WP-SCENARIO-006, WP-SCENARIO-008, WP-SCENARIO-009, and WP-SCENARIO-010 were previously named here. Each has real, substantial runtime evidence recorded in `38_WORDPRESS/AGENT-SCENARIO-TESTS.md` (baseline, execution, validation, cleanup) and a `PASS` result under that document's own evidence framework, but none has been explicitly reviewed against this specification or marked **Production Ready** under the SquirrelForge Engineering Framework; a `PASS` result under a different, pre-existing evidence framework is not equivalent to an explicit Production Ready designation under this one. The citations were removed as unverified rather than left in place on the assumption that a strong `PASS` result implies compliance.
 
 A Reference Implementation may be designated once a runtime scenario has been evaluated against every normative requirement of this specification and explicitly designated **Production Ready** following completed engineering review.
+
+---
+
+# 18. Revision History
+
+| Version | Date | Summary of Changes | Approval Status |
+|---|---|---|---|
+| 1.0 | 2026-07-13 | Initial specification, established as part of the framework's initial authoring pass (commit `7f29178`), then reviewed and corrected by `SF-REVIEW-002` (Specification Library Review) as part of a unified pass across `SF-SPEC-001` through `011` (Phases 1–6, 2026-07-12): Entry 2 (Phase 2) corrected then-§4.7 to cite **SF-SPEC-006** directly (removing a stale, mis-titled "Repository Integrity Specification" reference and a placeholder hedge) and rewrote then-§9 to defer evidence classification/retention/archival/disposal to **SF-SPEC-011**; Entry 5 (Phase 6, Finding F-2) changed then-§10's sole "must" to "shall"; Entry 5 (Finding F-3) changed "Repository governance" to "Repository validation." Entry 3 (Phase 4) removed unverified `WP-SCENARIO-XXX` Reference Implementation citations from §17. `SF-REVIEW-002` predates, and does not use, the Class A/Class B/Class C reviewer-classification system **SF-SPEC-012** later introduced. | Draft — reviewed via `SF-REVIEW-002` (predates Class A/B system) |
+| 1.1 | 2026-07-14 | Added this Revision History section, required by **SF-SPEC-004** Section 5.9 but absent until now. Migrated as part of a repository-wide pass verified by `SF-REVIEW-060` (Specification Library Revision-History Migration Review). No normative content changed. | Draft — migration verified, see `SF-REVIEW-060` |

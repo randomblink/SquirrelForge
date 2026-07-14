@@ -10,7 +10,7 @@
 
 **Status:** Draft
 
-**Version:** 1.0
+**Version:** 1.1
 
 **Owner:** SquirrelForge
 
@@ -321,3 +321,12 @@ The authoritative version of every Reference Implementation remains the individu
 No Reference Implementation is currently designated. A Reference Implementation may be designated once an artifact's review record has been evaluated against every normative requirement of this specification and explicitly verified as compliant.
 
 Reference Implementations are informative and do not supersede the normative requirements defined by this specification.
+
+---
+
+# 19. Revision History
+
+| Version | Date | Summary of Changes | Approval Status |
+|---|---|---|---|
+| 1.0 | 2026-07-13 | Initial specification, established after `SF-SPEC-001` through `011` (commit `7f29178`), outside `SF-REVIEW-002`'s "SF-SPEC-001 through SF-SPEC-011" scope. Reviewed by its own dedicated `SF-REVIEW-005` (Class A, author review): four Minor findings (a boundary-precision issue, two definitional-completeness issues, a template-compliance disclosure gap) corrected and re-validated within that same review. `SF-REVIEW-005` is the first review in this catalog to apply the Class A/Class B/Class C reviewer-classification vocabulary this specification itself defines. No Class B (independent) review has been performed; none was required by the Phase 1 Exit Gate `SF-REVIEW-005` Section 8 describes. | Draft — author-reviewed, see `SF-REVIEW-005` (no independent review) |
+| 1.1 | 2026-07-14 | Added this Revision History section, required by **SF-SPEC-004** Section 5.9 but absent until now. Migrated as part of a repository-wide pass verified by `SF-REVIEW-060` (Specification Library Revision-History Migration Review). No normative content changed. | Draft — migration verified, see `SF-REVIEW-060` |

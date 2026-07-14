@@ -10,7 +10,7 @@
 
 **Status:** Draft
 
-**Version:** 1.0
+**Version:** 1.1
 
 **Owner:** SquirrelForge
 
@@ -394,3 +394,12 @@ A Reference Implementation may be designated once a `WP-ERROR-XXX` document exis
 Once a Reference Implementation exists, authors should compare new `WP-ERROR-XXX` documents against it during development and engineering review to ensure compliance with this specification. No Reference Implementation is currently designated (see Section 22.3); this guidance applies once one has been.
 
 Reference Implementations are intended to demonstrate correct application of this specification. They do not supersede, modify, or extend the normative requirements defined by this document.
+
+---
+
+# 23. Revision History
+
+| Version | Date | Summary of Changes | Approval Status |
+|---|---|---|---|
+| 1.0 | 2026-07-13 | Initial specification, established as part of the framework's initial authoring pass (commit `7f29178`), then reviewed and corrected by `SF-REVIEW-002` (Specification Library Review) as part of a unified pass across `SF-SPEC-001` through `011` (Phases 1–6, 2026-07-12): Entry 3 (Phase 4) removed unverified `WP-ERROR-014`/`015` Reference Implementation citations from §22.3; Entry 5 (Phase 6, Finding F-1) corrected §22.4's present-tense contradiction with §22.3's corrected (empty) state. `SF-REVIEW-002` predates, and does not use, the Class A/Class B/Class C reviewer-classification system **SF-SPEC-012** later introduced (first applied in `SF-REVIEW-005`). | Draft — reviewed via `SF-REVIEW-002` (predates Class A/B system) |
+| 1.1 | 2026-07-14 | Added this Revision History section, required by **SF-SPEC-004** Section 5.9 but absent until now. Migrated as part of a repository-wide pass verified by `SF-REVIEW-060` (Specification Library Revision-History Migration Review). No normative content changed. | Draft — migration verified, see `SF-REVIEW-060` |

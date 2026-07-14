@@ -10,7 +10,7 @@
 
 **Status:** Draft
 
-**Version:** 1.0
+**Version:** 1.1
 
 **Owner:** SquirrelForge
 
@@ -353,3 +353,12 @@ All revisions shall:
 - Be documented.
 - Preserve backward compatibility where practical.
 - Identify affected specifications and engineering artifacts.
+
+---
+
+# 15. Revision History
+
+| Version | Date | Summary of Changes | Approval Status |
+|---|---|---|---|
+| 1.0 | 2026-07-13 | Initial specification, established as part of the framework's initial authoring pass (commit `7f29178`), then reviewed and corrected by `SF-REVIEW-002` (Specification Library Review) as part of a unified pass across `SF-SPEC-001` through `011` (Phases 1–6, 2026-07-12): Entry 2 (Phase 2) trimmed then-§3.7/§4.10 to reference **SF-SPEC-006** instead of restating repository-integrity requirements, updated then-§4.9 to cite **SF-SPEC-005** for engineering review, and reframed then-§5 (Scenario Lifecycle) as a high-level methodology-phase list deferring lifecycle-state governance to **SF-SPEC-007**; Entry 5 (Phase 6, Finding F-3) changed "Repository governance" to "Repository validation." Entry 3 (Phase 4) removed unverified `WP-SCENARIO-XXX` Reference Implementation citations from §13. `SF-REVIEW-002` predates, and does not use, the Class A/Class B/Class C reviewer-classification system **SF-SPEC-012** later introduced. | Draft — reviewed via `SF-REVIEW-002` (predates Class A/B system) |
+| 1.1 | 2026-07-14 | Added this Revision History section, required by **SF-SPEC-004** Section 5.9 but absent until now. Migrated as part of a repository-wide pass verified by `SF-REVIEW-060` (Specification Library Revision-History Migration Review). No normative content changed. | Draft — migration verified, see `SF-REVIEW-060` |

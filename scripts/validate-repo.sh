@@ -93,8 +93,28 @@ for tax in "$STANDARDS_DIR"/SF-TAXONOMY-*.md; do
 done
 
 echo
+echo "== Check C: every specification has a Revision History section =="
+echo
+
+# Per SF-SPEC-004 Section 5.9 (added SF-REVIEW-058/059; migrated across the
+# library by SF-REVIEW-060): every docs/standards/SF-SPEC-*.md file shall
+# contain a top-level "Revision History" section as its structure requires.
+check_c_issues=0
+for spec in "$STANDARDS_DIR"/SF-SPEC-*.md; do
+    [ -f "$spec" ] || continue
+    if ! grep -qE '^# [0-9]+\. Revision History' "$spec"; then
+        echo "MISSING: $spec has no top-level Revision History section (SF-SPEC-004 Section 5.9)."
+        issues=$((issues + 1))
+        check_c_issues=$((check_c_issues + 1))
+    fi
+done
+if [ "$check_c_issues" -eq 0 ]; then
+    echo "All specifications have a Revision History section."
+fi
+
+echo
 if [ "$issues" -eq 0 ]; then
-    echo "RESULT: clean. No stale conceptual references, no taxonomy/entry status drift."
+    echo "RESULT: clean. No stale conceptual references, no taxonomy/entry status drift, no missing Revision History section."
     exit 0
 else
     echo "RESULT: $issues issue(s) found."

@@ -51,7 +51,7 @@ This entry applies only when verified evidence establishes that a specific PHP e
 It is distinct from:
 
 - **WP-ERROR-013 — WordPress Bootstrap PHP Fatal Error**: WP-ERROR-013 owns the general condition of a PHP fatal error terminating WordPress bootstrap, regardless of cause. This entry owns the narrower, verified cause-specific condition in which the fatal error (or other observed failure) is attributable to a required PHP extension being unavailable. A missing extension may produce the fatal error WP-ERROR-013 describes, but the two entries do not own the same responsibility: WP-ERROR-013 covers the general symptom class, this entry covers one verified, specific cause within it.
-- **WP-ERROR-015 — Unsupported PHP Version** (conceptual reference; no corresponding document currently exists in this repository): covers a PHP runtime version that is unsupported or incompatible with WordPress, a plugin, or a theme — a version-level condition. This entry covers an *extension* being unavailable within whatever PHP version is running; the version itself may be fully supported. The two conditions are conceptually independent: a supported PHP version can still be missing a required extension, and an unsupported PHP version can have every extension present.
+- **[WP-ERROR-015 — Unsupported PHP Version](WP-ERROR-015-UNSUPPORTED-PHP-VERSION.md)**: covers a PHP runtime version that is unsupported or incompatible with WordPress, a plugin, or a theme — a version-level condition. This entry covers an *extension* being unavailable within whatever PHP version is running; the version itself may be fully supported. The two conditions are conceptually independent: a supported PHP version can still be missing a required extension, and an unsupported PHP version can have every extension present.
 - **Missing PHP function or class from userland code**: an undefined function or missing class defined by a plugin, theme, or the application's own code — not by a PHP extension — is not in scope. This entry requires evidence that the missing symbol is one a PHP extension itself provides (for example, a class or function belonging to `mysqli`, `curl`, `mbstring`, `DOMDocument`, or `ZipArchive`), not a symbol the application was expected to define itself.
 - **Autoloader or Composer dependency failure**: a missing package class caused by an absent or unautoloaded Composer package is not automatically a missing PHP extension. It is in scope only where the verified cause is that a declared Composer platform requirement (`ext-*`) is unmet by the PHP runtime, not where the cause is a missing vendor package, a broken autoloader, or an uninstalled dependency.
 - **Configuration file errors**: missing `wp-config.php`, invalid configuration values, PHP syntax errors, or other unrelated PHP configuration defects are excluded; these are covered, where applicable, by other WP-ERROR entries.
@@ -219,10 +219,10 @@ Recovery is successful when:
 
 # 16. Related Errors
 
-The following are cited as conceptual distinctions only unless a repository link is noted.
+The following are cited as they exist in this repository, or as conceptual distinctions where noted.
 
 1. [WP-ERROR-013 — WordPress Bootstrap PHP Fatal Error](WP-ERROR-013-WORDPRESS-BOOTSTRAP-PHP-FATAL-ERROR.md) — exists in this repository; see Section 6 (Distinction) above for how the two entries' ownership differs.
-2. WP-ERROR-015 — Unsupported PHP Version (conceptual reference; no corresponding document currently exists in this repository; no link is provided).
+2. [WP-ERROR-015 — Unsupported PHP Version](WP-ERROR-015-UNSUPPORTED-PHP-VERSION.md) — exists in this repository; see Section 6 (Distinction) above for how the two conceptually independent conditions are told apart.
 
 ---
 

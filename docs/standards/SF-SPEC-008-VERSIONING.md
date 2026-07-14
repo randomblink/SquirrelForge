@@ -10,7 +10,7 @@
 
 **Status:** Draft
 
-**Version:** 1.0
+**Version:** 1.1
 
 **Owner:** SquirrelForge
 
@@ -285,3 +285,12 @@ Reference Implementations may be designated following successful engineering rev
 The authoritative version of every Reference Implementation remains the individual engineering artifact.
 
 Reference Implementations are informative and do not supersede the normative requirements defined by this specification.
+
+---
+
+# 14. Revision History
+
+| Version | Date | Summary of Changes | Approval Status |
+|---|---|---|---|
+| 1.0 | 2026-07-13 | Initial specification, established as part of the framework's initial authoring pass (commit `7f29178`), then reviewed and corrected by `SF-REVIEW-002` (Specification Library Review) as part of a unified pass across `SF-SPEC-001` through `011` (Phases 1–6, 2026-07-12): Entry 2 (Phase 2) added an explicit clarifying paragraph at then-§5 (Version Status) distinguishing it from scenario lifecycle state (**SF-SPEC-007**), and added citations at then-§4.3 to **SF-SPEC-005** (approval status) and **SF-SPEC-004** (revision-history document structure). `SF-REVIEW-002` predates, and does not use, the Class A/Class B/Class C reviewer-classification system **SF-SPEC-012** later introduced. | Draft — reviewed via `SF-REVIEW-002` (predates Class A/B system) |
+| 1.1 | 2026-07-14 | Added this Revision History section, required by this specification's own Section 5.3 in content and by **SF-SPEC-004** Section 5.9 in structural placement, but absent until now. Migrated as part of a repository-wide pass verified by `SF-REVIEW-060` (Specification Library Revision-History Migration Review). No normative content changed. | Draft — migration verified, see `SF-REVIEW-060` |
