@@ -10,7 +10,7 @@
 
 **Status:** Frozen — the entry set in Section 3 is fixed until this document is deliberately revised (see Section 6). "Frozen" here is an informal, self-defined term describing this document's own adopted-plan state; it is not a claim of the `Version Frozen` **SF-SPEC-001** Section 18 lifecycle stage, nor of any **SF-SPEC-008** Section 6 Version Status value, nor of the category-level `Baseline Certified` designation **SF-SPEC-013** Section 5.5 defines. This document carries a `Version` and `Revision History` for traceability only; it does not present itself as a "versioned engineering artifact" within **SF-SPEC-008**'s own scope, the same disclaimer `SF-TAXONOMY-001`/`002` make.
 
-**Version:** 1.3
+**Version:** 1.4
 
 **Owner:** SquirrelForge
 
@@ -50,9 +50,9 @@ This document does not itself contain any `WP-ERROR` knowledge content and is no
 | `WP-ERROR-024` | WordPress Login Authentication Failure | Credential verification — `wp_authenticate()`/`wp_signon()` correctly reject a login attempt (or accept one that should have been rejected) due to a verified cause in WordPress's own credential-checking logic, across every entry point that ultimately calls this same core pipeline (`wp-login.php`, XML-RPC, a plugin's own programmatic `wp_signon()` call) | Existing, Production Ready |
 | `WP-ERROR-025` | WordPress Authentication Cookie Invalid or Expired | Session persistence — a user previously authenticated successfully, but a *subsequent* request's own auth-cookie validation (`wp_validate_auth_cookie()`) fails: cookie expiration, tampering, a scheme/domain mismatch (`COOKIE_DOMAIN`, `SECURE_AUTH_COOKIE`), or invalidation caused by a secret-key/salt rotation or a forced logout | Existing, Production Ready |
 | `WP-ERROR-026` | WordPress Capability or Role Authorization Denied | Post-authentication authorization, non-REST — a user is verifiably authenticated (Section 2's boundary with `WP-ERROR-024`/`025` already crossed successfully), but `current_user_can()` or an equivalent role/capability check denies access to a `wp-admin` page, an admin-ajax action, or a plugin/theme-defined capability gate | Existing, Production Ready |
-| `WP-ERROR-027` | WordPress Nonce Verification Failure (Non-REST) | Request-origin/freshness verification, non-REST — `wp_verify_nonce()`/`check_admin_referer()`/`check_ajax_referer()` reject a request as stale, forged, or mismatched to the acting user's own session, outside the REST API pipeline `WP-ERROR-022` already owns | Planned |
+| `WP-ERROR-027` | WordPress Nonce Verification Failure (Non-REST) | Request-origin/freshness verification, non-REST — `wp_verify_nonce()`/`check_admin_referer()`/`check_ajax_referer()` reject a request as stale, forged, or mismatched to the acting user's own session, outside the REST API pipeline `WP-ERROR-022` already owns | Existing, Production Ready |
 
-Nothing else is currently planned for this category. Any future addition to this table is a revision to this document, not an ad hoc decision made while authoring an unrelated entry, per **SF-SPEC-013** Section 5.7.
+All four entries now exist and are Production Ready; the Authentication category's initial planned baseline is complete. Nothing else is currently planned for this category. Any future addition to this table is a revision to this document, not an ad hoc decision made while authoring an unrelated entry, per **SF-SPEC-013** Section 5.7.
 
 ---
 
@@ -88,3 +88,4 @@ Evidence shall establish which of the four conditions is actually present before
 | 1.1 | 2026-07-14 | WP-ERROR-024 reached Production Ready (SF-REVIEW-070 author review, SF-REVIEW-071 independent review). Status column updated from Planned to Existing, Production Ready in the same body of work as the promotion, per SF-SPEC-013 Section 5.7. No boundary content changed. | Frozen |
 | 1.2 | 2026-07-14 | WP-ERROR-025 reached Production Ready (SF-REVIEW-072 author review, SF-REVIEW-073 independent review, which corrected an attribution error in WP-ERROR-025's own text about a WP-ERROR-024 boundary case rather than in this taxonomy). Status column updated from Planned to Existing, Production Ready in the same body of work as the promotion, per SF-SPEC-013 Section 5.7. No boundary content changed. | Frozen |
 | 1.3 | 2026-07-14 | WP-ERROR-026 reached Production Ready (SF-REVIEW-074 author review, SF-REVIEW-075 independent review, which also corrected a stale generic Authentication-category hedge in WP-ERROR-022 and SF-TAXONOMY-002, unrelated to this taxonomy's own content). Status column updated from Planned to Existing, Production Ready in the same body of work as the promotion, per SF-SPEC-013 Section 5.7. No boundary content changed. | Frozen |
+| 1.4 | 2026-07-14 | WP-ERROR-027 reached Production Ready (SF-REVIEW-076 author review, SF-REVIEW-077 independent review, all-Conforming). Status column updated from Planned to Existing, Production Ready in the same body of work as the promotion, per SF-SPEC-013 Section 5.7. All four planned entries now exist and are Production Ready; the Authentication category's initial planned baseline is complete. No boundary content changed. | Frozen |

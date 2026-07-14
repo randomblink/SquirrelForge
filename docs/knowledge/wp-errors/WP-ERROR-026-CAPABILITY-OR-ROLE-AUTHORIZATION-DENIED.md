@@ -198,7 +198,7 @@ The following are cited as they exist in this repository, or as conceptual disti
 1. [WP-ERROR-024 — WordPress Login Authentication Failure](WP-ERROR-024-WORDPRESS-LOGIN-AUTHENTICATION-FAILURE.md) — exists in this repository; see Section 6 (Distinction) above for how this entry presumes identity is already established.
 2. [WP-ERROR-025 — WordPress Authentication Cookie Invalid or Expired](WP-ERROR-025-AUTHENTICATION-COOKIE-INVALID-OR-EXPIRED.md) — exists in this repository; see Section 6 (Distinction) above for how this entry presumes the session is already valid.
 3. [WP-ERROR-022 — WordPress REST API Access Denied](WP-ERROR-022-REST-API-ACCESS-DENIED.md) — exists in this repository; see Section 6 (Distinction) above for how REST-context authorization denial is drawn by request context rather than by mechanism.
-4. WP-ERROR-027 — WordPress Nonce Verification Failure, Non-REST (conceptual reference; planned per `SF-TAXONOMY-003` Section 3, no corresponding document currently exists in this repository; no link is provided) — see Section 6 (Distinction) above for why request-origin verification is independent of capability.
+4. [WP-ERROR-027 — WordPress Nonce Verification Failure, Non-REST](WP-ERROR-027-NONCE-VERIFICATION-FAILURE-NON-REST.md) — exists in this repository (currently `Draft`); see Section 6 (Distinction) above for why request-origin verification is independent of capability.
 
 ---
 
