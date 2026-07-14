@@ -203,7 +203,7 @@ The following are cited as they exist in this repository, or as conceptual disti
 8. [WP-ERROR-020 — WordPress Disk Space Exhausted](WP-ERROR-020-DISK-SPACE-EXHAUSTED.md) — exists in this repository; see Section 6 (Distinction) above for the diagnose-then-hand-off relationship.
 9. [WP-ERROR-033 — WordPress Persistent Object Cache Backend Unavailable](WP-ERROR-033-PERSISTENT-OBJECT-CACHE-BACKEND-UNAVAILABLE.md) — exists in this repository; see Section 6 (Distinction) above.
 10. [WP-ERROR-009 — WordPress Database Query Timeout](WP-ERROR-009-DATABASE-QUERY-TIMEOUT.md) — exists in this repository; see Section 6/7 above for the dependency/consequence relationship.
-11. WP-ERROR-035 — WordPress OPcache Stale Bytecode (conceptual reference; planned per `SF-TAXONOMY-006` Section 3, no corresponding document currently exists in this repository; no link is provided) — a mechanistically distinct caching layer this taxonomy assigns to a separate entry, not further distinguished here since no overlap was identified during drafting.
+11. [WP-ERROR-035 — WordPress OPcache Stale Bytecode](WP-ERROR-035-OPCACHE-STALE-BYTECODE.md) — a mechanistically distinct caching layer this taxonomy assigns to a separate entry, not further distinguished here since no overlap was identified during drafting.
 
 ---
 
