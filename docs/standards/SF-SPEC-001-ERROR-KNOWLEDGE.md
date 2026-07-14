@@ -10,7 +10,7 @@
 
 **Status:** Draft
 
-**Version:** 1.1
+**Version:** 1.2
 
 **Owner:** SquirrelForge
 
@@ -164,7 +164,7 @@ Additional metadata shall not be introduced except through revision of this spec
 
 Defines every approved category.
 
-Examples:
+Approved category values (this list is exhaustive, not illustrative — see this section's closing sentence; the prior "Examples:" heading was corrected in Version 1.2 to avoid that ambiguity):
 
 - Bootstrap
 - Configuration
@@ -179,6 +179,12 @@ Examples:
 - Performance
 - Deployment
 - CLI
+- Networking
+- Media
+- Cron
+- Email
+- Multisite
+- Site Health
 
 No new category may be introduced without updating this specification.
 
@@ -403,3 +409,5 @@ Reference Implementations are intended to demonstrate correct application of thi
 |---|---|---|---|
 | 1.0 | 2026-07-13 | Initial specification, established as part of the framework's initial authoring pass (commit `7f29178`), then reviewed and corrected by `SF-REVIEW-002` (Specification Library Review) as part of a unified pass across `SF-SPEC-001` through `011` (Phases 1–6, 2026-07-12): Entry 3 (Phase 4) removed unverified `WP-ERROR-014`/`015` Reference Implementation citations from §22.3; Entry 5 (Phase 6, Finding F-1) corrected §22.4's present-tense contradiction with §22.3's corrected (empty) state. `SF-REVIEW-002` predates, and does not use, the Class A/Class B/Class C reviewer-classification system **SF-SPEC-012** later introduced (first applied in `SF-REVIEW-005`). | Draft — reviewed via `SF-REVIEW-002` (predates Class A/B system) |
 | 1.1 | 2026-07-14 | Added this Revision History section, required by **SF-SPEC-004** Section 5.9 but absent until now. Migrated as part of a repository-wide pass verified by `SF-REVIEW-060` (Specification Library Revision-History Migration Review). No normative content changed. | Draft — migration verified, see `SF-REVIEW-060` |
+| 1.2 | 2026-07-14 | Section 7 (Category Standard) amended, post-`SF-BASELINE-001`: added six approved category values (`HTTP / Networking`, `Media`, `Cron / Scheduled Tasks`, `Email`, `Multisite`, `Site Health`) per the Knowledge Production Plan's roadmap, batch-approved by explicit project-owner direction rather than one at a time. Also corrected the section's own "Examples:" heading to state plainly that the list is exhaustive, matching the section's pre-existing closing sentence ("no new category may be introduced without updating this specification") rather than leaving the two in tension. This is ordinary category-list maintenance the section's own closing sentence anticipates as its normal mechanism, not a framework reopening driven by a governance deficiency — distinct in kind from the structural work `SF-REVIEW-054` through `066` performed before `SF-BASELINE-001`. | Draft — author-reviewed, see `SF-REVIEW-067` |
+| 1.2 | 2026-07-14 | Class B independent review (`SF-REVIEW-068`) found and corrected one Minor finding (IF-1): two of the six new values (`HTTP / Networking`, `Cron / Scheduled Tasks`) used a slash-delimited format inconsistent with every pre-existing value; renamed to `Networking` and `Cron`. This revision reviewed and Approved with Minor Revisions; the specification as a whole remains `Draft` overall, unchanged by this narrowly-scoped revision. | Draft overall — Version 1.2 revision Approved with Minor Revisions |

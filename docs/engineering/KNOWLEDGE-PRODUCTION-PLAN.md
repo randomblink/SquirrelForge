@@ -37,9 +37,9 @@ Seven approved categories have **zero entries yet** and require no specification
 
 ## 3. Candidate Roadmap
 
-The candidate list below reflects the failure domains worth covering next. Cross-referenced against Section 2's approved list, roughly half are already approved and can begin immediately; the rest would require a category-value addition to **SF-SPEC-001** Section 7 first.
+**Resolved:** all twelve candidates are now approved and startable with no further specification change. The project owner chose batch approval; `SF-SPEC-001` Version 1.2 (`SF-REVIEW-067`/`068`) added six category values in one revision rather than one at a time. The independent review renamed two of them for formatting consistency with the pre-existing list: `HTTP / Networking` → **`Networking`**, `Cron / Scheduled Tasks` → **`Cron`**. Use the exact approved strings (right-hand column) in any entry's own `**Category:**` field; the left-hand names remain this document's informal roadmap labels.
 
-| Candidate | Maps to an approved category? | Status |
+| Candidate (roadmap label) | Approved `SF-SPEC-001` category value | Status |
 |---|---|---|
 | Authentication & Authorization | `Authentication` | **Ready** — approved, zero entries |
 | Plugin Lifecycle | `Plugin` | **Ready** — approved, already has `WP-ERROR-017`; a new entry extends an existing, uncertified single-entry category rather than starting fresh |
@@ -47,14 +47,12 @@ The candidate list below reflects the failure domains worth covering next. Cross
 | Caching / Performance | `Performance` | **Ready** — approved, zero entries |
 | WP-CLI | `CLI` | **Ready** — approved, zero entries |
 | Filesystem & Updates (remaining gaps) | `Filesystem` | **Partially ready** — category is already `Baseline Certified`; a new entry here is a *post-certification change* under **SF-SPEC-013** Section 5.6, not a fresh start, and must go through that section's own four-step process (taxonomy revision, standard authoring sequence, new consistency review, new baseline certification) |
-| HTTP / Networking | None | Requires a new **SF-SPEC-001** Section 7 category value |
-| Media | None | Requires a new **SF-SPEC-001** Section 7 category value |
-| Cron / Scheduled Tasks | None | Requires a new **SF-SPEC-001** Section 7 category value |
-| Email | None | Requires a new **SF-SPEC-001** Section 7 category value |
-| Multisite | None | Requires a new **SF-SPEC-001** Section 7 category value |
-| Site Health | None | Requires a new **SF-SPEC-001** Section 7 category value; also worth deciding, before taxonomy work starts, whether this is a genuine failure domain of its own or a diagnostic lens that cuts across every other category |
-
-**Open question for the project owner:** six candidates need a category-value addition to `SF-SPEC-001` before any taxonomy or entry work can begin in them. `SF-SPEC-001` Section 7 anticipates this exact situation as its own normal maintenance path ("no new category may be introduced *without updating this specification*" — implying updating it, on new-category demand, is the expected mechanism, not an exception). Whether that counts as routine production process or as "reopening the framework" in the sense the prior session's discipline was protecting against is a judgment call worth making deliberately rather than by default — either batching all six additions in one lightweight `SF-SPEC-001` revision now, or approving each one individually only when its own category's production work actually begins. Not decided here.
+| HTTP / Networking | `Networking` | **Ready** — approved `SF-SPEC-001` Version 1.2, zero entries |
+| Media | `Media` | **Ready** — approved `SF-SPEC-001` Version 1.2, zero entries |
+| Cron / Scheduled Tasks | `Cron` | **Ready** — approved `SF-SPEC-001` Version 1.2, zero entries |
+| Email | `Email` | **Ready** — approved `SF-SPEC-001` Version 1.2, zero entries |
+| Multisite | `Multisite` | **Ready** — approved `SF-SPEC-001` Version 1.2, zero entries |
+| Site Health | `Site Health` | **Ready** — approved `SF-SPEC-001` Version 1.2, zero entries; still worth deciding, before taxonomy work starts, whether this is a genuine failure domain of its own or a diagnostic lens that cuts across every other category |
 
 ---
 
@@ -62,18 +60,20 @@ The candidate list below reflects the failure domains worth covering next. Cross
 
 Ordered by estimated operational value — how often the condition is likely to be the actual cause of a real, reported WordPress problem — not alphabetically or by ease of authoring. This is a starting proposal, not a committed order; it should be adjusted against real production/support data as it accumulates (Section 7).
 
-1. **Authentication & Authorization** — ready now; login/access failures are among the most common real-world WordPress support issues, and the category already borders `WP-ERROR-022` (REST API Access Denied), so the boundary work is partly done.
-2. **Plugin Lifecycle** — ready now; plugin activation/conflict failures are extremely common and the category already has one entry (`WP-ERROR-017`) establishing precedent.
-3. **HTTP / Networking** — highest-value new category; outbound API calls, SSL, DNS, and reverse-proxy failures are a frequent, currently uncovered failure surface. Requires a category-value addition first.
-4. **Caching / Performance** — ready now; borders `WP-ERROR-009` (Database Query Timeout), so needs an explicit boundary statement in its own taxonomy.
-5. **Media** — common failure surface (uploads, image processing); borders `WP-ERROR-014` (PHP extension) and Filesystem. Requires a category-value addition first.
-6. **Theme Lifecycle** — ready now; lower volume than Plugin Lifecycle but a clear, well-bounded domain.
-7. **Email** — common but frequently a downstream symptom of HTTP/Networking or Configuration failures rather than its own root cause; worth sequencing after HTTP/Networking so the boundary is easier to draw. Requires a category-value addition first.
-8. **Cron / Scheduled Tasks** — real but often silent-failure territory, lower reported-incident volume. Requires a category-value addition first.
-9. **Filesystem & Updates (remaining gaps)** — valuable but procedurally heavier (post-certification change to an already-certified category); sequence once the team has practiced the post-certification process on paper via **SF-SPEC-013** Section 5.6.
-10. **WP-CLI** — ready now; developer-facing rather than production-incident-driven, lower priority.
-11. **Site Health** — resolve the "domain vs. diagnostic lens" design question (Section 3) before taxonomy work; likely lower urgency.
-12. **Multisite** — specialized, smaller installed base; lowest priority absent a specific signal it's needed sooner.
+All twelve are now approved (Section 3); this ordering is unaffected by that resolution.
+
+1. **Authentication & Authorization** (`Authentication`) — ready now; login/access failures are among the most common real-world WordPress support issues, and the category already borders `WP-ERROR-022` (REST API Access Denied), so the boundary work is partly done.
+2. **Plugin Lifecycle** (`Plugin`) — ready now; plugin activation/conflict failures are extremely common and the category already has one entry (`WP-ERROR-017`) establishing precedent.
+3. **Networking** (`Networking`) — highest-value remaining category; outbound API calls, SSL, DNS, and reverse-proxy failures are a frequent, currently uncovered failure surface.
+4. **Caching / Performance** (`Performance`) — ready now; borders `WP-ERROR-009` (Database Query Timeout), so needs an explicit boundary statement in its own taxonomy.
+5. **Media** (`Media`) — common failure surface (uploads, image processing); borders `WP-ERROR-014` (PHP extension) and Filesystem.
+6. **Theme Lifecycle** (`Theme`) — ready now; lower volume than Plugin Lifecycle but a clear, well-bounded domain.
+7. **Email** (`Email`) — common but frequently a downstream symptom of Networking or Configuration failures rather than its own root cause; worth sequencing after Networking so the boundary is easier to draw.
+8. **Cron** (`Cron`) — real but often silent-failure territory, lower reported-incident volume.
+9. **Filesystem & Updates (remaining gaps)** (`Filesystem`) — valuable but procedurally heavier (post-certification change to an already-certified category); sequence once the team has practiced the post-certification process on paper via **SF-SPEC-013** Section 5.6.
+10. **WP-CLI** (`CLI`) — ready now; developer-facing rather than production-incident-driven, lower priority.
+11. **Site Health** (`Site Health`) — resolve the "domain vs. diagnostic lens" design question (Section 3) before taxonomy work; likely lower urgency.
+12. **Multisite** (`Multisite`) — specialized, smaller installed base; lowest priority absent a specific signal it's needed sooner.
 
 ---
 
@@ -114,4 +114,4 @@ Empty scaffold. Per the project owner's own direction, this is the evidence base
 
 ## 8. Active Category
 
-None. Awaiting a decision on which candidate from Section 4 to start first, and how to resolve the six category-value additions Section 3 flags before any of that subset can begin.
+None yet. All twelve candidates are approved and ready (Section 3); awaiting a decision on which to start first. Section 4's proposed order (`Authentication` first) is a starting recommendation, not a commitment.
