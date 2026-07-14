@@ -24,8 +24,9 @@ It should be updated freely as production proceeds. It does not require engineer
 | Networking | 3 (`WP-ERROR-028`–`030`) | Yes | `SF-TAXONOMY-004` | `SF-REVIEW-088` |
 | Bootstrap | 1 (`WP-ERROR-013`) | No — single-entry, degenerate for category review | None | — |
 | Plugin | 3 (`WP-ERROR-017`, `031`, `032`) | Yes | `SF-TAXONOMY-005` | `SF-REVIEW-095` |
+| Performance | 1 (`WP-ERROR-033`) | No — category in progress, `WP-ERROR-034`/`035` still planned | `SF-TAXONOMY-006` | — |
 
-28 entries, 8 categories, 7 Baseline Certified, across the 14-specification framework at `SF-BASELINE-001`.
+29 entries, 9 categories, 7 Baseline Certified, across the 14-specification framework at `SF-BASELINE-001`.
 
 ---
 
@@ -46,7 +47,7 @@ Seven approved categories have **zero entries yet** and require no specification
 | Authentication & Authorization | `Authentication` | **Done** — Baseline Certified (`SF-REVIEW-079`) |
 | Plugin Lifecycle | `Plugin` | **Done** — Baseline Certified (`SF-REVIEW-095`) |
 | Theme Lifecycle | `Theme` | **Ready** — approved, zero entries |
-| Caching / Performance | `Performance` | **Ready** — approved, zero entries |
+| Caching / Performance | `Performance` | **In progress** — `SF-TAXONOMY-006` frozen (`SF-REVIEW-096`); `WP-ERROR-033` Production Ready; `WP-ERROR-034`/`035` remaining |
 | WP-CLI | `CLI` | **Ready** — approved, zero entries |
 | Filesystem & Updates (remaining gaps) | `Filesystem` | **Partially ready** — category is already `Baseline Certified`; a new entry here is a *post-certification change* under **SF-SPEC-013** Section 5.6, not a fresh start, and must go through that section's own four-step process (taxonomy revision, standard authoring sequence, new consistency review, new baseline certification) |
 | HTTP / Networking | `Networking` | **Done** — Baseline Certified (`SF-REVIEW-088`) |
@@ -116,7 +117,13 @@ Empty scaffold. Per the project owner's own direction, this is the evidence base
 
 ## 8. Active Category
 
-No category is currently active as of this update. Per the roadmap (Section 3), the next unstarted "ready now" candidate is now the first entry in the list without an existing category already claimed by this project's own production so far.
+**Caching / Performance.** Category Work Order: `SF-TAXONOMY-006` (Caching / Performance Error Taxonomy), Version 1.1, independently reviewed per `SF-REVIEW-096` (Approved). Drafting this taxonomy required more cross-entry research than any prior one: four existing, Production-Ready entries (`WP-ERROR-021`, `025`, `027`, `030`) already fully own a specific caching-related symptom within their own domains, so this category's own territory is narrow — the caching *mechanisms'* own operational state, not any downstream content served incorrectly. Planned entries: `WP-ERROR-033` (Persistent Object Cache Backend Unavailable), `WP-ERROR-034` (Page Cache Not Active), `WP-ERROR-035` (OPcache Stale Bytecode).
+
+Progress: `WP-ERROR-033` **Production Ready**. `WP-ERROR-034`/`035` not yet authored.
+
+- `WP-ERROR-033` (`SF-REVIEW-097`/`098`) — drafted directly from `SF-TAXONOMY-006`'s own declared scope, per explicit project-owner direction, as the first direct test of whether that taxonomy's own proactive cross-category ownership sweep (performed during its own drafting, unlike `SF-TAXONOMY-005`'s reactive mid-production correction) actually prevents the defect class `WP-ERROR-032` exposed. It did: this entry required no taxonomy revision. Keeps three causes distinct — connection failure, operation failure, and mechanism-level initialization failure — and maintains explicit evidence-quality layering throughout (WordPress core's own behavior versus the `object-cache.php` drop-in's own behavior versus the specific backend's own behavior), preserving the correction `SF-REVIEW-096` (IF-1) already applied at the taxonomy level rather than reintroducing a WordPress-core-level fallback guarantee that doesn't exist. Independent review caught two real Minor findings: a technically imprecise description of Redis's own `maxmemory`/eviction rejection behavior (corrected within this entry), and a cross-document gap in `WP-ERROR-009`'s own Common Causes list, which didn't name an object-cache outage as a contributing factor to increased query load (added, cross-referencing this entry).
+
+No category will be considered active again until the two remaining Performance entries are authored and this category proceeds through consistency review and baseline certification.
 
 Plugin Lifecycle is complete and Baseline Certified (`SF-REVIEW-095`) — the seventh category to reach that designation, and the fourth (after REST API, Authentication, and Networking) built from a dedicated taxonomy document — and the first whose taxonomy was declared *after* an existing, unbaselined entry (`WP-ERROR-017`) already occupied part of the category, and required a mid-production correction (`SF-TAXONOMY-005` v1.1→v1.2) before its final entry was authored. Category Work Order: `SF-TAXONOMY-005` (Plugin Lifecycle Error Taxonomy), Version 1.3. Entries: `WP-ERROR-017` (Must-Use Plugin Fatal Error), `WP-ERROR-031` (Plugin Activation Failure), `WP-ERROR-032` (Plugin Update Failure), all Production Ready.
 

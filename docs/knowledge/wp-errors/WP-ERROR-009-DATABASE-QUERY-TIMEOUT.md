@@ -104,6 +104,7 @@ Causes are grouped by category. Inclusion in this list identifies a category as 
 - A plugin or custom code issuing an unusually expensive query — for example, a report, export, or search feature performing a full scan without appropriate indexing.
 - A long-running administrative operation (a large data migration, a bulk update, or an `ALTER TABLE` on a large table) competing with ordinary request traffic.
 - Aggressively low timeout values configured at the database, driver, PHP, or gateway level relative to the site's actual, legitimate query needs.
+- An object-cache backend outage or degradation causing requests that would otherwise have been served from cache to issue a database query instead, increasing overall query volume — see [WP-ERROR-033](WP-ERROR-033-PERSISTENT-OBJECT-CACHE-BACKEND-UNAVAILABLE.md).
 
 ---
 
