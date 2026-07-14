@@ -10,7 +10,7 @@
 
 **Status:** Production Ready
 
-**Version:** 1.0
+**Version:** 1.1
 
 **Owner:** SquirrelForge
 
@@ -58,6 +58,7 @@ This specification does not define:
 * The distinction between an accepted limitation and a blocking defect, for purposes of a Framework Baseline declaration.
 * The Framework Baseline Readiness Review requirement and its relationship to a declaration.
 * The Framework Baseline declaration procedure.
+* The structure and required content of a Framework Baseline Declaration Record (`SF-BASELINE-XXX`), as an artifact type distinct from a Framework Baseline Readiness Review.
 * Framework Baseline numbering and succession from one baseline to the next.
 * The relationship between a Framework Baseline and the maturity state of individual specifications and knowledge categories, without redefining either.
 
@@ -184,9 +185,22 @@ A Framework Baseline Readiness Review shall classify every open item it identifi
 
 ## 5.6 Declaration Procedure
 
-A Framework Baseline is declared when a Framework Baseline Readiness Review's own Gate Decision section explicitly states that the baseline is declared, names its sequential version number, and identifies every specification, category, and `FRAMEWORK-OBSERVATIONS.md` disposition it covered. No separate declaration artifact is required or permitted beyond this review record; a Framework Baseline shall not be asserted informally — in a commit message, a summary, or conversational text — without a review record satisfying this section existing.
+A Framework Baseline is declared by a dedicated **Framework Baseline Declaration Record** (`SF-BASELINE-XXX`), an artifact type distinct from a Framework Baseline Readiness Review. The Readiness Review answers whether the framework is ready to be frozen; the Declaration Record answers whether the project owner has chosen to freeze it. The two shall not be merged into a single document, and a Readiness Review's own Gate Decision section shall not itself declare a baseline.
 
-**Evidentiary basis:** this mirrors how `SF-REVIEW-053` and `SF-REVIEW-057`'s own Section 8 ("Baseline Designation") is itself the category-level declaration, rather than a separate artifact — the same document performs the evaluation and, on Approved outcome, the designation. No new artifact type is introduced where an existing, already-governed one (the engineering review record, per **SF-SPEC-005**) suffices.
+A Framework Baseline Declaration Record shall state, at minimum:
+
+* The baseline identifier (its sequential version number, per Section 5.7).
+* The declaration date.
+* The approving authority.
+* The specific Framework Baseline Readiness Review relied upon as evidence, cited rather than restated.
+* The scope of the freeze: the specific commit and the specific set of specifications, categories, and artifacts it covers.
+* An explicit statement that subsequent framework changes require a new Framework Baseline Readiness Review and Declaration Record (Section 5.7), rather than silent modification.
+
+A Framework Baseline Declaration Record shall not restate the Readiness Review's own findings; it cites the review record rather than reproducing its evidence. It does not itself require a dedicated Class A/Class B review pair beyond the review already completed for the Readiness Review it cites: it records a governance decision rather than asserting new technical or normative content, a deliberate proportionality choice distinct from how an `SF-TAXONOMY-XXX` document — which does assert new technical content — is independently reviewed. This is disclosed, not silently assumed; see Section 15.
+
+A Framework Baseline shall not be asserted informally — in a commit message, a summary, or conversational text — without a Declaration Record satisfying this section existing.
+
+**Evidentiary basis:** this section replaces Version 1.0's approach, which required the declaration to live inside the Readiness Review's own Gate Decision section, mirroring how `SF-REVIEW-053`/`057`'s Section 8 ("Baseline Designation") is itself a category-level declaration. That approach was reconsidered per explicit user direction, given while `SF-REVIEW-064` awaited a declaration decision: readiness evidence and the governance decision to act on it are different questions, and conflating them in one document does not give a clean audit trail distinguishing "the repository was ready" from "the project owner chose to freeze it." Version 1.0's own Section 15 had already disclosed this exact question as unresolved, deferred "before one has proven necessary" (see Section 15's revised third bullet) — this revision is that proof.
 
 ---
 
@@ -223,12 +237,13 @@ A Framework Baseline shall not be declared until:
 * That review's outcome is Approved or Approved with Minor Revisions, with any findings it raised corrected and re-validated within the same review.
 * Repository validation has been applied and recorded.
 * Every open item is explicitly classified per Section 5.5; none remains a blocking defect.
+* A Framework Baseline Declaration Record satisfying Section 5.6 has been created, citing the Readiness Review as its evidence.
 
 ---
 
 # 8. Engineering Review Checklist
 
-Every Framework Baseline Readiness Review shall satisfy the following checklist before a Framework Baseline may be declared.
+Every Framework Baseline Readiness Review shall satisfy the following checklist before a Framework Baseline Declaration Record may be created.
 
 * ☐ Every specification's Status, Version, and Revision History independently re-verified
 * ☐ Every multi-entry knowledge category's certification state independently re-verified
@@ -238,7 +253,9 @@ Every Framework Baseline Readiness Review shall satisfy the following checklist 
 * ☐ Repository validation applied per **SF-SPEC-006**, outcome recorded
 * ☐ Working tree confirmed clean before and after any correction applied during the review
 * ☐ Readiness review outcome is Approved or Approved with Minor Revisions
-* ☐ Gate Decision section explicitly declares the baseline, names its version, and lists what it covers
+* ☐ Readiness review does not itself declare the baseline; it is recorded as available evidence for a subsequent Declaration Record (Section 5.6)
+
+A Framework Baseline Declaration Record itself shall satisfy the content checklist Section 5.6 states before the baseline it declares may be considered valid.
 
 ---
 
@@ -284,8 +301,8 @@ An application of this specification is complete when:
 
 * Every criterion in Section 5.4 has been independently re-verified against current repository state, not assumed from a prior claim.
 * Every open item has been explicitly classified per Section 5.5.
-* The Section 8 checklist has been fully satisfied.
-* The Gate Decision explicitly declares the baseline, per Section 5.6.
+* The Section 8 checklist has been fully satisfied by the Readiness Review.
+* A Framework Baseline Declaration Record satisfying Section 5.6 has been created, citing the Readiness Review rather than restating it.
 
 ---
 
@@ -307,8 +324,10 @@ Verify that this specification:
 
 * This specification's Section 5 requirements are grounded in generalization from category-level precedent and from `SF-REVIEW-061`'s own disclosed gap, not from a completed Framework Baseline lifecycle — because none exists yet. Unlike **SF-SPEC-013**, this specification cannot cite a first real instance until after its own first application. It should be re-examined once a Framework Baseline is actually declared under it, the same way **SF-SPEC-013** Section 15 flags its own Section 5.6 for re-examination once a real post-certification change occurs.
 * Section 5.7's numbering choice (starting at v2) is a continuity decision tied to this specific session's history, not a general principle other frameworks adopting a similar pattern would necessarily follow; disclosed rather than presented as a universal rule.
-* Whether a Framework Baseline declaration should eventually be its own dedicated artifact type (analogous to `SF-TAXONOMY-XXX` for categories) rather than living inside a review record's Gate Decision section is a design choice this specification resolves in favor of the simpler, already-governed option (Section 5.6) rather than introducing a new artifact type before one has proven necessary.
-* This specification's own creation was not preceded by an independent (Class B) review at the time of this Version 1.0 draft; that review is expected to follow before Production Ready is sought, consistent with every other specification's own lifecycle in this library.
+* **Resolved in Version 1.1:** Version 1.0 had deferred whether a Framework Baseline declaration should be its own dedicated artifact type, resolving in favor of embedding it in the Readiness Review's own Gate Decision section rather than introducing a new artifact type before one had proven necessary. Per explicit user direction, that necessity arose immediately upon the first real declaration decision: readiness evidence and the governance decision to act on it were found to be different things that a clean audit trail should keep separate. Section 5.6 now defines a dedicated `SF-BASELINE-XXX` artifact type accordingly.
+* No `SF-TEMPLATE-XXX` currently governs `SF-BASELINE-XXX` document structure; Section 5.6 defines required content inline, the same way `SF-TAXONOMY-001`/`002` were authored without a governing template before one existed for that artifact type either (**SF-SPEC-013** Section 15's own second bullet). A future, separately-scoped template would let this requirement be checked mechanically.
+* A Framework Baseline Declaration Record does not itself require a dedicated Class A/Class B review pair (Section 5.6); it relies on the review already completed for the Readiness Review it cites. This proportionality choice — appropriate for a document recording a decision rather than asserting new technical content — should be revisited if a future Declaration Record is ever found to assert something beyond what its cited Readiness Review actually established.
+* This specification's own creation was not preceded by an independent (Class B) review at the time of the Version 1.0 draft; that review (`SF-REVIEW-063`) followed before Production Ready was sought, consistent with every other specification's own lifecycle in this library. This Version 1.1 revision was independently reviewed in turn (see this document's own Revision History).
 * Whether any automated validation tooling (for example, `scripts/validate-repo.sh`) should receive formal normative ownership is explicitly left unresolved by this specification (Section 2.2), consistent with the user's own guidance to treat that as a later evolution rather than a prerequisite for this specification's own creation or for any Framework Baseline declared under it.
 
 ---
@@ -331,3 +350,5 @@ Should automated validation tooling later receive formal normative ownership (Se
 |---|---|---|---|
 | 1.0 | 2026-07-14 | Initial specification, authored in direct response to `SF-REVIEW-061`'s own disclosure that no specification defines a framework-level baseline, and to the user's explicit recommendation that this gap be closed by a dedicated specification before any Framework Baseline is declared, rather than inferred by analogy. Every Section 5 requirement cites `SF-REVIEW-061` or the four completed category-level baselines it aggregates from. | Draft — author-reviewed, see `SF-REVIEW-062` |
 | 1.0 | 2026-07-14 | Class B independent review (`SF-REVIEW-063`) found and corrected one Minor finding (IF-1): Section 3.2 did not cite `SF-SPEC-001` directly for the category-value concept Section 5.4 relies on, relying on transitive coverage through `SF-SPEC-013` instead. Corrected. Status changed to Production Ready — the fourth specification in this library to reach that designation. | Production Ready — Approved with Minor Revisions |
+| 1.1 | 2026-07-14 | Revised Section 5.6 (Declaration Procedure) per explicit user direction, given while `SF-REVIEW-064` awaited a declaration decision: a Framework Baseline is now declared by a dedicated `SF-BASELINE-XXX` Declaration Record, distinct from the Readiness Review, rather than inside the Readiness Review's own Gate Decision section. Updated Section 3.1 (Owns), Section 7 (Declared Definition), Section 8 (checklist), and Section 15 (Remaining Limitations) accordingly; no other section's substance changed. Resolves the design question Version 1.0 Section 15 had explicitly deferred. | Draft — author-reviewed, see `SF-REVIEW-065` |
+| 1.1 | 2026-07-14 | Class B independent review (`SF-REVIEW-066`) found no defects. Status changed to Production Ready. | Production Ready — Approved |
