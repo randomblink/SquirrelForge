@@ -114,4 +114,4 @@ Empty scaffold. Per the project owner's own direction, this is the evidence base
 
 ## 8. Active Category
 
-None yet. All twelve candidates are approved and ready (Section 3); awaiting a decision on which to start first. Section 4's proposed order (`Authentication` first) is a starting recommendation, not a commitment.
+**Authentication.** Category Work Order: `SF-TAXONOMY-003` (Authentication Error Taxonomy), independently reviewed per `SF-REVIEW-069` (Approved with Minor Revisions). Planned entries: `WP-ERROR-024` (Login Authentication Failure), `WP-ERROR-025` (Authentication Cookie Invalid or Expired), `WP-ERROR-026` (Capability or Role Authorization Denied), `WP-ERROR-027` (Nonce Verification Failure, Non-REST). Entry authoring has not yet begun.
