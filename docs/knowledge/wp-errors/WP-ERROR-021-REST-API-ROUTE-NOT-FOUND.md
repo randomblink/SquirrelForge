@@ -78,7 +78,7 @@ This entry applies only when verified evidence establishes that a request target
 - WordPress's own generic, non-REST 404 handling for ordinary content URLs.
 - A general WordPress bootstrap failure, missing PHP extension, or filesystem permission condition preventing route-registration code from ever running (Bootstrap, PHP Runtime, or Filesystem category, as applicable).
 - A request blocked before reaching WordPress at all by a web application firewall, security plugin, or hosting-level rule (Security category, once a taxonomy exists for it).
-- Browser-enforced cross-origin (CORS) policy failures, which presume the WordPress REST pipeline itself already completed successfully (excluded from this category entirely; see `SF-TAXONOMY-002` Section 5).
+- Browser-enforced cross-origin (CORS) policy failures, which presume the WordPress REST pipeline itself already completed successfully (excluded from this category entirely; see [WP-ERROR-030 — WordPress CORS (Cross-Origin) Policy Failure](WP-ERROR-030-CORS-CROSS-ORIGIN-POLICY-FAILURE.md), which resolves the forward-reference `SF-TAXONOMY-002` Section 5 originally made).
 
 ---
 

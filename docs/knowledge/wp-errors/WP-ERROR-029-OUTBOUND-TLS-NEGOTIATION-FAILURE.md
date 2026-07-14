@@ -192,7 +192,7 @@ Recovery is successful when:
 The following are cited as they exist in this repository, or as conceptual distinctions where noted.
 
 1. [WP-ERROR-028 — WordPress Outbound HTTP Request Failure](WP-ERROR-028-WORDPRESS-OUTBOUND-HTTP-REQUEST-FAILURE.md) — exists in this repository; see Section 6 (Distinction) above for how this entry begins exactly where connection establishment is confirmed.
-2. WP-ERROR-030 — WordPress CORS (Cross-Origin) Policy Failure (conceptual reference; planned per `SF-TAXONOMY-004` Section 3, no corresponding document currently exists in this repository; no link is provided) — see Section 7 (Scope) above.
+2. [WP-ERROR-030 — WordPress CORS (Cross-Origin) Policy Failure](WP-ERROR-030-CORS-CROSS-ORIGIN-POLICY-FAILURE.md) — see Section 7 (Scope) above.
 3. [WP-ERROR-014 — Required PHP Extension Missing](WP-ERROR-014-REQUIRED-PHP-EXTENSION-MISSING.md) — exists in this repository; see Section 6 (Distinction) above for the boundary between TLS capability existing and TLS negotiation succeeding once attempted.
 
 ---

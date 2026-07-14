@@ -192,7 +192,7 @@ Recovery is successful when:
 The following are cited as they exist in this repository, or as conceptual distinctions where noted.
 
 1. [WP-ERROR-029 — WordPress Outbound TLS Negotiation Failure](WP-ERROR-029-OUTBOUND-TLS-NEGOTIATION-FAILURE.md) — exists in this repository (currently `Draft`); see Section 6 (Distinction) above for how this entry ends exactly where connection establishment is confirmed.
-2. WP-ERROR-030 — WordPress CORS (Cross-Origin) Policy Failure (conceptual reference; planned per `SF-TAXONOMY-004` Section 3, no corresponding document currently exists in this repository; no link is provided) — see Section 7 (Scope) above.
+2. [WP-ERROR-030 — WordPress CORS (Cross-Origin) Policy Failure](WP-ERROR-030-CORS-CROSS-ORIGIN-POLICY-FAILURE.md) — see Section 7 (Scope) above.
 3. [WP-ERROR-007 — WordPress Database Connection Limit Exceeded](WP-ERROR-007-WORDPRESS-DATABASE-CONNECTION-LIMIT-EXCEEDED.md) and [WP-ERROR-008 — WordPress Database Server Unreachable](WP-ERROR-008-WORDPRESS-DATABASE-SERVER-UNREACHABLE.md) — exist in this repository; see Section 6 (Distinction) above for why the database connection is excluded regardless of shared underlying network mechanisms.
 4. [WP-ERROR-014 — Required PHP Extension Missing](WP-ERROR-014-REQUIRED-PHP-EXTENSION-MISSING.md) — exists in this repository; see Section 6 (Distinction) above for the boundary between transport availability and transport connection behavior.
 

@@ -77,7 +77,7 @@ This entry applies only when verified evidence establishes that a route was matc
 - A matched, accepted request whose callback began executing and then failed (see [WP-ERROR-023](WP-ERROR-023-REST-API-RESPONSE-ERROR.md)).
 - Generic `wp-admin` cookie/session authentication unrelated to a REST request specifically.
 - A specific third-party authentication plugin's own implementation defect, as distinct from the observable "the request was denied" condition this entry owns.
-- Browser-enforced cross-origin (CORS) policy failures, excluded from this category entirely per `SF-TAXONOMY-002` Section 5.
+- Browser-enforced cross-origin (CORS) policy failures, excluded from this category entirely; see [WP-ERROR-030 — WordPress CORS (Cross-Origin) Policy Failure](WP-ERROR-030-CORS-CROSS-ORIGIN-POLICY-FAILURE.md), which resolves the forward-reference `SF-TAXONOMY-002` Section 5 originally made.
 
 ---
 
