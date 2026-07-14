@@ -61,7 +61,7 @@ This entry applies only when verified evidence establishes that a route was matc
 **Distinct from the following related entries and categories:**
 
 - **`WP-ERROR-021` — WordPress REST API Route Not Found**: presumes no route was ever matched at all, so no callback — and therefore no request-acceptance stage — was ever reached. This entry presumes the opposite: a route was found and a callback identified.
-- **`WP-ERROR-023` — WordPress REST API Response Error** (conceptual reference; planned per `SF-TAXONOMY-002` Section 3, no corresponding document currently exists in this repository): presumes the request survived all three gates this entry owns, and the callback's own business logic began executing and then failed. This entry ends, and `WP-ERROR-023` begins, exactly at that boundary.
+- **`WP-ERROR-023` — WordPress REST API Response Error**: presumes the request survived all three gates this entry owns, and the callback's own business logic began executing and then failed. This entry ends, and `WP-ERROR-023` begins, exactly at that boundary.
 - **Generic `wp-admin` cookie authentication** (Authentication category, once a taxonomy exists for it): an ordinary `wp-admin` page load's own session/login handling is a distinct condition from REST's own cookie-authentication requirement, which additionally requires a valid `X-WP-Nonce` header or `_wpnonce` parameter beyond the session cookie alone — a REST-specific manifestation, per `SF-TAXONOMY-002` Section 2.
 - **A specific third-party authentication plugin's own implementation defect** (Plugin category): this entry owns the observable condition "the request was denied," regardless of which authentication mechanism was attempted. It does not own a specific JWT or OAuth plugin's own defective token-validation logic incorrectly denying a technically valid credential — that is the plugin's own defect, per `SF-TAXONOMY-002` Section 5.
 
@@ -74,7 +74,7 @@ This entry applies only when verified evidence establishes that a route was matc
 **Excluded:**
 
 - No route matched at all (see `WP-ERROR-021`).
-- A matched, accepted request whose callback began executing and then failed (see `WP-ERROR-023`, conceptual reference).
+- A matched, accepted request whose callback began executing and then failed (see [WP-ERROR-023](WP-ERROR-023-REST-API-RESPONSE-ERROR.md)).
 - Generic `wp-admin` cookie/session authentication unrelated to a REST request specifically.
 - A specific third-party authentication plugin's own implementation defect, as distinct from the observable "the request was denied" condition this entry owns.
 - Browser-enforced cross-origin (CORS) policy failures, excluded from this category entirely per `SF-TAXONOMY-002` Section 5.
@@ -197,7 +197,7 @@ Recovery is successful when:
 The following are cited as they exist in this repository, or as conceptual distinctions where noted.
 
 1. [WP-ERROR-021 — WordPress REST API Route Not Found](WP-ERROR-021-REST-API-ROUTE-NOT-FOUND.md) — exists in this repository; see Section 6 (Distinction) above.
-2. WP-ERROR-023 — WordPress REST API Response Error (conceptual reference; planned per `SF-TAXONOMY-002` Section 3, no corresponding document currently exists in this repository; no link is provided).
+2. [WP-ERROR-023 — WordPress REST API Response Error](WP-ERROR-023-REST-API-RESPONSE-ERROR.md) — exists in this repository; see Section 6 (Distinction) above.
 
 ---
 

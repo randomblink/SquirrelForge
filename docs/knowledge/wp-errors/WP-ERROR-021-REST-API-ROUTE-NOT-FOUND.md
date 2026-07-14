@@ -60,8 +60,8 @@ This entry applies only when verified evidence establishes that a request target
 
 **Distinct from the following related entries and categories:**
 
-- **`WP-ERROR-022` — WordPress REST API Access Denied** (conceptual reference; planned per `SF-TAXONOMY-002` Section 3, no corresponding document currently exists in this repository): presumes a route was matched and a callback identified, with the request then rejected before that callback's own business logic runs. This entry presumes no route was ever matched at all.
-- **`WP-ERROR-023` — WordPress REST API Response Error** (conceptual reference; planned per `SF-TAXONOMY-002` Section 3, no corresponding document currently exists in this repository): presumes a matched route's callback began executing and failed during or after that execution. This entry never reaches that point.
+- **`WP-ERROR-022` — WordPress REST API Access Denied**: presumes a route was matched and a callback identified, with the request then rejected before that callback's own business logic runs. This entry presumes no route was ever matched at all.
+- **`WP-ERROR-023` — WordPress REST API Response Error**: presumes a matched route's callback began executing and failed during or after that execution. This entry never reaches that point.
 - **Bootstrap, PHP Runtime, or Filesystem categories:** a general WordPress bootstrap failure, a missing PHP extension, or a filesystem permission condition preventing a route's own registration code from ever loading are the respective other category's condition, per `SF-TAXONOMY-002` Section 2. This entry presumes WordPress itself bootstraps successfully and the REST infrastructure has the opportunity to run; it owns only the resulting `rest_no_route` condition within that pipeline, not every possible upstream reason a request to `/wp-json/` might not be served.
 - **Security category** (once a taxonomy exists for it): a request blocked before it ever reaches WordPress at all — a web application firewall, a security plugin operating at the network/server layer, or a hosting-level rule — can present identically to this entry's own symptoms (a 403 or 404 for a REST request) but is a categorically different condition, per `SF-TAXONOMY-002` Section 2: WordPress's own routing logic is never reached at all, as opposed to being reached and failing to resolve the route.
 
@@ -73,8 +73,8 @@ This entry applies only when verified evidence establishes that a request target
 
 **Excluded:**
 
-- A matched route whose request is subsequently rejected before its callback runs (see `WP-ERROR-022`, conceptual reference).
-- A matched route whose callback began executing and then failed (see `WP-ERROR-023`, conceptual reference).
+- A matched route whose request is subsequently rejected before its callback runs (see [WP-ERROR-022](WP-ERROR-022-REST-API-ACCESS-DENIED.md)).
+- A matched route whose callback began executing and then failed (see [WP-ERROR-023](WP-ERROR-023-REST-API-RESPONSE-ERROR.md)).
 - WordPress's own generic, non-REST 404 handling for ordinary content URLs.
 - A general WordPress bootstrap failure, missing PHP extension, or filesystem permission condition preventing route-registration code from ever running (Bootstrap, PHP Runtime, or Filesystem category, as applicable).
 - A request blocked before reaching WordPress at all by a web application firewall, security plugin, or hosting-level rule (Security category, once a taxonomy exists for it).
@@ -194,14 +194,14 @@ Recovery is successful when:
 
 The following are cited as they exist in this repository, or as conceptual distinctions where noted.
 
-1. WP-ERROR-022 — WordPress REST API Access Denied (conceptual reference; planned per `SF-TAXONOMY-002` Section 3, no corresponding document currently exists in this repository; no link is provided).
-2. WP-ERROR-023 — WordPress REST API Response Error (conceptual reference; planned per `SF-TAXONOMY-002` Section 3, no corresponding document currently exists in this repository; no link is provided).
+1. [WP-ERROR-022 — WordPress REST API Access Denied](WP-ERROR-022-REST-API-ACCESS-DENIED.md) — exists in this repository; see Section 6 (Distinction) above.
+2. [WP-ERROR-023 — WordPress REST API Response Error](WP-ERROR-023-REST-API-RESPONSE-ERROR.md) — exists in this repository; see Section 6 (Distinction) above.
 
 ---
 
 # 17. Notes
 
-This entry documents the first of three entries `SF-TAXONOMY-002` declares for the REST API category, owning the route-resolution stage of the REST request lifecycle. It does not restate `WP-ERROR-022`'s or `WP-ERROR-023`'s own boundaries, since neither exists yet; see `SF-TAXONOMY-002` for the complete, governing three-stage progression. Consistent with the single-responsibility principle in **SF-SPEC-001** Section 4.3, this entry covers both ways a route can end up unmatched (never registered, or removed from the table before matching) as one cohesive failure mode, since both share the same underlying, observable condition and the same `rest_no_route` response — while explicitly excluding a request that intercepts an already-matched route before its callback runs, which remains `WP-ERROR-022`'s condition regardless of how colloquially similar the two are described.
+This entry documents the first of three entries `SF-TAXONOMY-002` declares for the REST API category, owning the route-resolution stage of the REST request lifecycle. It does not restate `WP-ERROR-022`'s or `WP-ERROR-023`'s own boundaries; see `SF-TAXONOMY-002` for the complete, governing three-stage progression. Consistent with the single-responsibility principle in **SF-SPEC-001** Section 4.3, this entry covers both ways a route can end up unmatched (never registered, or removed from the table before matching) as one cohesive failure mode, since both share the same underlying, observable condition and the same `rest_no_route` response — while explicitly excluding a request that intercepts an already-matched route before its callback runs, which remains `WP-ERROR-022`'s condition regardless of how colloquially similar the two are described.
 
 This entry's governing direction was `SF-TAXONOMY-002` Version 1.2 (post-`SF-REVIEW-045` correction and the subsequent argument-validation placement decision), whose own boundary for this entry — the request fails before a callback is selected — is applied here without narrowing or widening it; the argument/schema-validation placement decision recorded in that document's Section 4 does not affect this entry, since it concerns the boundary between `WP-ERROR-022` and `WP-ERROR-023`, both of which presume a route has already been found. The specific technical grounding (the `rest_no_route` error code and message, `register_rest_route()`/`rest_api_init`, the `rest_endpoints` filter's role in route removal, the `rest_route` query variable's independence from permalink structure, and the REST API's own discovery `Link` header/tag) was independently verified against current WordPress documentation before inclusion, following this catalog's established practice.
 
