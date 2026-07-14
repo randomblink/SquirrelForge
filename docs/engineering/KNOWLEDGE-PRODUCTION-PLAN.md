@@ -21,12 +21,11 @@ It should be updated freely as production proceeds. It does not require engineer
 | REST API | 3 (`WP-ERROR-021`–`023`) | Yes | `SF-TAXONOMY-002` | `SF-REVIEW-053` |
 | PHP Runtime | 2 (`WP-ERROR-014`, `015`) | Yes | None (informal, disclosed gap) | `SF-REVIEW-057` |
 | Authentication | 4 (`WP-ERROR-024`–`027`) | Yes | `SF-TAXONOMY-003` | `SF-REVIEW-079` |
+| Networking | 3 (`WP-ERROR-028`–`030`) | Yes | `SF-TAXONOMY-004` | `SF-REVIEW-088` |
 | Bootstrap | 1 (`WP-ERROR-013`) | No — single-entry, degenerate for category review | None | — |
 | Plugin | 1 (`WP-ERROR-017`) | No — single-entry, degenerate for category review | None | — |
 
-23 entries, 7 categories, 5 Baseline Certified, across the 14-specification framework at `SF-BASELINE-001`.
-
-19 entries, 6 categories, 4 Baseline Certified, across a 14-specification framework at `SF-BASELINE-001`.
+26 entries, 8 categories, 6 Baseline Certified, across the 14-specification framework at `SF-BASELINE-001`.
 
 ---
 
@@ -50,7 +49,7 @@ Seven approved categories have **zero entries yet** and require no specification
 | Caching / Performance | `Performance` | **Ready** — approved, zero entries |
 | WP-CLI | `CLI` | **Ready** — approved, zero entries |
 | Filesystem & Updates (remaining gaps) | `Filesystem` | **Partially ready** — category is already `Baseline Certified`; a new entry here is a *post-certification change* under **SF-SPEC-013** Section 5.6, not a fresh start, and must go through that section's own four-step process (taxonomy revision, standard authoring sequence, new consistency review, new baseline certification) |
-| HTTP / Networking | `Networking` | **Entries complete** — all three planned entries (`WP-ERROR-028`/`029`/`030`) Production Ready; category consistency review and baseline certification pending |
+| HTTP / Networking | `Networking` | **Done** — Baseline Certified (`SF-REVIEW-088`) |
 | Media | `Media` | **Ready** — approved `SF-SPEC-001` Version 1.2, zero entries |
 | Cron / Scheduled Tasks | `Cron` | **Ready** — approved `SF-SPEC-001` Version 1.2, zero entries |
 | Email | `Email` | **Ready** — approved `SF-SPEC-001` Version 1.2, zero entries |
@@ -117,13 +116,15 @@ Empty scaffold. Per the project owner's own direction, this is the evidence base
 
 ## 8. Active Category
 
-**Networking.** Category Work Order: `SF-TAXONOMY-004` (Networking Error Taxonomy), independently reviewed per `SF-REVIEW-080` (Approved). Planned entries: `WP-ERROR-028` (Outbound HTTP Request Failure), `WP-ERROR-029` (Outbound SSL/TLS Certificate Verification Failure), `WP-ERROR-030` (CORS Policy Failure — resolving the forward-reference `SF-TAXONOMY-002` made when REST API was built).
+No category is currently active. Networking (below) and Authentication were both completed and Baseline Certified in sequence; the next candidate has not yet been started. Per the roadmap (Section 3), **Plugin Lifecycle** (`Plugin`) is the next unstarted "ready now" candidate in priority order, since Networking (priority 3) was taken up ahead of Plugin Lifecycle (priority 2) at explicit project-owner direction.
 
-Progress: `WP-ERROR-028`, `WP-ERROR-029`, and `WP-ERROR-030` all **Production Ready**. All three planned Networking entries are now authored; category consistency review and baseline certification are the next steps (see Section 9 below).
+Networking is complete and Baseline Certified (`SF-REVIEW-088`) — the sixth category to reach that designation, and the third (after REST API and Authentication) built from a dedicated taxonomy from the outset. Category Work Order: `SF-TAXONOMY-004` (Networking Error Taxonomy), Version 1.4. Entries: `WP-ERROR-028` (Outbound HTTP Request Failure), `WP-ERROR-029` (Outbound TLS Negotiation Failure), `WP-ERROR-030` (CORS Policy Failure), all Production Ready.
 
 - `WP-ERROR-028` (`SF-REVIEW-081`/`082`) — kept deliberately transport-agnostic (`curl`/streams named only as diagnostic detail, never the entry's own definition), separated connection-establishment from protocol (TLS reserved to `WP-ERROR-029`), and explicitly disclosed two conditions this catalog does not yet own under any entry (read/response timeout; an HTTP-level error status from an otherwise-successful outbound exchange) rather than silently absorbing either. Independent review caught a real boundary-precision gap: "connection reset" as originally drafted didn't specify whether it meant a reset during establishment (in scope) or after (out of scope, same as the disclosed read-timeout gap) — qualified to the former.
 - `WP-ERROR-029` (`SF-REVIEW-083`/`084`) — `SF-TAXONOMY-004` was widened (v1.0 → v1.2) *before* this entry was authored, per explicit direction: the original scope ("Certificate Verification Failure") was narrower than the category needs, since protocol/cipher negotiation failures aren't certificate problems at all. Retitled "Outbound TLS Negotiation Failure," now covering eight explicitly separated causes rather than blending them. Independent review found a real cross-category overlap: `WP-ERROR-014`'s own diagnosis text already names "a curl build without a specific SSL backend or protocol" as its own territory, which sounds identical to this entry's protocol/cipher causes. Resolved by scope, not mechanism — `WP-ERROR-014` owns a categorical, environment-wide capability gap; this entry owns the observable, request-specific negotiation failure, escalating to `WP-ERROR-014` only once root-caused that deep.
 - `WP-ERROR-030` (`SF-REVIEW-085`/`086`) — matched `SF-TAXONOMY-004`'s already-declared Version 1.3 scope exactly, requiring no widening. Reverses WordPress's own role from client (`028`/`029`) to server: CORS is enforced by the browser, WordPress only emits or omits the relevant headers. Carries the two-directional relationship with `WP-ERROR-022` explicitly (a `200 OK` REST response can still be CORS-blocked; a correct CORS policy doesn't override an auth/authz denial). Independent review caught a real internal-precision gap: the entry's own Section 3 claimed WordPress "never becomes aware" a request was cross-origin, which overstated the boundary against the entry's own Section 8 documentation of the origin-aware header-emission mechanism (`get_http_origin()`/`is_allowed_http_origin()`) — narrowed to "never rejects or blocks on the basis of origin, though it does read the Origin header to decide what to emit." This entry's own creation also required updating `WP-ERROR-021`/`022`'s pre-existing CORS-exclusion bullets (previously citing only `SF-TAXONOMY-002`'s forward-reference promise) to cite this entry by a real link — the same class of stale-hedge cleanup `SF-REVIEW-075` performed during the Authentication phase.
+- **Consistency review** (`SF-REVIEW-087`) treated all three as a system: confirmed the two-axis ownership model (`028`/`029` sequential, `030` independent) holds exactly, and found two Minor cross-document staleness artifacts of sequential authoring — `WP-ERROR-028`'s own Section 6 still cited `WP-ERROR-029` by its pre-widening title, and Section 16 still carried a stale "(currently Draft)" parenthetical predating `WP-ERROR-029`'s own promotion — both corrected. Disclosed as a second `FRAMEWORK-OBSERVATIONS.md` data point for the `SF-SPEC-013` Section 5.7 staleness family: a sibling entry's own prose, not a placeholder citation, drifting after a retitle/promotion — outside `scripts/validate-repo.sh` Check A's current scope.
+- **Baseline certification** (`SF-REVIEW-088`) required no correction of its own, since the consistency review had already caught what would otherwise have surfaced here.
 
 Authentication is complete and Baseline Certified (`SF-REVIEW-079`) — the fifth category to reach that designation, and the second (after REST API) built from a dedicated taxonomy from the outset. Category Work Order: `SF-TAXONOMY-003` (Authentication Error Taxonomy), Version 1.5. Entries: `WP-ERROR-024` (Login Authentication Failure), `WP-ERROR-025` (Authentication Cookie Invalid or Expired), `WP-ERROR-026` (Capability or Role Authorization Denied), `WP-ERROR-027` (Nonce Verification Failure, Non-REST), all Production Ready.
 
