@@ -8,7 +8,7 @@
 
 **Classification:** Engineering Specification
 
-**Status:** Draft
+**Status:** Production Ready
 
 **Version:** 1.0
 
@@ -141,7 +141,7 @@ A category's lifecycle shall produce, at minimum:
 * One category-level consistency review record covering the complete set of entries together.
 * One category-level baseline certification review record.
 
-**Evidentiary basis:** the Database category produced this exact artifact set (eight entries, sixteen per-entry review records, `SF-REVIEW-032`, `SF-REVIEW-033`); the Filesystem category produced the same shape (three entries, six per-entry review records, `SF-REVIEW-039`, `SF-REVIEW-040`).
+**Evidentiary basis:** the Filesystem category produced this exact artifact set (three entries, six per-entry review records, `SF-REVIEW-039`, `SF-REVIEW-040`). The Database category produced the same artifact types with one exception: it has nine entries (`WP-ERROR-002` through `009` and `018`) and eighteen per-entry review records, `SF-REVIEW-032`, and `SF-REVIEW-033`, but never produced a formal `SF-TAXONOMY-XXX` document — its own planned-entry set existed only informally, reconstructed after the fact from conceptual placeholders scattered across `WP-ERROR-005` and `WP-ERROR-018`, which is precisely the gap Section 5.1 exists to close prospectively rather than evidence that this artifact fully conforms to it.
 
 ---
 
@@ -334,7 +334,7 @@ Verify that this specification:
 
 * Section 5.6 (Post-Certification Change) is derived prospectively from principle rather than from an observed change episode, since neither the Database nor Filesystem category has yet undergone a post-certification change. This requirement should be re-examined once a real instance occurs, to confirm the prescribed sequence is actually sufficient in practice.
 * No `SF-TAXONOMY-XXX` template currently exists (see Section 2.2); `SF-TAXONOMY-001` was authored without one. A future, separately-scoped template (analogous to **SF-TEMPLATE-004** for `WP-ERROR` entries) would let this specification's Section 5.1 be checked mechanically rather than by prose comparison.
-* This specification's own creation was not preceded by an independent (Class B) review; per the precedent established by `SF-REVIEW-005` for `SF-SPEC-012`, it is reviewed here only by its own authoring process (Section 17 below), consistent with how every specification in this library (`SF-SPEC-001` through `SF-SPEC-012`) was originally established.
+* This specification's own creation was not preceded by an independent (Class B) review; per the precedent established by `SF-REVIEW-005` for `SF-SPEC-012`, it was initially reviewed only by its own authoring process (`SF-REVIEW-041`), consistent with how every specification in this library (`SF-SPEC-001` through `SF-SPEC-012`) was originally established.
 
 ---
 
@@ -355,3 +355,4 @@ A future `SF-TEMPLATE-XXX` governing `SF-TAXONOMY-XXX` document structure, if cr
 | Version | Date | Summary of Changes | Approval Status |
 |---|---|---|---|
 | 1.0 | 2026-07-13 | Initial specification, authored after the Database and Filesystem categories independently completed the full lifecycle this document formalizes. Every Section 5 requirement cites the specific review record or commit it was extracted from. | Draft — author-reviewed, see `SF-REVIEW-041` |
+| 1.0 | 2026-07-14 | Independent (Class B) review (`SF-REVIEW-042`) found and corrected one Minor finding: Section 5.2 undercounted Database's review records (16 stated vs. 18 actual) and overstated its conformance to the taxonomy-document requirement Section 5.1 itself discloses Database lacks. Corrected. Status changed to Production Ready — the first specification in this library to reach that designation. | Production Ready — Approved with Minor Revisions |
