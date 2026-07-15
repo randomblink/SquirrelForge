@@ -25,7 +25,7 @@ It should be updated freely as production proceeds. It does not require engineer
 | Bootstrap | 1 (`WP-ERROR-013`) | No — single-entry, degenerate for category review | None | — |
 | Plugin | 3 (`WP-ERROR-017`, `031`, `032`) | Yes | `SF-TAXONOMY-005` | `SF-REVIEW-095` |
 | Performance | 3 (`WP-ERROR-033`–`035`) | Yes | `SF-TAXONOMY-006` | `SF-REVIEW-104` |
-| Media | 3 (`WP-ERROR-036`–`038`) | Yes | `SF-TAXONOMY-007` | `SF-REVIEW-113` |
+| Media | 3 (`WP-ERROR-036`–`038`) | Yes (v2) | `SF-TAXONOMY-007` | `SF-REVIEW-152` |
 | Theme | 2 (`WP-ERROR-039`–`040`) | Yes | `SF-TAXONOMY-008` | `SF-REVIEW-120` |
 | CLI | 2 (`WP-ERROR-041`–`042`) | Yes | `SF-TAXONOMY-009` | `SF-REVIEW-127` |
 | Cron | 2 (`WP-ERROR-043`–`044`) | Yes | `SF-TAXONOMY-010` | `SF-REVIEW-134` |
@@ -216,4 +216,20 @@ With the candidate-category roadmap complete (Section 3) and the project owner e
 Reviewed per this project's own established discipline despite not being governed by `SF-SPEC-005`: `SF-REVIEW-147` (Class A author review, one Minor Markdown-formatting defect found and corrected) and `SF-REVIEW-148` (Class B independent review, every citation independently re-derived from its own primary source before comparison with `SF-REVIEW-147`'s findings — zero discrepancy, zero further defect). Both approved with zero outstanding findings.
 
 This does not expand the `WP-ERROR` catalog and certifies no category. It is documentation of the process that produced the fourteen categories already Baseline Certified (Section 1), intended for a future practitioner or a future return to this project to reconstruct the reasoning without re-deriving it from the underlying review records.
+
+---
+
+## 10. Reference Implementation Track
+
+Per the project owner's own priority order (Section 9 above having closed out the methodology-documentation track first), **Reference Implementation** is the second of four future-work tracks: building reproducible runtime evidence per `WP-ERROR` entry, moving entries from reasoned-but-unverified knowledge toward runtime-verified knowledge.
+
+**Governance discovery before any work began:** the term "Reference Implementation" already has a distinct, pre-existing meaning in `SF-SPEC-001` Section 22 (designating an exemplary already-written entry as a model for other authors — informative, not evidence-based). This track is a different concept, closer to the existing `WP-SCENARIO-XXX` runtime-scenario machinery (`SF-SPEC-002`/`003`/`007`), which already governs deterministic, evidence-backed execution — but that machinery is built for a different portfolio (demonstrating the broader SquirrelForge agent's own software-engineering capabilities against a real "Hospital WordPress installation," per `38_WORDPRESS/AGENT-READINESS-REPORT.md`) and carries lifecycle machinery (`SF-SPEC-007`'s eleven-state scenario lifecycle, Distinct Contribution Review, Portfolio Integration) not suited to WP-ERROR-scoped verification. Resolved: the two catalogs (`WP-ERROR-XXX` here, and `38_WORDPRESS/KNOWLEDGE/ERROR-CODES.md`'s separate `WP-PHP-XXX` series) are confirmed intentionally separate by the project owner — no reconciliation needed. This track uses a disposable, self-controlled local environment, never the Hospital installation.
+
+**Artifact format:** a new identifier series, `WP-VERIFICATION-XXX`, reusing the existing `SF-TEMPLATE-005` (Runtime Evidence Record Template) directly — that template's own Section 2 already generalizes to "`WP-SCENARIO-XXX` or other artifact," so no new template needed drafting. Records live in `docs/knowledge/verifications/`. Each record is governed by the same `SF-SPEC-002`/`006`/`011` machinery `WP-SCENARIO-XXX` evidence already uses, without adopting `SF-SPEC-003`/`007`'s scenario-lifecycle/portfolio apparatus.
+
+**Pilot (2026-07-15):** `WP-VERIFICATION-001` verified `WP-ERROR-037` (Upload File Type Rejected) against a disposable local WordPress 7.0.1 installation (WordPress core + the official SQLite Database Integration drop-in + WP-CLI, built entirely in session scratchpad, nothing committed except the evidence record itself). Result: the entry's documented *mechanism* (the two-cause partition, the designed-rejection framing) was confirmed accurate, but two implementation-level details were not — the documented WordPress rejection message does not exist anywhere in WordPress core 7.0.1, and the `unfiltered_upload` capability's actual grant mechanism (`ALLOW_UNFILTERED_UPLOADS`) was entirely undocumented, with only its revocation (`DISALLOW_UNFILTERED_UPLOADS`) covered. A third, taxonomy-level inaccuracy (`SF-TAXONOMY-007` citing a nonexistent filter, `allow_unfiltered_uploads`) was found in the same pass.
+
+All three were corrected through `SF-SPEC-013` Section 5.6's post-certification change process — the first time that process has been fully executed in this catalog (the earlier Filesystem post-certification research, Section 3 above, concluded negatively and never reached the correction steps): `WP-ERROR-037` Version 1.0 → 1.1 (`SF-REVIEW-149` author, `SF-REVIEW-150` independent, both re-deriving every claim from primary WordPress source rather than trusting the verification record's own account), `SF-TAXONOMY-007` Version 1.3 → 1.4, a new Media category consistency review (`SF-REVIEW-151`), and **Media Knowledge Baseline v2** (`SF-REVIEW-152`) — the first `v2` category baseline in this catalog. Logged as a new `FRAMEWORK-OBSERVATIONS.md` entry: a genuinely new category of post-certification-change trigger (runtime evidence surfacing an implementation-level inaccuracy), distinct from the taxonomy-boundary-driven changes `SF-SPEC-013` Section 5.6 was originally modeled on.
+
+**Status:** one entry (`WP-ERROR-037`) now has a `WP-VERIFICATION-XXX` record; the remaining 46 do not. Extending coverage further is a future decision, not committed here.
 

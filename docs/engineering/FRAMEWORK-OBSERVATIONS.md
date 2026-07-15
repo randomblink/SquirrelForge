@@ -120,4 +120,14 @@ Not acted on now. Eight confirmed instances across three sub-patterns and three 
 
 ---
 
+## 2026-07-15 — First runtime-evidence-driven post-certification change: a new triggering-event category for SF-SPEC-013 Section 5.6
+
+Observed across `WP-VERIFICATION-001`, `SF-REVIEW-149`/`150` (WP-ERROR-037 Version 1.1 correction), `SF-REVIEW-151` (Media consistency re-review), and `SF-REVIEW-152` (Media Knowledge Baseline v2): the first Reference Implementation pilot (a disposable local WordPress 7.0.1 installation, built to runtime-verify WP-ERROR-037 rather than assume its documented mechanism, message text, and capability logic were accurate) found two real inaccuracies in an already-Baseline-Certified entry, plus one in its own taxonomy (`SF-TAXONOMY-007`'s Section 3 table cited a WordPress filter, `allow_unfiltered_uploads`, that a full-text source search confirmed does not exist anywhere in WordPress core). All three were corrected through `SF-SPEC-013` Section 5.6's post-certification change process.
+
+This is a genuinely new category of triggering event for that process. `SF-SPEC-013` Section 15 itself disclosed that Section 5.6 was originally "derived prospectively from principle" with no observed change episode; the Filesystem post-certification research earlier this same day (`docs/engineering/KNOWLEDGE-PRODUCTION-PLAN.md` Section 3) was the first real test of that process but concluded negatively (no change warranted) and was driven by re-reading existing documentation and WordPress core source directly, not by executing anything. This episode is the first to actually complete all four steps of Section 5.6 (taxonomy revision, standard authoring/review sequence for the revised entry, new consistency review, new baseline certification), and the first triggered by genuine runtime execution — a category of evidence this catalog had never previously applied to any already-certified entry.
+
+Not acted on now beyond disclosure — one instance does not establish a pattern, and unlike the taxonomy-boundary-driven changes Section 5.6's own text was modeled on, this trigger type (a WP-VERIFICATION-XXX record surfacing a factual inaccuracy) has no comparable prior instance to compare against yet. Worth tracking: whether extending Reference Implementation coverage to further already-certified entries continues to surface this same class of gap (implementation-level detail — exact messages, exact constant/capability names — inaccurate despite the entry's own boundary and mechanism being correct) at a rate that would justify a lighter-weight correction path for this specific defect shape, distinct from the full four-step process a boundary-level post-certification change requires.
+
+---
+
 No further observations recorded.
