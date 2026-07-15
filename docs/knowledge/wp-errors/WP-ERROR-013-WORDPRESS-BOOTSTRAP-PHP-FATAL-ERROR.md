@@ -124,6 +124,7 @@ Causes are grouped by category. Inclusion in this list identifies a category as 
 - A duplicate function or class declaration, commonly caused by a duplicated plugin installation or a duplicated file.
 - A single plugin's own files left internally inconsistent by an interrupted update — see [WP-ERROR-032](WP-ERROR-032-PLUGIN-UPDATE-FAILURE.md).
 - A theme switch that committed its own theme-option change but whose `after_switch_theme` callback failed, leaving a defective theme genuinely active — see [WP-ERROR-039](WP-ERROR-039-THEME-ACTIVATION-FAILURE.md).
+- A currently-active theme's own files left internally inconsistent by an interrupted update — see [WP-ERROR-040](WP-ERROR-040-THEME-UPDATE-FAILURE.md).
 - Cross-file bytecode inconsistency from PHP's own opcode cache serving a stale, pre-deployment compiled version of one file alongside a correctly-updated version of another — see [WP-ERROR-035](WP-ERROR-035-OPCACHE-STALE-BYTECODE.md).
 - An invalid callable registered and invoked too early in the bootstrap sequence.
 - A type error, particularly under PHP 8's stricter type-checking behavior.

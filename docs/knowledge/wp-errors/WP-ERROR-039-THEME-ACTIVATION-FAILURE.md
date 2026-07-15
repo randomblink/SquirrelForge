@@ -199,7 +199,7 @@ The following are cited as they exist in this repository, or as conceptual disti
 3. [WP-ERROR-015 — Unsupported PHP Version](WP-ERROR-015-UNSUPPORTED-PHP-VERSION.md) — exists in this repository; see Section 6 (Distinction) above for the diagnose-then-hand-off relationship.
 4. [WP-ERROR-031 — WordPress Plugin Activation Failure](WP-ERROR-031-PLUGIN-ACTIVATION-FAILURE.md) — exists in this repository; the direct structural parallel this entry mirrors, with the important divergence documented in Section 5 and Section 6 that theme switching has no equivalent of the sandboxed pre-flight check that mechanism performs.
 5. [WP-ERROR-032 — WordPress Plugin Update Failure](WP-ERROR-032-PLUGIN-UPDATE-FAILURE.md) — exists in this repository; see Section 6 (Distinction) above for the shared downstream-symptom resolution model this entry reuses for its own relationship with `WP-ERROR-013`.
-6. WP-ERROR-040 — WordPress Theme Update Failure — conceptual reference; planned per `SF-TAXONOMY-008` Section 3, no corresponding document currently exists in this repository; no link is provided.
+6. [WP-ERROR-040 — WordPress Theme Update Failure](WP-ERROR-040-THEME-UPDATE-FAILURE.md) — exists in this repository; see Section 6 (Distinction) above.
 
 ---
 
