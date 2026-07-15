@@ -180,7 +180,7 @@ The following are cited as they exist in this repository, or as conceptual disti
 1. [WP-ERROR-036 — WordPress Upload Size Limit Exceeded](WP-ERROR-036-UPLOAD-SIZE-LIMIT-EXCEEDED.md) — exists in this repository; see Section 6 (Distinction) above.
 2. [WP-ERROR-019 — WordPress Filesystem Permission Denied](WP-ERROR-019-FILESYSTEM-PERMISSION-DENIED.md) and [WP-ERROR-020 — WordPress Disk Space Exhausted](WP-ERROR-020-DISK-SPACE-EXHAUSTED.md) — exist in this repository; see Section 6 (Distinction) above.
 3. [WP-ERROR-014 — Required PHP Extension Missing](WP-ERROR-014-REQUIRED-PHP-EXTENSION-MISSING.md) — exists in this repository; see Section 6 (Distinction) above for why this entry does not hand off to it for the graceful-degradation scenario specifically.
-4. WP-ERROR-038 — WordPress Image Processing Failure (conceptual reference; planned per `SF-TAXONOMY-007` Section 3, no corresponding document currently exists in this repository; no link is provided) — see Section 6 (Distinction) above.
+4. [WP-ERROR-038 — WordPress Image Processing Failure](WP-ERROR-038-IMAGE-PROCESSING-FAILURE.md) — see Section 6 (Distinction) above.
 
 ---
 
