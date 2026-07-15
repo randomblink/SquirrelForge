@@ -96,7 +96,7 @@ Listed as components commonly involved, not as a claim that every installation r
 
 - A PHP fatal error referencing an undefined function or missing class that corresponds to a specific extension (for example, a class or function belonging to `mysqli`, `DOMDocument`, or `ZipArchive`).
 - A WordPress Site Health warning identifying a missing or recommended PHP extension.
-- A plugin or theme activation blocked by a requirements-not-met notice naming a specific extension — see [WP-ERROR-031](WP-ERROR-031-PLUGIN-ACTIVATION-FAILURE.md) for the plugin-activation-specific diagnostic entry point.
+- A plugin or theme activation blocked by a requirements-not-met notice naming a specific extension — see [WP-ERROR-031](WP-ERROR-031-PLUGIN-ACTIVATION-FAILURE.md) for the plugin-activation-specific diagnostic entry point, or [WP-ERROR-039](WP-ERROR-039-THEME-ACTIVATION-FAILURE.md) for the theme-switching-specific diagnostic entry point.
 - A Composer install or update failing with a platform requirement error naming an `ext-*` requirement.
 - A specific WordPress feature failing (for example, image resizing or a specific REST endpoint) while the rest of the site continues to function normally, when the missing extension is required only by that feature.
 - WP-CLI commands failing differently than web requests for the same site, when the CLI and web PHP runtimes have different extension availability.
