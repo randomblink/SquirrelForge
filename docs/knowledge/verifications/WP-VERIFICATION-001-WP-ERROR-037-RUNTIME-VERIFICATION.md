@@ -22,6 +22,8 @@ Structured per `SF-TEMPLATE-005` (Runtime Evidence Record Template). Governed by
 
 Determine whether `WP-ERROR-037`'s own documented claims — its two causes' triggering conditions, the `unfiltered_upload` capability mechanism, and WordPress's own user-facing rejection message — hold up against actual runtime behavior on a real, current WordPress installation, rather than remaining unverified "reasoned knowledge."
 
+**Expected behavior, per the entry as documented (Version 1.0):** a disallowed-extension upload and an extension/content-mismatch upload should each be rejected with the message *"Sorry, this file type is not permitted for security reasons."* A user should be able to bypass the allowed-types restriction only if they hold the `unfiltered_upload` capability, described as available by default and only "uncommon... for security reasons," with `DISALLOW_UNFILTERED_UPLOADS` as the only capability-related constant the entry names.
+
 ---
 
 # 4. Baseline
@@ -71,13 +73,17 @@ Disposable, local-only environment, isolated from the "Hospital WordPress instal
 
 # 8. Validation
 
-The objective (Section 3) is achieved: this record demonstrates that `WP-ERROR-037`'s documented *mechanism* is accurate — both causes are real, independently triggerable, and produce a genuine WordPress-level rejection rather than a false claim — but surfaces three specific, source-verified inaccuracies in the surrounding documentation, none of which change the entry's Scope, Distinction, or Diagnosis structure:
+The objective (Section 3) is achieved: this record demonstrates that `WP-ERROR-037`'s documented *mechanism* is accurate — both causes are real, independently triggerable, and produce a genuine WordPress-level rejection rather than a false claim — but surfaces three specific, source-verified inaccuracies in the surrounding documentation, none of which change the entry's Scope, Distinction, or Diagnosis structure.
+
+**Differences from documentation:**
 
 1. **Message text.** `WP-ERROR-037` Sections 8 and 9 state WordPress's message is *"Sorry, this file type is not permitted for security reasons."* This string does not exist anywhere in WordPress core 7.0.1. The actual message, confirmed both by direct trigger and by source, is *"Sorry, you are not allowed to upload this file type."*
 2. **`unfiltered_upload` grant mechanism undocumented.** `WP-ERROR-037` Sections 6, 8, and 11 document only the capability's *revocation* (`DISALLOW_UNFILTERED_UPLOADS`) and describe the capability itself as merely "uncommon by default" — worded as though it is ordinarily available to an Administrator and only unusually revoked. Actual core behavior is stronger: the capability requires an explicit, additional, undocumented-in-this-entry constant (`ALLOW_UNFILTERED_UPLOADS`, defined `true`) to be granted at all; without it, even an unmodified Administrator account lacks the capability by default, with no `DISALLOW_UNFILTERED_UPLOADS` involved. Diagnosis Section 11 step 3 ("attempt the identical upload as a user known to hold the `unfiltered_upload` capability") gives a reader no way to know how such a user would come to hold it.
 3. **`SF-TAXONOMY-007`'s own planned-entries table** (line 55, Section 3) additionally names a filter, `allow_unfiltered_uploads` (lowercase), as something the file-type validation is "governed by... where applicable." No such filter exists anywhere in WordPress core. This is a taxonomy-level inaccuracy, not merely an entry-level one, and independently triggers the taxonomy-revision step of `SF-SPEC-013` Section 5.6's post-certification change process.
 
 No defect was found in the entry's or taxonomy's core boundary claims (the two-cause partition, the exclusions in Section 6, the category boundary itself) — only in specific implementation-level details neither had been checked against real WordPress source before this record.
+
+**Required repository changes:** `WP-ERROR-037` (Version 1.0 → 1.1: corrected message text in Sections 8/9, corrected capability-grant mechanism in Sections 6/8/11) and `SF-TAXONOMY-007` (Version 1.3 → 1.4: corrected Section 3 table row). Both processed through **SF-SPEC-013** Section 5.6's post-certification change process — see Section 15 below.
 
 ---
 
@@ -123,7 +129,7 @@ Retain permanently alongside the corrected artifacts it supports. Do not delete 
 - **Scenario/Artifact:** `WP-ERROR-037` (Section 2).
 - **Implementation:** None — this record verifies existing documentation against existing WordPress behavior; no SquirrelForge code was implemented or modified.
 - **Validation:** Section 8 above.
-- **Documentation:** `WP-ERROR-037` Version 1.1 (corrected Sections 6, 8, 9, 11, 17) and `SF-TAXONOMY-007` Version 1.3 (corrected Section 3 table row), both citing this record. `docs/engineering/KNOWLEDGE-PRODUCTION-PLAN.md` Section 9, extended with a Reference Implementation status note.
+- **Documentation:** `WP-ERROR-037` Version 1.1 (corrected Sections 6, 8, 9, 11, 17) and `SF-TAXONOMY-007` Version 1.4 (corrected Section 3 table row), both citing this record. `docs/engineering/KNOWLEDGE-PRODUCTION-PLAN.md` Section 10, covering the Reference Implementation track.
 
 ---
 
@@ -138,3 +144,4 @@ Examined as part of `SF-REVIEW-149` (Class A author review) and `SF-REVIEW-150` 
 | Version | Date | Summary of Changes | Approval Status |
 |---|---|---|---|
 | 1.0 | 2026-07-15 | Initial record. Documents the first Reference Implementation pilot: a disposable local WordPress 7.0.1 + SQLite installation used to runtime-verify WP-ERROR-037's documented mechanism, message text, and unfiltered_upload capability logic. Found the mechanism accurate but the message text, the capability's own grant condition, and a taxonomy-level filter reference all inaccurate against real WordPress core source. | Draft — reviewed via SF-REVIEW-149/150 |
+| 1.1 | 2026-07-15 | Structural-only update: retrofitted to the newly-formalized `WP-VERIFICATION-XXX` series convention (`docs/knowledge/verifications/README.md`) — added an explicit "Expected behavior" sub-point to Section 3 and explicit "Differences from documentation" / "Required repository changes" sub-points to Section 8. No factual content changed; corrected two stale cross-references (SF-TAXONOMY-007 version number, KNOWLEDGE-PRODUCTION-PLAN.md section number) found while retrofitting. | Draft — reviewed via SF-REVIEW-149/150 (substance unchanged) |
