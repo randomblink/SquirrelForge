@@ -156,7 +156,7 @@ Recovery is successful when:
 
 The following are cited as they exist in this repository, or as conceptual distinctions where noted.
 
-1. WP-ERROR-047 — WordPress SMTP Mail Transport Failure — conceptual reference; planned per `SF-TAXONOMY-012` Section 3, no corresponding document currently exists in this repository; no link is provided.
+1. [WP-ERROR-047 — WordPress SMTP Mail Transport Failure](WP-ERROR-047-SMTP-MAIL-TRANSPORT-FAILURE.md) — exists in this repository; see Section 6 (Distinction) above.
 
 ---
 

@@ -73,7 +73,7 @@ It is distinct from:
 - Authentication or authorization occurring specifically within a REST API request, including Application Passwords and the `X-WP-Nonce` header (`WP-ERROR-022`).
 - A database-layer failure preventing the user-lookup query itself from completing (Database category) — this entry presumes the database is reachable and queryable, and that the lookup itself completed and returned a definitive "no match" or "password mismatch" result.
 - A missing PHP extension or unsupported PHP version preventing the authentication code (for example, a password-hashing function) from executing at all (PHP Runtime category) — this entry presumes the PHP runtime is fully capable and that the rejection is a business-logic decision, not a runtime-capability failure.
-- Password-reset or lost-password recovery flow failures (`retrieve_password()`, reset-key generation or validation) — a related but distinct mechanism, not currently covered by any entry in this category; see `SF-TAXONOMY-003` Section 5.
+- Password-reset or lost-password recovery flow failures (`retrieve_password()`, reset-key generation or validation) — a related but distinct mechanism. The reset key's own generation and validation remain uncovered by any entry, per `SF-TAXONOMY-003` Section 5; the reset email's own delivery, once `wp_mail()` is actually called, is [WP-ERROR-046](WP-ERROR-046-LOCAL-MAIL-TRANSPORT-FAILURE.md)'s or [WP-ERROR-047](WP-ERROR-047-SMTP-MAIL-TRANSPORT-FAILURE.md)'s own territory, depending on the configured transport.
 - A two-factor-authentication plugin's own additional verification step failing after primary credentials were already accepted (Plugin category).
 
 ---
