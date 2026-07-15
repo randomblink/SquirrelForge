@@ -172,7 +172,7 @@ Recovery is successful when:
 
 # 16. Related Errors
 
-The following are cited as they exist in this repository.
+The following are cited as they exist in this repository, or as conceptual distinctions where noted.
 
 1. [WP-ERROR-036 — WordPress Upload Size Limit Exceeded](WP-ERROR-036-UPLOAD-SIZE-LIMIT-EXCEEDED.md) and [WP-ERROR-037 — WordPress Upload File Type Rejected](WP-ERROR-037-UPLOAD-FILE-TYPE-REJECTED.md) — exist in this repository; see Section 6 (Distinction) above.
 2. [WP-ERROR-019 — WordPress Filesystem Permission Denied](WP-ERROR-019-FILESYSTEM-PERMISSION-DENIED.md) and [WP-ERROR-020 — WordPress Disk Space Exhausted](WP-ERROR-020-DISK-SPACE-EXHAUSTED.md) — exist in this repository; see Section 6 (Distinction) above for the diagnose-then-hand-off relationship at this later pipeline stage.

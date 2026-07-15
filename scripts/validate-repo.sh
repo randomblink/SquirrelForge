@@ -2,19 +2,20 @@
 #
 # validate-repo.sh
 #
-# Standalone, manually-run mechanical check for the two recurring defect
-# classes SF-REVIEW-032, SF-REVIEW-039, SF-REVIEW-040, and SF-REVIEW-052
-# each found only via a dedicated, after-the-fact category consistency
-# review: (A) a sibling entry still citing another entry as a
-# "conceptual reference" after that entry has actually been authored,
-# and (B) an SF-TAXONOMY-XXX status table that disagrees with an
-# entry's own Status field.
+# Standalone, manually-run mechanical check for recurring defect classes
+# this catalog's own category consistency reviews have repeatedly found
+# only after the fact: (A) a sibling entry still citing another entry as
+# a "conceptual reference" after that entry has actually been authored;
+# (B) an SF-TAXONOMY-XXX status table that disagrees with an entry's own
+# Status field; (C) a specification missing its required Revision History
+# section; and (D) a WP-ERROR entry's own Related Errors intro sentence
+# deviating from this catalog's majority wording.
 #
 # This does not replace a category consistency review under SF-SPEC-013
-# Section 5.4 -- it catches the two specific, deterministic gap classes
-# SF-SPEC-013 Section 5.7 already names, so they can be caught before a
-# promotion or taxonomy-update commit lands rather than only by the next
-# scheduled review. See FRAMEWORK-OBSERVATIONS.md, 2026-07-14 entry.
+# Section 5.4 -- it catches specific, deterministic gap classes so they
+# can be caught before a promotion or taxonomy-update commit lands rather
+# than only by the next scheduled review. See FRAMEWORK-OBSERVATIONS.md,
+# 2026-07-14 entries.
 #
 # Check A intentionally scopes to *live* citing documents only --
 # docs/knowledge/wp-errors/*.md and docs/standards/SF-TAXONOMY-*.md --
@@ -113,8 +114,42 @@ if [ "$check_c_issues" -eq 0 ]; then
 fi
 
 echo
+echo "== Check D: Related Errors (Section 16) intro sentence wording =="
+echo
+
+# Every WP-ERROR entry's own "# 16. Related Errors" section shall open with
+# either this catalog's majority wording, or WP-ERROR-013's own legitimate
+# variant (used only when every citation in that entry's own Section 16 is
+# genuinely conceptual, with no real links at all). Both are literal,
+# deliberately-chosen sentences, not paraphrased shorthand -- any entry
+# whose own text differs from both is a wording drift, the defect class
+# first caught only by category consistency reviews (SF-REVIEW-094,
+# SF-REVIEW-103, SF-REVIEW-112). See FRAMEWORK-OBSERVATIONS.md, 2026-07-14
+# entry.
+MAJORITY_WORDING="The following are cited as they exist in this repository, or as conceptual distinctions where noted."
+CONCEPTUAL_ONLY_WORDING="The following are cited as conceptual distinctions only. No corresponding \`WP-ERROR\` document currently exists in this repository for any of them, and no link is provided."
+
+check_d_issues=0
+for entry in "$KNOWLEDGE_DIR"/WP-ERROR-*.md; do
+    [ -f "$entry" ] || continue
+
+    intro=$(awk '/^# 16\. Related Errors/{found=1; next} found && NF{print; exit}' "$entry")
+    [ -z "$intro" ] && continue
+
+    if [ "$intro" != "$MAJORITY_WORDING" ] && [ "$intro" != "$CONCEPTUAL_ONLY_WORDING" ]; then
+        echo "DRIFT: $entry's own Section 16 intro sentence does not match either standard wording:"
+        echo "  found: $intro"
+        issues=$((issues + 1))
+        check_d_issues=$((check_d_issues + 1))
+    fi
+done
+if [ "$check_d_issues" -eq 0 ]; then
+    echo "All entries' Section 16 intro sentences match a standard wording."
+fi
+
+echo
 if [ "$issues" -eq 0 ]; then
-    echo "RESULT: clean. No stale conceptual references, no taxonomy/entry status drift, no missing Revision History section."
+    echo "RESULT: clean. No stale conceptual references, no taxonomy/entry status drift, no missing Revision History section, no Related Errors wording drift."
     exit 0
 else
     echo "RESULT: $issues issue(s) found."
