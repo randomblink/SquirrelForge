@@ -25,8 +25,9 @@ It should be updated freely as production proceeds. It does not require engineer
 | Bootstrap | 1 (`WP-ERROR-013`) | No — single-entry, degenerate for category review | None | — |
 | Plugin | 3 (`WP-ERROR-017`, `031`, `032`) | Yes | `SF-TAXONOMY-005` | `SF-REVIEW-095` |
 | Performance | 3 (`WP-ERROR-033`–`035`) | Yes | `SF-TAXONOMY-006` | `SF-REVIEW-104` |
+| Media | 1 (`WP-ERROR-036`) | No — category in progress, `WP-ERROR-037`/`038` still planned | `SF-TAXONOMY-007` | — |
 
-31 entries, 9 categories, 8 Baseline Certified, across the 14-specification framework at `SF-BASELINE-001`.
+32 entries, 10 categories, 8 Baseline Certified, across the 14-specification framework at `SF-BASELINE-001`.
 
 ---
 
@@ -51,7 +52,7 @@ Seven approved categories have **zero entries yet** and require no specification
 | WP-CLI | `CLI` | **Ready** — approved, zero entries |
 | Filesystem & Updates (remaining gaps) | `Filesystem` | **Partially ready** — category is already `Baseline Certified`; a new entry here is a *post-certification change* under **SF-SPEC-013** Section 5.6, not a fresh start, and must go through that section's own four-step process (taxonomy revision, standard authoring sequence, new consistency review, new baseline certification) |
 | HTTP / Networking | `Networking` | **Done** — Baseline Certified (`SF-REVIEW-088`) |
-| Media | `Media` | **Ready** — approved `SF-SPEC-001` Version 1.2, zero entries |
+| Media | `Media` | **In progress** — `SF-TAXONOMY-007` frozen (`SF-REVIEW-105`); `WP-ERROR-036` Production Ready; `WP-ERROR-037`/`038` remaining |
 | Cron / Scheduled Tasks | `Cron` | **Ready** — approved `SF-SPEC-001` Version 1.2, zero entries |
 | Email | `Email` | **Ready** — approved `SF-SPEC-001` Version 1.2, zero entries |
 | Multisite | `Multisite` | **Ready** — approved `SF-SPEC-001` Version 1.2, zero entries |
@@ -117,7 +118,13 @@ Empty scaffold. Per the project owner's own direction, this is the evidence base
 
 ## 8. Active Category
 
-No category is currently active. Per the roadmap (Section 3), the next unstarted "ready now" candidate is the first remaining entry in priority order not yet claimed by this project's own production.
+**Media.** Category Work Order: `SF-TAXONOMY-007` (Media Error Taxonomy), Version 1.1, independently reviewed per `SF-REVIEW-105` (Approved). Resolves `SF-TAXONOMY-001`'s own explicit forward-reference to a future "dedicated Media/Uploads category." Research (the proactive cross-category ownership sweep, now standard since `SF-TAXONOMY-006`) found two genuine, previously-unclaimed gaps: PHP/WordPress upload-size-limit rejection (already disclosed and excluded by `WP-ERROR-020`, but never claimed by any entry) and WordPress's own file-type/MIME validation gate (never mentioned anywhere). Planned entries: `WP-ERROR-036` (Upload Size Limit Exceeded), `WP-ERROR-037` (Upload File Type Rejected), `WP-ERROR-038` (Image Processing Failure), structured as a sequential pipeline rather than independent mechanisms.
+
+Progress: `WP-ERROR-036` **Production Ready**. `WP-ERROR-037`/`038` not yet authored.
+
+- `WP-ERROR-036` (`SF-REVIEW-106`/`107`) — drafted directly from `SF-TAXONOMY-007`'s own declared scope. Keeps three causes distinct: `post_max_size` exceeded (WordPress's own code still executes, but with empty `$_POST`/`$_FILES` and no PHP-level error code — the most diagnostically difficult case), `upload_max_filesize` exceeded (PHP populates `UPLOAD_ERR_INI_SIZE`, which WordPress translates), and WordPress's own further-restricted `wp_max_upload_size()` (a userland check after PHP has already accepted the file). Independent review caught three real Minor findings: an overstated description of PHP's own request-handling behavior under `post_max_size` (corrected — WordPress's code does execute, it's not skipped), a missing diagnostic signal (PHP's own error-log warning, a genuine way to distinguish this entry's own condition from an excluded web-server-level size limit, added), and a cross-document completeness gap in `WP-ERROR-020`'s own pre-existing exclusion bullet, which described this entry's own condition without citing it (added). `SF-TAXONOMY-007` itself required no revision.
+
+No category will be considered active again until the two remaining Media entries are authored and this category proceeds through consistency review and baseline certification.
 
 Caching / Performance is complete and Baseline Certified (`SF-REVIEW-104`) — the eighth category to reach that designation, and the fifth (after REST API, Authentication, Networking, and Plugin) built from a dedicated taxonomy from the outset — and the first whose complete planned-entry set was produced under a single, unrevised taxonomy boundary after exactly one pre-authoring correction. Category Work Order: `SF-TAXONOMY-006` (Caching / Performance Error Taxonomy), Version 1.3, independently reviewed per `SF-REVIEW-096` (Approved). Drafting this taxonomy required more cross-entry research than any prior one: four existing, Production-Ready entries (`WP-ERROR-021`, `025`, `027`, `030`) already fully own a specific caching-related symptom within their own domains, so this category's own territory is narrow — the caching *mechanisms'* own operational state, not any downstream content served incorrectly. Entries: `WP-ERROR-033` (Persistent Object Cache Backend Unavailable), `WP-ERROR-034` (Page Cache Not Active), `WP-ERROR-035` (OPcache Stale Bytecode), all Production Ready.
 
