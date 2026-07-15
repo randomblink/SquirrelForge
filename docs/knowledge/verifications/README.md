@@ -35,3 +35,4 @@ Every record shall additionally, within the indicated existing section, cover th
 |---|---|---|---|
 | `WP-VERIFICATION-001` | `WP-ERROR-037` | Mechanism confirmed; message text and capability-grant documentation were wrong | `WP-ERROR-037` v1.0→1.1, `SF-TAXONOMY-007` v1.3→1.4, Media Knowledge Baseline v2 |
 | `WP-VERIFICATION-002` | `WP-ERROR-038` | Cause 1 (corrupt source image) confirmed accurate in every respect tested | None |
+| `WP-VERIFICATION-003` | `WP-ERROR-036` | Causes 1/2 confirmed accurate; Cause 3 substantially inaccurate (documented mechanism does not exist; real mechanism is multisite-only and different) | `WP-ERROR-036` v1.0→1.1, `SF-TAXONOMY-007` v1.4→1.5, Media Knowledge Baseline v3 |
