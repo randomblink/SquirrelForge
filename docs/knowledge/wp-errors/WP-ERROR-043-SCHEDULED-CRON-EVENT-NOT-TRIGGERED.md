@@ -177,7 +177,7 @@ The following are cited as they exist in this repository, or as conceptual disti
 
 1. [WP-ERROR-013 — WordPress Bootstrap PHP Fatal Error](WP-ERROR-013-WORDPRESS-BOOTSTRAP-PHP-FATAL-ERROR.md) — exists in this repository; see Section 6 (Distinction) above for why this entry's own condition, occurring before or during the trigger attempt itself, falls outside that entry's own scope.
 2. [WP-ERROR-028 — WordPress Outbound HTTP Request Failure](WP-ERROR-028-WORDPRESS-OUTBOUND-HTTP-REQUEST-FAILURE.md) — exists in this repository; see Section 6 (Distinction) above for the diagnose-then-hand-off relationship and the diagnostic-asymmetry this entry's own condition presents.
-3. WP-ERROR-044 — WordPress Scheduled Cron Event Callback Failure — conceptual reference; planned per `SF-TAXONOMY-010` Section 3, no corresponding document currently exists in this repository; no link is provided.
+3. [WP-ERROR-044 — WordPress Scheduled Cron Event Callback Failure](WP-ERROR-044-SCHEDULED-CRON-EVENT-CALLBACK-FAILURE.md) — exists in this repository; see Section 6 (Distinction) above.
 
 ---
 

@@ -57,7 +57,7 @@ It is distinct from:
 - PHP warnings, notices, and deprecation messages, none of which terminate execution and none of which fall within this entry's scope.
 - HTTP-layer errors reported by a web server without corresponding PHP fatal-error evidence in any available log.
 - A blank or empty response with no corroborating PHP fatal-error evidence.
-- Fatal errors that occur only after WordPress has completed bootstrap and begun normal request processing — for example, within a plugin's request-handling callback, a REST route handler, or theme template rendering after the `template_redirect` stage.
+- Fatal errors that occur only after WordPress has completed bootstrap and begun normal request processing — for example, within a plugin's request-handling callback, a REST route handler, theme template rendering after the `template_redirect` stage, or a scheduled cron event's own callback — see [WP-ERROR-044](WP-ERROR-044-SCHEDULED-CRON-EVENT-CALLBACK-FAILURE.md) for the cron-specific diagnostic entry point.
 - Ordinary plugin or theme runtime failures occurring during normal, post-bootstrap request handling.
 
 ---
