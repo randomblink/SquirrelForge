@@ -165,7 +165,7 @@ The following are cited as they exist in this repository, or as conceptual disti
 1. [WP-ERROR-013 — WordPress Bootstrap PHP Fatal Error](WP-ERROR-013-WORDPRESS-BOOTSTRAP-PHP-FATAL-ERROR.md) — exists in this repository; see Section 6 (Distinction) above for why this entry's own condition, occurring before `wp-load.php` is ever reached, falls entirely outside that entry's own scope.
 2. WP-ERROR-010 — WordPress Configuration File Missing — conceptual reference; already named by `WP-ERROR-013` Section 16 as a planned entry, no corresponding document currently exists in this repository; no link is provided.
 3. WP-ERROR-011 — WordPress Configuration File Invalid — conceptual reference; already named by `WP-ERROR-013` Section 16 as a planned entry, no corresponding document currently exists in this repository; no link is provided.
-4. WP-ERROR-042 — WP-CLI Multisite Site Context Resolution Failure — conceptual reference; planned per `SF-TAXONOMY-009` Section 3, no corresponding document currently exists in this repository; no link is provided.
+4. [WP-ERROR-042 — WP-CLI Multisite Site Context Resolution Failure](WP-ERROR-042-WP-CLI-MULTISITE-SITE-CONTEXT-RESOLUTION-FAILURE.md) — exists in this repository; the second and final planned entry in this category.
 
 ---
 
