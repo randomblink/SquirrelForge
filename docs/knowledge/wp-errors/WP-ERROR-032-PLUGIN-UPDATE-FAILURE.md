@@ -80,7 +80,7 @@ It is distinct from:
 - A file-swap or extraction failure attributable to exhausted disk capacity, quota, or inodes (`WP-ERROR-020`).
 - A specific plugin's own business-logic defect in its new, post-update code, where the update mechanism itself completed every step correctly.
 - WordPress core's own update mechanism, a related but distinct mechanism (`Core_Upgrader`) out of scope for this category.
-- Theme update failures, Theme category's own parallel mechanism.
+- Theme update failures, Theme category's own parallel mechanism ([WP-ERROR-040](WP-ERROR-040-THEME-UPDATE-FAILURE.md)).
 
 ---
 
