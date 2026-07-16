@@ -19,7 +19,7 @@ The Project Loader does not select the final implementation strategy or perform 
 
 ## Loading Process
 
-1. Verify the project root and repository identity.
+1. Verify the project root and repository identity using the Repository Identity Verification Procedure below.
 2. Detect project type and active domains.
 3. Inspect current project state and uncommitted work when available.
 4. Load root project instructions and mandatory rules.
@@ -30,6 +30,90 @@ The Project Loader does not select the final implementation strategy or perform 
 9. Initialize task context with verified evidence and known unknowns.
 10. Pass project context to capability routing and workflow selection.
 11. Confirm readiness state and publish limitations.
+
+---
+
+## Repository Identity Verification Procedure
+
+Before any write operation, and after any change of working directory into another project, verify repository identity:
+
+1. Run `pwd` to confirm the current working directory.
+2. Run `git rev-parse --show-toplevel` to resolve the repository root.
+3. Run `git status --short` to inspect the current working tree state.
+4. When repository identity remains ambiguous — similarly named projects, nested repositories, or an unclear remote — also run `git remote -v`.
+5. Compare the resolved repository root and project name against the user's stated target project.
+
+### Mismatch Behavior
+
+If the resolved repository does not match the user's stated target project:
+
+- stop before making any edit,
+- report the current repository path and name and the requested project by name,
+- require explicit correction or confirmation before continuing,
+- never assume two similarly named projects are the same project.
+
+### Project-Switch Behavior
+
+After any `cd` into a different project directory:
+
+- re-run the full Repository Identity Verification Procedure,
+- treat the new repository as a fresh execution context,
+- do not carry over file paths, assumptions, staged changes, or commit plans from the prior project.
+
+### Dirty Working Tree Behavior
+
+When `git status --short` reports modified or untracked files before a new task begins:
+
+- do not discard or overwrite the existing changes,
+- report the modified and untracked files to the user,
+- continue only when the new task can be safely isolated from the existing changes, or the user explicitly directs how to proceed.
+
+### Examples
+
+**SquirrelForge work requested while the current repository is Hospital/CSHD**
+
+```text
+pwd → /Users/randomblink/Local Sites/hospital/app/public/wp-content/plugins/cshd
+git rev-parse --show-toplevel → .../wp-content/plugins/cshd
+Requested project: SquirrelForge
+
+Result: Mismatch. Stop before editing. Report the current repository (Hospital/CSHD)
+and the requested project (SquirrelForge). Require the user to confirm the correct
+path or explicitly switch directories before continuing.
+```
+
+**Hospital/CSHD work requested while the current repository is SquirrelForge**
+
+```text
+pwd → /Users/randomblink/Projects/SquirrelForge
+git rev-parse --show-toplevel → /Users/randomblink/Projects/SquirrelForge
+Requested project: Hospital/CSHD
+
+Result: Mismatch. Stop before editing. Report the current repository (SquirrelForge)
+and the requested project (Hospital/CSHD). Do not assume the two are the same project
+because both are WordPress-adjacent.
+```
+
+**User switches repositories mid-session**
+
+```text
+Session starts in SquirrelForge; work proceeds normally.
+User then asks for a change in Hospital/CSHD and the agent `cd`s into that repository.
+
+Result: Re-run the full verification procedure in the new directory. Treat
+Hospital/CSHD as a fresh execution context. Do not reuse SquirrelForge file paths,
+staged changes, or commit plans.
+```
+
+**Working tree is dirty before a new task**
+
+```text
+git status --short → M includes/class-something.php (modified, unrelated to the new request)
+
+Result: Do not discard or overwrite the modification. Report it to the user.
+Proceed only if the new task can be isolated from that file, or the user explicitly
+directs how to handle it.
+```
 
 ---
 

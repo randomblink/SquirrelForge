@@ -56,6 +56,10 @@ Requirements + Acceptance Criteria + Risk Inputs
 
 The exact test ordering may vary by change type and risk. The diagram describes evidence flow, not mandatory authority transfer.
 
+## Domain-Specific Testing Standards
+
+Domain layers may define additional validation dimensions on top of these general categories. For WordPress work, `38_WORDPRESS/STANDARDS/TESTING-STANDARD.md` defines the required WordPress-specific dimensions and maps each one onto the general categories above; it does not replace or duplicate them. WordPress work must satisfy both this layer's execution and reporting responsibilities and that standard's WordPress-specific dimensions.
+
 ## Rules
 
 - Tests must be repeatable and isolated where appropriate.

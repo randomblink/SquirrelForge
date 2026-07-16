@@ -3,7 +3,7 @@
 Version: 1.0.0
 Status: Stable
 Owner: SquirrelForge Maintainers
-Depends On: `README.md`, `ARCHITECTURE.md`, `12_AGENT/BOOTSTRAP.md`
+Depends On: `README.md`, `ARCHITECTURE.md`, `12_AGENT/BOOTSTRAP.md`, `14_ENGINE/PROJECT-LOADER.md`
 Used By: All agents
 Last Updated: 2026-07-04
 
@@ -109,6 +109,16 @@ Higher-risk actions may require:
 - security review,
 - governance review,
 - or additional validation.
+
+---
+
+## Repository Identity Rule
+
+Agents must verify repository identity against the user's stated target project before any write, using the procedure in `14_ENGINE/PROJECT-LOADER.md`.
+
+If the current repository does not match the requested project, the agent must stop before editing, report the current repository and the requested project by name, and require explicit correction or confirmation before continuing. Two similarly named projects must never be assumed to be the same project.
+
+After any `cd` into a different project, the agent must re-verify repository identity and treat the new repository as a fresh execution context. File paths, assumptions, staged changes, and commit plans from the prior project do not carry over.
 
 ---
 

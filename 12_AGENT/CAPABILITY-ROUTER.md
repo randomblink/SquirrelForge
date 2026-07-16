@@ -63,6 +63,63 @@ A request should have one primary route. Supporting routes may be added only whe
 
 ---
 
+## Domain Precedence Rule
+
+A request may match both a general route in the Primary Routing Table and the WordPress trigger in Domain Routing above. WordPress precedence resolves the conflict:
+
+1. If the request is clearly about WordPress code, plugins, themes, REST endpoints, block development, WordPress debugging, or WordPress deployment, `38_WORDPRESS/WORDPRESS-MANAGER.md` owns Skill and Role selection for that work. Route through `38_WORDPRESS/SKILLS/SKILL-ROUTING-MAP.md` and `33_WORDPRESS_ROLES/ROLE-ROUTING-MATRIX.md` instead of the Primary Routing Table's Lead Agent column.
+2. `16_AGENTS` specialists (Security, Performance, Reviewer, Release, and similar) act only as supporting specialists on WordPress work, and only when explicitly called by the WordPress route. They do not independently claim ownership of a WordPress Skill, Role selection, or finding.
+3. If the request is not WordPress-specific, general Agent routing through the Primary Routing Table proceeds unchanged and the WordPress Manager is not invoked.
+4. If a request spans WordPress and another domain, `38_WORDPRESS/WORDPRESS-MANAGER.md` owns the WordPress implementation boundary and the other domain's manager or specialist owns its own boundary. One primary owner must be identified for the overall request; the other owner supports a distinct boundary and never duplicates the same responsibility.
+
+### Precedence Examples
+
+**Security review of a WordPress plugin**
+
+```text
+Primary Owner: WordPress Manager (38_WORDPRESS/WORDPRESS-MANAGER.md)
+Route: REVIEW-CODE Skill → 33_WORDPRESS_ROLES/SECURITY-ENGINEER.md
+Supporting: 16_AGENTS/AGENT-SECURITY.md only if explicitly called by the WordPress route
+Reason: The request is WordPress-specific; the WordPress Security Engineer role, not the general Security Agent, owns the finding.
+```
+
+**Performance review of a WordPress theme**
+
+```text
+Primary Owner: WordPress Manager (38_WORDPRESS/WORDPRESS-MANAGER.md)
+Route: OPTIMIZE-PERFORMANCE Skill → 33_WORDPRESS_ROLES/PERFORMANCE-ENGINEER.md
+Supporting: 16_AGENTS/AGENT-PERFORMANCE.md only if explicitly called by the WordPress route
+Reason: The request is WordPress-specific and its primary objective is performance improvement, so `38_WORDPRESS/SKILLS/SKILL-ROUTING-MAP.md`'s "Performance Work" rule selects OPTIMIZE-PERFORMANCE regardless of whether the target is a plugin or a theme; CREATE-THEME governs building a new theme, not reviewing an existing one's performance. The WordPress Performance Engineer role owns the finding.
+```
+
+**Generic PHP security review unrelated to WordPress**
+
+```text
+Primary Owner: Security Agent (16_AGENTS/AGENT-SECURITY.md)
+Route: Primary Routing Table → Audit security → Security Agent
+Reason: No WordPress domain trigger is present; the WordPress Manager is not invoked and general Agent routing applies unchanged.
+```
+
+**WordPress plugin integrating with an external API**
+
+```text
+Primary Owner: WordPress Manager (38_WORDPRESS/WORDPRESS-MANAGER.md)
+Route: CREATE-PLUGIN Skill, supporting CREATE-REST-ENDPOINT Skill
+Supporting Boundary Owner: 26_INTEGRATIONS / Integration Agent for the external service's own auth, contract, and failure-mode requirements
+Reason: The deliverable is a WordPress plugin, so the WordPress Manager owns the overall implementation boundary; the Integration Agent owns only the external-API boundary, not the plugin itself.
+```
+
+**WordPress deployment request**
+
+```text
+Primary Owner: WordPress Manager (38_WORDPRESS/WORDPRESS-MANAGER.md)
+Route: REVIEW-CODE Skill (per 38_WORDPRESS/SKILLS/SKILL-ROUTING-MAP.md's "Code Inspection" → "assess release readiness" example) → Role Routing Matrix → 33_WORDPRESS_ROLES/RELEASE-ENGINEER.md for WordPress production readiness
+Supporting: 16_AGENTS/AGENT-RELEASE.md, invoked explicitly by the WordPress Manager, to perform the actual release action execution once readiness is approved
+Reason: A standalone "prepare for deployment" request with no accompanying feature or fix work is a readiness assessment, not new implementation, so it routes as REVIEW-CODE; Release Engineer is the conditional role that owns WordPress production readiness within that review. The general Release Agent supports execution because it is the only implemented release-action mechanism, not a competing owner.
+```
+
+---
+
 ## Selection Rules
 
 1. Use one primary workflow based on the requested outcome.

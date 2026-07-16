@@ -126,4 +126,58 @@ theme-name/
 
 | File | Required | Purpose |
 |---|---|---|
-| `style.
+| `style.css` | Yes | Theme header metadata. |
+| `theme.json` | Yes | Global styles and settings. |
+| `templates/index.html` | Yes | Main block template. |
+| `functions.php` | Recommended | Theme setup and enqueue logic. |
+| `README.md` | Yes | Developer-facing documentation. |
+
+---
+
+## Naming Rules
+
+- Plugin folders must use lowercase kebab-case.
+- Theme folders must use lowercase kebab-case.
+- PHP class files should use `class-name.php` or `class-component-name.php`.
+- PHP class names should be prefixed with the project namespace or project prefix.
+- Functions must use a unique project prefix.
+- Assets should be grouped by type.
+- Admin-only code must not be mixed with public frontend code unless the project is intentionally simple.
+
+---
+
+## Forbidden Patterns
+
+SquirrelForge must not approve WordPress projects that:
+
+- Place all code in one large file without a reason.
+- Mix admin, public, and core logic without separation.
+- Use generic function names without a prefix.
+- Omit the main plugin file or theme metadata.
+- Store generated files in unclear folders.
+- Put secrets, API keys, or credentials in committed files.
+- Modify WordPress core files.
+- Depend on production-only paths.
+- Lack a clear README.
+
+---
+
+## Validation Checklist
+
+Before approving a WordPress project structure, confirm:
+
+- The project has the required root files.
+- Folder names are predictable.
+- Admin and public logic are separated.
+- Assets are organized.
+- Language files have a location.
+- Tests or manual QA files have a location.
+- Activation, deactivation, and uninstall responsibilities are clear for plugins.
+- Theme templates are present for the intended theme type.
+- No WordPress core files are modified.
+
+---
+
+## Rule
+
+WordPress files must follow the approved structure, naming, responsibility, and dependency rules before implementation is considered valid.

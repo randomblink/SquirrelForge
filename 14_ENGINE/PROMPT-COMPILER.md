@@ -41,7 +41,7 @@ The final prompt is structured as follows, from top to bottom:
 ---
 
 # Domain-Specific Knowledge
-{Content from the relevant Knowledge Manager, e.g., 38_WORDPRESS/KNOWLEDGE-MANAGER.md}
+{Content from the relevant Knowledge Manager, e.g., 38_WORDPRESS/KNOWLEDGE/KNOWLEDGE-MANAGER.md}
 
 ---
 

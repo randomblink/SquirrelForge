@@ -221,6 +221,26 @@ If the primary deliverable is a widget or sidebar feature, select `38_WORDPRESS/
 
 If the widget belongs to a larger plugin or theme project, the parent project Skill remains primary.
 
+### Custom Post Types, Taxonomies, and Settings Pages
+
+If the request adds or defines a custom post type, a custom taxonomy, or a Settings API options page, select `38_WORDPRESS/SKILLS/CREATE-PLUGIN.md` as the primary Skill, regardless of whether the target project is new or an existing plugin.
+
+Examples:
+
+- add a custom post type for testimonials with a custom taxonomy
+- add a Settings API options page to an existing plugin
+- create a new plugin that registers a custom post type and a settings page
+
+Record the target in the `Existing or New Project:` field of the Skill Selection Decision. `CREATE-PLUGIN`'s Trigger Conditions already include "build plugin functionality" without restricting it to new projects, so no separate Skill is required for CPT, taxonomy, or Settings API work added to an already-existing plugin.
+
+Required knowledge must include:
+
+- `38_WORDPRESS/KNOWLEDGE/CUSTOM-POST-TYPES.md` when a custom post type is involved
+- `38_WORDPRESS/KNOWLEDGE/TAXONOMIES.md` when a custom taxonomy is involved
+- `38_WORDPRESS/KNOWLEDGE/SETTINGS-API.md` when a Settings API options page is involved
+
+Do not route this work to `REFACTOR-CODE`: a new post type, taxonomy, or settings page is new capability, not preserved-behavior restructuring. Do not route it to `MIGRATE-PLUGIN` unless it also changes stored data structures, schema, or public contracts.
+
 ### Existing Defect
 
 If the user reports broken behavior and wants it fixed, select `38_WORDPRESS/SKILLS/DEBUG-PLUGIN.md`.
@@ -562,6 +582,63 @@ CREATE-TESTS
 
 Reason:
 The goal is internal restructuring with behavior preservation.
+```
+
+### Example 7 — Custom Post Type and Taxonomy on an Existing Plugin
+
+```text
+Request:
+Add a custom post type for testimonials with a custom taxonomy.
+
+Primary Skill:
+CREATE-PLUGIN
+
+Existing or New Project:
+Existing
+
+Required Knowledge:
+CUSTOM-POST-TYPES.md, TAXONOMIES.md
+
+Reason:
+The request builds new plugin functionality on an existing project. CREATE-PLUGIN's Trigger Conditions cover "build plugin functionality" without restricting it to new projects, so no separate Skill is invoked.
+```
+
+### Example 8 — Settings API Options Page on an Existing Plugin
+
+```text
+Request:
+Add a Settings API options page to this existing plugin.
+
+Primary Skill:
+CREATE-PLUGIN
+
+Existing or New Project:
+Existing
+
+Required Knowledge:
+SETTINGS-API.md
+
+Reason:
+The request builds new plugin functionality (an options page) on an existing project. This is new capability, not preserved-behavior restructuring, so REFACTOR-CODE does not apply.
+```
+
+### Example 9 — New Plugin with a Custom Post Type and Settings Page
+
+```text
+Request:
+Create a new plugin that registers a custom post type and settings page.
+
+Primary Skill:
+CREATE-PLUGIN
+
+Existing or New Project:
+New
+
+Required Knowledge:
+CUSTOM-POST-TYPES.md, SETTINGS-API.md
+
+Reason:
+The request is a new plugin-scale system, consistent with the New Plugin routing rule.
 ```
 
 ---

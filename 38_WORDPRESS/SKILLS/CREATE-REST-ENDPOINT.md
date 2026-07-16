@@ -69,7 +69,7 @@ Use `REST Engineer` to produce a `REST Engineering Report` (as a plan). The plan
 
 #### Stage 2 — Role Routing
 
-Use `Role Manager` and `38_WORDPRESS/SKILLS/ROLE-ROUTING-MATRIX.md` to produce the `WordPress Role Routing Decision`.
+Use `33_WORDPRESS_ROLES/ROLE-MANAGER.md` and `33_WORDPRESS_ROLES/ROLE-ROUTING-MATRIX.md` to produce the `WordPress Role Routing Decision`.
 
 #### Stage 3 — Implementation
 
@@ -91,9 +91,109 @@ Use `QA Engineer` to execute a test plan verifying the endpoint's functionality,
 
 Use `Documentation Engineer` to document the endpoint's route, methods, parameters, and example responses.
 
+### Validation Commands
+
+These commands support Stage 4 (Security Validation) through Stage 6 (QA Validation). Exact availability depends on the target project's setup and installed tooling, not on SquirrelForge itself. Run every command from the target plugin's own repository.
+
+`<plugin-directory>` is the plugin's root directory. `<namespace>/<route>` is the registered REST route (for example `my-plugin/v1/submit`). `<site-url>` is the target WordPress site's base URL.
+
+Never place real credentials, nonces, or application passwords in these commands. Use environment variables for authentication values instead — production credentials pasted directly into a command are written to shell history.
+
+#### PHP Syntax Validation
+
+Shell commands for Terminal
+
+```sh
+find <plugin-directory> -name "*.php" -print0 | xargs -0 -n1 php -l
+```
+
+#### Focused PHPUnit REST Tests, When Available
+
+`<RestTestClassName>` is the PHPUnit test class covering the endpoint. `vendor/bin/phpunit` only exists when PHPUnit is installed as a dev dependency of the target plugin.
+
+Shell commands for Terminal
+
+```sh
+if [ -x <plugin-directory>/vendor/bin/phpunit ]; then
+  (cd <plugin-directory> && vendor/bin/phpunit tests/<RestTestClassName>.php)
+else
+  echo "PHPUnit not found in <plugin-directory>/vendor/bin -- skipping REST tests."
+fi
+```
+
+#### List or Inspect Routes
+
+When WP-CLI is available, `wp eval` against WordPress's own REST server lists registered routes without requiring an extra WP-CLI package:
+
+Shell commands for Terminal
+
+```sh
+if command -v wp >/dev/null 2>&1; then
+  wp eval 'echo wp_json_encode( array_keys( rest_get_server()->get_routes() ) );' --path=<wordpress-root>
+else
+  echo "WP-CLI not found -- inspect routes via the REST index instead (see below)."
+fi
+```
+
+Without WP-CLI, the REST index itself lists namespaces and routes:
+
+Shell commands for Terminal
+
+```sh
+curl -s https://<site-url>/wp-json/<namespace>
+```
+
+#### Authenticated Request Example
+
+Set credentials as environment variables first; `<placeholder-username>` and `<placeholder-application-password>` are placeholders, never real values.
+
+Shell commands for Terminal
+
+```sh
+export WP_REST_USER="<placeholder-username>"
+export WP_REST_APP_PASSWORD="<placeholder-application-password>"
+curl -i -u "${WP_REST_USER}:${WP_REST_APP_PASSWORD}" \
+  https://<site-url>/wp-json/<namespace>/<route>
+```
+
+#### Unauthenticated Request, to Verify Authorization Rejection
+
+Confirm the response is `401` or `403` for any endpoint whose `permission_callback` requires authentication.
+
+Shell commands for Terminal
+
+```sh
+curl -i https://<site-url>/wp-json/<namespace>/<route>
+```
+
+#### Git Checks
+
+These are read-only checks; they do not modify the working tree.
+
+Shell commands for Terminal
+
+```sh
+git diff --check
+git status --short
+```
+
 ### REST Endpoint Final Report
 
 Produce a final report summarizing the status of all stages.
+
+---
+
+## Completion Criteria
+
+This Skill is complete only when:
+
+- the namespace, route, methods, and argument schema are defined;
+- a `permission_callback` is defined for every registered route;
+- Stage 4 (Security Validation) has passed;
+- Stage 5 (Performance Validation) has passed or was not required;
+- Stage 6 (QA Validation) has passed;
+- Stage 7 (Documentation) is complete;
+- and the REST Endpoint Final Report is produced.
 
 ---
 
