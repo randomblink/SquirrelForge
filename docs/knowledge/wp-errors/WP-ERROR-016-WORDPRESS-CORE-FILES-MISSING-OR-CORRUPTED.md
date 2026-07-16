@@ -16,7 +16,7 @@ WordPress Core Files Missing or Corrupted
 * **Severity:** Critical
 * **Recovery Priority:** Immediate
 * **Status:** Production Ready
-* **Version:** 1.0
+* **Version:** 1.1
 
 ---
 
@@ -86,7 +86,7 @@ Listed as components commonly involved, not as a claim that every corruption inc
 - The `wp-admin/` directory, containing the administrative interface's code.
 - The `wp-includes/` directory, containing the majority of WordPress's core functions, classes, and libraries, including files depended upon by both `wp-admin/` and the front end.
 - Root-level bootstrap and support files distributed with WordPress core (for example `index.php`, `wp-blog-header.php`, `wp-load.php`, `wp-settings.php`, `wp-login.php`, `wp-cron.php`, `xmlrpc.php`, `wp-config-sample.php`).
-- WP-CLI's own core-integrity verification capability (`wp core verify-checksums`), which depends on WP-CLI itself being able to bootstrap far enough to run.
+- WP-CLI's own core-integrity verification capability (`wp core verify-checksums`), which runs on WP-CLI's `before_wp_load` hook and intentionally avoids loading WordPress for security. It can therefore remain usable when corrupted core files prevent WordPress bootstrap, provided WP-CLI itself can run, locate the installation, determine or receive the intended WordPress version and locale, read the files, and retrieve the applicable WordPress.org checksums.
 - Any file-integrity monitoring or security-scanning tooling in use on the site, where present.
 
 ---
@@ -96,7 +96,7 @@ Listed as components commonly involved, not as a claim that every corruption inc
 - A PHP fatal error referencing a class, function, or file within `wp-admin/` or `wp-includes/` that cannot be found, loaded, or parsed.
 - A White Screen of Death or an administrative-dashboard-only failure, depending on which core files are affected.
 - WordPress operating correctly for most requests but failing on a specific, less-frequently-exercised code path, when only a narrowly-scoped core file is affected.
-- `wp core verify-checksums` (where WP-CLI itself can bootstrap) reporting one or more core files that do not match the official checksums for the installed WordPress version.
+- `wp core verify-checksums` reporting one or more core files that do not match the official checksums for the selected WordPress version; WordPress itself is not loaded by this command.
 - A site that previously worked normally beginning to fail immediately after a compromised deployment, an interrupted file transfer, a failed WordPress update, or unauthorized filesystem access.
 - Visibly altered front-end or admin behavior consistent with injected code (for example, unexpected redirects or unexpected output), where the underlying cause is a maliciously altered core file rather than a legitimate application defect.
 
@@ -122,14 +122,14 @@ Verify the following:
 1. Confirm this is a genuine core-file integrity condition rather than a `wp-config.php` defect, a missing PHP extension, an unsupported PHP version, a plugin/theme/must-use-plugin/drop-in issue, a filesystem permission issue on an otherwise intact file, or database corruption.
 2. Capture the exact fatal error or other observed failure, including any referenced file path, class, or function.
 3. Determine the precise installed WordPress version, since core-file verification depends on comparing against the checksums for that exact version.
-4. Where WP-CLI can bootstrap, run core-file verification against the official checksums for the installed version, and record which specific files, if any, are reported as different from the official release.
+4. Where WP-CLI itself can execute, run core-file verification against the official checksums for the installed version and locale, and record which specific files, if any, are reported as different from the official release. `wp core verify-checksums` runs on WP-CLI's `before_wp_load` hook and intentionally does not load WordPress, so a WordPress bootstrap failure is not by itself a reason this check cannot run. Where a damaged or missing `wp-includes/version.php` prevents reliable automatic version or locale detection, supply the verified values explicitly with `--version=<version>` and `--locale=<locale>`.
 
    ```text
-   # Example only — requires a working WP-CLI bootstrap for the affected installation.
+   # Example only — requires WP-CLI execution, file access, and checksum retrieval; WordPress is not loaded.
    wp core verify-checksums
    ```
 
-5. Where WP-CLI cannot bootstrap (for example, because the corruption itself prevents bootstrap), obtain a fresh, official copy of WordPress at the exact same version, and compare the installed `wp-admin/` and `wp-includes/` directories and root-level core files against it directly, rather than assuming WP-CLI verification is the only available method.
+5. Where WP-CLI itself cannot execute, cannot locate or read the installation, cannot determine or receive the correct version and locale, or cannot retrieve the official checksums, obtain a fresh, official copy of WordPress at the exact same version and locale and compare the installed `wp-admin/` and `wp-includes/` directories and root-level core files against it directly. A broken WordPress bootstrap alone does not establish that this fallback is necessary.
 6. For each file identified as different from the official release, determine whether it is missing entirely, truncated, or altered in content.
 7. Preserve the current state of the affected files — copies of the altered or corrupted files, and their filesystem timestamps and permissions — before making any change, particularly where malicious alteration is suspected.
 8. Where alteration appears deliberate or malicious rather than accidental, treat this as a potential security incident: identify how the alteration became possible (for example, compromised credentials, a vulnerable plugin or theme, or exposed administrative access) in addition to identifying which files were altered.
@@ -146,7 +146,7 @@ Recovery shall target the verified affected files and the verified cause, not me
 Permitted recovery categories, depending on the verified cause, include:
 
 - Restoring the affected core files from an official WordPress release matching the exact installed version, rather than from an assumed-compatible or newer version.
-- Where WP-CLI can bootstrap, using it to re-download and reinstall the official core file set for the installed version, then re-verifying with `wp core verify-checksums`.
+- Where WP-CLI itself can execute and the exact version and locale are known, using its pre-load core-management commands to re-download the official core file set, then re-verifying with `wp core verify-checksums`; this does not require WordPress bootstrap to succeed.
 - Where the cause was an interrupted deployment, migration, or update, completing that operation correctly rather than only patching the specific files currently causing visible failure.
 - Where alteration was deliberate or malicious, closing the vector that allowed the alteration (for example, rotating compromised credentials, updating or removing a vulnerable plugin or theme, or correcting exposed administrative access) in addition to restoring the affected files; restoring files alone, without addressing the vector, leaves the site subject to immediate re-compromise.
 - Escalating to the hosting or platform administrator where the engineer performing diagnosis does not control the filesystem, or where the scope of compromise suggests a host-level incident beyond a single site.
@@ -209,10 +209,12 @@ The following are cited as they exist in this repository, or as conceptual disti
 
 This entry documents the general, verified observable condition of WordPress core-file integrity being compromised. It does not claim that every deployment, update, or migration will encounter this condition, and it does not claim malicious alteration is the most common cause; accidental and infrastructure-level causes are equally in scope. Consistent with the single-responsibility principle in **SF-SPEC-001** Section 4.3, cause-specific conditions (for example, a specific known malware pattern, or corruption tied to a specific hosting platform's known incident) may each be documented by a separate, independently created `WP-ERROR` entry without altering this one.
 
-Command examples in Section 11 are illustrative only and depend on WP-CLI being available and able to bootstrap for the affected installation.
+Command examples in Section 11 are illustrative only. `wp core verify-checksums` runs before WordPress loads and intentionally avoids loading it; the command instead depends on WP-CLI execution, installation discovery or an explicit `--path`, readable files, a correct version/locale (detected or explicitly supplied), and retrieval of the applicable WordPress.org checksums.
 
 This entry underwent the review sequence required by **SF-SPEC-001** Section 19, **SF-SPEC-005** Section 5.6, and **SF-SPEC-012**: an author (Class A) review at `docs/reviews/SF-REVIEW-010-WP-ERROR-016-AUTHOR-REVIEW.md`, followed by an independent (Class B) review at `docs/reviews/SF-REVIEW-011-WP-ERROR-016-INDEPENDENT-REVIEW.md`, which reached outcome **Approved with Minor Revisions**, applied and re-validated the one required revision, and satisfied the Production Ready gate per SF-SPEC-012 Section 12. Its Status was changed to Production Ready on that basis. This document does not itself constitute either review record; see the cited files for full findings, corrections, and gate decisions.
 
 The independent review did not designate this entry as a Reference Implementation. That designation, governed separately by **SF-SPEC-001** Section 22, has not been sought or asserted here.
 
 No Reference Implementation is currently designated by **SF-SPEC-001**; this entry's relationship to that designation, and to any future `WP-SCENARIO-XXX` runtime evidence, is not asserted here and shall not be assumed until such evidence or designation actually exists.
+
+**Version 1.1 (2026-07-16):** post-certification correction through **SF-SPEC-013** Section 5.6, prompted during research for `WP-VERIFICATION-006`. Official WP-CLI documentation states that `wp core verify-checksums` runs on `before_wp_load` and avoids loading WordPress for security, contradicting Version 1.0's repeated bootstrap prerequisite. Corrected Sections 8, 9, 11, 12, and Notes to describe the actual pre-load execution model and its genuine environmental requirements. Failure ownership, taxonomy scope, recovery intent, and security guidance are unchanged. Reviewed via `SF-REVIEW-177`/`178`; Filesystem re-certified via `SF-REVIEW-179`/`180`.

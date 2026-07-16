@@ -1,0 +1,24 @@
+# SF-REVIEW-180 — Filesystem Knowledge Baseline Review (Re-Certification)
+
+# 1. Review Information
+**Review ID:** SF-REVIEW-180
+**Review Date:** 2026-07-16
+**Reviewer:** Class B — Independent Review
+**Status:** Complete
+
+# 2. Scope Certified
+The complete Filesystem category: WP-ERROR-016 1.1, WP-ERROR-019 1.1, WP-ERROR-020 1.2, and SF-TAXONOMY-001 1.4.
+
+# 3. Criteria and Evidence
+All planned entries exist and remain Production Ready; boundaries remain exclusive; links resolve; taxonomy status is accurate; primary WP-CLI documentation supports the corrected command model; and `SF-REVIEW-177`–`179` have no open findings. `scripts/validate-repo.sh .` passed all checks, the complete PHPUnit suite passed (146 tests, 338 assertions), every PHP file under `src/` and `tests/` passed `php -l`, and `git diff --check` passed.
+
+# 4. Outcome
+**Approved.**
+
+# 5. Baseline Designation
+**Filesystem Knowledge Baseline v4**, superseding `SF-REVIEW-172` for the current entry versions.
+
+# 6. Revision History
+| Version | Date | Summary | Status |
+|---|---|---|---|
+| 1.0 | 2026-07-16 | Re-certification after WP-CLI checksum execution-model correction. | Approved |
