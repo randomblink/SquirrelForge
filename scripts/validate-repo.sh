@@ -8,8 +8,9 @@
 # a "conceptual reference" after that entry has actually been authored;
 # (B) an SF-TAXONOMY-XXX status table that disagrees with an entry's own
 # Status field; (C) a specification missing its required Revision History
-# section; and (D) a WP-ERROR entry's own Related Errors intro sentence
-# deviating from this catalog's majority wording.
+# section; (D) a WP-ERROR entry's own Related Errors intro sentence
+# deviating from this catalog's majority wording; and (E) a local Markdown
+# link whose target does not exist.
 #
 # This does not replace a category consistency review under SF-SPEC-013
 # Section 5.4 -- it catches specific, deterministic gap classes so they
@@ -34,6 +35,7 @@ set -uo pipefail
 ROOT="${1:-.}"
 KNOWLEDGE_DIR="$ROOT/docs/knowledge/wp-errors"
 STANDARDS_DIR="$ROOT/docs/standards"
+LINK_VALIDATOR="$ROOT/scripts/validate-markdown-links.php"
 
 issues=0
 
@@ -148,8 +150,16 @@ if [ "$check_d_issues" -eq 0 ]; then
 fi
 
 echo
+echo "== Check E: local Markdown links resolve =="
+echo
+
+if ! php "$LINK_VALIDATOR" "$ROOT"; then
+    issues=$((issues + 1))
+fi
+
+echo
 if [ "$issues" -eq 0 ]; then
-    echo "RESULT: clean. No stale conceptual references, no taxonomy/entry status drift, no missing Revision History section, no Related Errors wording drift."
+    echo "RESULT: clean. No stale conceptual references, no taxonomy/entry status drift, no missing Revision History section, no Related Errors wording drift, and no broken local Markdown links."
     exit 0
 else
     echo "RESULT: $issues issue(s) found."

@@ -70,7 +70,7 @@ No Major or Critical findings.
 
 # 8. Corrections Applied
 
-- `docs/knowledge/wp-errors/WP-ERROR-013-WORDPRESS-BOOTSTRAP-PHP-FATAL-ERROR.md`, Section 6: "Fatal errors that occur only after WordPress has completed bootstrap and begun normal request processing — for example, within a plugin's request-handling callback, a REST route handler, theme template rendering after the `template_redirect` stage, or a scheduled cron event's own callback — see [WP-ERROR-044](WP-ERROR-044-SCHEDULED-CRON-EVENT-CALLBACK-FAILURE.md) for the cron-specific diagnostic entry point." (extends the existing bullet rather than adding a new one).
+- `docs/knowledge/wp-errors/WP-ERROR-013-WORDPRESS-BOOTSTRAP-PHP-FATAL-ERROR.md`, Section 6: "Fatal errors that occur only after WordPress has completed bootstrap and begun normal request processing — for example, within a plugin's request-handling callback, a REST route handler, theme template rendering after the `template_redirect` stage, or a scheduled cron event's own callback — see [WP-ERROR-044](../knowledge/wp-errors/WP-ERROR-044-SCHEDULED-CRON-EVENT-CALLBACK-FAILURE.md) for the cron-specific diagnostic entry point." (extends the existing bullet rather than adding a new one).
 - `docs/knowledge/wp-errors/WP-ERROR-044-SCHEDULED-CRON-EVENT-CALLBACK-FAILURE.md`, Metadata: `Status` updated from `Draft` to `Production Ready`.
 
 ---
