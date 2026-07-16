@@ -10,7 +10,7 @@
 
 **Status:** Frozen — the entry set in Section 3 is fixed until this document is deliberately revised (see Section 6). "Frozen" here is an informal, self-defined term describing this document's own adopted-plan state; it is not a claim of the `Version Frozen` WP-ERROR lifecycle stage defined by **SF-SPEC-001** Section 18, nor of any status in the closed list **SF-SPEC-008** Section 6 defines for versioned engineering artifacts. This document carries a `Version` and `Revision History` for traceability only; it does not present itself as a "versioned engineering artifact" within **SF-SPEC-008**'s own scope (Section 2.1), in the same way `FRAMEWORK-OBSERVATIONS.md` explicitly disclaims being versioned. No conflict with either specification's own status vocabulary is intended or created.
 
-**Version:** 1.3
+**Version:** 1.4
 
 **Owner:** SquirrelForge
 
@@ -61,7 +61,7 @@ The three entries above are chosen to be orthogonal — each answers a different
 - **019 (accessibility):** Is the OS willing to grant the requested access — including the access needed to create a path that does not yet exist?
 - **020 (capacity):** Given a willing OS and a legitimate write attempt, is there room to complete it — whether measured in raw bytes, quota, or available inodes?
 
-Together these cover the major OS-level filesystem failure classes a WordPress installation can encounter, without overlap between them. `WP-ERROR-020` explicitly excludes PHP- or WordPress-configuration-imposed upload-size limits (`upload_max_filesize`, `post_max_size`, or the `upload_size_limit` filter): those reject an upload before it reaches the filesystem regardless of actual available capacity, and are a PHP Runtime/Configuration condition, not a storage-capacity one.
+Together these cover the major OS-level filesystem failure classes a WordPress installation can encounter, without overlap between them. `WP-ERROR-020` explicitly excludes the upload-size rejection paths owned by `WP-ERROR-036`: PHP's `upload_max_filesize` and `post_max_size` directives reject conventional multipart requests during request parsing, and multisite-only `check_upload_size()` can reject an accepted temporary file before WordPress attempts its destination write. `wp_max_upload_size()` and `upload_size_limit` are advisory display mechanisms, not enforcement. None of these size-limit paths is a destination storage-capacity condition.
 
 ---
 
@@ -82,3 +82,4 @@ Two additional candidates were proposed and deliberately excluded from Section 3
 | 1.1 | 2026-07-13 | Corrected per `SF-REVIEW-034` (independent review): clarified this document's non-versioned status relative to SF-SPEC-008; added three missing Category Boundary exclusions (Configuration, HTTP/web-server, Authentication/deployment-tool behavior); broadened WP-ERROR-019's declared boundary to explicitly include a required-but-missing path blocked by a permission constraint; broadened WP-ERROR-020's declared boundary to include quota/inode exhaustion and explicitly exclude PHP upload-size limits; updated the rejected-candidates reasoning to stay consistent with the broadened boundaries. | Frozen |
 | 1.2 | 2026-07-13 | WP-ERROR-019 and WP-ERROR-020 both reached Production Ready (per `SF-REVIEW-036` and `SF-REVIEW-038` respectively). Updated WP-ERROR-020's Status cell from `Planned` to `Existing, Production Ready`. This revision's own summary incorrectly claimed the three-entry baseline was thereby complete; WP-ERROR-019's Status cell was left unchanged at `Planned` in error. Corrected in Version 1.3. | Frozen |
 | 1.3 | 2026-07-13 | Corrected per the Filesystem Knowledge Baseline Certification (`SF-REVIEW-040`): WP-ERROR-019's Status cell, missed by Version 1.2, updated from `Planned` to `Existing, Production Ready`. The three-entry Filesystem baseline is now actually complete, not merely reported as complete. No boundary content changed. | Frozen |
+| 1.4 | 2026-07-16 | Post-certification fidelity correction prompted during `WP-VERIFICATION-005`: Section 4 still described `upload_size_limit` as an enforcing filter after `WP-VERIFICATION-003` had proved it display-only. Replaced the stale mechanism summary with the PHP request-parsing and multisite-only `check_upload_size()` paths already certified in `WP-ERROR-036`. Category scope and planned entries are unchanged. Filesystem re-certified via `SF-REVIEW-171`/`172`. | Frozen |

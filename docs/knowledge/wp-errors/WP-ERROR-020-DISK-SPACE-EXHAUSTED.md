@@ -16,7 +16,7 @@ WordPress Disk Space Exhausted
 * **Severity:** Critical
 * **Recovery Priority:** Immediate
 * **Status:** Production Ready
-* **Version:** 1.1
+* **Version:** 1.2
 
 ---
 
@@ -55,7 +55,7 @@ This entry applies only when verified evidence establishes that the operating sy
 **Internal distinctions this entry specifically requires:**
 
 - **Byte capacity versus inodes versus quota:** all three are covered by this entry as manifestations of the same underlying question (is there room to complete this write), but they are not interchangeable for diagnosis or recovery. A volume can show ample free bytes (`df -h`) while its inodes are exhausted (`df -i`), typically from an unusually large number of small files; a volume or account can be well within its own physical capacity while a separately enforced quota independently blocks further writes. Diagnosis (Section 11) checks all three rather than concluding capacity is sufficient from a single check.
-- **Capacity exhaustion versus a configured upload-size limit:** PHP's `upload_max_filesize` and `post_max_size` directives, and WordPress's own `wp_max_upload_size()` filter, reject an upload based on its declared size *before any write to the filesystem is attempted at all* — the rejection happens regardless of how much actual capacity is available. This is a PHP Runtime/Configuration condition, not this entry's, per `SF-TAXONOMY-001` Section 4; the two are easy to confuse from a symptom alone (both present as "the upload failed"), but a genuine capacity exhaustion always involves an attempted, failed write, while a size-limit rejection never reaches the filesystem at all.
+- **Capacity exhaustion versus a configured upload-size limit:** PHP's `upload_max_filesize` and `post_max_size` directives reject conventional multipart uploads during PHP request parsing, before WordPress attempts the destination write. On multisite only, WordPress's `check_upload_size()` can reject an already-received temporary file against `fileupload_maxk` or `upload_is_user_over_quota()` before the final WordPress filesystem-write stage. `wp_max_upload_size()` and its `upload_size_limit` filter are advisory display mechanisms, not enforcement. These rejection paths operate regardless of free capacity on the WordPress destination volume and belong to `WP-ERROR-036`, not this entry. A genuine capacity exhaustion, by contrast, requires an attempted filesystem operation that fails for lack of bytes, inodes, or quota headroom.
 - **Genuine physical exhaustion versus a hosting-imposed quota:** a quota can be reached with substantial physical capacity still available on the underlying volume, and conversely a shared volume can be physically full while a specific account's own quota still shows headroom (because other tenants consumed the shared capacity). Diagnosis shall check both independently rather than assuming one implies the other.
 
 **Distinct from the following related entries:**
@@ -75,7 +75,7 @@ This entry applies only when verified evidence establishes that the operating sy
 
 - Access denial regardless of available capacity (see `WP-ERROR-019`).
 - Missing or incorrect content, independent of capacity (see `WP-ERROR-016`).
-- A PHP- or WordPress-configuration-imposed upload-size limit rejecting a request before any write to the filesystem is attempted.
+- An applicable upload-size limit rejecting the request before WordPress attempts the destination filesystem write (see `WP-ERROR-036`).
 - Database-engine-level storage exhaustion or the resulting table corruption, even where the same physical volume and the same root cause (disk exhaustion) are involved (see `WP-ERROR-006`, Database category).
 - Any write that completes successfully, regardless of how close to any capacity limit it came.
 
@@ -208,7 +208,7 @@ The following are cited as they exist in this repository, or as conceptual disti
 
 # 17. Notes
 
-This entry documents the third and final entry `SF-TAXONOMY-001` declares for the Filesystem category, alongside `WP-ERROR-016` (integrity) and `WP-ERROR-019` (accessibility). With this entry's creation, the Filesystem category's planned baseline is complete. Consistent with the single-responsibility principle in **SF-SPEC-001** Section 4.3, this entry covers byte-capacity, inode, and quota exhaustion as one cohesive failure mode, since all three share the same underlying, observable condition — the operating system would grant the requested access but cannot satisfy it — while explicitly excluding PHP/WordPress configuration-imposed upload-size limits, which reject a request before any filesystem write is attempted at all, and database-engine-level storage exhaustion, which is `WP-ERROR-006`'s territory even when a shared physical volume is the same underlying root cause.
+This entry documents the third and final entry `SF-TAXONOMY-001` declares for the Filesystem category, alongside `WP-ERROR-016` (integrity) and `WP-ERROR-019` (accessibility). With this entry's creation, the Filesystem category's planned baseline is complete. Consistent with the single-responsibility principle in **SF-SPEC-001** Section 4.3, this entry covers byte-capacity, inode, and quota exhaustion as one cohesive failure mode, since all three share the same underlying, observable condition — the operating system would grant the requested access but cannot satisfy it — while explicitly excluding the upload-size rejection paths owned by `WP-ERROR-036`, which stop the request before WordPress attempts its destination filesystem write, and database-engine-level storage exhaustion, which is `WP-ERROR-006`'s territory even when a shared physical volume is the same underlying root cause.
 
 This entry's governing direction was `SF-TAXONOMY-001` Version 1.1, whose own boundary for this entry — byte capacity, or quota/inode exhaustion, with PHP upload-size limits explicitly excluded — is applied here without narrowing or widening it. The specific technical grounding (`ENOSPC`/errno 28 and its exact PHP warning wording, `df -h`/`df -i`, filesystem quota behavior and its `EDQUOT` distinction from `ENOSPC`, `WP_Site_Health::get_test_available_updates_disk_space()` and its documented limitations, and WordPress's own "uploaded file could not be moved" and "Could Not Create Directory" messages) was independently verified against current WordPress and OS documentation before inclusion, following this catalog's established practice.
 
@@ -219,3 +219,5 @@ The independent review did not designate this entry as a Reference Implementatio
 No Reference Implementation is currently designated by **SF-SPEC-001**; this entry's relationship to that designation, and to any future `WP-SCENARIO-XXX` runtime evidence, is not asserted here and shall not be assumed until such evidence or designation actually exists.
 
 **Version 1.1 (2026-07-16):** quotation-fidelity correction through **SF-SPEC-013** Section 5.6, prompted by `WP-VERIFICATION-004`'s WordPress 7.0.1 installer evidence. The shared installer symptom is now identified as the browser-interface composition "Installation failed: Could not create directory." and distinguished from WP-CLI's presentation of the underlying error. Capacity ownership, diagnosis, and recovery are unchanged; this record did not runtime-trigger capacity exhaustion. Reviewed via `SF-REVIEW-161`/`162`; Filesystem re-certified via `SF-REVIEW-163`/`164`.
+
+**Version 1.2 (2026-07-16):** post-certification correction through **SF-SPEC-013** Section 5.6. Research for `WP-VERIFICATION-005` found that Section 6 still repeated the pre-correction claim that `wp_max_upload_size()` and `upload_size_limit` enforce an upload limit. `WP-VERIFICATION-003` had already demonstrated that both are display-only and that the genuine WordPress-level size check is multisite-only `check_upload_size()`. Corrected the live distinction, exclusion, and Notes wording without changing capacity ownership, diagnosis, or recovery. Reviewed via `SF-REVIEW-169`/`170`; Filesystem re-certified via `SF-REVIEW-171`/`172`; the affected Media cross-reference re-certified via `SF-REVIEW-173`/`174`.
