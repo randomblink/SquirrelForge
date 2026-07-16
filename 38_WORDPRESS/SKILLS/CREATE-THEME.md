@@ -5,7 +5,7 @@ Status: Stable
 
 ## Purpose
 
-This skill defines how SquirrelForge creates a production-ready WordPress theme through the specialist roles in `33_WORDPRESS_ROLES` and the mandatory lifecycle in `38_WORDPRESS/PIPELINE.md`.
+This skill defines how SquirrelForge creates a production-ready WordPress theme through the specialist roles in `38_WORDPRESS/ROLES` and the mandatory lifecycle in `38_WORDPRESS/PIPELINE.md`.
 
 It supports classic, child, block, and hybrid themes while preserving the boundary between presentation and plugin-level business logic.
 
@@ -25,7 +25,7 @@ Before planning, consult:
 - `38_WORDPRESS/STANDARDS/CSS-STANDARD.md`
 - `38_WORDPRESS/STANDARDS/JAVASCRIPT-STANDARD.md`
 - `38_WORDPRESS/STANDARDS/TESTING-STANDARD.md`
-- `33_WORDPRESS_ROLES/ROLE-MANAGER.md`
+- `38_WORDPRESS/ROLES/ROLE-MANAGER.md`
 
 The Knowledge Manager must add block editor, accessibility, performance, integration, and project-specific references required by the selected theme type.
 
@@ -35,18 +35,18 @@ The Knowledge Manager must add block editor, accessibility, performance, integra
 
 | Role | Responsibility |
 |---|---|
-| [`Role Manager`](../../33_WORDPRESS_ROLES/ROLE-MANAGER.md) | Classifies the request, assigns roles, records handoffs, and enforces pipeline progression. |
-| [`Project Architect`](../../33_WORDPRESS_ROLES/PROJECT-ARCHITECT.md) | Defines purpose, scope, audience, requirements, compatibility, dependencies, risks, and theme boundaries. |
-| [`Theme Architect`](../../33_WORDPRESS_ROLES/THEME-ARCHITECT.md) | Selects theme type and defines templates, parts, patterns, `theme.json`, supports, assets, responsive behavior, and handoffs. |
-| [`PHP Engineer`](../../33_WORDPRESS_ROLES/PHP-ENGINEER.md) | Implements setup, supports, hooks, menus, sidebars, rendering helpers, and approved PHP behavior. |
-| [`CSS Engineer`](../../33_WORDPRESS_ROLES/CSS-ENGINEER.md) | Implements design tokens, layout, responsive behavior, editor parity, focus states, and visual accessibility. |
-| [`JavaScript Engineer`](../../33_WORDPRESS_ROLES/JAVASCRIPT-ENGINEER.md) | Implements required frontend and editor interactions. |
-| [`Block Engineer`](../../33_WORDPRESS_ROLES/BLOCK-ENGINEER.md) | Participates for block or hybrid themes requiring blocks, patterns, editor behavior, or block metadata. |
-| [`Security Engineer`](../../33_WORDPRESS_ROLES/SECURITY-ENGINEER.md) | Independently validates escaping, input handling, permissions, integrations, files, and security boundaries. |
-| [`Performance Engineer`](../../33_WORDPRESS_ROLES/PERFORMANCE-ENGINEER.md) | Validates assets, rendering, fonts, images, queries, and measured frontend performance. |
-| [`QA Engineer`](../../33_WORDPRESS_ROLES/QA-ENGINEER.md) | Defines and executes functional, responsive, accessibility, compatibility, and regression testing. |
-| [`Documentation Engineer`](../../33_WORDPRESS_ROLES/DOCUMENTATION-ENGINEER.md) | Produces installation, customization, architecture, template, and release documentation. |
-| [`Release Engineer`](../../33_WORDPRESS_ROLES/RELEASE-ENGINEER.md) | Confirms all gates, versions the theme, validates packaging, and approves the artifact. |
+| [`Role Manager`](../ROLES/ROLE-MANAGER.md) | Classifies the request, assigns roles, records handoffs, and enforces pipeline progression. |
+| [`Project Architect`](../ROLES/PROJECT-ARCHITECT.md) | Defines purpose, scope, audience, requirements, compatibility, dependencies, risks, and theme boundaries. |
+| [`Theme Architect`](../ROLES/THEME-ARCHITECT.md) | Selects theme type and defines templates, parts, patterns, `theme.json`, supports, assets, responsive behavior, and handoffs. |
+| [`PHP Engineer`](../ROLES/PHP-ENGINEER.md) | Implements setup, supports, hooks, menus, sidebars, rendering helpers, and approved PHP behavior. |
+| [`CSS Engineer`](../ROLES/CSS-ENGINEER.md) | Implements design tokens, layout, responsive behavior, editor parity, focus states, and visual accessibility. |
+| [`JavaScript Engineer`](../ROLES/JAVASCRIPT-ENGINEER.md) | Implements required frontend and editor interactions. |
+| [`Block Engineer`](../ROLES/BLOCK-ENGINEER.md) | Participates for block or hybrid themes requiring blocks, patterns, editor behavior, or block metadata. |
+| [`Security Engineer`](../ROLES/SECURITY-ENGINEER.md) | Independently validates escaping, input handling, permissions, integrations, files, and security boundaries. |
+| [`Performance Engineer`](../ROLES/PERFORMANCE-ENGINEER.md) | Validates assets, rendering, fonts, images, queries, and measured frontend performance. |
+| [`QA Engineer`](../ROLES/QA-ENGINEER.md) | Defines and executes functional, responsive, accessibility, compatibility, and regression testing. |
+| [`Documentation Engineer`](../ROLES/DOCUMENTATION-ENGINEER.md) | Produces installation, customization, architecture, template, and release documentation. |
+| [`Release Engineer`](../ROLES/RELEASE-ENGINEER.md) | Confirms all gates, versions the theme, validates packaging, and approves the artifact. |
 
 ---
 
@@ -147,4 +147,4 @@ Themes must not own critical business logic or durable data behavior that must s
 
 ## Rule
 
-SquirrelForge must create WordPress themes through the roles in `33_WORDPRESS_ROLES` and the ordered lifecycle in `38_WORDPRESS/PIPELINE.md`; a theme is not complete until architecture, implementation, independent validation, documentation, testing, and final release evidence are approved.
+SquirrelForge must create WordPress themes through the roles in `38_WORDPRESS/ROLES` and the ordered lifecycle in `38_WORDPRESS/PIPELINE.md`; a theme is not complete until architecture, implementation, independent validation, documentation, testing, and final release evidence are approved.

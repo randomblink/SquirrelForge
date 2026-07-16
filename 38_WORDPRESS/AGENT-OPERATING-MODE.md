@@ -195,7 +195,7 @@ Every task must have one primary Skill.
 
 ### Phase 6 — Route Roles
 
-Invoke `33_WORDPRESS_ROLES/ROLE-MANAGER.md` using `33_WORDPRESS_ROLES/ROLE-ROUTING-MATRIX.md`.
+Invoke `38_WORDPRESS/ROLES/ROLE-MANAGER.md` using `38_WORDPRESS/ROLES/ROLE-ROUTING-MATRIX.md`.
 
 Produce:
 

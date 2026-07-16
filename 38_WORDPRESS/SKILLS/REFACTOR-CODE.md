@@ -11,8 +11,8 @@ Defines the workflow for refactoring existing WordPress code without changing in
 
 - `38_WORDPRESS/PIPELINE.md`
 - `38_WORDPRESS/STANDARDS/REFACTORING-STANDARD.md`
-- `33_WORDPRESS_ROLES/ROLE-MANAGER.md`
-- `33_WORDPRESS_ROLES/ROLE-ROUTING-MATRIX.md`
+- `38_WORDPRESS/ROLES/ROLE-MANAGER.md`
+- `38_WORDPRESS/ROLES/ROLE-ROUTING-MATRIX.md`
 
 ## Output
 
@@ -41,10 +41,10 @@ A refactor is valid only when:
 
 ## Handoff Rules
 
-- Role selection routes through `33_WORDPRESS_ROLES/ROLE-MANAGER.md`.
-- Security-sensitive refactors route to `33_WORDPRESS_ROLES/SECURITY-ENGINEER.md`.
-- Performance-sensitive refactors route to `33_WORDPRESS_ROLES/PERFORMANCE-ENGINEER.md`.
-- Documentation-impacting refactors route to `33_WORDPRESS_ROLES/DOCUMENTATION-ENGINEER.md`.
+- Role selection routes through `38_WORDPRESS/ROLES/ROLE-MANAGER.md`.
+- Security-sensitive refactors route to `38_WORDPRESS/ROLES/SECURITY-ENGINEER.md`.
+- Performance-sensitive refactors route to `38_WORDPRESS/ROLES/PERFORMANCE-ENGINEER.md`.
+- Documentation-impacting refactors route to `38_WORDPRESS/ROLES/DOCUMENTATION-ENGINEER.md`.
 - Implementation ownership routes to the responsible specialist role.
 
 ## Completion Criteria

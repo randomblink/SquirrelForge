@@ -38,9 +38,9 @@ Cron guidance is valid only when:
 ## Handoff Rules
 
 - Cron implementation issues route to the relevant PHP implementation role.
-- Performance-sensitive scheduled workloads route to `33_WORDPRESS_ROLES/PERFORMANCE-ENGINEER.md`.
-- Security-sensitive scheduled actions route to `33_WORDPRESS_ROLES/SECURITY-ENGINEER.md`.
-- Documentation changes route to `33_WORDPRESS_ROLES/DOCUMENTATION-ENGINEER.md`.
+- Performance-sensitive scheduled workloads route to `38_WORDPRESS/ROLES/PERFORMANCE-ENGINEER.md`.
+- Security-sensitive scheduled actions route to `38_WORDPRESS/ROLES/SECURITY-ENGINEER.md`.
+- Documentation changes route to `38_WORDPRESS/ROLES/DOCUMENTATION-ENGINEER.md`.
 
 ## Completion Criteria
 

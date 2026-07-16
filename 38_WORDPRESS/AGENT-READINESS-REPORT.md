@@ -32,7 +32,7 @@ Assessor: SquirrelForge assistant (documentation/routing trace pass)
 
 Agent Version: WordPress Layer as of this repository's current working tree (no version tag)
 
-WordPress Layer Version: 38_WORDPRESS / 33_WORDPRESS_ROLES as committed through "Unify WordPress routing sources" (fac4c4e) plus uncommitted documentation passes made across this and prior sessions
+WordPress Layer Version: 38_WORDPRESS / 38_WORDPRESS/ROLES as committed through "Unify WordPress routing sources" (fac4c4e) plus uncommitted documentation passes made across this and prior sessions
 
 Assessment Environment: Primarily static repository inspection. One exception: WP-SCENARIO-001 was additionally executed against the live Hospital WordPress installation (see "Runtime Execution Evidence"); WP-CLI was confirmed unavailable there and a direct wp-load.php PHP runtime script was used instead. No browser session was exercised, and no other WordPress installation was accessed.
 
@@ -48,13 +48,13 @@ Verify the following evidence exists:
 | Evidence | Status | Notes |
 |---|---|---|
 | Boot Report | Not Available | No `38_WORDPRESS/AGENT-BOOT-REPORT.md` or equivalent execution log exists; `38_WORDPRESS/AGENT-BOOT-SEQUENCE.md` (the procedure) exists but no run record was produced in this pass. |
-| Agent Readiness Checklist | Available | `38_WORDPRESS/AGENT-READINESS-CHECKLIST.md` and `33_WORDPRESS_ROLES/AGENT-READINESS-CHECKLIST.md` both exist and are updated alongside this report. |
+| Agent Readiness Checklist | Available | `38_WORDPRESS/AGENT-READINESS-CHECKLIST.md` and `38_WORDPRESS/ROLES/AGENT-READINESS-CHECKLIST.md` both exist and are updated alongside this report. |
 | Capability Summary | Available | Recorded below in this report's Capability Summary section. |
 | Scenario Test Summary | Available | `38_WORDPRESS/AGENT-SCENARIO-TESTS.md`, "Scenario Test Summary" section, updated in this pass. |
 | Skill Inventory | Available | `38_WORDPRESS/SKILLS/` directory listing, cross-checked against `38_WORDPRESS/SKILLS/SKILL-ROUTING-MAP.md`'s Available Skills table. |
 | Knowledge Inventory | Available | `38_WORDPRESS/KNOWLEDGE/` directory listing, cross-checked against `38_WORDPRESS/KNOWLEDGE/KNOWLEDGE-MANAGER.md`'s Knowledge Mapping Examples. |
 | Standards Inventory | Available | `38_WORDPRESS/STANDARDS/` directory listing. |
-| Role Inventory | Available | `33_WORDPRESS_ROLES/` directory listing, cross-checked against `33_WORDPRESS_ROLES/ROLE-ROUTING-MATRIX.md`. |
+| Role Inventory | Available | `38_WORDPRESS/ROLES/` directory listing, cross-checked against `38_WORDPRESS/ROLES/ROLE-ROUTING-MATRIX.md`. |
 | Validation Capability Evidence | Available | `38_WORDPRESS/SECURITY-VALIDATOR.md` and `38_WORDPRESS/STANDARDS/TESTING-STANDARD.md`. |
 | Environment Capability Evidence | Partial | File inspection/creation/modification confirmed by this session's own edits; PHP/WordPress runtime, WP-CLI presence-check, and database access were verified once against the Hospital installation for WP-SCENARIO-001. Browser access against a real WordPress site was not exercised. |
 
@@ -66,13 +66,13 @@ Evaluate:
 |---|---|---|---|---|
 | WordPress Manager | Yes | Yes | Pass | `38_WORDPRESS/WORDPRESS-MANAGER.md` — Required Control Flow diagram traced for all 8 scenarios; Hard Rules include the precedence rule added in a prior session (`12_AGENT/CAPABILITY-ROUTER.md` cross-reference). |
 | Pipeline | Yes | Yes | Pass | `38_WORDPRESS/PIPELINE.md` — Required Stages table matches the stage names used by `CREATE-THEME.md`'s Pipeline Mapping table and `CODE-REVIEW-STANDARD.md`'s citation. |
-| Agent Operating Mode | Yes | Not Evaluated | Not Evaluated | `33_WORDPRESS_ROLES/AGENT-OPERATING-MODE.md` exists; not required by any of the 8 traced scenarios and not read in this pass. |
+| Agent Operating Mode | Yes | Not Evaluated | Not Evaluated | `38_WORDPRESS/ROLES/AGENT-OPERATING-MODE.md` exists; not required by any of the 8 traced scenarios and not read in this pass. |
 | Agent Execution Contract | Yes | Not Evaluated | Not Evaluated | `38_WORDPRESS/AGENT-EXECUTION-CONTRACT.md` exists; not exercised by this pass. |
 | Boot Sequence | Yes | Not Evaluated | Not Evaluated | `38_WORDPRESS/AGENT-BOOT-SEQUENCE.md` exists; no boot run was performed in this pass. |
 | Skill Routing Map | Yes | Yes | Pass | `38_WORDPRESS/SKILLS/SKILL-ROUTING-MAP.md` — correctly routed all 8 scenarios; 2 of the routes matched documented Routing Examples verbatim (Examples 5 and 6). |
 | Knowledge Manager | Yes | Yes | Pass | `38_WORDPRESS/KNOWLEDGE/KNOWLEDGE-MANAGER.md` — Knowledge Mapping Examples table covered the knowledge needs of Scenarios 1 and 8 directly; other scenarios' knowledge needs are covered by each Skill's own Required References. |
-| Role Manager | Yes | Yes | Pass | `33_WORDPRESS_ROLES/ROLE-MANAGER.md` — referenced as the role-selection step by every traced Skill. |
-| Role Routing Matrix | Yes | Yes | Pass | `33_WORDPRESS_ROLES/ROLE-ROUTING-MATRIX.md` — Required/Conditional Roles matched the scenario document's expectations exactly for all 8 scenarios (Routes 1, 2, 4, 7, 8, 9, 10, 11). |
+| Role Manager | Yes | Yes | Pass | `38_WORDPRESS/ROLES/ROLE-MANAGER.md` — referenced as the role-selection step by every traced Skill. |
+| Role Routing Matrix | Yes | Yes | Pass | `38_WORDPRESS/ROLES/ROLE-ROUTING-MATRIX.md` — Required/Conditional Roles matched the scenario document's expectations exactly for all 8 scenarios (Routes 1, 2, 4, 7, 8, 9, 10, 11). |
 | Security Validator | Yes | Yes | Pass | `38_WORDPRESS/SECURITY-VALIDATOR.md` — directly cited by, or structurally mirrored in, the security gate of every traced Skill. |
 
 Status values: `Pass`, `Pass with Conditions`, `Fail`, `Not Evaluated`.
@@ -153,7 +153,7 @@ Additional standards present but not part of the original template's roster: `CO
 | Documentation Engineer | Yes | Yes | Yes | Yes | Operational |
 | Release Engineer | Yes | Yes | Yes | Yes | Operational |
 
-All 14 role files exist in `33_WORDPRESS_ROLES/` and each is named as a Required or Conditional role in at least one Route of `33_WORDPRESS_ROLES/ROLE-ROUTING-MATRIX.md`. "Inputs Defined" / "Outputs Defined" are assessed from each role's presence in the Role Routing Matrix's Expected Reports lists, not from reading all 14 individual role files in full during this pass.
+All 14 role files exist in `38_WORDPRESS/ROLES/` and each is named as a Required or Conditional role in at least one Route of `38_WORDPRESS/ROLES/ROLE-ROUTING-MATRIX.md`. "Inputs Defined" / "Outputs Defined" are assessed from each role's presence in the Role Routing Matrix's Expected Reports lists, not from reading all 14 individual role files in full during this pass.
 
 ## Validation Readiness Assessment
 
@@ -162,7 +162,7 @@ All 14 role files exist in `33_WORDPRESS_ROLES/` and each is named as a Required
 ```text
 Security Validator Available: Yes — 38_WORDPRESS/SECURITY-VALIDATOR.md
 
-Security Engineer Available: Yes — 33_WORDPRESS_ROLES/SECURITY-ENGINEER.md
+Security Engineer Available: Yes — 38_WORDPRESS/ROLES/SECURITY-ENGINEER.md
 
 Authentication Review Capability: Documented — "Capability Checks" section
 
@@ -200,7 +200,7 @@ Security Validation Status: Operational (documentation traceability only — no 
 ### Performance Validation
 
 ```text
-Performance Engineer Available: Yes — 33_WORDPRESS_ROLES/PERFORMANCE-ENGINEER.md
+Performance Engineer Available: Yes — 38_WORDPRESS/ROLES/PERFORMANCE-ENGINEER.md
 
 Baseline Measurement Capability: Documented — OPTIMIZE-PERFORMANCE.md Stage 3, exercised by WP-SCENARIO-005
 
@@ -222,7 +222,7 @@ Performance Validation Status: Operational (documentation traceability only — 
 ### QA Validation
 
 ```text
-QA Engineer Available: Yes — 33_WORDPRESS_ROLES/QA-ENGINEER.md
+QA Engineer Available: Yes — 38_WORDPRESS/ROLES/QA-ENGINEER.md
 
 Functional Test Capability: Documented — TESTING-STANDARD.md Level 3
 
@@ -258,7 +258,7 @@ QA Validation Status: Operational (documentation traceability only — no live t
 ### Documentation Validation
 
 ```text
-Documentation Engineer Available: Yes — 33_WORDPRESS_ROLES/DOCUMENTATION-ENGINEER.md
+Documentation Engineer Available: Yes — 38_WORDPRESS/ROLES/DOCUMENTATION-ENGINEER.md
 
 Technical Review Capability: Documented — WRITE-DOCUMENTATION.md Workflow step 5 (Standards Validator checks against DOCUMENTATION-STANDARD.md)
 
@@ -274,7 +274,7 @@ Documentation Validation Status: Operational (documentation traceability only)
 ### Release Validation
 
 ```text
-Release Engineer Available: Yes — 33_WORDPRESS_ROLES/RELEASE-ENGINEER.md
+Release Engineer Available: Yes — 38_WORDPRESS/ROLES/RELEASE-ENGINEER.md
 
 Report Verification Capability: Documented — MIGRATE-PLUGIN.md Stage 15 and CREATE-PLUGIN.md Stage 13 both require the Release Engineer to verify all prior reports
 

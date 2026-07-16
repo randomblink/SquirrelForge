@@ -11,8 +11,8 @@ Defines the workflow for reviewing existing WordPress code for correctness, secu
 
 - `38_WORDPRESS/PIPELINE.md`
 - `38_WORDPRESS/STANDARDS/CODE-REVIEW-STANDARD.md`
-- `33_WORDPRESS_ROLES/ROLE-MANAGER.md`
-- `33_WORDPRESS_ROLES/ROLE-ROUTING-MATRIX.md`
+- `38_WORDPRESS/ROLES/ROLE-MANAGER.md`
+- `38_WORDPRESS/ROLES/ROLE-ROUTING-MATRIX.md`
 
 ## Output
 
@@ -40,10 +40,10 @@ A code review is valid only when:
 
 ## Handoff Rules
 
-- Role selection routes through `33_WORDPRESS_ROLES/ROLE-MANAGER.md`.
-- Security findings route to `33_WORDPRESS_ROLES/SECURITY-ENGINEER.md`.
-- Performance findings route to `33_WORDPRESS_ROLES/PERFORMANCE-ENGINEER.md`.
-- Documentation findings route to `33_WORDPRESS_ROLES/DOCUMENTATION-ENGINEER.md`.
+- Role selection routes through `38_WORDPRESS/ROLES/ROLE-MANAGER.md`.
+- Security findings route to `38_WORDPRESS/ROLES/SECURITY-ENGINEER.md`.
+- Performance findings route to `38_WORDPRESS/ROLES/PERFORMANCE-ENGINEER.md`.
+- Documentation findings route to `38_WORDPRESS/ROLES/DOCUMENTATION-ENGINEER.md`.
 - Implementation findings route to the responsible specialist role.
 
 ## Completion Criteria

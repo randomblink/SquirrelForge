@@ -15,8 +15,8 @@ This checklist determines whether the SquirrelForge WordPress Layer is ready to 
 - [x] `38_WORDPRESS/PIPELINE.md` exists.
 - [x] `38_WORDPRESS/SKILLS/SKILL-ROUTING-MAP.md` exists.
 - [x] `38_WORDPRESS/KNOWLEDGE/KNOWLEDGE-MANAGER.md` exists.
-- [x] `33_WORDPRESS_ROLES/ROLE-MANAGER.md` exists.
-- [x] `33_WORDPRESS_ROLES/ROLE-ROUTING-MATRIX.md` exists.
+- [x] `38_WORDPRESS/ROLES/ROLE-MANAGER.md` exists.
+- [x] `38_WORDPRESS/ROLES/ROLE-ROUTING-MATRIX.md` exists.
 - [x] `38_WORDPRESS/SECURITY-VALIDATOR.md` exists.
 - [x] `38_WORDPRESS/STANDARDS/` exists.
 - [x] `38_WORDPRESS/SKILLS/` exists.
@@ -56,7 +56,7 @@ This checklist determines whether the SquirrelForge WordPress Layer is ready to 
 ## Validation Readiness
 
 - [x] Security validation is mandatory for code work. Evidence: `38_WORDPRESS/SECURITY-VALIDATOR.md`; a blocking Security gate is present in every traced Skill.
-- [x] QA validation is independent from engineer self-review. Evidence: `33_WORDPRESS_ROLES/QA-ENGINEER.md` is a distinct required role from the implementing Engineer in every Route of `ROLE-ROUTING-MATRIX.md`.
+- [x] QA validation is independent from engineer self-review. Evidence: `38_WORDPRESS/ROLES/QA-ENGINEER.md` is a distinct required role from the implementing Engineer in every Route of `ROLE-ROUTING-MATRIX.md`.
 - [x] Performance validation is required when performance-sensitive work exists. Evidence: `OPTIMIZE-PERFORMANCE.md` full workflow; conditional Performance Engineer gates in `ROLE-ROUTING-MATRIX.md`.
 - [x] Documentation must match validated behavior. Evidence: `WRITE-DOCUMENTATION.md` Agent Rule #1 ("Document the Final State").
 - [x] Release review is required for production-ready deliverables. Evidence: `RELEASE-ENGINEER.md`-driven Release Review stage present in `CREATE-PLUGIN.md`, `MIGRATE-PLUGIN.md`, and `CREATE-THEME.md`.

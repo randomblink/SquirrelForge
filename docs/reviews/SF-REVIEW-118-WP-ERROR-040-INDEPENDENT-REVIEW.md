@@ -71,7 +71,7 @@ No Major or Critical findings.
 
 # 8. Corrections Applied
 
-- `docs/knowledge/wp-errors/WP-ERROR-013-WORDPRESS-BOOTSTRAP-PHP-FATAL-ERROR.md`, Section 10: added "A currently-active theme's own files left internally inconsistent by an interrupted update — see [WP-ERROR-040](WP-ERROR-040-THEME-UPDATE-FAILURE.md)." immediately after the existing `WP-ERROR-039` bullet.
+- `docs/knowledge/wp-errors/WP-ERROR-013-WORDPRESS-BOOTSTRAP-PHP-FATAL-ERROR.md`, Section 10: added "A currently-active theme's own files left internally inconsistent by an interrupted update — see [WP-ERROR-040](../knowledge/wp-errors/WP-ERROR-040-THEME-UPDATE-FAILURE.md)." immediately after the existing `WP-ERROR-039` bullet.
 - `docs/knowledge/wp-errors/WP-ERROR-040-THEME-UPDATE-FAILURE.md`, Metadata: `Status` updated from `Draft` to `Production Ready`.
 
 ---

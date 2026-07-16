@@ -136,7 +136,7 @@ register_activation_hook( __FILE__, 'my_plugin_activate' );
 
 ## Agent Rules
 
-1.  **Always start with a plan**: Before generating code, consult the `33_WORDPRESS_ROLES/PLUGIN-ARCHITECT.md` to define the file structure, classes, and data model.
+1.  **Always start with a plan**: Before generating code, consult the `38_WORDPRESS/ROLES/PLUGIN-ARCHITECT.md` to define the file structure, classes, and data model.
 2.  **Enforce Structure**: Generate code that adheres to the standard plugin architecture (separate classes for admin, public, core, etc.).
 3.  **Prioritize Security**: Every generated function that handles data must include the appropriate sanitization, escaping, nonce, and capability checks.
 4.  **Document Everything**: Generate PHPDoc blocks for all classes, methods, and functions.

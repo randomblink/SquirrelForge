@@ -48,10 +48,10 @@ Before execution, consult:
 - `38_WORDPRESS/STANDARDS/PHP-STANDARD.md`
 - `38_WORDPRESS/STANDARDS/TESTING-STANDARD.md`
 - `38_WORDPRESS/STANDARDS/DOCUMENTATION-STANDARD.md`
-- `33_WORDPRESS_ROLES/ROLE-MANAGER.md`
-- `33_WORDPRESS_ROLES/ROLE-ROUTING-MATRIX.md`
-- `33_WORDPRESS_ROLES/PROJECT-ARCHITECT.md`
-- `33_WORDPRESS_ROLES/PLUGIN-ARCHITECT.md`
+- `38_WORDPRESS/ROLES/ROLE-MANAGER.md`
+- `38_WORDPRESS/ROLES/ROLE-ROUTING-MATRIX.md`
+- `38_WORDPRESS/ROLES/PROJECT-ARCHITECT.md`
+- `38_WORDPRESS/ROLES/PLUGIN-ARCHITECT.md`
 
 Additional references must be selected according to project requirements.
 
@@ -166,7 +166,7 @@ Reason:
 
 Use:
 
-`33_WORDPRESS_ROLES/PROJECT-ARCHITECT.md`
+`38_WORDPRESS/ROLES/PROJECT-ARCHITECT.md`
 
 Produce:
 
@@ -188,7 +188,7 @@ The plan must establish:
 
 Use:
 
-`33_WORDPRESS_ROLES/PLUGIN-ARCHITECT.md`
+`38_WORDPRESS/ROLES/PLUGIN-ARCHITECT.md`
 
 Produce:
 
@@ -223,8 +223,8 @@ Implementation must not begin before architecture is approved.
 
 Use:
 
-- `33_WORDPRESS_ROLES/ROLE-MANAGER.md`
-- `33_WORDPRESS_ROLES/ROLE-ROUTING-MATRIX.md`
+- `38_WORDPRESS/ROLES/ROLE-MANAGER.md`
+- `38_WORDPRESS/ROLES/ROLE-ROUTING-MATRIX.md`
 
 The standard plugin route is:
 
@@ -396,7 +396,7 @@ Required output:
 Use:
 
 - `38_WORDPRESS/SECURITY-VALIDATOR.md`
-- `33_WORDPRESS_ROLES/SECURITY-ENGINEER.md`
+- `38_WORDPRESS/ROLES/SECURITY-ENGINEER.md`
 
 Review the actual implementation.
 
@@ -448,7 +448,7 @@ Performance changes must be remeasured whenever practical.
 
 Use:
 
-`33_WORDPRESS_ROLES/QA-ENGINEER.md`
+`38_WORDPRESS/ROLES/QA-ENGINEER.md`
 
 QA must test applicable behavior including:
 
@@ -488,7 +488,7 @@ Defects return to the responsible Engineer and must be retested.
 
 Use:
 
-`33_WORDPRESS_ROLES/DOCUMENTATION-ENGINEER.md`
+`38_WORDPRESS/ROLES/DOCUMENTATION-ENGINEER.md`
 
 Update applicable documentation:
 
@@ -514,7 +514,7 @@ Documentation must describe actual validated behavior.
 
 Use:
 
-`33_WORDPRESS_ROLES/RELEASE-ENGINEER.md`
+`38_WORDPRESS/ROLES/RELEASE-ENGINEER.md`
 
 Verify:
 

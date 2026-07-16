@@ -40,8 +40,8 @@ Accessibility validation is valid only when:
 
 - Accessibility defects route to the implementation owner responsible for the affected UI.
 - Security, performance, or compatibility tradeoffs discovered during accessibility review route to the relevant specialist role.
-- Documentation-impacting accessibility behavior routes to `33_WORDPRESS_ROLES/DOCUMENTATION-ENGINEER.md`.
-- Release-blocking accessibility issues route to `33_WORDPRESS_ROLES/RELEASE-ENGINEER.md`.
+- Documentation-impacting accessibility behavior routes to `38_WORDPRESS/ROLES/DOCUMENTATION-ENGINEER.md`.
+- Release-blocking accessibility issues route to `38_WORDPRESS/ROLES/RELEASE-ENGINEER.md`.
 
 ## Completion Criteria
 

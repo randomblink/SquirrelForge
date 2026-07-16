@@ -71,7 +71,7 @@ No Major or Critical findings.
 
 # 8. Corrections Applied
 
-- `docs/knowledge/wp-errors/WP-ERROR-041-WP-CLI-CANNOT-LOCATE-WORDPRESS-INSTALLATION.md`, Section 16: entry 4 converted from a conceptual reference to a real link — "[WP-ERROR-042 — WP-CLI Multisite Site Context Resolution Failure](WP-ERROR-042-WP-CLI-MULTISITE-SITE-CONTEXT-RESOLUTION-FAILURE.md) — exists in this repository; the second and final planned entry in this category."
+- `docs/knowledge/wp-errors/WP-ERROR-041-WP-CLI-CANNOT-LOCATE-WORDPRESS-INSTALLATION.md`, Section 16: entry 4 converted from a conceptual reference to a real link — "[WP-ERROR-042 — WP-CLI Multisite Site Context Resolution Failure](../knowledge/wp-errors/WP-ERROR-042-WP-CLI-MULTISITE-SITE-CONTEXT-RESOLUTION-FAILURE.md) — exists in this repository; the second and final planned entry in this category."
 - `docs/knowledge/wp-errors/WP-ERROR-042-WP-CLI-MULTISITE-SITE-CONTEXT-RESOLUTION-FAILURE.md`, Metadata: `Status` updated from `Draft` to `Production Ready`.
 
 ---

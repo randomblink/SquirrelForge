@@ -36,10 +36,10 @@ Block editor guidance is valid only when:
 
 ## Handoff Rules
 
-- Block implementation issues route to `33_WORDPRESS_ROLES/BLOCK-ENGINEER.md`.
+- Block implementation issues route to `38_WORDPRESS/ROLES/BLOCK-ENGINEER.md`.
 - Accessibility concerns route to the applicable accessibility review owner.
-- Performance-sensitive block behavior routes to `33_WORDPRESS_ROLES/PERFORMANCE-ENGINEER.md`.
-- Security-sensitive REST, rendering, or data-handling behavior routes to `33_WORDPRESS_ROLES/SECURITY-ENGINEER.md`.
+- Performance-sensitive block behavior routes to `38_WORDPRESS/ROLES/PERFORMANCE-ENGINEER.md`.
+- Security-sensitive REST, rendering, or data-handling behavior routes to `38_WORDPRESS/ROLES/SECURITY-ENGINEER.md`.
 
 ## Completion Criteria
 

@@ -47,8 +47,8 @@ Before designing plugin architecture, consult:
 - `38_WORDPRESS/STANDARDS/NAMING-STANDARD.md`
 - `38_WORDPRESS/STANDARDS/PHP-STANDARD.md`
 - `38_WORDPRESS/SECURITY-VALIDATOR.md`
-- `33_WORDPRESS_ROLES/PROJECT-ARCHITECT.md`
-- `33_WORDPRESS_ROLES/ROLE-MANAGER.md`
+- `38_WORDPRESS/ROLES/PROJECT-ARCHITECT.md`
+- `38_WORDPRESS/ROLES/ROLE-MANAGER.md`
 
 Additional knowledge must be selected for REST, database, cron, shortcode, block, media, or WooCommerce work.
 

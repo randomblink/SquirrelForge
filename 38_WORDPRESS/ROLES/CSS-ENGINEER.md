@@ -48,7 +48,7 @@ Before implementation, consult:
 For block work, also consult:
 
 - `38_WORDPRESS/KNOWLEDGE/BLOCK-EDITOR.md`
-- `33_WORDPRESS_ROLES/BLOCK-ENGINEER.md`
+- `38_WORDPRESS/ROLES/BLOCK-ENGINEER.md`
 
 ---
 

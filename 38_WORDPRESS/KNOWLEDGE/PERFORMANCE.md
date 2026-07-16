@@ -34,10 +34,10 @@ Performance guidance is valid only when:
 
 ## Handoff Rules
 
-- Performance-sensitive findings route to `33_WORDPRESS_ROLES/PERFORMANCE-ENGINEER.md`.
+- Performance-sensitive findings route to `38_WORDPRESS/ROLES/PERFORMANCE-ENGINEER.md`.
 - Database performance issues route to the database implementation owner.
 - Frontend asset issues route to the relevant JavaScript, block, or theme role.
-- Security tradeoffs discovered during optimization route to `33_WORDPRESS_ROLES/SECURITY-ENGINEER.md`.
+- Security tradeoffs discovered during optimization route to `38_WORDPRESS/ROLES/SECURITY-ENGINEER.md`.
 
 ## Completion Criteria
 

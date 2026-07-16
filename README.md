@@ -58,7 +58,6 @@ The platform is organized into specialized numbered layers. The numbering has in
 | `30_LEARNING` | Turning outcomes and feedback into validated improvements |
 | `32_OPTIMIZATION` | Performance, cost, and resource improvements from evidence |
 | `33_AUTOMATION` | Approved automatic work from schedules, events, and rules |
-| `33_WORDPRESS_ROLES` | WordPress-specific specialist roles: architecture, implementation, validation, and release |
 | `34_AIDRIVER` | AI reasoning core driving the agent |
 | `35_RESILIENCE` | Failure detection, recovery, and safe degradation |
 | `36_COMMUNICATION` | Information exchange between users, agents, and systems |
@@ -131,7 +130,6 @@ Response
 30_LEARNING/
 32_OPTIMIZATION/
 33_AUTOMATION/
-33_WORDPRESS_ROLES/
 34_AIDRIVER/
 35_RESILIENCE/
 36_COMMUNICATION/

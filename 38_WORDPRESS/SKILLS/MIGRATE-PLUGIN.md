@@ -66,16 +66,16 @@ Before execution, consult:
 - `38_WORDPRESS/STANDARDS/TESTING-STANDARD.md`
 - `38_WORDPRESS/STANDARDS/DOCUMENTATION-STANDARD.md`
 - `38_WORDPRESS/SECURITY-VALIDATOR.md`
-- `33_WORDPRESS_ROLES/ROLE-MANAGER.md`
-- `33_WORDPRESS_ROLES/ROLE-ROUTING-MATRIX.md`
-- `33_WORDPRESS_ROLES/PROJECT-ARCHITECT.md`
-- `33_WORDPRESS_ROLES/PLUGIN-ARCHITECT.md`
-- `33_WORDPRESS_ROLES/DATABASE-ENGINEER.md` when applicable
-- `33_WORDPRESS_ROLES/SECURITY-ENGINEER.md`
-- `33_WORDPRESS_ROLES/PERFORMANCE-ENGINEER.md` when applicable
-- `33_WORDPRESS_ROLES/QA-ENGINEER.md`
-- `33_WORDPRESS_ROLES/DOCUMENTATION-ENGINEER.md`
-- `33_WORDPRESS_ROLES/RELEASE-ENGINEER.md`
+- `38_WORDPRESS/ROLES/ROLE-MANAGER.md`
+- `38_WORDPRESS/ROLES/ROLE-ROUTING-MATRIX.md`
+- `38_WORDPRESS/ROLES/PROJECT-ARCHITECT.md`
+- `38_WORDPRESS/ROLES/PLUGIN-ARCHITECT.md`
+- `38_WORDPRESS/ROLES/DATABASE-ENGINEER.md` when applicable
+- `38_WORDPRESS/ROLES/SECURITY-ENGINEER.md`
+- `38_WORDPRESS/ROLES/PERFORMANCE-ENGINEER.md` when applicable
+- `38_WORDPRESS/ROLES/QA-ENGINEER.md`
+- `38_WORDPRESS/ROLES/DOCUMENTATION-ENGINEER.md`
+- `38_WORDPRESS/ROLES/RELEASE-ENGINEER.md`
 - All relevant implementation and validation roles.
 
 ---
@@ -211,8 +211,8 @@ Reason:
 
 Use:
 
-`33_WORDPRESS_ROLES/PROJECT-ARCHITECT.md`
-`33_WORDPRESS_ROLES/PLUGIN-ARCHITECT.md`
+`38_WORDPRESS/ROLES/PROJECT-ARCHITECT.md`
+`38_WORDPRESS/ROLES/PLUGIN-ARCHITECT.md`
 
 Produce:
 
@@ -284,8 +284,8 @@ Large migrations should be resumable when practical.
 
 Use:
 
-`33_WORDPRESS_ROLES/ROLE-MANAGER.md`
-`33_WORDPRESS_ROLES/ROLE-ROUTING-MATRIX.md`
+`38_WORDPRESS/ROLES/ROLE-MANAGER.md`
+`38_WORDPRESS/ROLES/ROLE-ROUTING-MATRIX.md`
 
 Standard migration route:
 
@@ -421,7 +421,7 @@ Each selected role must produce its normal implementation report.
 Use:
 
 `38_WORDPRESS/SECURITY-VALIDATOR.md`
-`33_WORDPRESS_ROLES/SECURITY-ENGINEER.md`
+`38_WORDPRESS/ROLES/SECURITY-ENGINEER.md`
 
 Review:
 
@@ -445,7 +445,7 @@ Critical and High security findings block migration release.
 
 #### Stage 12 — Performance Validation
 
-Use `33_WORDPRESS_ROLES/PERFORMANCE-ENGINEER.md` when migration cost or runtime behavior is significant.
+Use `38_WORDPRESS/ROLES/PERFORMANCE-ENGINEER.md` when migration cost or runtime behavior is significant.
 
 Review:
 
@@ -468,7 +468,7 @@ Large migration workloads must not be assumed safe without measurement or bounde
 
 #### Stage 13 — Migration QA
 
-Use `33_WORDPRESS_ROLES/QA-ENGINEER.md`.
+Use `38_WORDPRESS/ROLES/QA-ENGINEER.md`.
 
 Test applicable paths:
 
@@ -502,7 +502,7 @@ Migration release must stop when `Final QA Status` is:
 
 #### Stage 14 — Migration Documentation
 
-Use `33_WORDPRESS_ROLES/DOCUMENTATION-ENGINEER.md`.
+Use `38_WORDPRESS/ROLES/DOCUMENTATION-ENGINEER.md`.
 
 Document:
 
@@ -525,7 +525,7 @@ Required output:
 
 #### Stage 15 — Release Review
 
-Use `33_WORDPRESS_ROLES/RELEASE-ENGINEER.md`.
+Use `38_WORDPRESS/ROLES/RELEASE-ENGINEER.md`.
 
 Verify:
 

@@ -81,7 +81,7 @@ This review also independently re-read `WP-ERROR-020`'s complete Section 6/7 to 
 **Corrections applied:**
 - `WP-ERROR-036` Section 4 revised: "...PHP's own `post_max_size` directive, which governs the entire HTTP request body; when exceeded, WordPress's own code still executes normally, but PHP leaves `$_POST` and `$_FILES` both empty rather than populating them with the request's own data..."
 - `WP-ERROR-036` Section 6 cause 1 revised with the same correction, and Section 8 gained a new bullet: "PHP's own error-log warning for an exceeded `post_max_size` (commonly worded to the effect of 'POST Content-Length of *N* bytes exceeds the limit of *N* bytes'), which — unlike the excluded web-server/gateway-level condition, which never invokes PHP at all — provides a genuine, checkable signal that PHP itself, specifically, is where the rejection occurred." Section 11 step 3 updated to reference checking for this specific log entry.
-- `WP-ERROR-020`'s own exclusion bullet updated: "**PHP/WordPress upload-size limits**: see the internal distinction above. Excluded entirely from this entry's scope, per `SF-TAXONOMY-001` Section 4 — see [WP-ERROR-036](WP-ERROR-036-UPLOAD-SIZE-LIMIT-EXCEEDED.md)."
+- `WP-ERROR-020`'s own exclusion bullet updated: "**PHP/WordPress upload-size limits**: see the internal distinction above. Excluded entirely from this entry's scope, per `SF-TAXONOMY-001` Section 4 — see [WP-ERROR-036](../knowledge/wp-errors/WP-ERROR-036-UPLOAD-SIZE-LIMIT-EXCEEDED.md)."
 
 No Major or Critical findings. All other areas remain Conforming as recorded in Section 6.
 
