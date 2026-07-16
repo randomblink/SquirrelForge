@@ -29,6 +29,7 @@ The layer owns:
 - WordPress performance guidance,
 - WordPress accessibility guidance,
 - WordPress testing expectations,
+- WordPress-specific specialist roles and role routing,
 - and WordPress-specific operating references.
 
 The layer does not own general-purpose:
@@ -71,6 +72,7 @@ Those responsibilities remain in their respective architectural layers.
 | `INTERNATIONALIZATION.md` | Defines translation, localization, escaping, and text-domain rules. |
 | `WOOCOMMERCE.md` | Defines WooCommerce extension concepts, hooks, products, checkout, and orders. |
 | `CODING-STANDARDS.md` | Defines WordPress PHP, JavaScript, CSS, and documentation standards. |
+| [`ROLES/`](ROLES/README.md) | Defines WordPress-specific architecture, implementation, validation, QA, documentation, release, and routing roles. |
 
 The roster must reflect files that actually exist in this directory. Missing components must not be presented as completed documentation.
 

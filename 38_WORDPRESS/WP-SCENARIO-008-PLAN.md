@@ -110,8 +110,8 @@ Knowledge:
 
 Roles:
 
-- `33_WORDPRESS_ROLES/ROLE-ROUTING-MATRIX.md`, Route 7 (`MIGRATE-PLUGIN`) — Required Roles: Project Architect, Plugin Architect, PHP Engineer, Security Engineer, QA Engineer, Documentation Engineer, Release Engineer; Conditional Roles include Database Engineer, triggered here by schema creation/alteration.
-- `33_WORDPRESS_ROLES/DATABASE-ENGINEER.md`.
+- `38_WORDPRESS/ROLES/ROLE-ROUTING-MATRIX.md`, Route 7 (`MIGRATE-PLUGIN`) — Required Roles: Project Architect, Plugin Architect, PHP Engineer, Security Engineer, QA Engineer, Documentation Engineer, Release Engineer; Conditional Roles include Database Engineer, triggered here by schema creation/alteration.
+- `38_WORDPRESS/ROLES/DATABASE-ENGINEER.md`.
 
 Standards and testing facilities:
 
@@ -331,8 +331,8 @@ Database Engineering
 - `38_WORDPRESS/SKILLS/MIGRATE-PLUGIN.md`
 - `38_WORDPRESS/SKILLS/SKILL-ROUTING-MAP.md`
 - `38_WORDPRESS/KNOWLEDGE/DATABASE.md`
-- `33_WORDPRESS_ROLES/ROLE-ROUTING-MATRIX.md`
-- `33_WORDPRESS_ROLES/DATABASE-ENGINEER.md`
+- `38_WORDPRESS/ROLES/ROLE-ROUTING-MATRIX.md`
+- `38_WORDPRESS/ROLES/DATABASE-ENGINEER.md`
 - `38_WORDPRESS/STANDARDS/TESTING-STANDARD.md`
 - `29_TESTING/REGRESSION-TESTS.md`
 - `29_TESTING/INTEGRATION-TESTS.md`

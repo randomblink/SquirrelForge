@@ -46,8 +46,8 @@ Before execution, consult:
 - `38_WORDPRESS/STANDARDS/ARCHITECTURE-STANDARD.md`
 - `38_WORDPRESS/STANDARDS/TESTING-STANDARD.md`
 - `38_WORDPRESS/SECURITY-VALIDATOR.md`
-- `33_WORDPRESS_ROLES/ROLE-MANAGER.md`
-- `33_WORDPRESS_ROLES/ROLE-ROUTING-MATRIX.md`
+- `38_WORDPRESS/ROLES/ROLE-MANAGER.md`
+- `38_WORDPRESS/ROLES/ROLE-ROUTING-MATRIX.md`
 
 Additional references must be selected according to the nature of the bug.
 
@@ -76,7 +76,7 @@ If steps to reproduce are missing, the first stage must be to define them.
 
 Use:
 
-`33_WORDPRESS_ROLES/QA-ENGINEER.md`
+`38_WORDPRESS/ROLES/QA-ENGINEER.md`
 
 The `QA Engineer` must:
 
@@ -107,11 +107,11 @@ Status:
 
 Use:
 
-`33_WORDPRESS_ROLES/ROLE-MANAGER.md`
+`38_WORDPRESS/ROLES/ROLE-MANAGER.md`
 
 and:
 
-`33_WORDPRESS_ROLES/ROLE-ROUTING-MATRIX.md`
+`38_WORDPRESS/ROLES/ROLE-ROUTING-MATRIX.md`
 
 The `Role Manager` assigns the defect to the appropriate specialist roles for root cause analysis.
 
@@ -177,7 +177,7 @@ The fix must adhere to all relevant standards.
 
 Use:
 
-`33_WORDPRESS_ROLES/SECURITY-ENGINEER.md`
+`38_WORDPRESS/ROLES/SECURITY-ENGINEER.md`
 
 The `Security Engineer` must review the fix if it touches:
 
@@ -193,7 +193,7 @@ A fix that introduces a security vulnerability must be rejected.
 
 Use:
 
-`33_WORDPRESS_ROLES/PERFORMANCE-ENGINEER.md`
+`38_WORDPRESS/ROLES/PERFORMANCE-ENGINEER.md`
 
 The `Performance Engineer` must review the fix if it affects a performance-sensitive area.
 
@@ -201,7 +201,7 @@ The `Performance Engineer` must review the fix if it affects a performance-sensi
 
 Use:
 
-`33_WORDPRESS_ROLES/QA-ENGINEER.md`
+`38_WORDPRESS/ROLES/QA-ENGINEER.md`
 
 The `QA Engineer` must:
 
@@ -214,7 +214,7 @@ The fix is not complete until QA verification passes.
 
 Use:
 
-`33_WORDPRESS_ROLES/DOCUMENTATION-ENGINEER.md`
+`38_WORDPRESS/ROLES/DOCUMENTATION-ENGINEER.md`
 
 Update applicable documentation:
 
@@ -226,7 +226,7 @@ Update applicable documentation:
 
 Use:
 
-`33_WORDPRESS_ROLES/RELEASE-ENGINEER.md`
+`38_WORDPRESS/ROLES/RELEASE-ENGINEER.md`
 
 If the fix is part of a release, the `Release Engineer` packages it into a new version, following all release readiness checks.
 

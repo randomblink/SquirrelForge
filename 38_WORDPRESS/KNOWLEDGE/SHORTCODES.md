@@ -38,9 +38,9 @@ Shortcode guidance is valid only when:
 ## Handoff Rules
 
 - Shortcode implementation issues route to the relevant PHP implementation role.
-- Security-sensitive rendering, attributes, or database use route to `33_WORDPRESS_ROLES/SECURITY-ENGINEER.md`.
+- Security-sensitive rendering, attributes, or database use route to `38_WORDPRESS/ROLES/SECURITY-ENGINEER.md`.
 - Accessibility concerns route to the applicable accessibility review owner.
-- Documentation changes route to `33_WORDPRESS_ROLES/DOCUMENTATION-ENGINEER.md`.
+- Documentation changes route to `38_WORDPRESS/ROLES/DOCUMENTATION-ENGINEER.md`.
 
 ## Completion Criteria
 

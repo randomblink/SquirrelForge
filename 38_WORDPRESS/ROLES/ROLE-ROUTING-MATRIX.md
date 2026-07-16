@@ -51,8 +51,8 @@ The Role Routing Matrix coordinates with:
 - `38_WORDPRESS/PIPELINE.md`
 - `38_WORDPRESS/SKILLS/SKILL-ROUTING-MAP.md`
 - individual Skills in `38_WORDPRESS/SKILLS/`
-- `33_WORDPRESS_ROLES/ROLE-MANAGER.md`
-- specialist Role documents in `33_WORDPRESS_ROLES/`
+- `38_WORDPRESS/ROLES/ROLE-MANAGER.md`
+- specialist Role documents in `38_WORDPRESS/ROLES/`
 
 ---
 

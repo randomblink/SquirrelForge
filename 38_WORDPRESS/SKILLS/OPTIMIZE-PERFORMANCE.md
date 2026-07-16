@@ -48,13 +48,13 @@ Before execution, consult:
 - `38_WORDPRESS/KNOWLEDGE/THEME-HANDBOOK.md` when the target is a theme
 - `38_WORDPRESS/KNOWLEDGE/SECURITY.md`
 - applicable standards in `38_WORDPRESS/STANDARDS/`
-- `33_WORDPRESS_ROLES/ROLE-MANAGER.md`
-- `33_WORDPRESS_ROLES/ROLE-ROUTING-MATRIX.md`
-- `33_WORDPRESS_ROLES/PERFORMANCE-ENGINEER.md`
+- `38_WORDPRESS/ROLES/ROLE-MANAGER.md`
+- `38_WORDPRESS/ROLES/ROLE-ROUTING-MATRIX.md`
+- `38_WORDPRESS/ROLES/PERFORMANCE-ENGINEER.md`
 - applicable implementation Engineer roles
-- `33_WORDPRESS_ROLES/SECURITY-ENGINEER.md` when security controls may be affected
-- `33_WORDPRESS_ROLES/QA-ENGINEER.md`
-- `33_WORDPRESS_ROLES/DOCUMENTATION-ENGINEER.md` when operational behavior changes
+- `38_WORDPRESS/ROLES/SECURITY-ENGINEER.md` when security controls may be affected
+- `38_WORDPRESS/ROLES/QA-ENGINEER.md`
+- `38_WORDPRESS/ROLES/DOCUMENTATION-ENGINEER.md` when operational behavior changes
 
 ---
 
@@ -110,8 +110,8 @@ Out of Scope:
 
 Use:
 
-- `33_WORDPRESS_ROLES/ROLE-MANAGER.md`
-- `33_WORDPRESS_ROLES/ROLE-ROUTING-MATRIX.md`
+- `38_WORDPRESS/ROLES/ROLE-MANAGER.md`
+- `38_WORDPRESS/ROLES/ROLE-ROUTING-MATRIX.md`
 
 Standard route:
 
@@ -328,7 +328,7 @@ Performance improvements must not bypass security controls.
 
 ### Stage 10 — QA Validation
 
-Use `33_WORDPRESS_ROLES/QA-ENGINEER.md`.
+Use `38_WORDPRESS/ROLES/QA-ENGINEER.md`.
 
 Test:
 

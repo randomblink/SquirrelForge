@@ -79,3 +79,4 @@ Proceed with additive navigation, verified link repairs, and validator expansion
 | Version | Date | Summary | Status |
 |---|---|---|---|
 | 1.0 | 2026-07-16 | Initial evidence-first repository inventory and problem classification. No tracked artifact moved, renamed, archived, merged, or deleted. | Inventory Complete |
+| 1.1 | 2026-07-16 | Records completion of approved RH-003 remediation after impact analysis: 19 stable WordPress role authorities moved to `38_WORDPRESS/ROLES/`, 13 files explicitly marked as deprecated compatibility references removed, and repository references updated. The Version 1.0 finding above remains unchanged as the historical evidence that prompted the action. | RH-003 Corrected |

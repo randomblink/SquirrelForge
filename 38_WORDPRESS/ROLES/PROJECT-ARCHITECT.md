@@ -41,7 +41,7 @@ Before defining project architecture, consult:
 - `38_WORDPRESS/STANDARDS/ARCHITECTURE-STANDARD.md`
 - `38_WORDPRESS/STANDARDS/NAMING-STANDARD.md`
 - `38_WORDPRESS/SECURITY-VALIDATOR.md`
-- `33_WORDPRESS_ROLES/ROLE-MANAGER.md`
+- `38_WORDPRESS/ROLES/ROLE-MANAGER.md`
 
 Additional references must be selected according to project type.
 
