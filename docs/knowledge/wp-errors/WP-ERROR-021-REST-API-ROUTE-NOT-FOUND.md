@@ -16,7 +16,7 @@ WordPress REST API Route Not Found
 * **Severity:** Critical
 * **Recovery Priority:** Immediate
 * **Status:** Production Ready
-* **Version:** 1.0
+* **Version:** 1.1
 
 ---
 
@@ -28,7 +28,9 @@ A request targeting a WordPress REST API URL — whether the pretty `/wp-json/..
 
 # 4. Primary Failure Mode
 
-`WP_REST_Server::dispatch()` attempts to match an incoming request's path and HTTP method against the full table of routes currently registered via `register_rest_route()` (normally called during the `rest_api_init` action) and finds no match at all — or the REST API infrastructure never reaches the point of attempting that match in the first place. In either case, no callback is ever selected; the request fails before the request-acceptance stage `WP-ERROR-022` owns, and long before the callback-execution stage `WP-ERROR-023` owns.
+`WP_REST_Server::dispatch()` attempts to match an incoming REST request's path and HTTP method against the full table of routes currently registered via `register_rest_route()` (normally called during the `rest_api_init` action) and finds no matching handler. WordPress returns `rest_no_route` with HTTP status 404; no callback is selected, so the request fails before the request-acceptance stage `WP-ERROR-022` owns and before the callback-execution stage `WP-ERROR-023` owns.
+
+A request that never reaches WordPress's REST dispatcher is not this condition. A missing or unapplied rewrite rule, web-server interception, WAF rule, or other pre-dispatch failure may make a pretty `/wp-json/...` URL unavailable, but it cannot itself produce WordPress's `rest_no_route` result because route/method matching never occurred. Diagnosis uses the query-string form to distinguish that separate reachability failure from this entry's route-table failure.
 
 This entry covers two distinct ways a route can end up unmatched, both producing the identical `rest_no_route` response:
 
@@ -43,7 +45,7 @@ Both are distinct from a request that *does* match a still-present route and is 
 
 This entry is classified **Critical**, though its actual impact ranges depending on scope:
 
-- Where the REST API's own core infrastructure or every endpoint is affected (for example, by a site-wide rewrite-rule failure), the impact can be a full-site outage for any feature depending on it — most notably the Block Editor, which cannot load or save content without a working REST API, and any headless or decoupled front end for which the REST API *is* the entire site.
+- Where every expected endpoint is absent from the route table (for example, through a wholesale `rest_endpoints` removal), the impact can be a full-site outage for any feature depending on it — most notably the Block Editor, which cannot load or save content without a working REST API, and any headless or decoupled front end for which the REST API *is* the entire site. A site-wide rewrite failure can cause similarly broad impact, but it is a distinct pre-dispatch reachability condition rather than this entry's `rest_no_route` mechanism.
 - Where only a single, specific custom endpoint is affected (for example, one plugin's own registration failing), the impact is typically narrower — that specific feature fails while WordPress's own built-in endpoints and ordinary browsing continue to work normally.
 - This entry remains classified at the level of its most severe possible manifestation, consistent with the range-based Critical classification used elsewhere in this catalog (for example, `WP-ERROR-004`, `005`, `006`, `019`, and `020`).
 
@@ -56,7 +58,7 @@ This entry applies only when verified evidence establishes that a request target
 **Internal distinctions this entry specifically requires:**
 
 - **Genuine route removal versus post-match interception:** a `rest_endpoints`-filter removal (or an equivalent mechanism preventing a route from ever entering the match table) is this entry's condition. A `rest_authentication_errors` denial, or a `rest_pre_dispatch`/`rest_request_before_callbacks` short-circuit that intercepts a request *after* a route has already been identified, is not — the route itself remains registered and reachable; only the request directed at it is being rejected, which is `WP-ERROR-022`'s condition. Both are commonly described as "the REST API is disabled," but only the former genuinely produces `rest_no_route`.
-- **REST-specific 404 versus WordPress's own generic 404:** WordPress's ordinary "post/page not found" 404 handling (`WP_Query`'s own template-resolution logic for a normal front-end URL) is an entirely separate code path from `WP_REST_Server`'s own `rest_no_route` response. A REST request and an ordinary content request can both return HTTP 404, but only the latter is this entry's condition, identified by the `rest_no_route` error code specifically, not the status code alone.
+- **REST-specific 404 versus WordPress's own generic 404:** WordPress's ordinary "post/page not found" 404 handling (`WP_Query`'s own template-resolution logic for a normal front-end URL) is an entirely separate code path from `WP_REST_Server`'s own `rest_no_route` response. A REST request and an ordinary content request can both return HTTP 404, but only the REST response carrying `rest_no_route` is this entry's condition; the status code alone is insufficient.
 
 **Distinct from the following related entries and categories:**
 
@@ -78,6 +80,7 @@ This entry applies only when verified evidence establishes that a request target
 - WordPress's own generic, non-REST 404 handling for ordinary content URLs.
 - A general WordPress bootstrap failure, missing PHP extension, or filesystem permission condition preventing route-registration code from ever running (Bootstrap, PHP Runtime, or Filesystem category, as applicable).
 - A request blocked before reaching WordPress at all by a web application firewall, security plugin, or hosting-level rule (Security category, once a taxonomy exists for it).
+- A pretty `/wp-json/...` request that fails because rewrite/permalink or web-server routing never populated `rest_route` and therefore never invoked WordPress's REST dispatcher; successful `?rest_route=...` access distinguishes this pre-dispatch reachability condition from a missing route.
 - Browser-enforced cross-origin (CORS) policy failures, which presume the WordPress REST pipeline itself already completed successfully (excluded from this category entirely; see [WP-ERROR-030 — WordPress CORS (Cross-Origin) Policy Failure](WP-ERROR-030-CORS-CROSS-ORIGIN-POLICY-FAILURE.md), which resolves the forward-reference `SF-TAXONOMY-002` Section 5 originally made).
 
 ---
@@ -88,10 +91,10 @@ Listed as components commonly involved, not as a claim that every incident exerc
 
 - `register_rest_route()` (`wp-includes/rest-api.php`) and the `rest_api_init` action, where routes are normally registered.
 - `WP_REST_Server::dispatch()` and `WP_REST_Server::get_routes()` (`wp-includes/class-wp-rest-server.php`), responsible for matching an incoming request's path and method against the registered route table and producing the `rest_no_route` error, HTTP status 404, when no match exists.
-- `WP_REST_Server::get_index()`, which handles the bare API root (`GET /wp-json/`) itself — a route always registered independently of any specific namespace, returning a full index of every currently registered namespace and route. Its own success or failure is the most fundamental available signal of whether the REST API infrastructure is initializing at all, distinct from any specific namespace or route.
+- `WP_REST_Server::get_index()`, which handles the bare API root (`GET /wp-json/`) independently of a specific namespace and returns an index of registered namespaces and routes. Its success is the most fundamental signal that the request reached REST serving; it is a diagnostic control, not itself evidence that a particular route matched.
 - The `rest_endpoints` filter, which can add, modify, or `unset()` entries in the route table after registration but before matching, and is the mechanism by which a route can be genuinely removed from what `dispatch()` will ever match.
 - The `rest_route` public query variable and the `index.php?rest_route=` request form, WordPress's rewrite-independent path into `WP_REST_Server`, available regardless of the site's permalink structure.
-- The permalink/rewrite-rule infrastructure (`WP_Rewrite`; Settings → Permalinks), whose "pretty" (non-Plain) structure is specifically required for the `/wp-json/` URL form to resolve via `.htaccess` or equivalent web-server rewrite rules into the `rest_route` query variable; a Plain permalink structure does not prevent REST requests generally, only the pretty URL form specifically, since `?rest_route=` remains available regardless.
+- The permalink/rewrite-rule infrastructure (`WP_Rewrite`; Settings → Permalinks), used diagnostically to determine whether the pretty `/wp-json/` request reached REST routing at all. A Plain structure or missing/unapplied rewrite can prevent that URL form from populating `rest_route`; the query-string form remains the rewrite-independent control. Such a pre-dispatch failure is not itself `rest_no_route`.
 - The REST API discovery signal WordPress adds to front-end output — the `Link` HTTP response header and the `<link rel="https://api.w.org/">` HTML tag — pointing to the site's own current REST API root (`/wp-json/` or `?rest_route=/`, depending on permalink structure), useful as a diagnostic signal of which URL form the site itself currently expects.
 - WP-CLI's core `wp rewrite structure` and `wp rewrite flush` commands, for permalink/rewrite diagnostics. Listing registered REST routes is not a core WP-CLI capability; it requires the optional `wp-cli/restful` package, or direct inspection via `wp eval` calling `rest_get_server()->get_routes()`.
 
@@ -103,9 +106,9 @@ Listed as components commonly involved, not as a claim that every incident exerc
 - The Block Editor (Gutenberg) failing to load content, failing to save, or showing an "Updating failed" notice, since it depends heavily on the REST API for its own normal operation.
 - A headless or decoupled front end (a separate application consuming the REST API) failing to load any content at all, where the REST API constitutes the entire site's own data source.
 - The site's own REST API discovery signal (`Link` header or `<link rel="https://api.w.org/">`) pointing to a URL form inconsistent with the one the calling application is actually requesting.
-- The failure appearing immediately after a permalink structure change, a plugin deactivation or failed update, or a migration to a new environment.
+- The caller's failure appearing immediately after a permalink structure change, a plugin deactivation or failed update, or a migration to a new environment. A permalink-correlated pretty-URL failure requires the query-string control before it can be classified as this entry.
 - A specific custom endpoint returning `rest_no_route` while WordPress's own built-in endpoints (for example, `/wp/v2/posts`) continue to function normally — indicating the cause is specific to the plugin or code responsible for the one missing route, not the REST API infrastructure as a whole.
-- Conversely, every REST endpoint — including WordPress's own built-in ones — returning `rest_no_route`, indicating a broader, infrastructure-level cause (rewrite rules, or a wholesale route-table removal) rather than one specific plugin.
+- Conversely, requests that do reach the REST dispatcher but return `rest_no_route` for every expected endpoint — including WordPress's own built-in ones — indicating wholesale route-table removal or registration failure rather than one specific plugin. A generic 404 for the pretty URL form is not equivalent and shall first be tested through `?rest_route=`.
 
 ---
 
@@ -113,12 +116,13 @@ Listed as components commonly involved, not as a claim that every incident exerc
 
 Causes are grouped by category. Inclusion in this list identifies a category as plausible; it does not assert that any specific cause is present without diagnostic confirmation.
 
-- A Plain permalink structure, or otherwise corrupted or unflushed rewrite rules, preventing the `/wp-json/` URL form specifically from resolving, while `?rest_route=` continues to function.
 - A plugin or theme responsible for a specific route failing to run its own `rest_api_init` callback — because it is inactive, was recently deactivated, or encountered a PHP error during its own registration logic that prevented `register_rest_route()` from ever executing for that route.
 - A `rest_endpoints` filter (in a security plugin, a custom must-use plugin, or theme code) removing one or more routes from the registration table, whether intentionally (to reduce attack surface) or as a side effect of unrelated code.
 - A typo, or a version mismatch, in the requested namespace or path (for example, requesting `/wp/v3/posts` when only `/wp/v2/posts` is registered, or a plugin's own endpoint namespace changing between versions without the calling application being updated to match).
 - A caching layer or CDN continuing to serve a stale, previously-cached 404 response for a REST URL after the underlying cause has already been corrected.
-- A migration or environment change that did not carry forward the site's permalink/rewrite configuration, or that changed the site's own base URL without updating a headless front end's own configured API endpoint to match.
+- A migration or environment change that changed the site's base URL, route-providing plugin state, or namespace/version without updating a headless front end's configured request path to match.
+
+A Plain permalink structure or corrupted, unflushed, or unapplied rewrite rule may prevent the pretty `/wp-json/` URL from reaching REST dispatch while `?rest_route=` continues to work. That is an important diagnostic distinction and can explain the caller's symptom, but it is not a cause of `rest_no_route`; it is outside this entry's owned failure mechanism.
 
 ---
 
@@ -128,9 +132,9 @@ Verify the following:
 
 1. Confirm this is genuinely a route-not-found condition — an HTTP 404 response carrying the `rest_no_route` error code and message — rather than a later-stage denial (`WP-ERROR-022`), a callback execution failure (`WP-ERROR-023`), or WordPress's own unrelated, generic 404 for ordinary content.
 2. Capture the exact request URL, HTTP method, and the full JSON error response, since a plain HTTP 404 without the `rest_no_route` code may indicate the request never reached WordPress's own REST routing at all (a web-server- or security-layer block, outside this entry's scope).
-3. Check whether the bare API root itself (`GET /wp-json/`, or `?rest_route=/` under a Plain permalink structure) resolves at all, as the most fundamental, least invasive check available: this route is always registered independently of any specific namespace, and its own response lists every currently registered namespace. If the root itself fails, the cause is REST API infrastructure-wide, not specific to one route; if it succeeds, its listed `namespaces` array indicates whether the specific namespace of interest is registered at all, narrowing subsequent steps before testing any specific endpoint directly.
-4. Test the identical request using the `?rest_route=` query-string form in place of the pretty `/wp-json/...` form (for example, `example.com/?rest_route=/wp/v2/posts`), since success there while the pretty form fails isolates the cause to permalink/rewrite configuration specifically, rather than the route itself being absent from the registration table.
-5. Confirm the site's currently configured permalink structure (Settings → Permalinks, or `wp option get permalink_structure`) is not set to Plain, and re-save permalinks (Settings → Permalinks → Save Changes) or run `wp rewrite flush` to rule out stale or corrupted rewrite rules.
+3. Check whether the bare API root itself (`GET /wp-json/`, or `?rest_route=/` under a Plain permalink structure) resolves at all, as the most fundamental, least invasive check available: the REST server handles the index independently of any specific namespace, and its response lists registered namespaces. If the query-string root succeeds, its listed `namespaces` array indicates whether the specific namespace of interest is registered. Failure of the pretty root alone does not establish this entry.
+4. Test the identical request using the `?rest_route=` query-string form in place of the pretty `/wp-json/...` form (for example, `example.com/?rest_route=/wp/v2/posts`). Success there while the pretty form fails proves the route exists and rules out this entry; investigate permalink/rewrite or web-server routing instead.
+5. If Step 4 isolates a pretty-URL reachability failure, confirm the configured permalink structure (`wp option get permalink_structure`) and inspect or flush rewrite rules as a separate diagnosis. Do not classify its generic 404 as `rest_no_route`.
 6. Test whether WordPress's own built-in REST endpoints (for example, `/wp-json/wp/v2/types`) succeed while only a specific custom endpoint fails, to isolate whether the cause is REST API infrastructure-wide or specific to the plugin or theme responsible for the one failing route.
 7. Where a specific plugin's own endpoint is suspected, confirm the plugin is active and did not encounter a PHP error during its own `rest_api_init` callback, by checking PHP error logs around the time of the failing request, since a failed registration callback can silently leave a route missing from the table without producing a visible fatal error elsewhere.
 8. Where a security plugin, firewall, or custom code is present, check for a `rest_endpoints` filter or an equivalent route-removal mechanism, by temporarily deactivating the suspected plugin and retesting, rather than assuming its presence or absence without confirmation.
@@ -144,16 +148,17 @@ Verify the following:
 
 # 12. Recovery Procedure
 
-Recovery shall target the verified cause of the missing route, not merely advise use of the `?rest_route=` fallback as a permanent substitute for a proper fix.
+Recovery shall target the verified cause of the missing route. The `?rest_route=` form is a diagnostic control, not a permanent substitute or evidence that a route is missing.
 
 Permitted recovery categories, depending on the verified cause, include:
 
-- Where a Plain permalink structure or corrupted rewrite rules are confirmed as the cause, changing the permalink structure to a non-Plain option and saving (which flushes rewrite rules), or running `wp rewrite flush`.
 - Where a specific plugin or theme's own registration code failed to run, reactivating it through WordPress's normal administrative flow, or correcting the PHP error preventing its `rest_api_init` callback from completing, rather than manually re-registering its routes elsewhere without understanding why the original registration failed.
 - Where a `rest_endpoints` filter or equivalent mechanism is confirmed to be removing the route, correcting or removing that filter, in coordination with whoever added it where its original intent is unclear, rather than assuming its removal was accidental without confirming.
 - Where a namespace or path mismatch between the caller and the currently registered route is confirmed, correcting the calling application's request to match the currently registered route, or restoring the expected route if a recent change unintentionally removed or renamed it.
 - Where a caching layer or CDN is serving a stale 404, purging the relevant cache, rather than only fixing the underlying cause and assuming callers will immediately see the corrected response.
 - Escalating to whoever controls the specific plugin, theme, or infrastructure responsible, where the engineer performing recovery does not have that access.
+
+Where the query-string control proves the route exists and only the pretty URL fails, leave this entry's recovery path and correct the separately diagnosed permalink/rewrite or web-server reachability condition—for example, by selecting the intended permalink structure and safely regenerating the applicable rules.
 
 Recovery shall not disable security plugins or firewall rules wholesale as a diagnostic shortcut in a production environment; isolate and correct the specific rule or filter responsible instead.
 
@@ -164,7 +169,7 @@ Recovery shall not disable security plugins or firewall rules wholesale as a dia
 Recovery is successful when:
 
 - The previously failing request now returns a successful response from the expected route, confirmed by reproducing the exact request that previously failed.
-- Both the pretty (`/wp-json/...`) and query-string (`?rest_route=...`) forms succeed where both are expected to work, not only whichever form was tested first.
+- The query-string (`?rest_route=...`) form reaches the expected route; the pretty (`/wp-json/...`) form also succeeds where the site's permalink and server configuration are intended to support it. A remaining pretty-only failure is recorded as a separate reachability defect, not a recurring `rest_no_route` result.
 - WordPress's own built-in REST endpoints continue to function normally, confirming no unrelated route was affected by the fix.
 - No equivalent `rest_no_route` error recurs across repeated, fresh requests to the same and related endpoints.
 - Where a caching layer was involved, the corrected response is confirmed to actually reach the caller, not only the origin server.
@@ -210,3 +215,5 @@ This entry underwent the review sequence required by **SF-SPEC-001** Section 19,
 The independent review did not designate this entry as a Reference Implementation. That designation, governed separately by **SF-SPEC-001** Section 22, has not been sought or asserted here.
 
 No Reference Implementation is currently designated by **SF-SPEC-001**; this entry's relationship to that designation, and to any future `WP-SCENARIO-XXX` runtime evidence, is not asserted here and shall not be assumed until such evidence or designation actually exists.
+
+**Version 1.1 (2026-07-16):** post-certification correction through **SF-SPEC-013** Section 5.6, prompted by the source gate preceding `WP-VERIFICATION-007`. Corrected the conflation between WordPress's `rest_no_route` result—produced only after REST route/method matching—and a pretty URL that never reaches REST dispatch because rewrite or server routing failed. Rewrite comparison remains required diagnostic evidence but is no longer an owned cause of this entry. Also corrected Section 6's reversed “latter” reference. Reviewed via `SF-REVIEW-183`/`184`; REST API re-certified via `SF-REVIEW-185`/`186` as Knowledge Baseline v2.
