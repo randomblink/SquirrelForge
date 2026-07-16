@@ -16,7 +16,7 @@ WordPress Filesystem Permission Denied
 * **Severity:** Critical
 * **Recovery Priority:** Immediate
 * **Status:** Production Ready
-* **Version:** 1.0
+* **Version:** 1.1
 
 ---
 
@@ -96,7 +96,7 @@ Listed as components commonly involved, not as a claim that every incident exerc
 - `request_filesystem_credentials()` (`wp-admin/includes/file.php`), which presents the FTP/SSH credential-entry form in `wp-admin` when `get_filesystem_method()` determines the direct method is unavailable — the symptom documented in Section 6's internal distinctions.
 - `wp_is_writable()` and `win_is_writable()` (`wp-includes/functions.php`), WordPress's own writability-check wrapper, used because PHP's native `is_writable()` is documented to behave unreliably against ACL-based permission systems (historically, Windows Server); `wp_is_writable()` delegates to `win_is_writable()`, which verifies writability by actually attempting a file operation rather than solely interpreting OS-reported ACL state.
 - `wp_upload_dir()` and `wp_mkdir_p()` (`wp-includes/functions.php`), responsible for resolving and creating the uploads directory structure, and the source of WordPress's own "Unable to create directory wp-content/uploads/&lt;year&gt;/&lt;month&gt;. Is its parent directory writable by the server?" message.
-- The `wp-content/upgrade` staging directory, used during plugin and theme installation and updates, and the source of WordPress's own "Installation Failed: Could Not Create Directory." message when it cannot be created or written to.
+- The `wp-content/upgrade` staging directory, used during plugin and theme installation and updates. In the browser interface, WordPress composes the failure as "Installation failed: Could not create directory."; WP-CLI reports "Could not create directory." together with the failed staging path.
 - Site Health (**Tools → Site Health → Info** tab), WordPress's own built-in diagnostic listing the writable/not-writable status of key directories (`wp-content`, `wp-content/plugins`, `wp-content/themes`, `wp-content/uploads`, and others).
 - The web server process's effective user and group (for example, `www-data`, `apache`, `nginx`, or a PHP-FPM pool's configured user), distinct from the file-owning user a deployment or SFTP account typically creates files as — the relationship between the two determines the outcome of standard Unix ownership and mode-bit checks.
 - OS-level access-control layers beyond standard Unix permission bits: SELinux contexts (for example, `httpd_sys_content_t` versus the writable `httpd_sys_rw_content_t`), AppArmor profiles, and POSIX ACLs, any of which can deny access independently of otherwise-permissive standard permission bits.
@@ -108,7 +108,7 @@ Listed as components commonly involved, not as a claim that every incident exerc
 
 - A PHP warning referencing the specific failed operation and path, such as `Warning: fopen(<path>): failed to open stream: Permission denied`, `Warning: mkdir(): Permission denied`, or `Warning: unlink(<path>): Permission denied`, visible in logs or on-screen where `WP_DEBUG`/error display is enabled.
 - WordPress's own "Unable to create directory wp-content/uploads/&lt;year&gt;/&lt;month&gt;. Is its parent directory writable by the server?" message, typically encountered during a media upload.
-- WordPress's own "Installation Failed: Could Not Create Directory." message, typically encountered during plugin or theme installation or update.
+- The browser-interface message "Installation failed: Could not create directory.", typically encountered during plugin or theme installation or update; WP-CLI presents the underlying "Could not create directory." error and failed path without that browser-interface prefix.
 - The FTP/SSH credential-entry form appearing in `wp-admin` when attempting to install, update, or edit a plugin or theme, or perform a core update, where it did not previously appear.
 - Site Health (Tools → Site Health → Info tab) reporting one or more key directories as "Not writable."
 - A specific feature (media uploads, a specific plugin's own file-writing behavior, plugin/theme installation or update, the built-in file editor) failing while ordinary browsing and unaffected features continue to work normally, where the affected feature depends on a specific, narrower path.
@@ -231,3 +231,5 @@ This entry underwent the review sequence required by **SF-SPEC-001** Section 19,
 The independent review did not designate this entry as a Reference Implementation. That designation, governed separately by **SF-SPEC-001** Section 22, has not been sought or asserted here.
 
 No Reference Implementation is currently designated by **SF-SPEC-001**; this entry's relationship to that designation, and to any future `WP-SCENARIO-XXX` runtime evidence, is not asserted here and shall not be assumed until such evidence or designation actually exists.
+
+**Version 1.1 (2026-07-16):** corrected through **SF-SPEC-013** Section 5.6 following `WP-VERIFICATION-004`. Runtime testing against WordPress 7.0.1 confirmed the failure mechanism, direct-write and ancestor-traversal cases, diagnosis, and recovery procedure. It also found that this entry's title-cased installer quotation was not the literal current message: browser-side core composes "Installation failed: Could not create directory.", while WP-CLI reports "Could not create directory." with the failed path. Only quotation fidelity changed; taxonomy ownership, failure mechanism, diagnosis, and recovery are unchanged. Reviewed via `SF-REVIEW-159`/`160`; Filesystem re-certified via `SF-REVIEW-163`/`164`.
