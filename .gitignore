@@ -11,23 +11,17 @@
 # Logs
 *.log
 
-# Dependencies
+# Dependency directories
 node_modules/
 vendor/
 
 # Build
-dist/
+ dist/
 build/
 
 # Environment
 .env
 .env.*
 
-# Composer
-composer.lock
-
 # PHPUnit
 .phpunit.result.cache
-
-# npm
-package-lock.json
