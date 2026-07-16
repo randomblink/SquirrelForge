@@ -56,23 +56,9 @@ final class ModuleDiscovery
                 continue;
             }
 
-            try {
-                if (!class_exists($class)) {
-                    continue;
-                }
-
-                $reflection = new ReflectionClass($class);
-
-                if (!$this->isDiscoverableModule($reflection)) {
-                    continue;
-                }
-
-                /** @var ModuleInterface $instance */
-                $instance = $reflection->newInstance();
+            $instance = $this->tryInstantiateModule($class);
+            if ($instance !== null) {
                 $modules[] = $instance;
-            } catch (Throwable $e) {
-                // One broken candidate must not stop discovery or boot.
-                $this->errors[] = sprintf('%s: %s', $class, $e->getMessage());
             }
         }
 
@@ -147,5 +133,28 @@ final class ModuleDiscovery
         $relative = str_replace(DIRECTORY_SEPARATOR, '\\', $relative);
 
         return rtrim($namespacePrefix, '\\') . '\\' . $relative;
+    }
+
+    private function tryInstantiateModule(string $class): ?ModuleInterface
+    {
+        try {
+            if (!class_exists($class)) {
+                return null;
+            }
+
+            $reflection = new ReflectionClass($class);
+
+            if (!$this->isDiscoverableModule($reflection)) {
+                return null;
+            }
+
+            /** @var ModuleInterface $instance */
+            $instance = $reflection->newInstance();
+            return $instance;
+        } catch (Throwable $e) {
+            // One broken candidate must not stop discovery or boot.
+            $this->errors[] = sprintf('%s: %s', $class, $e->getMessage());
+            return null;
+        }
     }
 }
