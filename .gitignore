@@ -16,7 +16,7 @@ node_modules/
 vendor/
 
 # Build
- dist/
+dist/
 build/
 
 # Environment
