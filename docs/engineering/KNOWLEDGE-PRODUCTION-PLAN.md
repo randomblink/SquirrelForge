@@ -18,7 +18,7 @@ It should be updated freely as production proceeds. It does not require engineer
 |---|---|---|---|---|
 | Database | 9 (`WP-ERROR-002`–`009`, `018`) | Yes | None (informal, disclosed gap) | `SF-REVIEW-033` |
 | Filesystem | 3 (`WP-ERROR-016`, `019`, `020`) | Yes | `SF-TAXONOMY-001` | `SF-REVIEW-040` |
-| REST API | 3 (`WP-ERROR-021`–`023`) | Yes | `SF-TAXONOMY-002` | `SF-REVIEW-053` |
+| REST API | 3 (`WP-ERROR-021`–`023`) | Yes | `SF-TAXONOMY-002` | `SF-REVIEW-186` (v2) |
 | PHP Runtime | 2 (`WP-ERROR-014`, `015`) | Yes | None (informal, disclosed gap) | `SF-REVIEW-057` |
 | Authentication | 4 (`WP-ERROR-024`–`027`) | Yes | `SF-TAXONOMY-003` | `SF-REVIEW-079` |
 | Networking | 3 (`WP-ERROR-028`–`030`) | Yes | `SF-TAXONOMY-004` | `SF-REVIEW-088` |
