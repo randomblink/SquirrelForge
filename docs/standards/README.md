@@ -15,6 +15,8 @@ This directory holds the governed rules and models used to produce and evaluate 
 
 Start with the specification governing the artifact you intend to change. For knowledge-category work, read `SF-SPEC-013` and the applicable taxonomy before editing an entry. Methodologies explain execution practice but do not silently override specifications.
 
+Before any runtime verification environment is created, read `SF-SPEC-015`. Runtime acquisition must pass its official-source and integrity gate before `SF-SPEC-002` runtime evidence collection begins.
+
 ## Placement Rule
 
 Do not place plans, review outcomes, runtime evidence, or historical notes here. Those belong in `docs/engineering/`, `docs/reviews/`, `docs/knowledge/verifications/`, or the artifact's own revision history.
