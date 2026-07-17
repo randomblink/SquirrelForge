@@ -30,7 +30,24 @@ This log records governed attempts to acquire official WordPress Core inputs for
 
 ## Current Acquisition State
 
-- No WordPress 7.0.1 cache entry exists.
-- No package from these attempts is trusted or retained.
+- A trusted WordPress 7.0.1 `en_US` cache entry was admitted on 2026-07-17 under `SF-SPEC-015` after the successful attempt recorded below.
+- No package from the failed attempts is trusted or retained.
 - Hospital, Thematic, and all other existing sites remain excluded.
-- WP-VERIFICATION-009 remains paused at its clean research checkpoint until a source passes `SF-SPEC-015`.
+- The WordPress Core source gate in `SF-SPEC-015` has now passed, but WP-VERIFICATION-009 remains paused at its clean research checkpoint pending a separate decision to accept this cache as its input and begin disposable-runtime creation.
+
+## 2026-07-17 — Successful Tier 1 Cache Admission / WordPress 7.0.1
+
+- Target: WordPress 7.0.1, `en_US`.
+- Source tier: Tier 1 — WordPress.org Release Archive.
+- Archive: `wordpress-7.0.1.zip`, 31,552,576 bytes.
+- Source URL: `https://wordpress.org/wordpress-7.0.1.zip`.
+- Official checksum source: the SHA-1 link for the WordPress 7.0.1 ZIP on the official WordPress.org Release Archive.
+- Official SHA-1: `a8186485dda36ea1a3a998c145efc946ce9f390e`.
+- Calculated SHA-1: `a8186485dda36ea1a3a998c145efc946ce9f390e` — exact match.
+- Local cache SHA-256: `f171740cf45b1f5a1bf52194ca914787cd9d8ea078599b430eca951b62b2d000`.
+- Pre-extraction archive test: passed with Info-ZIP UnZip 6.00; the archive contained the expected `wordpress/` top-level tree and no extraction was performed.
+- Provenance record: valid `runtime.json`, schema version 1.0, admitted with `cache_status` set to `trusted` only after the cached archive's SHA-256 matched the verified source copy.
+- Cache location: `/Users/randomblink/WordPressRuntimeCache/wordpress-7.0.1` (outside the SquirrelForge repository and disposable runtime locations).
+- Admission decision: accepted as a trusted cached Tier 1 archive under `SF-SPEC-015` Sections 5.3, 5.5, and 5.6.
+- Acquisition timestamp: `2026-07-17T14:46:26Z`.
+- Verification state: WP-VERIFICATION-009 did not start; no archive extraction, WordPress installation, healthy control, target request, or runtime conclusion occurred.
