@@ -10,7 +10,7 @@
 
 **Status:** Production Ready
 
-**Version:** 1.0
+**Version:** 1.1
 
 **Owner:** SquirrelForge
 
@@ -21,6 +21,8 @@
 ## 1.1 Objective
 
 This specification defines how SquirrelForge acquires, verifies, records, caches, instantiates, and disposes of WordPress Core packages used to create runtime-verification environments. Its purpose is to ensure that a runtime verification begins only from an official, integrity-verified, reproducible input rather than an unverified download or an unrelated existing site.
+
+It additionally defines acquisition-integrity requirements for supporting components — such as backend services, PHP extensions, WordPress plugins, and libraries — used to construct those same environments (Section 5.9). Supporting-component acquisition is governed separately from WordPress Core acquisition because the two do not share the same publisher ecosystems or integrity-mechanism guarantees; Sections 5.1–5.8 remain the exclusive and unamended governance for WordPress Core.
 
 The acquired runtime is environment evidence. It establishes the trustworthiness of the execution environment but does not, by itself, prove any claim about the behavior being verified.
 
@@ -35,6 +37,7 @@ This specification applies to:
 * WordPress Core release archives acquired for disposable runtime verification.
 * Official WordPress Git checkouts proposed as an archive alternative.
 * Locally cached WordPress Core packages reused by later verifications.
+* Supporting components acquired to construct a disposable runtime-verification environment — for example, backend services, PHP extensions, WordPress plugins, and libraries — as governed by Section 5.9.
 * Acquisition metadata and acquisition-failure records.
 * The integrity gate that precedes extraction, installation, and runtime evidence collection.
 
@@ -59,6 +62,7 @@ This specification does not define:
 * Pre-extraction integrity verification.
 * Runtime-acquisition provenance metadata.
 * Verified-package cache admission and periodic re-verification.
+* Acceptable supporting-component acquisition tiers and their evidence requirements (Section 5.9).
 * Acquisition stop conditions and acquisition-failure classification.
 * Separation between runtime acquisition and runtime verification.
 
@@ -214,9 +218,57 @@ Post-extraction Core file checks supplement but do not replace archive or Git pr
 
 ## 5.9 Supporting Components
 
-Every separately acquired supporting component used to construct the disposable environment, including WP-CLI or a database-integration plugin, shall have its official source, exact version, acquisition result, and available integrity mechanism recorded. A component shall not be represented as cryptographically verified when its publisher provides no independent signature or checksum for the acquired artifact.
+Every separately acquired supporting component used to construct the disposable environment, including WP-CLI, a database-integration plugin, a backend service, a PHP extension, or a library, shall have its official source, exact version, acquisition result, and available integrity mechanism recorded. A component shall not be represented as cryptographically verified when its publisher provides no independent signature or checksum for the acquired artifact.
 
-If a supporting component lacks a sufficient integrity mechanism for the verification's required assurance level, runtime acquisition shall stop or the component shall be replaced by an environment dependency whose provenance can be established without weakening the WordPress Core gate.
+This section governs supporting-component acquisition exclusively. It does not amend, relax, or reinterpret Sections 5.1–5.8, which remain the exclusive governance for WordPress Core acquisition.
+
+### 5.9.1 Applicability
+
+This section applies to every supporting component acquired to construct a disposable runtime-verification environment that is not itself a WordPress Core input governed by Sections 5.1–5.8. Supporting components include, without limitation: backend services (for example, a cache or queue server), PHP extensions, WordPress plugins, and libraries.
+
+### 5.9.2 Supporting Component Acquisition Tiers
+
+An acquired supporting component shall originate from one of these tiers:
+
+1. **Tier A — Exact-artifact publisher provenance:** the exact versioned artifact together with an integrity mechanism (checksum, digest, or signature) that the component's publisher publishes for that exact artifact.
+2. **Tier B — Content-verified alternate-artifact provenance:** a different, publisher-distributed artifact (for example, a rolling or alias release, or an official Git tag) for which the publisher does publish an integrity mechanism, used to establish provenance for the exact requested artifact only when all of the following hold:
+   - The alternate artifact's published integrity mechanism is independently recalculated and matches.
+   - The alternate artifact reports, through its own contents, the exact requested version.
+   - A complete comparison is performed between the alternate artifact's contents and the exact requested artifact's contents — their fully extracted trees, where the artifacts are archives, or their raw bytes, where an artifact is not an archive — and produces no unexplained difference. Only content-neutral packaging metadata (for example, a top-level directory or archive name, file modification timestamps, or file/directory permission bits) may be recorded as an explained difference; any difference in file content, file count, or path structure beyond such packaging metadata is unexplained and disqualifying.
+3. **Tier C — No acceptable provenance:** no publisher-backed integrity mechanism is available under Tier A or Tier B for the requested component and version. Acquisition of that component shall stop.
+
+Tier B shall not be inferred, substituted, or applied unless the governing campaign specification or this specification explicitly authorizes its use in advance of acquisition. A gate reached under Tier C shall not be resolved by locally computing a checksum with no independent value to compare it against, and shall not be reinterpreted during execution — resolving a Tier C stop is a specification decision, made in advance of acquisition, not an execution-time judgment call.
+
+### 5.9.3 Supporting Component Evidence Requirements
+
+For every supporting component, the acquisition record shall include:
+
+* Component name, publisher, and exact requested version.
+* Selected tier (A, B, or C).
+* Source URL(s) for the exact artifact and, where Tier B is used, the alternate artifact.
+* The published integrity mechanism's type and value, and the independently recalculated value.
+* For Tier B, the equivalence-verification method used (for example, a full-tree comparison), the specific tool(s) and version(s) used to perform it, its result, and any explained difference.
+* Overall acquisition status and, for a Tier C stop, an explicit statement that acquisition did not proceed and produced no runtime conclusion, consistent with Section 4.6's separation of outcomes.
+
+### 5.9.4 Supporting Component Stop Conditions
+
+Supporting-component acquisition shall stop before extraction, build, or use when:
+
+* No acceptable source under Tier A or Tier B is reachable.
+* A published integrity mechanism does not match its independently recalculated value.
+* A Tier B equivalence comparison finds an unexplained difference.
+* The requested exact version cannot be confirmed from the acquired artifact's own contents.
+
+No exception may be inferred from schedule pressure, campaign convenience, or the absence of an alternative supporting component.
+
+### 5.9.5 Rejected Supporting-Component Sources
+
+The following shall not be used as supporting-component inputs for governed runtime verification:
+
+* Unversioned or random artifacts.
+* Third-party mirrors not distributed by the component's official publisher.
+* A GitHub-generated source snapshot for a tag whose authenticity was not otherwise verified, unless accepted under Tier B's alternate-artifact provenance.
+* A checksum, digest, or signature calculated only after acquisition with no independent publisher-provided value against which to compare it.
 
 ## 5.10 Acquisition Failure Record
 
@@ -255,6 +307,7 @@ A `WP-VERIFICATION-XXX` runtime shall be considered started only after:
 * The applicable archive or Git gate passed.
 * `runtime.json` exists and is complete.
 * The disposable runtime reports the requested WordPress version.
+* Every supporting component required by the runtime has passed its applicable Section 5.9 gate.
 * A healthy control succeeds.
 
 Events before that point belong to runtime acquisition. They shall not be included as target-behavior observations or described as a failed `WP-VERIFICATION-XXX` execution.
@@ -342,3 +395,6 @@ No Reference Implementation is currently designated. The failed acquisition atte
 | Version | Date | Summary of Changes | Approval Status |
 |---|---|---|---|
 | 1.0 | 2026-07-17 | Initial specification. Formalizes official-source tiers, pre-extraction integrity gates, provenance records, cache admission and re-verification, acquisition-failure records, stop conditions, disposable instantiation, and the boundary between acquisition failure and runtime verification. | Production Ready — reviewed via SF-REVIEW-200/201 |
+| 1.1 | 2026-07-20 | Expanded Section 5.9 (Supporting Components) into a tiered acquisition model (5.9.1 Applicability, 5.9.2 Acquisition Tiers A/B/C, 5.9.3 Evidence Requirements, 5.9.4 Stop Conditions, 5.9.5 Rejected Supporting-Component Sources — the last added during author review per `SF-REVIEW-218` Finding F-1), added a supporting-component gate to Section 5.12 (Verification Start Gate), and updated Sections 1.1, 2.1, and 3.1 to reflect the expanded scope. Sections 5.1–5.8 (WordPress Core acquisition) are unchanged. Motivated by `WP-VERIFICATION-012`: no upstream-published digest was found for the exact-versioned Redis 8.8.0, PhpRedis 6.3.0, or Redis Object Cache 2.8.0 artifacts, and the campaign specification had to freehand equivalent rigor with no codified resolution path; this revision generalizes that gap into a reusable, pre-agreed model rather than leaving it to per-campaign improvisation. Does not retroactively alter or resume `WP-VERIFICATION-012`, which remains suspended pending a separate decision. | Draft — author-reviewed, see `SF-REVIEW-218` |
+| 1.1 | 2026-07-20 | Class B independent review (`SF-REVIEW-219`) verified the revision's scope via direct `git diff` against the Version 1.0 baseline (58 insertions, 4 deletions, confined to the Document Information fields, Sections 1.1/2.1/3.1/5.9/5.12, and Revision History), reproduced `SF-REVIEW-218`'s Finding F-1 resolution, and found no additional defect. Status changed to Production Ready. | Production Ready — Approved, see `SF-REVIEW-219` |
+| 1.1 | 2026-07-20 | Supplementary policy-focused review (`SF-REVIEW-220`), requested before committing, tested the revision against generality, determinism, evidence-burden, boundary, and Core-compatibility questions. Found and corrected two Minor findings within the review: Tier B's equivalence-comparison wording (5.9.2) implicitly assumed an archive artifact ("extracted contents") and left "explained difference" undefined beyond one example, both fixed by generalizing to non-archive artifacts and bounding "explained difference" to a closed category of content-neutral packaging metadata; and Tier B's evidence requirement (5.9.3) did not require recording the comparison tool/version, fixed to match Section 5.5's existing rigor for WordPress Core provenance records. No issue found with Tier B's boundary conditions or with Core-compatibility (Sections 5.1–5.8 remain untouched). Status remains Production Ready. | Production Ready — Approved with Minor Revisions, see `SF-REVIEW-220` |
