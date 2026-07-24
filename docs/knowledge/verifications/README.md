@@ -47,3 +47,4 @@ Every record shall additionally, within the indicated existing section, cover th
 | `WP-VERIFICATION-012` | `WP-ERROR-033` | Redis backend connection failure, connected-backend operation failure, and drop-in initialization failure verified; all cases independently reviewed | None |
 | `WP-VERIFICATION-013` | `WP-ERROR-034` | Missing page-cache drop-in, administrative no-op, and cache-write failure verified with a deterministic runtime fixture; all cases independently reviewed | None |
 | `WP-VERIFICATION-014` | `WP-ERROR-035` | OPcache stale-bytecode behavior verified across disabled timestamp validation, timed revalidation, and CLI/web execution-context boundaries; all cases independently reviewed | None |
+| `WP-VERIFICATION-015` | `WP-ERROR-007` | Database authentication, missing-database, permission-denied, and connection-limit boundaries verified against MariaDB; all cases independently reviewed | None |
