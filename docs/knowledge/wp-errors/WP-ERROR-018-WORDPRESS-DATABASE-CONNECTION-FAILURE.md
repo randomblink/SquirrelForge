@@ -16,7 +16,7 @@ WordPress Database Connection Failure
 * **Severity:** Critical
 * **Recovery Priority:** Immediate
 * **Status:** Production Ready
-* **Version:** 1.0
+* **Version:** 1.1
 
 ---
 
@@ -28,7 +28,7 @@ WordPress attempts to establish a connection to the database server configured i
 
 # 4. Primary Failure Mode
 
-WordPress's database layer (`wpdb`) attempts to open a connection to the configured database host and cannot obtain a usable connection handle. The attempt itself — not anything that depends on a connection already existing — is what fails. WordPress anticipates this condition: `wpdb` catches the failed connection attempt and calls its own dedicated database-error handling (`dead_db()`, which invokes `wp_die()` with a specific "Error establishing a database connection" message, optionally overridden by a `wp-content/db-error.php` drop-in), rather than allowing an uncaught PHP fatal error to terminate the request.
+WordPress's database layer (`wpdb`) attempts to open a connection to the configured database host and cannot obtain a usable connection handle. The attempt itself — not anything that depends on a connection already existing — is what fails. WordPress anticipates this condition: `wpdb::db_connect()` suppresses the driver exception path, checks for an optional `wp-content/db-error.php` drop-in, constructs the dedicated "Error establishing a database connection" presentation when no drop-in exists, and passes that presentation through `wpdb::bail()` to `wp_die()`, rather than allowing an uncaught PHP fatal error to terminate the request. The separate `dead_db()` helper owns other database-unavailable call sites after Core has progressed beyond this initial `db_connect()` failure branch; it is not the function `db_connect()` itself calls for the failed initial connection.
 
 ---
 
@@ -56,7 +56,7 @@ It is distinct from:
 - **WP-ERROR-007 — Database Connection Limit Exceeded**: covers the specific, verified case where the connection attempt is refused because the database server has reached its maximum permitted connections. This entry's boundary ends once a specific cause such as connection-limit exhaustion has been confirmed; that specific, verified cause belongs to WP-ERROR-007, not this entry.
 - **WP-ERROR-008 — Database Server Unreachable**: covers the specific, verified case where the failure is at the network level (the host cannot be reached at all — DNS failure, firewall block, incorrect host or port, or the database process not running). This entry's boundary ends once a specific cause such as network unreachability has been confirmed; that specific, verified cause belongs to WP-ERROR-008, not this entry.
 - **WP-ERROR-009 — Database Query Timeout**: presumes a successful, established connection, with the failure occurring because a specific query does not complete in time. This entry's boundary ends once a specific cause such as a query timeout has been confirmed; that specific, verified cause belongs to WP-ERROR-009, not this entry.
-- **WP-ERROR-013 — WordPress Bootstrap PHP Fatal Error**: a database connection failure is handled by WordPress's own dedicated `dead_db()` / `wp_die()` path, not by an uncaught PHP fatal error terminating bootstrap. This entry's condition is deliberately anticipated and handled by WordPress itself; it is not, by default, an instance of the general uncaught-fatal-error condition WP-ERROR-013 documents. Where the required database extension itself is unavailable (so that `wpdb` cannot even attempt to call a connection function), that is WP-ERROR-014's territory, and the resulting failure may then present as an uncaught fatal error rather than the handled path this entry documents. Where a site has installed a custom `wp-content/db-error.php` drop-in and that drop-in file is itself defective, the resulting failure is an uncaught fatal error in that drop-in's own code, not the graceful, anticipated handling this entry otherwise documents; evidence shall establish which condition is actually present.
+- **WP-ERROR-013 — WordPress Bootstrap PHP Fatal Error**: an initial database connection failure is handled by WordPress's dedicated `wpdb::db_connect()` error branch and `wpdb::bail()` / `wp_die()` path, not by an uncaught PHP fatal error terminating bootstrap. Other database-unavailable call sites may invoke `dead_db()`, but that helper is not the initial `db_connect()` failure mechanism. This entry's condition is deliberately anticipated and handled by WordPress itself; it is not, by default, an instance of the general uncaught-fatal-error condition WP-ERROR-013 documents. Where the required database extension itself is unavailable (so that `wpdb` cannot even attempt to call a connection function), that is WP-ERROR-014's territory, and the resulting failure may then present as an uncaught fatal error rather than the handled path this entry documents. Where a site has installed a custom `wp-content/db-error.php` drop-in and that drop-in file is itself defective, the resulting failure is an uncaught fatal error in that drop-in's own code, not the graceful, anticipated handling this entry otherwise documents; evidence shall establish which condition is actually present.
 - **WP-ERROR-016 — WordPress Core Files Missing or Corrupted**: a connection failure caused by corrupted or missing `wpdb`-related core files is a distinct, verified condition from a connection failure that occurs because the database server itself, its credentials, or the network path to it is unavailable. Evidence shall establish which is actually present before concluding this entry applies.
 
 ---
@@ -86,7 +86,8 @@ It is distinct from:
 Listed as components commonly involved, not as a claim that every installation exercises every one of them identically:
 
 - The `wpdb` class (`wp-includes/class-wpdb.php`), specifically its connection-establishment logic.
-- WordPress's dedicated database-error handling (`dead_db()` and `wp_die()` in `wp-includes/functions.php`), which presents the connection failure rather than allowing an uncaught fatal error.
+- The initial connection-error branch in `wpdb::db_connect()` and `wpdb::bail()` in `wp-includes/class-wpdb.php`, which loads the optional drop-in or passes the constructed connection-error presentation to `wp_die()`.
+- The separate `dead_db()` helper in `wp-includes/functions.php`, used by other database-unavailable call sites after Core has progressed beyond the initial `db_connect()` failure branch; it shares the optional drop-in and database-error presentation but is not called by that initial branch.
 - The optional `wp-content/db-error.php` drop-in, which a site may use to customize the connection-failure page.
 - The `DB_HOST`, `DB_USER`, `DB_PASSWORD`, and `DB_NAME` constants defined in `wp-config.php`, whose values determine what WordPress attempts to connect to.
 - WP-CLI's own database-connectivity commands (for example, `wp db check`), which depend on the same underlying connection attempt as web requests.
@@ -203,10 +204,19 @@ The following are cited as they exist in this repository, or as conceptual disti
 
 # 17. Notes
 
-This entry documents the general, verified observable condition of a database connection attempt failing, and the specific, dedicated way WordPress handles that condition (`dead_db()` / `wp_die()`, optionally customized by `wp-content/db-error.php`) rather than as an uncaught PHP fatal error. It does not claim to own the specific, verified causes of a connection failure once they have been isolated; those are reserved for separate, cause-specific entries named in Section 6. WP-ERROR-002, WP-ERROR-003, WP-ERROR-004, WP-ERROR-005, WP-ERROR-006, WP-ERROR-007, WP-ERROR-008, and WP-ERROR-009 — every cause named in Section 6 — now exist in this repository. Consistent with the single-responsibility principle in **SF-SPEC-001** Section 4.3, this entry owns the general condition and the diagnostic process for narrowing it to a specific cause, not the full remediation detail for every possible specific cause.
+This entry documents the general, verified observable condition of a database connection attempt failing, and the specific, dedicated way WordPress handles an initial failure (`wpdb::db_connect()` → optional `db-error.php` or `wpdb::bail()` → `wp_die()`) rather than as an uncaught PHP fatal error. The separate `dead_db()` helper serves other database-unavailable call sites and shares the optional drop-in/error-presentation behavior; it is not the initial connection branch. This entry does not claim to own the specific, verified causes of a connection failure once they have been isolated; those are reserved for separate, cause-specific entries named in Section 6. WP-ERROR-002, WP-ERROR-003, WP-ERROR-004, WP-ERROR-005, WP-ERROR-006, WP-ERROR-007, WP-ERROR-008, and WP-ERROR-009 — every cause named in Section 6 — now exist in this repository. Consistent with the single-responsibility principle in **SF-SPEC-001** Section 4.3, this entry owns the general condition and the diagnostic process for narrowing it to a specific cause, not the full remediation detail for every possible specific cause.
 
 This entry underwent the review sequence required by **SF-SPEC-001** Section 19, **SF-SPEC-005** Section 5.6, and **SF-SPEC-012**: an author (Class A) review at `docs/reviews/SF-REVIEW-014-WP-ERROR-018-AUTHOR-REVIEW.md`, followed by an independent (Class B) review at `docs/reviews/SF-REVIEW-015-WP-ERROR-018-INDEPENDENT-REVIEW.md`, which independently re-verified the non-existence of WP-ERROR-002 through 009, reached outcome **Approved with Minor Revisions**, applied and re-validated the one required revision, and satisfied the Production Ready gate per SF-SPEC-012 Section 12. Its Status was changed to Production Ready on that basis. This document does not itself constitute either review record; see the cited files for full findings, corrections, and gate decisions.
 
 The independent review did not designate this entry as a Reference Implementation. That designation, governed separately by **SF-SPEC-001** Section 22, has not been sought or asserted here.
 
 No Reference Implementation is currently designated by **SF-SPEC-001**; this entry's relationship to that designation, and to any future `WP-SCENARIO-XXX` runtime evidence, is not asserted here and shall not be assumed until such evidence or designation actually exists.
+
+---
+
+## Revision History
+
+| Version | Date | Summary | Approval Status |
+|---|---|---|---|
+| 1.0 | 2026-07-13 | Initial Production Ready entry. | Approved via SF-REVIEW-014/015 |
+| 1.1 | 2026-07-25 | Post-certification correction prompted by the WP-VERIFICATION-018 source gate. Corrected the initial connection-failure call path from an asserted `dead_db()` call to the actual `wpdb::db_connect()` drop-in-or-`wpdb::bail()`/`wp_die()` branch, and distinguished later `dead_db()` call sites. Observable ownership, severity, recovery, and cause-specific handoffs are unchanged. | Reviewed via SF-REVIEW-242/243; Database re-certified via SF-REVIEW-244/245 |
