@@ -16,7 +16,7 @@ WordPress Database Query Timeout
 * **Severity:** High
 * **Recovery Priority:** High
 * **Status:** Production Ready
-* **Version:** 1.0
+* **Version:** 1.1
 
 ---
 
@@ -83,7 +83,7 @@ Listed as components commonly involved, not as a claim that every installation e
 # 9. Typical Symptoms
 
 - A specific WordPress operation (a search, a report, an export, a large listing page, or a specific administrative screen) consistently taking a very long time or failing to complete, while ordinary browsing and other operations continue to work normally.
-- A database-level error such as MySQL error `3024` ("Query execution was interrupted, maximum statement execution time exceeded") or MariaDB error `1969` ("Query execution was interrupted (max_statement_time exceeded)"), visible in logs where accessible.
+- A database-level statement-timeout error, such as MySQL error `3024` or MariaDB `ER_STATEMENT_TIMEOUT` error `1969` with SQLSTATE `70100`, visible in logs where accessible. Treat the numeric error, symbolic name, and SQLSTATE as the stable identifiers rather than requiring one exact message string: MariaDB documentation records "Query execution was interrupted (max_statement_time exceeded)," while MariaDB 12.3.2 emitted the version-specific text "Query was interrupted: execution time limit 0.2 sec exceeded" in `WP-VERIFICATION-017`.
 - PHP's own "Maximum execution time of N seconds exceeded" fatal error, where the underlying cause is a specific slow query rather than an unrelated long-running operation.
 - A blank page, a gateway timeout response (for example, an HTTP 504), or a truncated response for a specific operation, without WordPress's own generic connection-failure message, since the connection itself was successfully established and only a specific query failed to complete in time.
 - The same operation succeeding when run directly against the database outside of the usual web-request timeout constraints (for example, via WP-CLI or a direct database client), suggesting a timeout-configuration or request-path issue rather than the query being universally too slow to ever complete.
@@ -113,7 +113,7 @@ Causes are grouped by category. Inclusion in this list identifies a category as 
 Verify the following:
 
 1. Confirm this is genuinely a query-timeout condition — occurring after connection establishment, authentication, database selection, and privilege checks have all already succeeded — rather than an earlier-stage failure documented elsewhere in this cluster.
-2. Identify exactly which layer enforced the observed timeout: the database server's own statement-execution limit (MySQL error 3024 or MariaDB error 1969), the PHP database driver's own read or query timeout, PHP's own overall script execution-time limit (distinct from MySQL's identically-named setting), or a web-server or gateway-level request timeout — since each is configured in a different place and points to a different corrective action.
+2. Identify exactly which layer enforced the observed timeout: the database server's own statement-execution limit (MySQL error 3024 or MariaDB `ER_STATEMENT_TIMEOUT` error 1969 with SQLSTATE `70100`), the PHP database driver's own read or query timeout, PHP's own overall script execution-time limit (distinct from MySQL's identically-named setting), or a web-server or gateway-level request timeout — since each is configured in a different place and points to a different corrective action. Do not require an exact MariaDB message-text match, because the wording is version-dependent even when the error number, symbolic name, and SQLSTATE identify the same condition.
 3. Capture the exact query that was executing when the timeout occurred, using WordPress's own query logging (for example, `SAVEQUERIES` with `WP_DEBUG`), WP-CLI's built-in profiling commands (`wp profile stage` and `wp profile hook`, which break down where execution time is actually spent across a request), or the database server's own slow-query log, rather than assuming which query was responsible.
 4. Where the database server's slow-query log is available, review it for the specific query's actual execution time and its query plan (for example, via `EXPLAIN`), to determine whether the query itself is inherently expensive or was delayed by contention from other queries. Confirm the server's `long_query_time` setting, which determines the threshold above which a query is actually recorded in the slow-query log, since a threshold set too high can mean a genuinely slow query never appears there at all.
 5. Determine whether the slow query is reproducible in isolation (run directly against the database outside of WordPress) or only under concurrent production load, since the two point toward different causes.
@@ -202,3 +202,12 @@ This entry underwent the review sequence required by **SF-SPEC-001** Section 19,
 The independent review did not designate this entry as a Reference Implementation. That designation, governed separately by **SF-SPEC-001** Section 22, has not been sought or asserted here.
 
 No Reference Implementation is currently designated by **SF-SPEC-001**; this entry's relationship to that designation, and to any future `WP-SCENARIO-XXX` runtime evidence, is not asserted here and shall not be assumed until such evidence or designation actually exists.
+
+---
+
+## Revision History
+
+| Version | Date | Summary | Approval Status |
+|---|---|---|---|
+| 1.0 | 2026-07-13 | Initial Production Ready entry. | Approved via SF-REVIEW-026/027 |
+| 1.1 | 2026-07-25 | Post-certification correction prompted by WP-VERIFICATION-017 runtime evidence. Replaced a single supposedly universal MariaDB error-1969 quotation with stable identifiers (`ER_STATEMENT_TIMEOUT`, `1969`, SQLSTATE `70100`) and documented that message wording varies by MariaDB version. Failure ownership, severity, diagnosis order, and recovery guidance are unchanged. | Reviewed via SF-REVIEW-232/233; Database re-certified via SF-REVIEW-234/235 |
