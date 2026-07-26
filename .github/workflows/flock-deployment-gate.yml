@@ -71,6 +71,24 @@ jobs:
             --env MOCK_PROVIDER_TOKEN="$PROVIDER_TOKEN" \
             squirrelforge-mock-provider
 
+          for attempt in $(seq 1 30); do
+            if docker run --rm \
+              --network squirrelforge-ci-network \
+              --volume "$PWD/.ci-certs/provider.crt:/certs/provider.crt:ro" \
+              curlimages/curl:8.10.1 \
+              --fail --silent --show-error \
+              --cacert /certs/provider.crt \
+              --header "Authorization: Bearer $PROVIDER_TOKEN" \
+              https://mock-provider:8090/v1/provider/health >/dev/null; then
+              break
+            fi
+            if [ "$attempt" -eq 30 ]; then
+              echo "Mock credential provider did not become ready." >&2
+              exit 1
+            fi
+            sleep 1
+          done
+
           docker run --detach \
             --name squirrelforge-ci-runtime \
             --network squirrelforge-ci-network \
