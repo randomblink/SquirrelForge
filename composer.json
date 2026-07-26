@@ -19,8 +19,21 @@
     "phpunit/phpunit": "^11.0"
   },
   "scripts": {
+    "admission:verify": "sh bin/verify-release-image.sh",
+    "backup:engine": "php bin/backup-engine.php",
+    "capacity:evaluate": "php bin/evaluate-capacity-result.php",
+    "capacity:run": "k6 run deploy/load/capacity-test.js",
+    "health:production": "sh bin/check-production-health.sh",
+    "launch:evaluate": "php bin/evaluate-launch-readiness.php",
+    "observe:release": "sh bin/observe-release.sh",
+    "restore:engine": "php bin/restore-engine-backup.php",
+    "rollback:release": "sh bin/rollback-release.sh",
+    "rollout:release": "sh bin/rollout-release.sh",
+    "runtime:preflight": "php bin/runtime-preflight.php",
+    "smoke:production": "php bin/production-smoke-test.php",
     "test": "phpunit",
-    "test:coverage": "phpunit --coverage-text"
+    "test:coverage": "phpunit --coverage-text",
+    "verify:backup": "php bin/verify-engine-backup.php"
   },
   "config": {
     "optimize-autoloader": true,

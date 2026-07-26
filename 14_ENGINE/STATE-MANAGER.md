@@ -1,11 +1,11 @@
 # SquirrelForge State Manager
 
-Version: 1.0.0
+Version: 1.1.0
 Status: Stable
 Owner: Engine Maintainers
-Depends On: `11_OVERVIEW/LIFECYCLE.md`, `14_ENGINE/PROJECT-LOADER.md`, `14_ENGINE/WORKFLOW-SELECTOR.md`, `14_ENGINE/TASK-ROUTER.md`
+Depends On: `11_OVERVIEW/LIFECYCLE.md`, `14_ENGINE/PROJECT-LOADER.md`, `14_ENGINE/WORKFLOW-SELECTOR.md`, `14_ENGINE/TASK-ROUTER.md`, `14_ENGINE/VALIDATION.md`
 Used By: Engine, Coordination, Execution, Validation, Reporting
-Last Updated: 2026-07-04
+Last Updated: 2026-07-26
 
 ## Purpose
 
@@ -54,7 +54,7 @@ A useful state record should include:
 | Dependencies | Required predecessor tasks and their status. |
 | Routing | Routing state and current owner. |
 | Permissions | Permission status for planned actions. |
-| Validation | Required validation and current evidence status. |
+| Validation | Validation ID, subject and version references, overall decision, stage and item states, evidence and report references, attempt history, invalidated items, limitations, residual risks, and next action from the standardized validation object. |
 | Blockers | Active blockers, reasons, and responsible phase. |
 | Recovery | Recovery or rollback state when required. |
 | Next Step | Next required lifecycle action. |
@@ -81,7 +81,7 @@ A useful state record should include:
 | `OBSERVABILITY_RECORDING` | Relevant events, diagnostics, and audit records are being recorded. |
 | `MEMORY_UPDATE` | Allowed memory or learning records are being stored. |
 | `RETENTION` | Records are retained or archived according to policy. |
-| `COMPLETE` | Work is complete with required evidence or clearly reported limitations. |
+| `COMPLETE` | Work is complete after `ACCEPTED` or policy-permitted `ACCEPTED_WITH_LIMITATIONS`. |
 | `BLOCKED` | A required condition prevents progress. |
 | `RECOVERY_REQUIRED` | Unsafe or incomplete state requires recovery before continuation. |
 | `FAILED` | Work failed and no safe continuation path is currently available. |
@@ -98,8 +98,8 @@ A useful state record should include:
 | `IN_PROGRESS` | Work has begun. |
 | `WAITING` | Task is waiting on dependency, permission, tool, or user input. |
 | `BLOCKED` | Task cannot proceed until a blocker is resolved. |
-| `VALIDATION_PENDING` | Work exists but validation evidence is not complete. |
-| `VALIDATION_FAILED` | Validation failed and repair is required. |
+| `VALIDATION_PENDING` | Work exists but the standardized validation decision is not terminal. |
+| `VALIDATION_FAILED` | Validation decision is `REPAIR_REQUIRED`; repair and re-validation are required. |
 | `COMPLETED` | Task is complete with required evidence. |
 | `CANCELLED` | Task was cancelled by lifecycle, governance, or scope control. |
 
@@ -109,20 +109,42 @@ A useful state record should include:
 
 | State | Meaning |
 |---|---|
-| `NOT_REQUIRED` | No validation is required for this item. |
+| `NOT_REQUIRED` | Applicability analysis determined the item is not required and recorded why. |
 | `REQUIRED` | Validation is required but not started. |
 | `PENDING` | Validation is underway or waiting for evidence. |
-| `PASSED` | Required validation evidence passed. |
-| `FAILED` | Validation evidence failed. |
-| `UNAVAILABLE` | Validation could not be performed and must be disclosed. |
-| `WAIVED` | Validation was intentionally waived by an approved governance or permission decision. |
+| `PASSED` | Applicable authoritative evidence met the expected condition. |
+| `FAILED` | Evidence did not meet the expected condition. |
+| `UNAVAILABLE` | Validation could not be performed; reason and impact are recorded. |
+| `WAIVED` | An authorized governance decision explicitly waived the item. |
+| `STALE` | Earlier evidence was invalidated by a relevant change and must be produced again. |
+| `CANCELLED` | The item was cancelled because the request or owning task was cancelled. |
+
+---
+
+## Validation Decision Values
+
+The State Manager records, but does not independently calculate, the decision emitted by `14_ENGINE/VALIDATION.md`.
+
+| Decision | Required State Effect |
+|---|---|
+| `ACCEPTED` | The validated task may move to `COMPLETED`; lifecycle may advance to `REVIEW` or `REPORTING`. |
+| `ACCEPTED_WITH_LIMITATIONS` | The task may move to `COMPLETED` only when policy permits the limitations; limitations and residual risks remain attached. |
+| `REPAIR_REQUIRED` | Task moves to `VALIDATION_FAILED` and lifecycle returns to the recorded responsible phase. |
+| `CLARIFICATION_REQUIRED` | Task moves to `WAITING`; the missing decision and resume condition are recorded. |
+| `BLOCKED` | Task and lifecycle move to `BLOCKED`; blocker ownership and next safe action are recorded. |
+| `RECOVERY_REQUIRED` | Lifecycle moves to `RECOVERY_REQUIRED`; affected state and recovery route are preserved. |
+| `REJECTED` | Task cannot complete; lifecycle moves to `FAILED` unless governance or workflow policy defines another terminal rejected state. |
 
 ---
 
 ## Transition Rules
 
 - A task may move to `IN_PROGRESS` only after required dependencies are satisfied or explicitly waived.
-- A task may move to `COMPLETED` only after required validation evidence exists or unavailable validation is explicitly reported.
+- A task may move to `COMPLETED` only after a validation decision of `ACCEPTED` or policy-permitted `ACCEPTED_WITH_LIMITATIONS`.
+- `UNAVAILABLE`, `WAIVED`, `NOT_REQUIRED`, `STALE`, and `CANCELLED` must never be normalized to `PASSED`.
+- A changed validation subject, version, dependency, environment, rule, or acceptance criterion invalidates affected evidence and moves its items to `STALE`.
+- A validation retry or repair appends attempt history and preserves earlier failures and evidence.
+- Validation decisions must reference the same request, execution, task, subject, and version held by the active state record.
 - A lifecycle phase may not skip a required gate.
 - A failed validation returns work to the earliest responsible phase.
 - A blocker must identify the blocked condition, responsible phase, and next safe action.

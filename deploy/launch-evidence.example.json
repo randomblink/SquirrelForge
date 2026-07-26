@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "release_ref": "release:v1.0.0",
+  "change_ref": "change:replace-with-approved-change",
+  "approval_ref": "approval:replace-with-production-approval",
+  "candidate_image": "ghcr.io/example/squirrelforge@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "rollback_image": "ghcr.io/example/squirrelforge@sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "owners": {
+    "release": "team:release",
+    "on_call": "rotation:squirrelforge",
+    "recovery": "team:recovery",
+    "security": "team:security"
+  },
+  "evidence": {
+    "admission": {
+      "path": "admission-receipt.json",
+      "sha256": "replace_with_sha256"
+    },
+    "rollout": {
+      "path": "rollout-receipt.json",
+      "sha256": "replace_with_sha256"
+    },
+    "observation": {
+      "path": "observation-receipt.json",
+      "sha256": "replace_with_sha256"
+    },
+    "health": {
+      "path": "production-health-receipt.json",
+      "sha256": "replace_with_sha256"
+    },
+    "backup": {
+      "path": "engine.backup.manifest.json",
+      "sha256": "replace_with_sha256"
+    },
+    "restore": {
+      "path": "restore-receipt.json",
+      "sha256": "replace_with_sha256"
+    },
+    "capacity": {
+      "path": "capacity-receipt.json",
+      "sha256": "replace_with_sha256"
+    }
+  }
+}

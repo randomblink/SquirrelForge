@@ -1,11 +1,11 @@
 # SquirrelForge Identity Manager
 
-Version: 1.0.0
+Version: 1.1.0
 Status: Stable
 Owner: Security Maintainers
 Depends On: `24_SECURITY/SECURITY-GOVERNANCE.md`, `28_RUNTIME-CONFIG/SECRETS-MANAGER.md`
 Used By: `24_SECURITY/AUTHENTICATION-MANAGER.md`, `24_SECURITY/AUTHORIZATION-MANAGER.md`, `24_SECURITY/SECURITY-MANAGER.md`
-Last Updated: 2026-07-07
+Last Updated: 2026-07-26
 
 ## Purpose
 
@@ -123,6 +123,12 @@ The Identity Manager succeeds when:
 - Role assignments remain current for `24_SECURITY/AUTHORIZATION-MANAGER.md` to consume.
 - All identity lifecycle events are securely logged.
 - No credentials are stored outside `28_RUNTIME-CONFIG/SECRETS-MANAGER.md`.
+
+---
+
+## Reference Runtime
+
+The PHP reference implementation provides `IdentityManagerInterface` and `SqliteIdentityManager` for persistent local identity records, roles, attributes, and lifecycle status. It stores no credential material. Authentication consults its active status before accepting a session.
 
 ---
 

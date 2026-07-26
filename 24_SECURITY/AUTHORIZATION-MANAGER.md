@@ -1,11 +1,11 @@
 # SquirrelForge Authorization Manager
 
-Version: 1.0.0
+Version: 1.1.0
 Status: Stable
 Owner: Security Maintainers
 Depends On: `24_SECURITY/AUTHENTICATION-MANAGER.md`, `24_SECURITY/SECURITY-GOVERNANCE.md`, `21_CONFIGURATION/PERMISSIONS.md`, `23_GOVERNANCE/POLICY-ENGINE.md`
 Used By: `24_SECURITY/SECURITY-MANAGER.md`, `24_SECURITY/SECURITY-MONITOR.md`
-Last Updated: 2026-07-07
+Last Updated: 2026-07-26
 
 ## Purpose
 
@@ -161,6 +161,29 @@ The Authorization Manager succeeds when:
 - Audit history is complete.
 - Governance requirements are respected.
 - Platform resources remain securely protected.
+
+---
+
+## Reference Runtime
+
+The PHP reference implementation defines:
+
+- `AuthorizationManagerInterface` for runtime grant/deny evaluation,
+- `SqliteAuthorizationManager` for persistent local grants and immutable decision records,
+- and `StaticAuthorizationManager` only for deterministic contract tests.
+
+The SQLite implementation binds permission references to:
+
+- one authenticated identity reference,
+- allowed operations,
+- allowed resource references,
+- optional restrictions,
+- optional expiry,
+- and revocation state.
+
+Every evaluation produces a persisted authorization decision with its identity, permission, operation, resource, correlation, rationale, restrictions, and timestamp. The Engine API exposes the resulting authorization reference in its response headers.
+
+The HTTP entry point is fail-closed when no matching grant exists. Its optional bootstrap identity and permission environment values exist for controlled local initialization; production deployment must replace bootstrap provisioning with the authoritative identity, authentication, configuration-permission, policy, and governance inputs described above.
 
 ---
 

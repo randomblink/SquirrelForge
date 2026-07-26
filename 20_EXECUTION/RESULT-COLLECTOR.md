@@ -1,11 +1,11 @@
 # SquirrelForge Result Collector
 
-Version: 1.0.0
+Version: 1.1.0
 Status: Stable
 Owner: Execution Maintainers
 Depends On: `20_EXECUTION/ACTION-DISPATCHER.md`, `14_ENGINE/VALIDATION.md`, `20_EXECUTION/EXECUTION-ENGINE.md`, `20_EXECUTION/WORKFLOW-EXECUTOR.md`, `20_EXECUTION/EXECUTION-LOGGER.md`, `37_STORAGE/STORAGE-MANAGER.md`
 Used By: Execution Engine, Workflow Executor, Execution Reporter
-Last Updated: 2026-07-06
+Last Updated: 2026-07-26
 
 ## Purpose
 
@@ -25,7 +25,7 @@ The Result Collector must:
 - detect missing expected result references,
 - detect duplicate collection entries or duplicate result references, flagging them without deleting or reconciling the underlying authoritative record,
 - assemble related result references into an Execution Result Set,
-- attach external validation-result references when available, without independently validating,
+- attach a standardized validation-record reference when available, without independently validating or copying its contents,
 - report collection findings to `20_EXECUTION/EXECUTION-ENGINE.md` and `20_EXECUTION/WORKFLOW-EXECUTOR.md`,
 - provide assembled result sets to `20_EXECUTION/EXECUTION-REPORTER.md`,
 - and preserve collection traceability.
@@ -50,10 +50,11 @@ It must not:
 3. Register the result reference.
 4. Detect missing expected result references.
 5. Detect duplicate collection entries or duplicate result references, and flag them without deleting or reconciling the underlying record.
-6. Attach an external validation-result reference when one is available.
+6. Record the validation subject and version references required to bind later evidence to this exact result set.
 7. Assemble related result references into an Execution Result Set.
 8. Report collection findings to `20_EXECUTION/EXECUTION-ENGINE.md` and `20_EXECUTION/WORKFLOW-EXECUTOR.md`.
-9. Provide the assembled result set to `20_EXECUTION/EXECUTION-REPORTER.md`.
+9. After validation, attach the standardized validation-record reference supplied by `14_ENGINE/VALIDATION.md`.
+10. Provide the assembled result set and attached validation-record reference to `20_EXECUTION/EXECUTION-REPORTER.md`.
 
 ---
 
@@ -65,7 +66,7 @@ It must not:
 | Received | A result reference has been registered |
 | Missing | An expected result reference has not been received |
 | Duplicate | More than one result reference was collected for the same expected output; flagged, not deleted |
-| Referenced | An external validation-result reference has been attached |
+| Referenced | A standardized validation-record reference has been attached |
 | Assembled | Included in an Execution Result Set |
 
 ---
@@ -80,7 +81,9 @@ It must not:
 | Action Reference | Source action |
 | Dispatch Reference | Related dispatch record |
 | Output Type | Artifact or result category |
-| Validation Result Reference | Reference to `14_ENGINE/VALIDATION.md`'s result, when available |
+| Subject Reference | Artifact, state change, decision, response, or execution-result reference to validate. |
+| Version Reference | Commit, build, revision, or immutable result version to validate. |
+| Validation Record Reference | Reference to `14_ENGINE/VALIDATION.md`'s standardized validation object, when available. |
 | Collection Finding | Current finding from the table above |
 | Timestamp | Collection time |
 
@@ -95,6 +98,8 @@ It must not:
 | Included Result References | Result Reference Records assembled into this set |
 | Missing References | Expected result references not yet received |
 | Duplicate References | Flagged duplicate result references |
+| Validation Subject References | Subjects and versions represented by this result set. |
+| Validation Record Reference | Standardized validation-record reference, attached after validation. |
 | Timestamp | Assembly time |
 
 ---
