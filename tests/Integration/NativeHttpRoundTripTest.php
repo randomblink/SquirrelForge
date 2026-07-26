@@ -54,7 +54,7 @@ final class NativeHttpRoundTripTest extends TestCase
         $apiKey = 'test_api_key_' . bin2hex(random_bytes(24));
         $this->databasePath = sys_get_temp_dir() . '/squirrelforge-http-' . bin2hex(random_bytes(8)) . '.sqlite';
         $this->startServer($port, $apiKey);
-        $this->waitUntilReady($baseUrl);
+        $this->waitUntilReady($port);
         $session = (new HttpAuthenticationClient($baseUrl, new NativeHttpTransport()))->createSession(
             'identity_1',
             $apiKey,
@@ -126,17 +126,25 @@ final class NativeHttpRoundTripTest extends TestCase
         }
     }
 
-    private function waitUntilReady(string $baseUrl): void
+    private function waitUntilReady(int $port): void
     {
         $lastError = '';
 
         for ($attempt = 0; $attempt < 50; $attempt++) {
-            $context = stream_context_create(['http' => ['ignore_errors' => true, 'timeout' => 0.1]]);
-            $response = @file_get_contents($baseUrl . '/health-probe', false, $context);
+            $socket = @stream_socket_client(
+                'tcp://127.0.0.1:' . $port,
+                $errorCode,
+                $errorMessage,
+                0.1
+            );
 
-            if ($response !== false) {
+            if (is_resource($socket)) {
+                fclose($socket);
+
                 return;
             }
+
+            $lastError = sprintf('Connection error %d: %s. ', $errorCode, $errorMessage);
 
             if (isset($this->pipes[2]) && is_resource($this->pipes[2])) {
                 stream_set_blocking($this->pipes[2], false);
