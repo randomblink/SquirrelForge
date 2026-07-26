@@ -63,6 +63,7 @@ jobs:
           docker run --detach \
             --name squirrelforge-ci-provider \
             --network squirrelforge-ci-network \
+            --network-alias mock-provider \
             --volume "$PWD/.ci-certs:/certs:ro" \
             --env MOCK_TLS_CERT=/certs/provider.crt \
             --env MOCK_TLS_KEY=/certs/provider.key \

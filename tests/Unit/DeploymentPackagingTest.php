@@ -91,6 +91,7 @@ final class DeploymentPackagingTest extends TestCase
             'docker build --file deploy/Dockerfile',
             'docker build --file deploy/mock-provider/Dockerfile',
             'openssl req -x509',
+            '--network-alias mock-provider',
             'SQUIRRELFORGE_ENVIRONMENT=production',
             'https://mock-provider:8090/v1/provider/health',
             '--cacert /certs/provider.crt',
