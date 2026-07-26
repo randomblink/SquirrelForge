@@ -50,13 +50,16 @@ final class SqliteEngineRuntime implements EngineRuntimeInterface
             return $this->error('UNAUTHORIZED', 'The supplied permission reference was denied.', false);
         }
 
-        $this->database->exec('BEGIN IMMEDIATE');
+        $transactionStarted = false;
 
         try {
+            $this->database->exec('BEGIN IMMEDIATE');
+            $transactionStarted = true;
             $existing = $this->executionForIdempotencyKey($idempotencyKey);
 
             if ($existing !== null) {
-                $this->database->commit();
+                $this->database->exec('COMMIT');
+                $transactionStarted = false;
 
                 return ['execution_ref' => $existing];
             }
@@ -158,12 +161,13 @@ final class SqliteEngineRuntime implements EngineRuntimeInterface
                 'created_at' => $completedAt,
                 'updated_at' => $completedAt,
             ]);
-            $this->database->commit();
+            $this->database->exec('COMMIT');
+            $transactionStarted = false;
 
             return ['execution_ref' => $executionRef];
         } catch (PDOException $exception) {
-            if ($this->database->inTransaction()) {
-                $this->database->rollBack();
+            if ($transactionStarted) {
+                $this->database->exec('ROLLBACK');
             }
 
             $existing = $this->executionForIdempotencyKey($idempotencyKey);
@@ -391,6 +395,7 @@ final class SqliteEngineRuntime implements EngineRuntimeInterface
         );
         $statement->execute(['idempotency_key' => $idempotencyKey]);
         $value = $statement->fetchColumn();
+        $statement->closeCursor();
 
         return is_string($value) ? $value : null;
     }
@@ -402,6 +407,7 @@ final class SqliteEngineRuntime implements EngineRuntimeInterface
         );
         $statement->execute(['execution_ref' => $executionRef]);
         $execution = $statement->fetch();
+        $statement->closeCursor();
 
         return is_array($execution) ? $execution : null;
     }
