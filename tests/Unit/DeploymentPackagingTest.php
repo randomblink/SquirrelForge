@@ -34,6 +34,7 @@ final class DeploymentPackagingTest extends TestCase
         $entrypoint = $this->contents('deploy/entrypoint.sh');
 
         $this->assertStringContainsString('USER www-data', $dockerfile);
+        $this->assertStringContainsString('apk upgrade --no-cache', $dockerfile);
         $this->assertStringContainsString('/v1/health/providers', $dockerfile);
         $this->assertStringContainsString('php /app/bin/runtime-preflight.php', $entrypoint);
         $this->assertStringContainsString('exec php -S 0.0.0.0:8080', $entrypoint);

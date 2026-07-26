@@ -7,7 +7,8 @@ RUN composer install --no-dev --classmap-authoritative --no-interaction --no-pro
 
 FROM php:8.3-cli-alpine
 
-RUN apk add --no-cache sqlite-dev \
+RUN apk upgrade --no-cache \
+    && apk add --no-cache sqlite-dev \
     && docker-php-ext-install pdo_sqlite
 
 WORKDIR /app
