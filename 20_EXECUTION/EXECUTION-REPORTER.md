@@ -1,11 +1,11 @@
 # SquirrelForge Execution Reporter
 
-Version: 1.0.0
+Version: 1.1.0
 Status: Stable
 Owner: Execution Maintainers
 Depends On: `20_EXECUTION/RESULT-COLLECTOR.md`, `20_EXECUTION/EXECUTION-LOGGER.md`, `20_EXECUTION/ROLLBACK-MANAGER.md`, `20_EXECUTION/FAILURE-HANDLER.md`, `14_ENGINE/VALIDATION.md`, `14_ENGINE/STATE-MANAGER.md`
 Used By: `23_GOVERNANCE`, Reporting
-Last Updated: 2026-07-06
+Last Updated: 2026-07-26
 
 ## Purpose
 
@@ -21,7 +21,7 @@ The Execution Reporter must:
 
 - receive the Execution Result Set from `20_EXECUTION/RESULT-COLLECTOR.md`,
 - receive execution-event references from `20_EXECUTION/EXECUTION-LOGGER.md`,
-- include external validation and test-result references when supplied by `14_ENGINE/VALIDATION.md`,
+- include the standardized validation-record reference and its externally reportable decision, limitations, residual risks, and evidence references when supplied by `14_ENGINE/VALIDATION.md`,
 - include rollback-result references from `20_EXECUTION/ROLLBACK-MANAGER.md`, when applicable,
 - include failure and recovery references from `20_EXECUTION/FAILURE-HANDLER.md` and `17_COORDINATION/FAILURE-RECOVERY.md`, when applicable,
 - summarize completed execution activity, blocked or unresolved execution conditions, changed-artifact references, and outstanding execution concerns,
@@ -44,7 +44,7 @@ It must not:
 
 1. Receive the Execution Result Set from `20_EXECUTION/RESULT-COLLECTOR.md`.
 2. Receive relevant execution-event references from `20_EXECUTION/EXECUTION-LOGGER.md`.
-3. Include external validation and test-result references when `14_ENGINE/VALIDATION.md` has supplied them.
+3. Include the standardized validation-record reference and reportable fields when `14_ENGINE/VALIDATION.md` has supplied them.
 4. Include rollback-result references from `20_EXECUTION/ROLLBACK-MANAGER.md`, when applicable.
 5. Include failure and recovery references from `20_EXECUTION/FAILURE-HANDLER.md` and `17_COORDINATION/FAILURE-RECOVERY.md`, when applicable.
 6. Summarize completed activity, blocked or unresolved conditions, changed artifacts, and outstanding concerns from these references.
@@ -63,7 +63,10 @@ It must not:
 | Completed Activity | Summary of completed execution steps. | `20_EXECUTION/RESULT-COLLECTOR.md`, `20_EXECUTION/EXECUTION-LOGGER.md` |
 | Blocked / Unresolved Conditions | Summary of blocked or unresolved execution conditions. | `20_EXECUTION/EXECUTION-LOGGER.md`, `20_EXECUTION/FAILURE-HANDLER.md` |
 | Changed Artifact References | References to artifacts changed during execution. | `20_EXECUTION/RESULT-COLLECTOR.md` |
-| Validation / Test Evidence References | References to validation and test results. | `14_ENGINE/VALIDATION.md` |
+| Validation Record Reference | Reference to the standardized validation object. | `14_ENGINE/VALIDATION.md` |
+| Validation Decision | Accepted, limited, repair, clarification, blocked, recovery, or rejected decision copied without reinterpretation. | `14_ENGINE/VALIDATION.md` |
+| Validation / Test Evidence References | References to validation and underlying test results. | `14_ENGINE/VALIDATION.md` |
+| Validation Limitations / Residual Risks | Externally reportable limitations and residual risks from the validation record. | `14_ENGINE/VALIDATION.md` |
 | Rollback References | References to rollback results, when applicable. | `20_EXECUTION/ROLLBACK-MANAGER.md` |
 | Failure / Recovery References | References to failure and recovery records, when applicable. | `20_EXECUTION/FAILURE-HANDLER.md`, `17_COORDINATION/FAILURE-RECOVERY.md` |
 | Unresolved Risk References | References to risk the owning risk authority has recorded. | `19_REASONING/RISK-ASSESSOR.md` |
@@ -76,7 +79,7 @@ It must not:
 
 The Execution Reporter may assemble, summarize, and provide an Execution Report from existing authoritative records and references, preserving their provenance.
 
-It must not decide whether execution passed validation (owned by `14_ENGINE/VALIDATION.md`), determine authoritative task or workflow status (owned by `14_ENGINE/STATE-MANAGER.md`), create rollback decisions (owned by `20_EXECUTION/ROLLBACK-MANAGER.md`), assess risk independently (owned by `19_REASONING/RISK-ASSESSOR.md`), invent recommended next actions on its own authority, mutate execution results (owned by `20_EXECUTION/RESULT-COLLECTOR.md`), or replace audit or observability records (owned by `20_EXECUTION/EXECUTION-LOGGER.md` and `27_OBSERVABILITY`).
+It must not decide or reinterpret whether execution passed validation (owned by `14_ENGINE/VALIDATION.md`), determine authoritative task or workflow status (owned by `14_ENGINE/STATE-MANAGER.md`), create rollback decisions (owned by `20_EXECUTION/ROLLBACK-MANAGER.md`), assess risk independently (owned by `19_REASONING/RISK-ASSESSOR.md`), invent recommended next actions on its own authority, mutate execution results (owned by `20_EXECUTION/RESULT-COLLECTOR.md`), or replace audit or observability records (owned by `20_EXECUTION/EXECUTION-LOGGER.md` and `27_OBSERVABILITY`).
 
 ---
 

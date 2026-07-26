@@ -33,10 +33,11 @@ The Integrations Layer does not own platform security, secrets, runtime configur
 | `DATABASE-CONNECTOR.md` | Adapts external database APIs and connection interfaces without owning platform data persistence. |
 | `FILE-STORAGE.md` | Adapts external file-storage services without owning SquirrelForge storage infrastructure. |
 | `AUTOMATION-CONNECTOR.md` | Adapts external automation platforms, schedulers, job queues, and CI/CD systems into integration handoff interfaces. |
+| `FLOCK-PLUGIN-ADAPTER.md` | Translates Flock plugin requests into the Engine API contract and maps authoritative Engine result envelopes back into Flock responses. |
 | `INTEGRATION-MONITOR.md` | Interprets integration-domain telemetry and status references to produce health, availability, and degradation findings. |
 | `INTEGRATION-GOVERNANCE.md` | Defines integration-domain standards, registration requirements, and allowed external-connection rules. |
 
-The authoritative component roster must match the 14 component files that actually exist in `26_INTEGRATIONS`.
+The authoritative component roster must match the 15 component files that actually exist in `26_INTEGRATIONS`.
 
 ---
 

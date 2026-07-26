@@ -1,11 +1,11 @@
 # SquirrelForge Authentication Manager
 
-Version: 1.0.0
+Version: 1.6.0
 Status: Stable
 Owner: Security Maintainers
 Depends On: `24_SECURITY/IDENTITY-MANAGER.md`, `24_SECURITY/SECURITY-GOVERNANCE.md`, `28_RUNTIME-CONFIG/SECRETS-MANAGER.md`
 Used By: `24_SECURITY/AUTHORIZATION-MANAGER.md`, `24_SECURITY/ENCRYPTION-MANAGER.md`, `24_SECURITY/SECURITY-MANAGER.md`
-Last Updated: 2026-07-07
+Last Updated: 2026-07-26
 
 ## Purpose
 
@@ -98,6 +98,40 @@ The Authentication Manager succeeds when:
 - All authentication attempts are securely logged.
 - MFA and other security policies are correctly enforced.
 - Compromised or invalid credentials are reliably rejected.
+
+---
+
+## Reference Runtime
+
+The PHP reference implementation defines:
+
+- `AuthenticationManagerInterface` for access-token validation,
+- `SqliteAuthenticationManager` for persistent local sessions and attempt records,
+- and `StaticHeaderAuthenticationManager` only for deterministic contract tests.
+
+The SQLite implementation:
+
+- verifies API keys through `SecretsManagerInterface`,
+- issues a random opaque token only after receiving a credential-verification reference,
+- stores only the token's SHA-256 digest,
+- binds the session to one active Identity Manager record,
+- enforces session expiry and revocation,
+- rejects claimed-identity mismatches,
+- and persists every successful or failed authentication attempt with a rationale and correlation reference.
+
+`ApiKeySessionIssuer` applies configurable source-and-identity failure windows and temporary lockout before issuing a session. Human `USER` identities additionally require a successful `MfaVerifierInterface` decision; the production default fails closed when no verifier is configured. Service and agent identities retain the API-key flow.
+
+`AuthenticationApiServer` exposes session issue and refresh operations. Refresh atomically revokes the presented session and returns a new opaque token; a revoked, expired, missing, or inactive-identity session cannot be refreshed. Credential failures, lockouts, MFA decisions, session issuance, and refresh decisions are written through `SecurityEventSinkInterface`; the SQLite sink persists correlation-safe metadata without credentials or token values.
+
+`CredentialAdministrationApiServer` protects session revocation behind Authentication and a resource-scoped `security.sessions.revoke` authorization decision. It returns authentication, authorization, and security-event references so an administrative transport response can be traced to each owning decision without exposing a token.
+
+`public/engine-api.php` requires a bearer session before authorization. Its optional bootstrap identity, permission, and API-key environment values are honored only when `SQUIRRELFORGE_ENVIRONMENT` is explicitly `local` or `test`. The default environment is production and refuses bootstrap provisioning. Production provisioning must use governed identity, secret, credential-verification, and permission workflows.
+
+The same environment boundary governs provider composition. Local and test environments may use the documented SQLite, static, and deny-only reference providers. Production startup validates all credential-path providers before accepting requests and terminates if Secrets Manager, MFA verification, or security-event persistence is missing production-readiness evidence.
+
+The first production-capable adapter is `HttpCredentialProvider`. It delegates API-key verification and human MFA verification to a configured external HTTPS gateway, while preserving the existing Authentication Manager decisions, throttling, session issuance, and correlation model. Provider transport failure never becomes successful authentication and remote response bodies are not copied into public authentication errors.
+
+The resilient provider wrapper applies bounded retry and circuit-breaking before Authentication receives a provider result. Retry exhaustion and open-circuit decisions are failures, never cached authentication successes. The circuit breaker suppresses repeated calls during a bounded outage window while preserving fail-closed behavior.
 
 ---
 
