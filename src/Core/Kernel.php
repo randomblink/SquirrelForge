@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SquirrelForge\Core;
 
+use Composer\Autoload\ClassLoader;
 use SquirrelForge\Agent\AgentServiceProvider;
 use SquirrelForge\Contracts\EventBusInterface;
 use SquirrelForge\Contracts\LoggerInterface;
@@ -12,6 +13,7 @@ use SquirrelForge\Memory\MemoryServiceProvider;
 use SquirrelForge\Modules\ModuleDiscovery;
 use SquirrelForge\Modules\ModuleLoader;
 use SquirrelForge\Modules\ModuleServiceProvider;
+use SquirrelForge\Modules\PluginPathResolver;
 use SquirrelForge\Core\CoreRuntimeServiceProvider;
 use SquirrelForge\Observability\ObservabilityServiceProvider;
 use SquirrelForge\Tools\ToolServiceProvider;
@@ -21,7 +23,8 @@ final class Kernel
 {
     public function __construct(
         private readonly Application $app = new Application(),
-        private readonly Bootstrapper $bootstrapper = new Bootstrapper()
+        private readonly Bootstrapper $bootstrapper = new Bootstrapper(),
+        private readonly ?ClassLoader $autoloader = null
     ) {
     }
 
@@ -75,6 +78,10 @@ final class Kernel
      * to change. This is how capability registration (like the Agent role
      * pipeline, via `AgentPipelineModule`) stays out of core service
      * providers' `boot()` methods.
+     *
+     * External plugin directories configured via `PluginPathResolver` (opt-in
+     * only) are scanned the same way, once their namespace is registered
+     * with the autoloader -- see that class for the trust implications.
      */
     private function loadModules(): void
     {
@@ -82,19 +89,32 @@ final class Kernel
 
         /** @var ModuleLoader $moduleLoader */
         $moduleLoader = $container->make(ModuleLoader::class);
+        $logger = $container->has(LoggerInterface::class)
+            ? $container->make(LoggerInterface::class)
+            : null;
 
         $discovery = new ModuleDiscovery();
         $modules = $discovery->discover($this->sourceRoot(), 'SquirrelForge');
+        $this->logDiscoveryErrors($discovery, $logger);
+
+        foreach (PluginPathResolver::resolve($container) as $plugin) {
+            if ($this->autoloader === null) {
+                $logger?->warning('Skipped plugin path -- no autoloader supplied to Kernel.', $plugin);
+                continue;
+            }
+
+            $this->autoloader->addPsr4(rtrim($plugin['namespace'], '\\') . '\\', $plugin['path']);
+            $modules = [...$modules, ...$discovery->discover($plugin['path'], $plugin['namespace'])];
+            $this->logDiscoveryErrors($discovery, $logger);
+        }
 
         $moduleLoader->load($modules, $container);
+    }
 
-        if ($container->has(LoggerInterface::class)) {
-            /** @var LoggerInterface $logger */
-            $logger = $container->make(LoggerInterface::class);
-
-            foreach ($discovery->errors() as $error) {
-                $logger->warning('Module discovery skipped a candidate.', ['error' => $error]);
-            }
+    private function logDiscoveryErrors(ModuleDiscovery $discovery, ?LoggerInterface $logger): void
+    {
+        foreach ($discovery->errors() as $error) {
+            $logger?->warning('Module discovery skipped a candidate.', ['error' => $error]);
         }
     }
 
