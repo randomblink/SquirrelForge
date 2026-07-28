@@ -59,4 +59,15 @@ interface ToolInterface extends BootableInterface, HealthCheckInterface
      * @return array<string, mixed>
      */
     public function parameters(): array;
+
+    /**
+     * Capability tags this tool provides (e.g. "file.read"), used by
+     * SquirrelForge\AiDriver\ToolSelector to match a required capability
+     * against registered tools. An empty array means the tool declares no
+     * specific capability and is only ever a candidate for an unconstrained
+     * selection.
+     *
+     * @return array<int, string>
+     */
+    public function capabilities(): array;
 }

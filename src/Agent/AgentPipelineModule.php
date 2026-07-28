@@ -12,6 +12,7 @@ use SquirrelForge\Agent\Roles\PlannerAgent;
 use SquirrelForge\Agent\Roles\ReleaseAgent;
 use SquirrelForge\Agent\Roles\ReviewerAgent;
 use SquirrelForge\Agent\Roles\SecurityAgent;
+use SquirrelForge\AiDriver\ToolSelector;
 use SquirrelForge\Contracts\AgentInterface;
 use SquirrelForge\Contracts\CommandRunnerInterface;
 use SquirrelForge\Contracts\ContainerInterface;
@@ -73,10 +74,7 @@ final class AgentPipelineModule extends AbstractModule
         $commandRunner = new ShellCommandRunner($this->projectRoot());
         $actionsEnabled = ReleaseActionsPolicy::isEnabled($container);
 
-        $fileTools = new ToolRegistry();
-        $fileTools->register(new ReadFileTool($fileSystem));
-        $fileTools->register(new WriteFileTool($fileSystem));
-        $fileTools->register(new DeleteFileTool($fileSystem));
+        $fileTools = $this->buildFileToolRegistry($fileSystem);
 
         foreach ($this->pipelineAgents($llm, $fileSystem, $commandRunner, $actionsEnabled, $fileTools) as $agent) {
             $agent->boot();
@@ -109,6 +107,39 @@ final class AgentPipelineModule extends AbstractModule
             new DocumentationAgent($llm),
             new ReleaseAgent($llm, $fileSystem, $commandRunner, $actionsEnabled),
         ];
+    }
+
+    /**
+     * Builds and boots the three file tools, then runs each capability
+     * (read/write/delete) through a `ToolSelector` before handing the
+     * narrowed, selector-approved registry to `DeveloperAgent` -- rather
+     * than registering every tool unconditionally. This is also what fixed
+     * a latent bug: these tools previously went straight into the registry
+     * without ever having `boot()` called, so their `isHealthy()` silently
+     * reported false; a health-filtering selector would have rejected all
+     * three. They're booted here, exactly like every agent already is below.
+     */
+    private function buildFileToolRegistry(FileSystemInterface $fileSystem): ToolRegistry
+    {
+        $allFileTools = new ToolRegistry();
+
+        foreach ([new ReadFileTool($fileSystem), new WriteFileTool($fileSystem), new DeleteFileTool($fileSystem)] as $tool) {
+            $tool->boot();
+            $allFileTools->register($tool);
+        }
+
+        $selector = new ToolSelector($allFileTools);
+        $selected = new ToolRegistry();
+
+        foreach (['file.read', 'file.write', 'file.delete'] as $capability) {
+            $id = $selector->select([$capability])['selected'];
+
+            if ($id !== null) {
+                $selected->register($allFileTools->get($id));
+            }
+        }
+
+        return $selected;
     }
 
     /**

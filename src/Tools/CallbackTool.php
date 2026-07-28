@@ -20,7 +20,8 @@ final class CallbackTool implements ToolInterface
         private readonly Closure $execute,
         private readonly string $version = '1.0.0',
         private readonly array $metadata = [],
-        private readonly array $parameters = ['type' => 'object', 'properties' => new \stdClass()]
+        private readonly array $parameters = ['type' => 'object', 'properties' => new \stdClass()],
+        private readonly array $capabilities = []
     ) {
     }
 
@@ -85,5 +86,10 @@ final class CallbackTool implements ToolInterface
     public function parameters(): array
     {
         return $this->parameters;
+    }
+
+    public function capabilities(): array
+    {
+        return $this->capabilities;
     }
 }

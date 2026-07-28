@@ -96,4 +96,9 @@ final class DeleteFileTool implements ToolInterface
             'required' => ['path'],
         ];
     }
+
+    public function capabilities(): array
+    {
+        return ['file.delete'];
+    }
 }

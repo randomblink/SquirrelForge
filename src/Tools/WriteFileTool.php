@@ -104,4 +104,9 @@ final class WriteFileTool implements ToolInterface
             'required' => ['path', 'content'],
         ];
     }
+
+    public function capabilities(): array
+    {
+        return ['file.write'];
+    }
 }

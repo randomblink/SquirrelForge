@@ -93,4 +93,13 @@ final class FileToolsTest extends TestCase
         $this->assertSame(['path', 'content'], (new WriteFileTool($fileSystem))->parameters()['required']);
         $this->assertSame(['path'], (new DeleteFileTool($fileSystem))->parameters()['required']);
     }
+
+    public function testToolsDeclareDistinctCapabilities(): void
+    {
+        $fileSystem = new FakeFileSystem();
+
+        $this->assertSame(['file.read'], (new ReadFileTool($fileSystem))->capabilities());
+        $this->assertSame(['file.write'], (new WriteFileTool($fileSystem))->capabilities());
+        $this->assertSame(['file.delete'], (new DeleteFileTool($fileSystem))->capabilities());
+    }
 }

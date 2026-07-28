@@ -94,4 +94,9 @@ final class ReadFileTool implements ToolInterface
             'required' => ['path'],
         ];
     }
+
+    public function capabilities(): array
+    {
+        return ['file.read'];
+    }
 }
