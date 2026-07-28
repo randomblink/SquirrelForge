@@ -14,17 +14,19 @@ Storage is responsible for persistence only. It does not define business meaning
 
 | Component | Responsibility |
 |---|---|
-| `STORAGE-MANAGER.md` | Coordinates all storage operations. |
-| `OBJECT-STORAGE.md` | Stores binary and large objects. |
-| `DOCUMENT-STORAGE.md` | Stores structured documents. |
+| `STORAGE-MANAGER.md` | Coordinates all storage operations across object, document, vector, caching, versioning, backup, archival, replication, and governance concerns. |
+| `DATA-MANAGER.md` | Coordinates all data operations: storing, retrieving, validating, indexing, caching, versioning, backing up, and governing data. |
+| `OBJECT-STORAGE.md` | Stores binary and large objects (files, media, exports, model artifacts). |
+| `DOCUMENT-STORAGE.md` | Stores structured and semi-structured documents. |
 | `VECTOR-STORAGE.md` | Stores embeddings, vector collections, and semantic indexes. |
-| `KEY-VALUE-STORAGE.md` | Stores fast lookup data. |
-| `CACHE-MANAGER.md` | Manages temporary cached data. |
-| `VERSION-MANAGER.md` | Manages stored object versions. |
-| `BACKUP-MANAGER.md` | Coordinates backups. |
-| `ARCHIVE-STORAGE.md` | Stores long-term archived data. |
-| `STORAGE-REPLICATION.md` | Replicates stored data across locations. |
-| `STORAGE-GOVERNANCE.md` | Governs storage policies and standards. |
+| `CACHE-MANAGER.md` | Manages temporary cached data: creation, retrieval, invalidation, expiration, synchronization. |
+| `INDEX-MANAGER.md` | Creates, maintains, and optimizes searchable indexes over stored data. |
+| `RETRIEVAL-MANAGER.md` | Locates, validates, and delivers stored data to authorized components. |
+| `DATA-VALIDATOR.md` | Verifies the integrity, structure, and compliance of data moving through the Storage Layer. |
+| `DATA-GOVERNANCE.md` | Establishes and enforces data lifecycle, protection, classification, retention, and disposal policies. |
+| `BACKUP-MANAGER.md` | Coordinates backup creation, verification, and restoration. |
+
+The authoritative component roster must match files that actually exist in this directory.
 
 ---
 
