@@ -29,6 +29,14 @@ final class FakeFileSystem implements FileSystemInterface
     private array $failOnWrite = [];
 
     /**
+     * When set, every subsequent read() returns this value regardless of
+     * what was written -- for simulating storage corruption, since a
+     * correctly-functioning file system never produces a mismatch on its
+     * own.
+     */
+    public ?string $forcedReadOverride = null;
+
+    /**
      * @param array<string, string> $initialFiles
      */
     public function __construct(array $initialFiles = [])
@@ -49,7 +57,7 @@ final class FakeFileSystem implements FileSystemInterface
             throw new RuntimeException(sprintf('No such fake file: "%s".', $relativePath));
         }
 
-        return $this->files[$relativePath];
+        return $this->forcedReadOverride ?? $this->files[$relativePath];
     }
 
     public function write(string $relativePath, string $contents): void
