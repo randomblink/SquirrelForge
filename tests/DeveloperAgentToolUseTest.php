@@ -8,6 +8,8 @@ use PHPUnit\Framework\TestCase;
 use SquirrelForge\Agent\Roles\DeveloperAgent;
 use SquirrelForge\Tests\Support\FakeFileSystem;
 use SquirrelForge\Tests\Support\FakeLlmClient;
+use SquirrelForge\Tools\ToolRegistry;
+use SquirrelForge\Tools\WriteFileTool;
 
 /**
  * Covers DeveloperAgent's real file-write path: it must only engage when
@@ -90,6 +92,51 @@ final class DeveloperAgentToolUseTest extends TestCase
         $this->assertNull($result['next_stage']);
         $this->assertFalse($result['implementation']['file_changes'][0]['applied']);
         $this->assertSame('Blocked', $result['implementation']['tasks'][0]['status']);
+    }
+
+    public function testImplementsPlanViaRealToolCallsWhenToolRegistryIsSupplied(): void
+    {
+        $fileSystem = new FakeFileSystem();
+        $tools = new ToolRegistry();
+        $tools->register(new WriteFileTool($fileSystem));
+
+        $fake = new FakeLlmClient('unused', [
+            [
+                'stop_reason' => 'tool_use',
+                'text' => '',
+                'tool_calls' => [[
+                    'id' => 'call_1',
+                    'name' => 'write_file',
+                    'input' => ['path' => 'src/Cache.php', 'content' => "<?php\n// cache\n"],
+                ]],
+                'assistant_content' => [],
+            ],
+            [
+                'stop_reason' => 'end_turn',
+                'text' => json_encode([
+                    'tasks_completed' => [
+                        ['task' => 'Add cache class', 'output' => 'src/Cache.php', 'status' => 'Complete'],
+                    ],
+                ], JSON_THROW_ON_ERROR),
+                'tool_calls' => [],
+                'assistant_content' => [],
+            ],
+        ]);
+
+        $agent = new DeveloperAgent($fake, $fileSystem, tools: $tools);
+        $agent->boot();
+
+        $result = $agent->execute([
+            'stage' => 'developer',
+            'history' => ['planner' => ['plan' => [['phase' => 'Core', 'task' => 'Add cache class']]]],
+        ]);
+
+        $this->assertSame('Complete', $result['status']);
+        $this->assertSame('reviewer', $result['next_stage']);
+        $this->assertSame("<?php\n// cache\n", $fileSystem->files['src/Cache.php']);
+        $this->assertSame('write', $result['implementation']['file_changes'][0]['action']);
+        $this->assertTrue($result['implementation']['file_changes'][0]['applied']);
+        $this->assertSame('src/Cache.php', $result['implementation']['file_changes'][0]['path']);
     }
 
     public function testThrowsWhenNeitherTasksCompletedNorFileSystemAreAvailable(): void

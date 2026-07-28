@@ -48,4 +48,15 @@ interface ToolInterface extends BootableInterface, HealthCheckInterface
      * @return array<string, mixed>
      */
     public function metadata(): array;
+
+    /**
+     * JSON Schema describing execute()'s expected $parameters, advertised to
+     * an LLM tool-calling loop (e.g. SquirrelForge\Llm\Reasoner) so the model
+     * knows what shape of input this tool accepts. Not mechanically
+     * validated against a call's actual parameters -- each tool is
+     * responsible for its own lightweight input checks.
+     *
+     * @return array<string, mixed>
+     */
+    public function parameters(): array;
 }

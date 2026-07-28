@@ -8,6 +8,7 @@ use InvalidArgumentException;
 use SquirrelForge\Agent\Roles\Support\FileChangeApplier;
 use SquirrelForge\Contracts\FileSystemInterface;
 use SquirrelForge\Contracts\LlmClientInterface;
+use SquirrelForge\Tools\ToolRegistry;
 
 /**
  * Implements the Agent Developer role from `16_AGENTS/AGENT-DEVELOPER.md`.
@@ -33,15 +34,18 @@ use SquirrelForge\Contracts\LlmClientInterface;
 final class DeveloperAgent extends AbstractRoleAgent
 {
     private readonly ?FileChangeApplier $fileChangeApplier;
+    private readonly bool $hasTools;
 
     public function __construct(
         ?LlmClientInterface $llm = null,
         ?FileSystemInterface $fileSystem = null,
-        string $version = '1.0.0'
+        string $version = '1.0.0',
+        ?ToolRegistry $tools = null
     ) {
-        parent::__construct($llm, $version);
+        parent::__construct($llm, $version, $tools);
 
         $this->fileChangeApplier = $fileSystem !== null ? new FileChangeApplier($fileSystem) : null;
+        $this->hasTools = $tools !== null && $tools->all() !== [];
     }
 
     public function stage(): string
@@ -119,6 +123,10 @@ final class DeveloperAgent extends AbstractRoleAgent
      */
     private function implementViaFileSystem(array $planner): array
     {
+        if ($this->hasTools) {
+            return $this->implementViaToolUse($planner);
+        }
+
         $reasoned = $this->reason(
             'Read the execution plan and implement it directly. Return "file_changes" as an ' .
             'array of objects {path, action, content}: "action" is one of create, update, ' .
@@ -146,5 +154,49 @@ final class DeveloperAgent extends AbstractRoleAgent
         }
 
         return ['tasks' => $tasks, 'file_changes' => $appliedChanges];
+    }
+
+    /**
+     * @param array<string, mixed> $planner
+     * @return array{tasks: array<int, array<string, mixed>>, file_changes: array<int, array<string, mixed>>}
+     */
+    private function implementViaToolUse(array $planner): array
+    {
+        $reasoned = $this->reason(
+            'Read the execution plan and implement it directly using the available file tools ' .
+            '(read_file, write_file, delete_file) to make the necessary changes. Once finished, ' .
+            'return "tasks_completed" as an array of objects {task, output, status} mirroring ' .
+            'each plan phase, where "status" is one of Complete, In Progress, Blocked.',
+            ['tasks_completed'],
+            ['plan' => $planner['plan'] ?? []]
+        );
+
+        $tasks = $reasoned['tasks_completed'] ?? [];
+        $fileChanges = [];
+        $hasFailedChange = false;
+
+        foreach ($this->lastToolCalls() as $call) {
+            if (!in_array($call['name'], ['write_file', 'delete_file'], true)) {
+                continue;
+            }
+
+            $applied = ($call['result']['applied'] ?? false) === true;
+            $hasFailedChange = $hasFailedChange || !$applied;
+
+            $fileChanges[] = [
+                'path' => $call['input']['path'] ?? null,
+                'action' => $call['name'] === 'write_file' ? 'write' : 'delete',
+                'applied' => $applied,
+                'error' => $call['result']['error'] ?? null,
+            ];
+        }
+
+        if ($hasFailedChange) {
+            $tasks = $tasks !== []
+                ? array_map(static fn (array $task): array => [...$task, 'status' => 'Blocked'], $tasks)
+                : [['task' => 'Apply file changes', 'output' => null, 'status' => 'Blocked']];
+        }
+
+        return ['tasks' => $tasks, 'file_changes' => $fileChanges];
     }
 }

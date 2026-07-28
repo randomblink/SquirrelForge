@@ -19,9 +19,13 @@ use SquirrelForge\Contracts\FileSystemInterface;
 use SquirrelForge\Contracts\LlmClientInterface;
 use SquirrelForge\Llm\LlmClientResolver;
 use SquirrelForge\Modules\AbstractModule;
+use SquirrelForge\Tools\DeleteFileTool;
 use SquirrelForge\Tools\LocalFileSystem;
+use SquirrelForge\Tools\ReadFileTool;
 use SquirrelForge\Tools\ReleaseActionsPolicy;
 use SquirrelForge\Tools\ShellCommandRunner;
+use SquirrelForge\Tools\ToolRegistry;
+use SquirrelForge\Tools\WriteFileTool;
 
 /**
  * Registers the Architect -> Planner -> Developer -> Reviewer -> Security ->
@@ -69,7 +73,12 @@ final class AgentPipelineModule extends AbstractModule
         $commandRunner = new ShellCommandRunner($this->projectRoot());
         $actionsEnabled = ReleaseActionsPolicy::isEnabled($container);
 
-        foreach ($this->pipelineAgents($llm, $fileSystem, $commandRunner, $actionsEnabled) as $agent) {
+        $fileTools = new ToolRegistry();
+        $fileTools->register(new ReadFileTool($fileSystem));
+        $fileTools->register(new WriteFileTool($fileSystem));
+        $fileTools->register(new DeleteFileTool($fileSystem));
+
+        foreach ($this->pipelineAgents($llm, $fileSystem, $commandRunner, $actionsEnabled, $fileTools) as $agent) {
             $agent->boot();
             $registry->register($agent);
         }
@@ -87,12 +96,13 @@ final class AgentPipelineModule extends AbstractModule
         ?LlmClientInterface $llm,
         FileSystemInterface $fileSystem,
         CommandRunnerInterface $commandRunner,
-        bool $actionsEnabled
+        bool $actionsEnabled,
+        ToolRegistry $fileTools
     ): array {
         return [
             new ArchitectAgent($llm),
             new PlannerAgent($llm),
-            new DeveloperAgent($llm, $fileSystem),
+            new DeveloperAgent($llm, $fileSystem, tools: $fileTools),
             new ReviewerAgent($llm),
             new SecurityAgent($llm),
             new PerformanceAgent($llm),

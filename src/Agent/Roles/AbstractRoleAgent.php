@@ -9,6 +9,7 @@ use SquirrelForge\Agent\Support\BootableHealthCheck;
 use SquirrelForge\Contracts\AgentInterface;
 use SquirrelForge\Contracts\LlmClientInterface;
 use SquirrelForge\Llm\Reasoner;
+use SquirrelForge\Tools\ToolRegistry;
 
 /**
  * Common plumbing shared by every pipeline role agent described in `16_AGENTS/`.
@@ -43,9 +44,10 @@ abstract class AbstractRoleAgent implements AgentInterface
 
     public function __construct(
         ?LlmClientInterface $llm = null,
-        private readonly string $version = '1.0.0'
+        private readonly string $version = '1.0.0',
+        ?ToolRegistry $tools = null
     ) {
-        $this->reasoner = $llm !== null ? new Reasoner($llm) : null;
+        $this->reasoner = $llm !== null ? new Reasoner($llm, $tools) : null;
     }
 
     /**
@@ -134,5 +136,17 @@ abstract class AbstractRoleAgent implements AgentInterface
     protected function reason(string $instructions, array $fields, array $payload): ?array
     {
         return $this->reasoner?->reason($this->getName(), static::class, $instructions, $fields, $payload);
+    }
+
+    /**
+     * Every tool call made and its result during the most recent tool-driven
+     * `reason()` call (empty when no LLM is configured, or tools were not
+     * active for that call).
+     *
+     * @return array<int, array{name: string, input: array<string, mixed>, result: array<string, mixed>}>
+     */
+    protected function lastToolCalls(): array
+    {
+        return $this->reasoner?->lastToolCalls() ?? [];
     }
 }

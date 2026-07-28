@@ -6,13 +6,14 @@ namespace SquirrelForge\Llm;
 
 use RuntimeException;
 use SquirrelForge\Contracts\LlmClientInterface;
+use SquirrelForge\Contracts\ToolCallingLlmClientInterface;
 
 /**
  * Calls the Anthropic Messages API (https://api.anthropic.com/v1/messages)
  * using PHP's cURL extension directly, so no additional Composer HTTP
  * client dependency is required.
  */
-final class AnthropicClient implements LlmClientInterface
+final class AnthropicClient implements LlmClientInterface, ToolCallingLlmClientInterface
 {
     private const API_URL = 'https://api.anthropic.com/v1/messages';
     private const API_VERSION = '2023-06-01';
@@ -30,18 +31,66 @@ final class AnthropicClient implements LlmClientInterface
 
     public function complete(string $systemPrompt, string $userPrompt): string
     {
-        if (!function_exists('curl_init')) {
-            throw new RuntimeException('AnthropicClient requires the PHP cURL extension.');
-        }
-
-        $payload = json_encode([
+        $decoded = $this->callApi([
             'model' => $this->model,
             'max_tokens' => $this->maxTokens,
             'system' => $systemPrompt,
             'messages' => [
                 ['role' => 'user', 'content' => $userPrompt],
             ],
-        ], JSON_THROW_ON_ERROR);
+        ]);
+
+        return $this->extractText($decoded['content']);
+    }
+
+    public function completeWithTools(string $systemPrompt, array $messages, array $tools): array
+    {
+        $decoded = $this->callApi([
+            'model' => $this->model,
+            'max_tokens' => $this->maxTokens,
+            'system' => $systemPrompt,
+            'messages' => $messages,
+            'tools' => array_map(
+                static fn(array $tool): array => [
+                    'name' => $tool['name'],
+                    'description' => $tool['description'],
+                    'input_schema' => $tool['parameters'],
+                ],
+                $tools
+            ),
+        ]);
+
+        $toolCalls = [];
+
+        foreach ($decoded['content'] as $block) {
+            if (($block['type'] ?? null) === 'tool_use') {
+                $toolCalls[] = [
+                    'id' => (string) ($block['id'] ?? ''),
+                    'name' => (string) ($block['name'] ?? ''),
+                    'input' => is_array($block['input'] ?? null) ? $block['input'] : [],
+                ];
+            }
+        }
+
+        return [
+            'stop_reason' => (string) ($decoded['stop_reason'] ?? 'end_turn'),
+            'text' => $this->extractText($decoded['content']),
+            'tool_calls' => $toolCalls,
+            'assistant_content' => $decoded['content'],
+        ];
+    }
+
+    /**
+     * @param array<string, mixed> $body
+     * @return array<string, mixed>
+     */
+    private function callApi(array $body): array
+    {
+        if (!function_exists('curl_init')) {
+            throw new RuntimeException('AnthropicClient requires the PHP cURL extension.');
+        }
+
+        $payload = json_encode($body, JSON_THROW_ON_ERROR);
 
         $curl = curl_init(self::API_URL);
 
@@ -86,9 +135,17 @@ final class AnthropicClient implements LlmClientInterface
             throw new RuntimeException('AnthropicClient received an unexpected response shape.');
         }
 
+        return $decoded;
+    }
+
+    /**
+     * @param array<int, array<string, mixed>> $content
+     */
+    private function extractText(array $content): string
+    {
         $text = '';
 
-        foreach ($decoded['content'] as $block) {
+        foreach ($content as $block) {
             if (($block['type'] ?? null) === 'text') {
                 $text .= (string) ($block['text'] ?? '');
             }
