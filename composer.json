@@ -2,6 +2,7 @@
   "name": "squirrelforge/agent",
   "description": "A modular AI agent runtime framework.",
   "type": "project",
+  "license": "proprietary",
   "autoload": {
     "psr-4": {
       "SquirrelForge\\": "src/"

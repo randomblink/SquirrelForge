@@ -191,7 +191,7 @@ Current focus includes:
 
 ## License
 
-The `LICENSE` file exists but is currently empty. Add the appropriate open-source or commercial license before the first public release.
+Proprietary. All rights reserved -- see [`LICENSE`](LICENSE).
 
 ## Status
 
