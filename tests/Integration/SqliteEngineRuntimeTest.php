@@ -80,6 +80,47 @@ final class SqliteEngineRuntimeTest extends TestCase
         $this->assertNull($result['validation_decision']);
     }
 
+    public function testRecentExcludesPayloadColumnsAndReturnsSummaryFields(): void
+    {
+        $runtime = new SqliteEngineRuntime($this->databasePath);
+        $runtime->submit(
+            ['request_id' => 'request_1', 'goal' => 'Run persistent workflow.'],
+            'project_1',
+            'identity_1',
+            'permission:allowed',
+            'idempotency_recent_1',
+            'correlation_1'
+        );
+
+        $recent = $runtime->recent();
+
+        $this->assertCount(1, $recent);
+        $this->assertSame(
+            ['execution_ref', 'project_ref', 'status', 'cancelled', 'created_at', 'updated_at'],
+            array_keys($recent[0])
+        );
+        $this->assertSame('project_1', $recent[0]['project_ref']);
+    }
+
+    public function testRecentRespectsLimit(): void
+    {
+        $runtime = new SqliteEngineRuntime($this->databasePath);
+
+        foreach (['a', 'b', 'c'] as $suffix) {
+            $runtime->submit(
+                ['request_id' => 'request_' . $suffix, 'goal' => 'Run persistent workflow.'],
+                'project_' . $suffix,
+                'identity_1',
+                'permission:allowed',
+                'idempotency_recent_' . $suffix,
+                'correlation_1'
+            );
+        }
+
+        $this->assertCount(2, $runtime->recent(2));
+        $this->assertCount(3, $runtime->recent(10));
+    }
+
     private function submit(SqliteEngineRuntime $runtime): array
     {
         return $runtime->submit(

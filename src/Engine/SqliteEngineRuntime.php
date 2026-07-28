@@ -322,6 +322,26 @@ final class SqliteEngineRuntime implements EngineRuntimeInterface
             : $this->decode($execution['validation_json']);
     }
 
+    /**
+     * Most recent executions across all identities and projects, excluding
+     * request/validation/result payload columns.
+     *
+     * @return array<int, array{execution_ref: string, project_ref: string, status: string, cancelled: int, created_at: string, updated_at: string}>
+     */
+    public function recent(int $limit = 50): array
+    {
+        $statement = $this->database->prepare(
+            'SELECT execution_ref, project_ref, status, cancelled, created_at, updated_at
+             FROM executions
+             ORDER BY created_at DESC
+             LIMIT :limit'
+        );
+        $statement->bindValue('limit', $limit, PDO::PARAM_INT);
+        $statement->execute();
+
+        return $statement->fetchAll();
+    }
+
     private function migrate(): void
     {
         $this->database->exec(

@@ -82,4 +82,23 @@ final class SqliteSecurityEventSink implements SecurityEventSinkInterface, Provi
 
         return $statement->fetchAll();
     }
+
+    /**
+     * Most recent events across all identities, excluding metadata_json.
+     *
+     * @return array<int, array{event_ref: string, event_type: string, outcome: string, identity_ref: ?string, correlation_id: string, created_at: string}>
+     */
+    public function recent(int $limit = 50): array
+    {
+        $statement = $this->database->prepare(
+            'SELECT event_ref, event_type, outcome, identity_ref, correlation_id, created_at
+             FROM security_events
+             ORDER BY created_at DESC, event_ref DESC
+             LIMIT :limit'
+        );
+        $statement->bindValue('limit', $limit, PDO::PARAM_INT);
+        $statement->execute();
+
+        return $statement->fetchAll();
+    }
 }

@@ -6,6 +6,7 @@ use SquirrelForge\Engine\SqliteEngineRuntime;
 use SquirrelForge\Contracts\ProviderHealthInterface;
 use SquirrelForge\Integration\Http\AuthenticationApiServer;
 use SquirrelForge\Integration\Http\CredentialAdministrationApiServer;
+use SquirrelForge\Integration\Http\DashboardApiServer;
 use SquirrelForge\Integration\Http\EngineApiServer;
 use SquirrelForge\Integration\Http\NativeHttpTransport;
 use SquirrelForge\Integration\Http\ProviderReadinessApiServer;
@@ -19,6 +20,7 @@ use SquirrelForge\Security\AuthenticationThrottlePolicy;
 use SquirrelForge\Security\SqliteAuthenticationManager;
 use SquirrelForge\Security\SqliteAuthorizationManager;
 use SquirrelForge\Security\SqliteIdentityManager;
+use SquirrelForge\Security\SqliteSecurityEventSink;
 
 require dirname(__DIR__) . '/vendor/autoload.php';
 
@@ -80,6 +82,7 @@ if ($environment->allowsBootstrapProvisioning()
             'security.credentials.rotate',
             'security.credentials.revoke',
             'security.sessions.revoke',
+            'observability.dashboard.read',
         ]
     );
 }
@@ -96,6 +99,14 @@ $credentialAdministrationServer = new CredentialAdministrationApiServer(
 $providerReadinessServer = new ProviderReadinessApiServer(
     $providers->secrets instanceof ProviderHealthInterface ? $providers->secrets : null,
     $providerTelemetry
+);
+$dashboardServer = new DashboardApiServer(
+    $providers->secrets instanceof ProviderHealthInterface ? $providers->secrets : null,
+    $providerTelemetry,
+    $securityEvents instanceof SqliteSecurityEventSink ? $securityEvents : null,
+    $runtime,
+    $authorization,
+    $authentication
 );
 $headers = [];
 
@@ -115,6 +126,8 @@ $response = match (true) {
         $credentialAdministrationServer->handle($method, $path, $headers, $body),
     $path === '/v1/health/providers' =>
         $providerReadinessServer->handle($method, $path),
+    $path === '/v1/admin/dashboard' =>
+        $dashboardServer->handle($method, $path, $headers, $body),
     default => $server->handle($method, $path, $headers, $body),
 };
 
