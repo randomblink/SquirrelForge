@@ -52,7 +52,7 @@ use SquirrelForge\Events\Event;
  * reason: neither KNOWLEDGE-VALIDATOR nor KNOWLEDGE-VERSIONING has code
  * to source a real signal from.
  */
-final class SqliteSemanticSearchManager
+final class SemanticSearchManager
 {
     public function __construct(
         private readonly ?SqliteEmbeddingsManager $embeddings = null,

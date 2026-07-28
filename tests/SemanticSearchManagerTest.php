@@ -10,10 +10,10 @@ use SquirrelForge\Events\CallbackEventListener;
 use SquirrelForge\Events\EventBus;
 use SquirrelForge\Knowledge\SqliteDocumentRepository;
 use SquirrelForge\Knowledge\SqliteEmbeddingsManager;
-use SquirrelForge\Knowledge\SqliteSemanticSearchManager;
+use SquirrelForge\Knowledge\SemanticSearchManager;
 use SquirrelForge\Storage\SqliteVectorStorage;
 
-final class SqliteSemanticSearchManagerTest extends TestCase
+final class SemanticSearchManagerTest extends TestCase
 {
     /** @var array<int, string> */
     private array $databasePaths = [];
@@ -38,14 +38,14 @@ final class SqliteSemanticSearchManagerTest extends TestCase
     }
 
     /**
-     * @return array{0: SqliteDocumentRepository, 1: SqliteEmbeddingsManager, 2: SqliteSemanticSearchManager}
+     * @return array{0: SqliteDocumentRepository, 1: SqliteEmbeddingsManager, 2: SemanticSearchManager}
      */
     private function makeManagers(?EventBus $events = null): array
     {
         $documents = new SqliteDocumentRepository($this->tempPath('documents'));
         $vectors = new SqliteVectorStorage($this->tempPath('vectors'));
         $embeddings = new SqliteEmbeddingsManager($this->tempPath('embeddings'), $vectors, $documents);
-        $search = new SqliteSemanticSearchManager($embeddings, $documents, $events);
+        $search = new SemanticSearchManager($embeddings, $documents, $events);
 
         return [$documents, $embeddings, $search];
     }
@@ -156,7 +156,7 @@ final class SqliteSemanticSearchManagerTest extends TestCase
     public function testSearchWithoutEmbeddingsConfiguredReturnsAnError(): void
     {
         $documents = new SqliteDocumentRepository($this->tempPath('documents'));
-        $search = new SqliteSemanticSearchManager(documents: $documents);
+        $search = new SemanticSearchManager(documents: $documents);
 
         $result = $search->search('anything');
 
@@ -167,7 +167,7 @@ final class SqliteSemanticSearchManagerTest extends TestCase
     {
         $vectors = new SqliteVectorStorage($this->tempPath('vectors'));
         $embeddings = new SqliteEmbeddingsManager($this->tempPath('embeddings'), $vectors);
-        $search = new SqliteSemanticSearchManager($embeddings);
+        $search = new SemanticSearchManager($embeddings);
 
         $result = $search->search('anything');
 
