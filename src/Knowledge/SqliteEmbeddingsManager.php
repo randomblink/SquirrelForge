@@ -46,7 +46,7 @@ final class SqliteEmbeddingsManager
 {
     private const MODEL_NAME = 'squirrelforge-feature-hashing';
     private const MODEL_VERSION = '1.0.0';
-    private const DEFAULT_DIMENSION = 256;
+    public const DEFAULT_DIMENSION = 256;
 
     private PDO $database;
 
@@ -85,12 +85,8 @@ final class SqliteEmbeddingsManager
      */
     public function generate(string $knowledgeId, string $text, array $options = []): array
     {
-        if ($this->documents !== null) {
-            $registered = $this->documents->readMetadata($knowledgeId);
-
-            if (!$registered['found']) {
-                return ['created' => false, 'embedding_id' => null, 'knowledge_id' => $knowledgeId, 'status' => null, 'vector' => null, 'vector_storage_reference' => null, 'error' => sprintf('Knowledge asset "%s" is not a registered document reference.', $knowledgeId)];
-            }
+        if ($this->documents !== null && !$this->documents->exists($knowledgeId)) {
+            return ['created' => false, 'embedding_id' => null, 'knowledge_id' => $knowledgeId, 'status' => null, 'vector' => null, 'vector_storage_reference' => null, 'error' => sprintf('Knowledge asset "%s" is not a registered document reference.', $knowledgeId)];
         }
 
         $contentHash = hash('sha256', $text);
@@ -170,6 +166,21 @@ final class SqliteEmbeddingsManager
             'vector_storage_reference' => $vectorStorageReference,
             'error' => null,
         ];
+    }
+
+    /**
+     * Computes a vector for ephemeral text -- a search query, typically
+     * -- using the same feature-hashing math as generate(), but without
+     * creating a persisted embedding record. This is what
+     * 25_KNOWLEDGE/SEMANTIC-SEARCH.md uses to turn query text into a
+     * comparable vector, since it must not create embedding records
+     * itself.
+     *
+     * @return array<int, float>
+     */
+    public function queryVector(string $text, int $dimension = self::DEFAULT_DIMENSION): array
+    {
+        return $this->hashingTrickVector($text, $dimension);
     }
 
     /**

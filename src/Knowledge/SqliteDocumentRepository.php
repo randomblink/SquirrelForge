@@ -162,6 +162,18 @@ final class SqliteDocumentRepository
     }
 
     /**
+     * Whether a document reference exists at all, regardless of
+     * protection -- for internal existence checks (e.g. verifying a
+     * knowledge_id before generating an embedding) that don't expose any
+     * metadata and so aren't subject to the protected-reference
+     * authorization gate the way readMetadata() is.
+     */
+    public function exists(string $documentId): bool
+    {
+        return $this->fetch($documentId) !== null;
+    }
+
+    /**
      * @param array{title?: string, type?: string, owner?: ?string, metadata?: array<string, mixed>} $changes
      * @return array{found: bool, error: ?string}
      */

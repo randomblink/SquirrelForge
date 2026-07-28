@@ -79,6 +79,15 @@ final class SqliteDocumentRepositoryTest extends TestCase
         $this->assertStringContainsString('does not resolve', (string) $result['error']);
     }
 
+    public function testExistsIsTrueForARegisteredReferenceRegardlessOfProtectionAndFalseOtherwise(): void
+    {
+        $repository = new SqliteDocumentRepository($this->tempPath('main'));
+        $protected = $repository->registerReference('Secret Policy', 'policy', ['protected' => true]);
+
+        $this->assertTrue($repository->exists($protected['document_id']));
+        $this->assertFalse($repository->exists('knowledge_document_does_not_exist'));
+    }
+
     public function testRegisterReferenceSkipsVerificationWhenNoDocumentStorageIsConfigured(): void
     {
         $repository = new SqliteDocumentRepository($this->tempPath('main'));
