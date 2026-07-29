@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace SquirrelForge\Tests;
 
 use PHPUnit\Framework\TestCase;
+use SquirrelForge\Automation\RuleEngine;
 use SquirrelForge\Contracts\EventInterface;
 use SquirrelForge\Events\CallbackEventListener;
 use SquirrelForge\Events\EventBus;
+use SquirrelForge\Governance\SqlitePolicyEngine;
 use SquirrelForge\Learning\PatternDetector;
 use SquirrelForge\Learning\SqliteEvaluationEngine;
 use SquirrelForge\Learning\SqliteExperienceStore;
@@ -101,6 +103,39 @@ final class SqliteLearningGovernanceTest extends TestCase
         $result = $governance->review('proposal_1', ['policy_result' => 'pending']);
 
         $this->assertSame('deferred', $result['outcome']);
+    }
+
+    public function testExplicitPolicyResultTakesPrecedenceOverPolicyEngine(): void
+    {
+        $policyEngine = new SqlitePolicyEngine($this->tempPath('policy'), new RuleEngine());
+        $policyEngine->registerPolicy('p1', ['category' => 'compliance', 'priority' => 1, 'condition' => ['type' => 'boolean', 'field' => 'x', 'equals' => true], 'effect' => 'deny']);
+        $governance = new SqliteLearningGovernance($this->tempPath('main'), policyEngine: $policyEngine);
+
+        $result = $governance->review('proposal_1', ['policy_result' => 'approved', 'policy_context' => ['x' => true]]);
+
+        $this->assertSame('approved', $result['outcome']);
+    }
+
+    public function testPolicyEngineDenialProhibitsWhenNoExplicitPolicyResultIsGiven(): void
+    {
+        $policyEngine = new SqlitePolicyEngine($this->tempPath('policy'), new RuleEngine());
+        $policyEngine->registerPolicy('p1', ['category' => 'compliance', 'priority' => 1, 'condition' => ['type' => 'boolean', 'field' => 'x', 'equals' => true], 'effect' => 'deny']);
+        $governance = new SqliteLearningGovernance($this->tempPath('main'), policyEngine: $policyEngine);
+
+        $result = $governance->review('proposal_1', ['policy_context' => ['x' => true]]);
+
+        $this->assertSame('prohibited', $result['outcome']);
+    }
+
+    public function testWithoutPolicyContextThePolicyEngineIsNeverConsulted(): void
+    {
+        $policyEngine = new SqlitePolicyEngine($this->tempPath('policy'), new RuleEngine());
+        $policyEngine->registerPolicy('p1', ['category' => 'compliance', 'priority' => 1, 'condition' => ['type' => 'boolean', 'field' => 'x', 'equals' => true], 'effect' => 'deny']);
+        $governance = new SqliteLearningGovernance($this->tempPath('main'), policyEngine: $policyEngine);
+
+        $result = $governance->review('proposal_1');
+
+        $this->assertSame('approved', $result['outcome']);
     }
 
     public function testDetectedAnomalyConditionsAnOtherwiseApprovedProposal(): void

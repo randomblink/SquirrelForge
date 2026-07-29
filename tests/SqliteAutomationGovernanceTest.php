@@ -6,10 +6,12 @@ namespace SquirrelForge\Tests;
 
 use PHPUnit\Framework\TestCase;
 use SquirrelForge\Automation\AutomationValidator;
+use SquirrelForge\Automation\RuleEngine;
 use SquirrelForge\Automation\SqliteAutomationGovernance;
 use SquirrelForge\Contracts\EventInterface;
 use SquirrelForge\Events\CallbackEventListener;
 use SquirrelForge\Events\EventBus;
+use SquirrelForge\Governance\SqlitePolicyEngine;
 use SquirrelForge\Reasoning\SqliteRiskAssessor;
 
 final class SqliteAutomationGovernanceTest extends TestCase
@@ -121,6 +123,50 @@ final class SqliteAutomationGovernanceTest extends TestCase
         $result = $governance->review('auto_1', ['compliance_finding' => 'pending']);
 
         $this->assertSame('deferred', $result['outcome']);
+    }
+
+    public function testExplicitPolicyResultTakesPrecedenceOverPolicyEngine(): void
+    {
+        $policyEngine = new SqlitePolicyEngine($this->tempPath('policy'), new RuleEngine());
+        $policyEngine->registerPolicy('p1', ['category' => 'workflow', 'priority' => 1, 'condition' => ['type' => 'boolean', 'field' => 'x', 'equals' => true], 'effect' => 'deny']);
+        $governance = new SqliteAutomationGovernance($this->tempPath('main'), policyEngine: $policyEngine);
+
+        $result = $governance->review('auto_1', ['policy_result' => 'approved', 'policy_context' => ['x' => true]]);
+
+        $this->assertSame('approved', $result['outcome']);
+    }
+
+    public function testPolicyEngineDenialRejectsWhenNoExplicitPolicyResultIsGiven(): void
+    {
+        $policyEngine = new SqlitePolicyEngine($this->tempPath('policy'), new RuleEngine());
+        $policyEngine->registerPolicy('p1', ['category' => 'workflow', 'priority' => 1, 'condition' => ['type' => 'boolean', 'field' => 'x', 'equals' => true], 'effect' => 'deny']);
+        $governance = new SqliteAutomationGovernance($this->tempPath('main'), policyEngine: $policyEngine);
+
+        $result = $governance->review('auto_1', ['policy_context' => ['x' => true]]);
+
+        $this->assertSame('rejected', $result['outcome']);
+    }
+
+    public function testPolicyEngineAllowLetsReviewProceedToApproval(): void
+    {
+        $policyEngine = new SqlitePolicyEngine($this->tempPath('policy'), new RuleEngine());
+        $policyEngine->registerPolicy('p1', ['category' => 'workflow', 'priority' => 1, 'condition' => ['type' => 'boolean', 'field' => 'x', 'equals' => true], 'effect' => 'allow']);
+        $governance = new SqliteAutomationGovernance($this->tempPath('main'), policyEngine: $policyEngine);
+
+        $result = $governance->review('auto_1', ['policy_context' => ['x' => true]]);
+
+        $this->assertSame('approved', $result['outcome']);
+    }
+
+    public function testWithoutPolicyContextThePolicyEngineIsNeverConsulted(): void
+    {
+        $policyEngine = new SqlitePolicyEngine($this->tempPath('policy'), new RuleEngine());
+        $policyEngine->registerPolicy('p1', ['category' => 'workflow', 'priority' => 1, 'condition' => ['type' => 'boolean', 'field' => 'x', 'equals' => true], 'effect' => 'deny']);
+        $governance = new SqliteAutomationGovernance($this->tempPath('main'), policyEngine: $policyEngine);
+
+        $result = $governance->review('auto_1');
+
+        $this->assertSame('approved', $result['outcome']);
     }
 
     public function testReadyWithConditionsValidationIsConditionedAndCarriesTheUnsatisfiedReferences(): void

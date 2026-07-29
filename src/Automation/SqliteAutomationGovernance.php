@@ -8,6 +8,7 @@ use DateTimeImmutable;
 use PDO;
 use SquirrelForge\Contracts\EventBusInterface;
 use SquirrelForge\Events\Event;
+use SquirrelForge\Governance\SqlitePolicyEngine;
 use SquirrelForge\Reasoning\SqliteRiskAssessor;
 
 /**
@@ -58,6 +59,7 @@ final class SqliteAutomationGovernance
         private readonly array $exemptClasses = [],
         private readonly ?AutomationValidator $validator = null,
         private readonly ?SqliteRiskAssessor $riskAssessor = null,
+        private readonly ?SqlitePolicyEngine $policyEngine = null,
         private readonly ?EventBusInterface $events = null
     ) {
         $this->database = new PDO('sqlite:' . $databasePath, options: [
@@ -81,7 +83,7 @@ final class SqliteAutomationGovernance
     }
 
     /**
-     * @param array{automation_class?: ?string, definition?: array<string, mixed>, security_decision?: string, compliance_finding?: string, policy_result?: string} $options
+     * @param array{automation_class?: ?string, definition?: array<string, mixed>, security_decision?: string, compliance_finding?: string, policy_result?: string, policy_context?: array<string, mixed>, policy_category?: ?string} $options
      * @return array{record_id: string, automation_id: string, outcome: string, rationale: string, conditions: array<int, string>}
      */
     public function review(string $automationId, array $options = []): array
@@ -90,6 +92,12 @@ final class SqliteAutomationGovernance
 
         if ($automationClass !== null && in_array($automationClass, $this->exemptClasses, true)) {
             return $this->recordDecision($automationId, $automationClass, 'approved', 'Automation class is exempt from governance review.', [], []);
+        }
+
+        $resolvedPolicyResult = $this->resolvePolicyResult($automationId, $options);
+
+        if ($resolvedPolicyResult !== null) {
+            $options['policy_result'] = $resolvedPolicyResult;
         }
 
         $evidence = [];
@@ -183,6 +191,35 @@ final class SqliteAutomationGovernance
         $result = $this->recordDecision($automationId, null, 'approved', sprintf('Exception granted by "%s": %s', $grantedBy, $justification), [], ['exception' => true, 'granted_by' => $grantedBy]);
 
         return ['found' => true, 'record_id' => $result['record_id'], 'error' => null];
+    }
+
+    /**
+     * A caller-supplied `policy_result` always takes precedence -- this
+     * is still consumption, not computation. Only when the caller omits
+     * it but supplies `policy_context`, and a real SqlitePolicyEngine is
+     * injected, is a genuine decision computed and mapped into the same
+     * approved/denied/pending vocabulary the rest of review() already
+     * expects.
+     *
+     * @param array<string, mixed> $options
+     */
+    private function resolvePolicyResult(string $automationId, array $options): ?string
+    {
+        if (array_key_exists('policy_result', $options)) {
+            return $options['policy_result'];
+        }
+
+        if ($this->policyEngine === null || !isset($options['policy_context'])) {
+            return null;
+        }
+
+        $decision = $this->policyEngine->evaluate($automationId, $options['policy_context'], $options['policy_category'] ?? null)['decision'];
+
+        return match ($decision) {
+            'allowed', 'allowed_with_conditions' => 'approved',
+            'denied', 'permanently_prohibited' => 'denied',
+            default => 'pending',
+        };
     }
 
     private function lifecycleAction(string $automationId, string $outcome, string $reason): array
