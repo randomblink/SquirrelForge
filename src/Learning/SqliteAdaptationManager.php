@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SquirrelForge\Learning;
 
+use Closure;
 use DateTimeImmutable;
 use PDO;
 use SquirrelForge\Contracts\EventBusInterface;
@@ -58,7 +59,8 @@ final class SqliteAdaptationManager
         private readonly ?WorkflowEngine $workflowEngine = null,
         private readonly ?SqliteFailureDetector $failureDetector = null,
         private readonly ?SqliteResilienceManager $resilienceManager = null,
-        private readonly ?EventBusInterface $events = null
+        private readonly ?EventBusInterface $events = null,
+        private readonly ?Closure $clock = null
     ) {
         $this->database = new PDO('sqlite:' . $databasePath, options: [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
@@ -110,7 +112,7 @@ final class SqliteAdaptationManager
         }
 
         $planId = 'adaptation_plan_' . bin2hex(random_bytes(12));
-        $now = gmdate(DATE_RFC3339);
+        $now = $this->now()->format(DATE_RFC3339);
 
         $statement = $this->database->prepare(
             'INSERT INTO adaptation_plans (
@@ -195,7 +197,7 @@ final class SqliteAdaptationManager
         }
 
         $statement = $this->database->prepare('UPDATE adaptation_plans SET validation_result = :validation_result, updated_at = :updated_at WHERE plan_id = :plan_id');
-        $statement->execute(['validation_result' => $result, 'updated_at' => gmdate(DATE_RFC3339), 'plan_id' => $planId]);
+        $statement->execute(['validation_result' => $result, 'updated_at' => $this->now()->format(DATE_RFC3339), 'plan_id' => $planId]);
 
         if ($result === 'passed') {
             $this->updateStatus($planId, 'validated', null);
@@ -235,7 +237,7 @@ final class SqliteAdaptationManager
         $statement = $this->database->prepare(
             'UPDATE adaptation_plans SET status = :status, execution_error = :execution_error, updated_at = :updated_at WHERE plan_id = :plan_id'
         );
-        $statement->execute(['status' => $status, 'execution_error' => $error, 'updated_at' => gmdate(DATE_RFC3339), 'plan_id' => $planId]);
+        $statement->execute(['status' => $status, 'execution_error' => $error, 'updated_at' => $this->now()->format(DATE_RFC3339), 'plan_id' => $planId]);
     }
 
     /**
@@ -276,6 +278,11 @@ final class SqliteAdaptationManager
     /**
      * @return array<string, mixed>|null
      */
+    private function now(): DateTimeImmutable
+    {
+        return $this->clock !== null ? ($this->clock)() : new DateTimeImmutable();
+    }
+
     private function fetch(string $planId): ?array
     {
         $statement = $this->database->prepare('SELECT * FROM adaptation_plans WHERE plan_id = :plan_id');
