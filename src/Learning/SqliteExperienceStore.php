@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SquirrelForge\Learning;
 
+use Closure;
 use DateTimeImmutable;
 use PDO;
 use SquirrelForge\Contracts\EventBusInterface;
@@ -52,7 +53,8 @@ final class SqliteExperienceStore
         string $databasePath,
         private readonly ?SqliteDocumentStorage $documentStorage = null,
         private readonly ?SqliteFeedbackCollector $feedbackCollector = null,
-        private readonly ?EventBusInterface $events = null
+        private readonly ?EventBusInterface $events = null,
+        private readonly ?Closure $clock = null
     ) {
         $this->database = new PDO('sqlite:' . $databasePath, options: [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
@@ -119,7 +121,7 @@ final class SqliteExperienceStore
         }
 
         $experienceId = 'experience_' . bin2hex(random_bytes(12));
-        $now = gmdate(DATE_RFC3339);
+        $now = $this->now()->format(DATE_RFC3339);
 
         $statement = $this->database->prepare(
             'INSERT INTO experience_records (
@@ -181,7 +183,7 @@ final class SqliteExperienceStore
         $statement = $this->database->prepare(
             "UPDATE experience_records SET {$column} = :reference, status = :status, updated_at = :updated_at WHERE experience_id = :experience_id"
         );
-        $statement->execute(['reference' => $reference, 'status' => $status, 'updated_at' => gmdate(DATE_RFC3339), 'experience_id' => $experienceId]);
+        $statement->execute(['reference' => $reference, 'status' => $status, 'updated_at' => $this->now()->format(DATE_RFC3339), 'experience_id' => $experienceId]);
 
         $this->publish($type . '_attached', $experienceId);
 
@@ -204,7 +206,7 @@ final class SqliteExperienceStore
         }
 
         $statement = $this->database->prepare('UPDATE experience_records SET status = :status, updated_at = :updated_at WHERE experience_id = :experience_id');
-        $statement->execute(['status' => 'archived', 'updated_at' => gmdate(DATE_RFC3339), 'experience_id' => $experienceId]);
+        $statement->execute(['status' => 'archived', 'updated_at' => $this->now()->format(DATE_RFC3339), 'experience_id' => $experienceId]);
 
         $this->publish('archived', $experienceId);
 
@@ -282,6 +284,11 @@ final class SqliteExperienceStore
             'created_at' => $record['created_at'],
             'updated_at' => $record['updated_at'],
         ];
+    }
+
+    private function now(): DateTimeImmutable
+    {
+        return $this->clock !== null ? ($this->clock)() : new DateTimeImmutable();
     }
 
     private function publish(string $eventSuffix, string $experienceId): void
