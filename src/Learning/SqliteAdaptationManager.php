@@ -8,6 +8,7 @@ use Closure;
 use DateTimeImmutable;
 use PDO;
 use SquirrelForge\Contracts\EventBusInterface;
+use SquirrelForge\Engine\EngineValidation;
 use SquirrelForge\Events\Event;
 use SquirrelForge\Reasoning\SqliteRiskAssessor;
 use SquirrelForge\Resilience\SqliteFailureDetector;
@@ -38,11 +39,16 @@ use SquirrelForge\Workflow\WorkflowExecutionException;
  * the caller explicitly requests it, whether triggered by an execution
  * failure or by a failed post-change validation.
  *
- * "Request post-change validation from Validation owners" is consumed,
- * not computed: 14_ENGINE/VALIDATION.md has no code to produce a real
- * result, so requestValidation() takes an already-decided
- * passed/failed/pending value from the caller. Plan status is a real,
- * enforced state machine (planned -> implemented|failed -> validated|
+ * "Request post-change validation from Validation owners" follows the
+ * same "consume, don't compute" pattern as Policy Engine's retrofit
+ * into Automation/Learning Governance: a caller-supplied passed/failed/
+ * pending value always takes precedence, but when the caller instead
+ * supplies `validation_items` and a real EngineValidation is injected,
+ * requestValidation() computes a genuine decision (mapping ACCEPTED/
+ * ACCEPTED_WITH_LIMITATIONS -> passed, REJECTED/BLOCKED -> failed,
+ * everything else -> pending) rather than requiring the caller to have
+ * already decided. Plan status is a real, enforced state machine
+ * (planned -> implemented|failed -> validated|
  * failed): execute() refuses to run a plan that isn't `planned`, and
  * requestValidation() refuses to validate one that isn't `implemented`.
  */
@@ -60,7 +66,8 @@ final class SqliteAdaptationManager
         private readonly ?SqliteFailureDetector $failureDetector = null,
         private readonly ?SqliteResilienceManager $resilienceManager = null,
         private readonly ?EventBusInterface $events = null,
-        private readonly ?Closure $clock = null
+        private readonly ?Closure $clock = null,
+        private readonly ?EngineValidation $engineValidation = null
     ) {
         $this->database = new PDO('sqlite:' . $databasePath, options: [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
@@ -177,11 +184,17 @@ final class SqliteAdaptationManager
     }
 
     /**
-     * @param array{recovery?: array<string, mixed>} $options
+     * @param array{recovery?: array<string, mixed>, validation_items?: array<int, array<string, mixed>>, validation_options?: array<string, mixed>} $options
      * @return array{found: bool, status: ?string, error: ?string, recovery: ?array<string, mixed>}
      */
-    public function requestValidation(string $planId, string $result, array $options = []): array
+    public function requestValidation(string $planId, ?string $result = null, array $options = []): array
     {
+        $result = $this->resolveValidationResult($result, $options);
+
+        if ($result === null) {
+            return ['found' => false, 'status' => null, 'error' => 'A validation result is required, either directly or via "validation_items" with Engine Validation configured.', 'recovery' => null];
+        }
+
         if (!in_array($result, self::VALIDATION_RESULTS, true)) {
             return ['found' => false, 'status' => null, 'error' => sprintf('Unknown validation result "%s".', $result), 'recovery' => null];
         }
@@ -221,6 +234,35 @@ final class SqliteAdaptationManager
      * @param array<string, mixed>|null $recoveryOptions
      * @return array<string, mixed>|null
      */
+    /**
+     * A caller-supplied `$result` always takes precedence -- this is
+     * still consumption, not computation. Only when the caller omits it
+     * but supplies `validation_items`, and a real EngineValidation is
+     * injected, is a genuine decision computed and mapped into the same
+     * passed/failed/pending vocabulary requestValidation() already
+     * expects.
+     *
+     * @param array{validation_items?: array<int, array<string, mixed>>, validation_options?: array<string, mixed>} $options
+     */
+    private function resolveValidationResult(?string $result, array $options): ?string
+    {
+        if ($result !== null) {
+            return $result;
+        }
+
+        if ($this->engineValidation === null || !isset($options['validation_items'])) {
+            return null;
+        }
+
+        $decision = $this->engineValidation->evaluate($options['validation_items'], $options['validation_options'] ?? [])['decision'];
+
+        return match ($decision) {
+            'ACCEPTED', 'ACCEPTED_WITH_LIMITATIONS' => 'passed',
+            'REJECTED', 'BLOCKED' => 'failed',
+            default => 'pending',
+        };
+    }
+
     private function requestRecovery(string $planId, ?array $recoveryOptions): ?array
     {
         if ($recoveryOptions === null || $this->failureDetector === null || $this->resilienceManager === null) {

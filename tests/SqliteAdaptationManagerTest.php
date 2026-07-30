@@ -7,6 +7,7 @@ namespace SquirrelForge\Tests;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use SquirrelForge\Contracts\EventInterface;
+use SquirrelForge\Engine\EngineValidation;
 use SquirrelForge\Events\CallbackEventListener;
 use SquirrelForge\Events\EventBus;
 use SquirrelForge\Learning\SqliteAdaptationManager;
@@ -216,6 +217,57 @@ final class SqliteAdaptationManagerTest extends TestCase
         $result = $manager->requestValidation($created['plan_id'], 'maybe');
 
         $this->assertFalse($result['found']);
+    }
+
+    public function testExplicitValidationResultTakesPrecedenceOverEngineValidation(): void
+    {
+        $manager = new SqliteAdaptationManager($this->tempPath('main'), workflowEngine: $this->successfulEngine(), engineValidation: new EngineValidation());
+        $created = $manager->createPlan('proposal_1', ['rollback_plan' => 'revert config']);
+        $manager->execute($created['plan_id'], []);
+
+        $result = $manager->requestValidation($created['plan_id'], 'passed', [
+            'validation_items' => [['item_id' => 'i1', 'stage' => 'RUNTIME', 'required' => true, 'status' => 'FAILED', 'waivable' => false]],
+        ]);
+
+        $this->assertSame('validated', $result['status']);
+    }
+
+    public function testEngineValidationRejectionFailsWhenNoExplicitResultIsGiven(): void
+    {
+        $manager = new SqliteAdaptationManager($this->tempPath('main'), workflowEngine: $this->successfulEngine(), engineValidation: new EngineValidation());
+        $created = $manager->createPlan('proposal_1', ['rollback_plan' => 'revert config']);
+        $manager->execute($created['plan_id'], []);
+
+        $result = $manager->requestValidation($created['plan_id'], null, [
+            'validation_items' => [['item_id' => 'i1', 'stage' => 'RUNTIME', 'required' => true, 'status' => 'FAILED', 'waivable' => false]],
+        ]);
+
+        $this->assertSame('failed', $result['status']);
+    }
+
+    public function testEngineValidationAcceptanceTransitionsToValidated(): void
+    {
+        $manager = new SqliteAdaptationManager($this->tempPath('main'), workflowEngine: $this->successfulEngine(), engineValidation: new EngineValidation());
+        $created = $manager->createPlan('proposal_1', ['rollback_plan' => 'revert config']);
+        $manager->execute($created['plan_id'], []);
+
+        $result = $manager->requestValidation($created['plan_id'], null, [
+            'validation_items' => [['item_id' => 'i1', 'stage' => 'RUNTIME', 'required' => true, 'status' => 'PASSED']],
+        ]);
+
+        $this->assertSame('validated', $result['status']);
+    }
+
+    public function testWithoutAResultOrValidationItemsRequestValidationIsRejected(): void
+    {
+        $manager = new SqliteAdaptationManager($this->tempPath('main'), workflowEngine: $this->successfulEngine());
+        $created = $manager->createPlan('proposal_1', ['rollback_plan' => 'revert config']);
+        $manager->execute($created['plan_id'], []);
+
+        $result = $manager->requestValidation($created['plan_id']);
+
+        $this->assertFalse($result['found']);
+        $this->assertStringContainsString('validation result is required', (string) $result['error']);
     }
 
     public function testListFiltersByProposalAndStatus(): void
