@@ -131,7 +131,7 @@ final class MetricsManager
             return ['metric_name' => $metricName, 'type' => $type, 'value' => null, 'sample_count' => 0, 'outcome' => 'invalid_type', 'error' => sprintf('Unknown aggregate type "%s".', $type)];
         }
 
-        $values = $this->valuesFor($metricName);
+        $values = $this->values($metricName);
 
         if ($values === []) {
             $value = $type === 'count' ? 0.0 : null;
@@ -174,10 +174,19 @@ final class MetricsManager
     }
 
     /**
+     * Every recorded value for a metric name, in storage order. A
+     * retrofit exposing what aggregate() already computed internally --
+     * real stored data, not a fabricated series -- so callers like
+     * Diagnostics Engine can run their own statistics over it.
+     *
      * @return array<int, float>
      */
-    private function valuesFor(string $metricName): array
+    public function values(string $metricName): array
     {
+        if ($this->documentStorage === null) {
+            return [];
+        }
+
         $values = [];
 
         foreach ($this->documentStorage->search(['type' => 'metric_record', 'tag' => $metricName]) as $document) {

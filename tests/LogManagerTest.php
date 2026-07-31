@@ -151,4 +151,31 @@ final class LogManagerTest extends TestCase
         $this->assertSame('rejected', $result['outcome']);
         $this->assertNull($result['log_ref']);
     }
+
+    public function testRecentWithoutDocumentStorageConfiguredReturnsEmpty(): void
+    {
+        $manager = new LogManager();
+
+        $this->assertSame([], $manager->recent());
+    }
+
+    public function testRecentFiltersOnSourceSignalTypeSeverityAndCorrelationId(): void
+    {
+        $documents = new SqliteDocumentStorage($this->tempPath('documents'));
+        $manager = new LogManager($documents);
+        $manager->recordLog($this->telemetry(['source' => 'workflow-engine', 'correlation_id' => 'corr_a']));
+        $manager->recordLog($this->telemetry(['source' => 'other-service', 'correlation_id' => 'corr_b', 'signal_type' => 'alert']));
+
+        $bySource = $manager->recent(['source' => 'workflow-engine']);
+        $this->assertCount(1, $bySource);
+        $this->assertSame('corr_a', $bySource[0]['correlation_id']);
+
+        $bySeverity = $manager->recent(['severity' => 'error']);
+        $this->assertCount(1, $bySeverity);
+        $this->assertSame('alert', $bySeverity[0]['signal_type']);
+
+        $byCorrelation = $manager->recent(['correlation_id' => 'corr_b']);
+        $this->assertCount(1, $byCorrelation);
+        $this->assertSame('other-service', $byCorrelation[0]['source']);
+    }
 }

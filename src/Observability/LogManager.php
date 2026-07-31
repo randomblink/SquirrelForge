@@ -35,6 +35,14 @@ use SquirrelForge\Storage\SqliteDocumentStorage;
  * caller-named sensitive_fields when the standard requires it, and
  * carries the standard's real retention_days into the stored
  * document's metadata.
+ *
+ * recent() is a retrofit: the spec's "Provide references to querying
+ * and troubleshooting components" implies a read path, but this class
+ * originally only wrote. It searches the same `log_record` documents
+ * recordLog() creates and filters in-memory on the stored content's
+ * source/signal_type/severity/correlation_id -- real data, not a
+ * fabricated index, matching the same scan-then-filter honesty already
+ * documented on SqliteDocumentStorage::search() itself.
  */
 final class LogManager
 {
@@ -104,5 +112,54 @@ final class LogManager
         }
 
         return ['log_ref' => $result['document_ref'], 'severity' => $severity, 'outcome' => 'recorded', 'error' => null];
+    }
+
+    /**
+     * @param array{source?: string, signal_type?: string, severity?: string, correlation_id?: string} $filters
+     * @return array<int, array<string, mixed>>
+     */
+    public function recent(array $filters = [], int $limit = 50): array
+    {
+        if ($this->documentStorage === null) {
+            return [];
+        }
+
+        $searchFilters = ['type' => 'log_record'];
+
+        if (isset($filters['source'])) {
+            $searchFilters['owner'] = $filters['source'];
+        }
+
+        $records = [];
+
+        foreach ($this->documentStorage->search($searchFilters) as $document) {
+            $retrieved = $this->documentStorage->retrieve($document['document_ref']);
+
+            if (!$retrieved['found']) {
+                continue;
+            }
+
+            $content = $retrieved['content'];
+
+            if (isset($filters['signal_type']) && ($content['signal_type'] ?? null) !== $filters['signal_type']) {
+                continue;
+            }
+
+            if (isset($filters['severity']) && ($content['severity'] ?? null) !== $filters['severity']) {
+                continue;
+            }
+
+            if (isset($filters['correlation_id']) && ($content['correlation_id'] ?? null) !== $filters['correlation_id']) {
+                continue;
+            }
+
+            $records[] = $content;
+
+            if (count($records) >= $limit) {
+                break;
+            }
+        }
+
+        return $records;
     }
 }

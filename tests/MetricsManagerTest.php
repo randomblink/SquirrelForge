@@ -205,4 +205,22 @@ final class MetricsManagerTest extends TestCase
 
         $this->assertSame(30, $metadata['retention_days']);
     }
+
+    public function testValuesWithoutDocumentStorageConfiguredReturnsEmpty(): void
+    {
+        $manager = new MetricsManager();
+
+        $this->assertSame([], $manager->values('queue_depth'));
+    }
+
+    public function testValuesReturnsEveryRecordedValueForAMetricName(): void
+    {
+        $documents = new SqliteDocumentStorage($this->tempPath('documents'));
+        $manager = new MetricsManager($documents);
+        foreach ([5, 10, 15] as $value) {
+            $manager->recordMetric($this->telemetry(['value' => $value]));
+        }
+
+        $this->assertSame([15.0, 10.0, 5.0], $manager->values('queue_depth'));
+    }
 }
