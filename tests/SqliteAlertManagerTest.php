@@ -373,4 +373,25 @@ final class SqliteAlertManagerTest extends TestCase
 
         $this->assertCount(1, $captured);
     }
+
+    public function testOpenForReturnsOnlyUnresolvedAlertsForASource(): void
+    {
+        $manager = $this->manager();
+        $open = $manager->create('workflow-engine', 'performance', 'warning', []);
+        $resolved = $manager->create('workflow-engine', 'reliability', 'error', []);
+        $manager->resolve($resolved['alert_id'], 'Fixed.');
+        $manager->create('other-service', 'performance', 'critical', []);
+
+        $result = $manager->openFor('workflow-engine');
+
+        $this->assertCount(1, $result);
+        $this->assertSame($open['alert_id'], $result[0]['alert_id']);
+    }
+
+    public function testOpenForReturnsEmptyWhenNoAlertsExistForASource(): void
+    {
+        $manager = $this->manager();
+
+        $this->assertSame([], $manager->openFor('unknown-service'));
+    }
 }

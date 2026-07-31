@@ -243,6 +243,25 @@ final class SqliteAlertManager
     }
 
     /**
+     * Every not-yet-resolved alert for a source. A retrofit: consumers
+     * like Health Reporter genuinely need to ask "what's currently open
+     * for this component", and until now the only lookup was by a
+     * single known alert_id.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function openFor(string $source): array
+    {
+        $placeholders = implode(',', array_fill(0, count(self::OPEN_STATUSES), '?'));
+        $statement = $this->database->prepare(
+            "SELECT * FROM alerts WHERE source = ? AND status IN ({$placeholders}) ORDER BY rowid DESC"
+        );
+        $statement->execute([$source, ...self::OPEN_STATUSES]);
+
+        return array_map(fn(array $row): array => $this->hydrate($row), $statement->fetchAll());
+    }
+
+    /**
      * @param array{id: string, source?: string, category?: string, severity?: string, metric?: string, operator?: string, threshold?: float, aggregate_type?: string} $rule
      * @return array{rule_id: string, condition_met: bool, alert: ?array<string, mixed>, outcome: string, error: ?string}
      */
