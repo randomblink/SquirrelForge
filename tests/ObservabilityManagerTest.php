@@ -8,6 +8,7 @@ use PHPUnit\Framework\TestCase;
 use SquirrelForge\Contracts\EventInterface;
 use SquirrelForge\Events\CallbackEventListener;
 use SquirrelForge\Events\EventBus;
+use SquirrelForge\Observability\AuditTrail;
 use SquirrelForge\Observability\DashboardManager;
 use SquirrelForge\Observability\DiagnosticsEngine;
 use SquirrelForge\Observability\HealthReporter;
@@ -45,7 +46,7 @@ final class ObservabilityManagerTest extends TestCase
     }
 
     /**
-     * @return array{0: LogManager, 1: MetricsManager, 2: TraceManager, 3: SqliteAlertManager, 4: SqliteObservabilityGovernance, 5: ObservabilityManager}
+     * @return array{0: LogManager, 1: MetricsManager, 2: TraceManager, 3: SqliteAlertManager, 4: SqliteObservabilityGovernance, 5: AuditTrail, 6: ObservabilityManager}
      */
     private function fullyWiredManager(?EventBus $events = null): array
     {
@@ -59,10 +60,11 @@ final class ObservabilityManagerTest extends TestCase
         $health = new HealthReporter($alerts, $metrics, $diagnostics);
         $dashboards = new DashboardManager($documents, $logs, $metrics, $traces, $alerts, $health);
         $governance = new SqliteObservabilityGovernance($this->tempPath('governance'));
+        $auditTrail = new AuditTrail($documents, $governance);
 
-        $manager = new ObservabilityManager($telemetry, $logs, $metrics, $traces, $diagnostics, $alerts, $health, $dashboards, $governance, $events);
+        $manager = new ObservabilityManager($telemetry, $logs, $metrics, $traces, $diagnostics, $alerts, $health, $dashboards, $governance, $auditTrail, $events);
 
-        return [$logs, $metrics, $traces, $alerts, $governance, $manager];
+        return [$logs, $metrics, $traces, $alerts, $governance, $auditTrail, $manager];
     }
 
     private function telemetry(string $signalType, array $payload): array
@@ -118,7 +120,7 @@ final class ObservabilityManagerTest extends TestCase
 
     public function testRecordLogRoutesToLogManager(): void
     {
-        [, , , , , $manager] = $this->fullyWiredManager();
+        [, , , , , , $manager] = $this->fullyWiredManager();
 
         $result = $manager->coordinate('record_log', $this->telemetry('log', ['message' => 'hi']));
 
@@ -128,7 +130,7 @@ final class ObservabilityManagerTest extends TestCase
 
     public function testRecordMetricRoutesToMetricsManager(): void
     {
-        [, , , , , $manager] = $this->fullyWiredManager();
+        [, , , , , , $manager] = $this->fullyWiredManager();
 
         $result = $manager->coordinate('record_metric', $this->telemetry('metric', ['metric_name' => 'queue_depth', 'value' => 5]));
 
@@ -138,7 +140,7 @@ final class ObservabilityManagerTest extends TestCase
 
     public function testRecordSpanRoutesToTraceManager(): void
     {
-        [, , , , , $manager] = $this->fullyWiredManager();
+        [, , , , , , $manager] = $this->fullyWiredManager();
 
         $result = $manager->coordinate('record_span', $this->telemetry('trace', ['span_id' => 'span_a', 'operation' => 'step_a']));
 
@@ -148,7 +150,7 @@ final class ObservabilityManagerTest extends TestCase
 
     public function testCorrelateEvidenceRoutesToDiagnosticsEngine(): void
     {
-        [$logs, , , , , $manager] = $this->fullyWiredManager();
+        [$logs, , , , , , $manager] = $this->fullyWiredManager();
         $logs->recordLog($this->telemetry('log', ['message' => 'hi']));
 
         $result = $manager->coordinate('correlate_evidence', ['correlation_id' => 'trace_1']);
@@ -159,7 +161,7 @@ final class ObservabilityManagerTest extends TestCase
 
     public function testDiagnoseFailurePathRoutesToDiagnosticsEngine(): void
     {
-        [, , $traces, , , $manager] = $this->fullyWiredManager();
+        [, , $traces, , , , $manager] = $this->fullyWiredManager();
         $traces->recordSpan($this->telemetry('trace', ['span_id' => 'span_a', 'operation' => 'step_a', 'status' => 'failed']));
 
         $result = $manager->coordinate('diagnose_failure_path', ['trace_id' => 'trace_1']);
@@ -169,7 +171,7 @@ final class ObservabilityManagerTest extends TestCase
 
     public function testDiagnoseBottlenecksRoutesToDiagnosticsEngine(): void
     {
-        [, , $traces, , , $manager] = $this->fullyWiredManager();
+        [, , $traces, , , , $manager] = $this->fullyWiredManager();
         $traces->recordSpan($this->telemetry('trace', ['span_id' => 'span_a', 'operation' => 'step_a', 'started_at' => '2026-07-29T12:00:00Z', 'ended_at' => '2026-07-29T12:00:05Z']));
 
         $result = $manager->coordinate('diagnose_bottlenecks', ['trace_id' => 'trace_1']);
@@ -179,7 +181,7 @@ final class ObservabilityManagerTest extends TestCase
 
     public function testDiagnoseMetricAnomaliesRoutesToDiagnosticsEngine(): void
     {
-        [, $metrics, , , , $manager] = $this->fullyWiredManager();
+        [, $metrics, , , , , $manager] = $this->fullyWiredManager();
         foreach ([100, 102, 98, 500] as $value) {
             $metrics->recordMetric($this->telemetry('metric', ['metric_name' => 'latency_ms', 'value' => $value]));
         }
@@ -191,7 +193,7 @@ final class ObservabilityManagerTest extends TestCase
 
     public function testEvaluateAlertRuleRoutesToAlertManager(): void
     {
-        [, $metrics, , , , $manager] = $this->fullyWiredManager();
+        [, $metrics, , , , , $manager] = $this->fullyWiredManager();
         $metrics->recordMetric($this->telemetry('metric', ['metric_name' => 'queue_depth', 'value' => 500]));
 
         $result = $manager->coordinate('evaluate_alert_rule', ['rule' => [
@@ -206,7 +208,7 @@ final class ObservabilityManagerTest extends TestCase
 
     public function testAcknowledgeAlertRoutesToAlertManager(): void
     {
-        [, , , $alerts, , $manager] = $this->fullyWiredManager();
+        [, , , $alerts, , , $manager] = $this->fullyWiredManager();
         $alert = $alerts->create('workflow-engine', 'performance', 'warning', []);
 
         $result = $manager->coordinate('acknowledge_alert', ['alert_id' => $alert['alert_id'], 'acknowledged_by' => 'oncall_jane']);
@@ -216,7 +218,7 @@ final class ObservabilityManagerTest extends TestCase
 
     public function testResolveAlertRoutesToAlertManager(): void
     {
-        [, , , $alerts, , $manager] = $this->fullyWiredManager();
+        [, , , $alerts, , , $manager] = $this->fullyWiredManager();
         $alert = $alerts->create('workflow-engine', 'performance', 'warning', []);
 
         $result = $manager->coordinate('resolve_alert', ['alert_id' => $alert['alert_id'], 'resolution_evidence' => 'Fixed.']);
@@ -226,7 +228,7 @@ final class ObservabilityManagerTest extends TestCase
 
     public function testReportHealthRoutesToHealthReporter(): void
     {
-        [, , , , , $manager] = $this->fullyWiredManager();
+        [, , , , , , $manager] = $this->fullyWiredManager();
 
         $result = $manager->coordinate('report_health', ['source' => 'workflow-engine']);
 
@@ -249,12 +251,37 @@ final class ObservabilityManagerTest extends TestCase
 
     public function testReviewSignalStandardRoutesToObservabilityGovernance(): void
     {
-        [, , , , , $manager] = $this->fullyWiredManager();
+        [, , , , , , $manager] = $this->fullyWiredManager();
 
         $result = $manager->coordinate('review_signal_standard', ['proposal_id' => 'proposal_1']);
 
         $this->assertSame('observability_governance', $result['target_component']);
         $this->assertSame('approved', $result['outcome']);
+    }
+
+    public function testRecordAuditEventRoutesToAuditTrail(): void
+    {
+        [, , , , , , $manager] = $this->fullyWiredManager();
+
+        $result = $manager->coordinate('record_audit_event', [
+            'actor_ref' => 'user_42', 'action' => 'update_config',
+            'resource_ref' => 'config:feature_flags', 'outcome' => 'success',
+        ]);
+
+        $this->assertSame('audit_trail', $result['target_component']);
+        $this->assertSame('recorded', $result['outcome']);
+    }
+
+    public function testRecordAuditEventWithoutAuditTrailIsRejected(): void
+    {
+        $manager = new ObservabilityManager();
+
+        $result = $manager->coordinate('record_audit_event', [
+            'actor_ref' => 'user_42', 'action' => 'update_config',
+            'resource_ref' => 'config:feature_flags', 'outcome' => 'success',
+        ]);
+
+        $this->assertSame('rejected', $result['outcome']);
     }
 
     public function testCoordinateDispatchesAnEvent(): void
@@ -268,7 +295,7 @@ final class ObservabilityManagerTest extends TestCase
             }
         ));
 
-        [, , , , , $manager] = $this->fullyWiredManager($events);
+        [, , , , , , $manager] = $this->fullyWiredManager($events);
         $manager->coordinate('report_health', ['source' => 'workflow-engine']);
 
         $this->assertCount(1, $captured);

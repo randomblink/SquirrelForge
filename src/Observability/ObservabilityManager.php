@@ -14,17 +14,14 @@ use SquirrelForge\Events\Event;
  * LearningManager, AutomationManager, and KnowledgeManager route to
  * their own layer's real specialists.
  *
- * Eight of the nine components the roster lists are real and each gets
- * at least one routed operation: Telemetry Collector (collect_telemetry),
- * Log/Metrics/Trace Manager (record_log/record_metric/record_span),
- * Diagnostics Engine (correlate_evidence, diagnose_failure_path,
- * diagnose_bottlenecks, diagnose_metric_anomalies), Alert Manager
- * (evaluate_alert_rule, acknowledge_alert, resolve_alert), Health
- * Reporter (report_health), Dashboard Manager (render_dashboard), and
- * Observability Governance (review_signal_standard). Audit Trail has no
- * implementation yet, so there is no operation routing to it -- this
- * class doesn't invent one, the same restraint LearningManager showed
- * by not routing to the unbuilt Learning Monitor.
+ * Every real component in the roster gets at least one routed
+ * operation: Telemetry Collector (collect_telemetry), Log/Metrics/Trace
+ * Manager (record_log/record_metric/record_span), Diagnostics Engine
+ * (correlate_evidence, diagnose_failure_path, diagnose_bottlenecks,
+ * diagnose_metric_anomalies), Alert Manager (evaluate_alert_rule,
+ * acknowledge_alert, resolve_alert), Health Reporter (report_health),
+ * Dashboard Manager (render_dashboard), Observability Governance
+ * (review_signal_standard), and Audit Trail (record_audit_event).
  *
  * This class never re-implements any specialist's logic, only forwards
  * payloads and passes back real results unmodified, upholding Rule 1
@@ -51,6 +48,7 @@ final class ObservabilityManager
         'report_health' => ['source'],
         'render_dashboard' => ['dashboard_ref'],
         'review_signal_standard' => ['proposal_id'],
+        'record_audit_event' => ['actor_ref', 'action', 'resource_ref', 'outcome'],
     ];
 
     public function __construct(
@@ -63,6 +61,7 @@ final class ObservabilityManager
         private readonly ?HealthReporter $healthReporter = null,
         private readonly ?DashboardManager $dashboardManager = null,
         private readonly ?SqliteObservabilityGovernance $governance = null,
+        private readonly ?AuditTrail $auditTrail = null,
         private readonly ?EventBusInterface $events = null
     ) {
     }
@@ -99,6 +98,7 @@ final class ObservabilityManager
             'report_health' => $this->coordinateReportHealth($payload, $options),
             'render_dashboard' => $this->coordinateRenderDashboard($payload, $options),
             'review_signal_standard' => $this->coordinateReviewSignalStandard($payload, $options),
+            'record_audit_event' => $this->coordinateRecordAuditEvent($payload, $options),
         };
     }
 
@@ -268,6 +268,17 @@ final class ObservabilityManager
         $result = $this->governance->review($payload['proposal_id'], $options);
 
         return $this->finish('review_signal_standard', 'observability_governance', $result['outcome'], null, $result);
+    }
+
+    private function coordinateRecordAuditEvent(array $payload, array $options): array
+    {
+        if ($this->auditTrail === null) {
+            return $this->finish('record_audit_event', 'audit_trail', 'rejected', 'Audit Trail is not configured.', null);
+        }
+
+        $result = $this->auditTrail->recordEvent($payload, $options);
+
+        return $this->finish('record_audit_event', 'audit_trail', $result['outcome'], $result['error'], $result);
     }
 
     private function finish(string $operation, string $targetComponent, string $outcome, ?string $error, mixed $result): array
