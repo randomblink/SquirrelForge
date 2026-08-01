@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace SquirrelForge\Tests;
 
 use PHPUnit\Framework\TestCase;
+use SquirrelForge\Memory\EpisodicMemory;
+use SquirrelForge\Memory\InMemoryStore;
 use SquirrelForge\Reasoning\ReflectionEngine;
 
 final class ReflectionEngineTest extends TestCase
@@ -94,5 +96,65 @@ final class ReflectionEngineTest extends TestCase
 
         $this->assertTrue($result['reflection']['goal_achieved']);
         $this->assertNull($result['reflection']['goal']);
+    }
+
+    public function testReflectOnTaskWithoutEpisodicMemoryIsNotConfigured(): void
+    {
+        $engine = new ReflectionEngine();
+
+        $result = $engine->reflectOnTask('task_1');
+
+        $this->assertSame('not_configured', $result['outcome']);
+    }
+
+    public function testReflectOnTaskWithAnUnknownTaskReferenceIsNotFound(): void
+    {
+        $episodicMemory = new EpisodicMemory(new InMemoryStore());
+        $engine = new ReflectionEngine($episodicMemory);
+
+        $result = $engine->reflectOnTask('task_ghost');
+
+        $this->assertSame('not_found', $result['outcome']);
+    }
+
+    public function testReflectOnTaskGenuinelyFetchesTheRecordFromEpisodicMemory(): void
+    {
+        $episodicMemory = new EpisodicMemory(new InMemoryStore());
+        $recorded = $episodicMemory->recordCompletedTask([
+            'task_reference' => 'task_1',
+            'goal_reference' => 'goal_1',
+            'outcome_summary' => 'Checkout discount field shipped.',
+            'validation_result_reference' => 'ACCEPTED',
+        ]);
+        $engine = new ReflectionEngine($episodicMemory);
+
+        $result = $engine->reflectOnTask('task_1');
+
+        $this->assertSame('reflected', $result['outcome']);
+        $this->assertTrue($result['reflection']['goal_achieved']);
+        $this->assertSame('task_1', $result['reflection']['task_reference']);
+        $this->assertSame('goal_1', $result['reflection']['goal']);
+        $this->assertSame('Checkout discount field shipped.', $result['reflection']['result']);
+        $this->assertNotNull($recorded['memory_id']);
+    }
+
+    public function testReflectOnTaskUsesCallerSuppliedAcceptanceCriteriaAgainstTheFetchedRecord(): void
+    {
+        $episodicMemory = new EpisodicMemory(new InMemoryStore());
+        $episodicMemory->recordCompletedTask([
+            'task_reference' => 'task_1',
+            'goal_reference' => 'goal_1',
+            'outcome_summary' => 'Checkout discount field shipped.',
+            'validation_result_reference' => 'ACCEPTED',
+        ]);
+        $engine = new ReflectionEngine($episodicMemory);
+
+        $result = $engine->reflectOnTask('task_1', [
+            'acceptance_criteria' => ['Field renders', 'Code validates'],
+            'acceptance_criteria_met' => ['Field renders' => true, 'Code validates' => false],
+        ]);
+
+        $this->assertFalse($result['reflection']['goal_achieved']);
+        $this->assertContains('Acceptance criterion not met: "Code validates".', $result['reflection']['issues']);
     }
 }

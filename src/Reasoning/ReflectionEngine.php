@@ -4,16 +4,28 @@ declare(strict_types=1);
 
 namespace SquirrelForge\Reasoning;
 
+use SquirrelForge\Memory\EpisodicMemory;
+
 /**
  * Reviews a completed, validated task record to identify successes,
  * failures, and repeated issues, producing reflection records and
  * improvement candidates, per 19_REASONING/REFLECTION-ENGINE.md.
  *
- * Does not take an Episodic Memory dependency: 18_MEMORY/EPISODIC-
- * MEMORY.md has no src/ implementation, so the completed task record is
- * accepted as caller-supplied input, the same boundary every unbuilt
- * dependency in this codebase gets. "Review the validation result
- * already referenced there" is a real, literal check against
+ * 18_MEMORY/EPISODIC-MEMORY.md is real now: reflectOnTask() genuinely
+ * fetches the completed task record via the injected
+ * EpisodicMemory::retrieve() rather than requiring the caller to
+ * assemble one, literally satisfying "receive a completed, validated
+ * task record from 18_MEMORY/EPISODIC-MEMORY.md". Episodic Memory only
+ * ever stores a `goal_reference` (a reference, not the full goal
+ * object, per its own spec's "reference... rather than re-describing
+ * them"), so acceptance-criteria evaluation still comes from the
+ * caller -- that data was never Episodic Memory's to own. The original
+ * reflect() method remains for callers that already have a fully
+ * assembled record (or a synthetic one, e.g. in tests) and don't need
+ * the Episodic Memory round-trip.
+ *
+ * "Review the validation result already referenced there" is a real,
+ * literal check against
  * EngineValidation's own real decision vocabulary (ACCEPTED,
  * ACCEPTED_WITH_LIMITATIONS, REJECTED, BLOCKED, REPAIR_REQUIRED,
  * RECOVERY_REQUIRED, CLARIFICATION_REQUIRED) -- this class never
@@ -50,8 +62,49 @@ final class ReflectionEngine
 {
     private const PASSING_DECISIONS = ['ACCEPTED', 'ACCEPTED_WITH_LIMITATIONS'];
 
+    public function __construct(private readonly ?EpisodicMemory $episodicMemory = null)
+    {
+    }
+
     /**
-     * @param array{task_reference: string, goal?: array{primary_goal?: ?string, acceptance_criteria?: array<int, string>}, result: string, validation_reference: array{decision?: ?string}, acceptance_criteria_met?: array<string, bool>} $episodicRecord caller-supplied (18_MEMORY/EPISODIC-MEMORY.md has no implementation)
+     * Genuinely fetches the completed task record from Episodic Memory
+     * rather than requiring the caller to assemble one. Acceptance
+     * criteria and their satisfaction are still caller-supplied, since
+     * Episodic Memory only stores a goal reference, not the full goal.
+     *
+     * @param array{primary_goal?: ?string, acceptance_criteria?: array<int, string>, acceptance_criteria_met?: array<string, bool>, prior_issues?: array<int, array{description: string}>, recurrence_threshold?: int} $options
+     * @return array{reflection: array<string, mixed>, outcome: string, error: ?string}
+     */
+    public function reflectOnTask(string $taskReference, array $options = []): array
+    {
+        if ($this->episodicMemory === null) {
+            return ['reflection' => [], 'outcome' => 'not_configured', 'error' => 'Episodic Memory is not configured.'];
+        }
+
+        $matches = $this->episodicMemory->search(['task_reference' => $taskReference]);
+
+        if ($matches === []) {
+            return ['reflection' => [], 'outcome' => 'not_found', 'error' => sprintf('Unknown task reference "%s".', $taskReference)];
+        }
+
+        $episodicRecord = $matches[0];
+
+        $mappedRecord = [
+            'task_reference' => $episodicRecord['task_reference'],
+            'goal' => [
+                'primary_goal' => $options['primary_goal'] ?? $episodicRecord['goal_reference'],
+                'acceptance_criteria' => $options['acceptance_criteria'] ?? [],
+            ],
+            'result' => $episodicRecord['outcome_summary'],
+            'validation_reference' => ['decision' => $episodicRecord['validation_result_reference']],
+            'acceptance_criteria_met' => $options['acceptance_criteria_met'] ?? [],
+        ];
+
+        return $this->reflect($mappedRecord, $options['prior_issues'] ?? [], $options['recurrence_threshold'] ?? 2);
+    }
+
+    /**
+     * @param array{task_reference: string, goal?: array{primary_goal?: ?string, acceptance_criteria?: array<int, string>}, result: string, validation_reference: array{decision?: ?string}, acceptance_criteria_met?: array<string, bool>} $episodicRecord a fully assembled record, e.g. from reflectOnTask() or a caller that already has one
      * @param array<int, array{description: string}> $priorIssues prior Reflection Records' own issues, for real recurrence detection
      * @return array{reflection: array<string, mixed>, outcome: string, error: ?string}
      */
