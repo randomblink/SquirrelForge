@@ -150,4 +150,19 @@ final class MemoryRetrievalTest extends TestCase
         $this->assertSame('checkout_goal', $working['record']['active_goal']);
         $this->assertSame('CheckoutProject', $project['record']['project_name']);
     }
+
+    public function testGetByReferenceIsPubliclyCallableForAnExactLookup(): void
+    {
+        $index = $this->index();
+        $semanticMemory = new SemanticMemory(new InMemoryStore());
+        $stored = $semanticMemory->storeApprovedKnowledge([
+            'category' => 'Solutions', 'title' => 'Checkout validation pattern',
+            'description' => 'desc', 'source_reference' => 'src_1', 'validation_reference' => 'ACCEPTED',
+        ]);
+        $retrieval = new MemoryRetrieval($index, semanticMemory: $semanticMemory);
+
+        $record = $retrieval->getByReference('semantic', $stored['record_id']);
+
+        $this->assertSame('Checkout validation pattern', $record['title']);
+    }
 }

@@ -81,7 +81,7 @@ final class MemoryRetrieval
         $ranked = array_slice($candidates, 0, $options['limit'] ?? 10);
 
         $results = array_map(
-            fn(array $candidate): array => [...$candidate, 'record' => $this->retrieveOriginal($candidate['memory_type'], $candidate['record_id'])],
+            fn(array $candidate): array => [...$candidate, 'record' => $this->getByReference($candidate['memory_type'], $candidate['record_id'])],
             $ranked
         );
 
@@ -110,9 +110,16 @@ final class MemoryRetrieval
     }
 
     /**
+     * A direct lookup by exact reference, never a ranked search -- the
+     * same real dispatch search() already uses internally, exposed
+     * publicly so a caller with an exact (memory_type, record_id) in
+     * hand (e.g. 22_INTERFACES/MEMORY-API.md's `get()`) can fetch it
+     * through Memory Retrieval rather than bypassing it into a memory
+     * type directly.
+     *
      * @return array<string, mixed>|null
      */
-    private function retrieveOriginal(string $memoryType, string $recordId): ?array
+    public function getByReference(string $memoryType, string $recordId): ?array
     {
         return match ($memoryType) {
             'working' => $this->workingMemory?->snapshot($recordId),
