@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Storage Replication maintains redundant copies of stored records across registered replication targets so that the loss of a single storage location does not mean the loss of data. It replicates data written to Object Storage, Document Storage, Vector Storage, and Key-Value Storage, verifies replica integrity, and reports replication status and lag.
+Storage Replication maintains redundant copies of stored records across registered replication targets so that the loss of a single storage location does not mean the loss of data. It replicates data written to Object Storage and Document Storage — the same two source types `37_STORAGE/BACKUP-MANAGER.md` and `37_STORAGE/ARCHIVE-STORAGE.md` already coordinate real content against — verifies replica integrity, and reports replication status and lag. Extending replication to Vector Storage and Key-Value Storage is future scope, not covered by this component today.
 
 Storage Replication coordinates data-copy replication only. It does not decide failover, does not manage standby services or execution paths, and does not itself initiate recovery — those remain owned by `35_RESILIENCE/REDUNDANCY-MANAGER.md` and `35_RESILIENCE/FAILOVER-COORDINATOR.md`, which consume the replica health and integrity status this component reports. Storage Replication is distinct from `37_STORAGE/BACKUP-MANAGER.md`: replication maintains live, ongoing copies for availability and durability, not versioned, point-in-time recovery snapshots.
 
