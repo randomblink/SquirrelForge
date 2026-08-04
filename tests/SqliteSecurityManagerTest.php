@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace SquirrelForge\Tests;
 
 use PHPUnit\Framework\TestCase;
+use SquirrelForge\Security\SqliteIncidentManager;
 use SquirrelForge\Security\SqliteSecurityGovernance;
 use SquirrelForge\Security\SqliteSecurityManager;
 use SquirrelForge\Security\SqliteSecurityMonitor;
+use SquirrelForge\Security\SqliteThreatDetector;
 
 final class SqliteSecurityManagerTest extends TestCase
 {
@@ -72,7 +74,7 @@ final class SqliteSecurityManagerTest extends TestCase
         $this->assertSame('security_governance', $result['target_component']);
     }
 
-    public function testThreatAndIncidentItemsAreAlwaysUnavailable(): void
+    public function testThreatAndIncidentItemsAreUnavailableWhenNotConfigured(): void
     {
         $manager = new SqliteSecurityManager($this->tempPath('mgr'));
 
@@ -81,6 +83,23 @@ final class SqliteSecurityManagerTest extends TestCase
 
         $this->assertSame('unavailable', $threat['routing_outcome']);
         $this->assertSame('unavailable', $incident['routing_outcome']);
+    }
+
+    public function testThreatAndIncidentItemsRouteWhenConfigured(): void
+    {
+        $threatDetector = new SqliteThreatDetector($this->tempPath('threat'));
+        $incidentManager = new SqliteIncidentManager($this->tempPath('incident'));
+        $manager = new SqliteSecurityManager(
+            $this->tempPath('mgr'),
+            threatDetector: $threatDetector,
+            incidentManager: $incidentManager
+        );
+
+        $threat = $manager->route($this->item(['item_type' => 'threat_reference']));
+        $incident = $manager->route($this->item(['item_type' => 'incident_reference']));
+
+        $this->assertSame('routed', $threat['routing_outcome']);
+        $this->assertSame('routed', $incident['routing_outcome']);
     }
 
     public function testRouteSucceedsWhenTheSpecialistIsConfigured(): void

@@ -42,10 +42,10 @@ use SquirrelForge\RuntimeConfig\SqliteSecretsManager;
  * ID) is preserved verbatim rather than reinterpreted.
  *
  * `24_SECURITY/THREAT-DETECTOR.md` and `24_SECURITY/INCIDENT-MANAGER.md`
- * have no real implementation yet, so their item types always route to
- * `unavailable` -- an honest reflection of this codebase's current
- * state, not a silently dropped item (the item and its correlation ID
- * are still recorded).
+ * item types route the same as every other specialist: `routed` when a
+ * `SqliteThreatDetector` or `SqliteIncidentManager` is configured,
+ * `unavailable` otherwise -- the item and its correlation ID are always
+ * recorded either way.
  *
  * Owns its own database (`Sqlite` prefix): the Coordination Record
  * fields this spec names are recorded for every route() call
@@ -81,7 +81,9 @@ final class SqliteSecurityManager
         private readonly ?SqliteComplianceManager $complianceManager = null,
         private readonly ?SqliteVulnerabilityManager $vulnerabilityManager = null,
         private readonly ?SqliteSecurityGovernance $securityGovernance = null,
-        private readonly ?SqliteSecurityMonitor $securityMonitor = null
+        private readonly ?SqliteSecurityMonitor $securityMonitor = null,
+        private readonly ?SqliteThreatDetector $threatDetector = null,
+        private readonly ?SqliteIncidentManager $incidentManager = null
     ) {
         $this->database = new PDO('sqlite:' . $databasePath, options: [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
@@ -147,6 +149,8 @@ final class SqliteSecurityManager
             'vulnerability_manager' => $this->vulnerabilityManager !== null,
             'security_governance' => $this->securityGovernance !== null,
             'security_monitor' => $this->securityMonitor !== null,
+            'threat_detector' => $this->threatDetector !== null,
+            'incident_manager' => $this->incidentManager !== null,
             default => false,
         };
     }
