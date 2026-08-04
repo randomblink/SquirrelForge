@@ -36,16 +36,17 @@ use SquirrelForge\Governance\SqliteVersionManager;
  * every write would be a surprising, uninvited side effect.
  *
  * Of the ten components the spec's own "Coordination Responsibilities"
- * lists, three still have no real implementation to route to (Key-Value
- * Storage, Archive Storage, Storage Replication), so operations that
- * would need them are rejected as unsupported rather than routed
- * somewhere invented, matching SqliteDataManager's own established
- * precedent for the same situation. Storage Governance is no longer one
- * of them: `37_STORAGE/DATA-GOVERNANCE.md` is real as
- * `SqliteDataGovernance` and is composed directly for the
- * `governance_review` operation, the same "coordinator predates its own
- * specialist" resolution `SqliteSecurityManager` already went through
- * for Threat Detector and Incident Manager.
+ * lists, all now have a real implementation to route to. Storage
+ * Governance, Key-Value Storage, Archive Storage, and Storage
+ * Replication were the last four: each went through the same
+ * "coordinator predates its own specialist" resolution
+ * `SqliteSecurityManager` already established for Threat Detector and
+ * Incident Manager -- `37_STORAGE/KEY-VALUE-STORAGE.md`,
+ * `37_STORAGE/ARCHIVE-STORAGE.md`, and `37_STORAGE/STORAGE-REPLICATION.md`
+ * did not even have their own spec documents until this class's own
+ * docblock had already flagged them as a known gap; they do now, and
+ * `SqliteKeyValueStorage`, `SqliteArchiveStorage`, and
+ * `SqliteStorageReplication` are real against them.
  *
  * This class does not perform its own authorization check: each
  * coordinated component already has its own optional
@@ -75,9 +76,15 @@ final class SqliteStorageManager
         'restore' => ['backup_ref'],
         'register_version' => ['record_id', 'record_type', 'content'],
         'governance_review' => ['request_id', 'data_classification', 'policy_context'],
+        'kv_store' => ['namespace', 'key', 'value'],
+        'kv_update' => ['namespace', 'key', 'value'],
+        'kv_retrieve' => ['namespace', 'key'],
+        'kv_delete' => ['namespace', 'key'],
+        'archive' => ['source_type', 'source_ref', 'retention_days'],
+        'retrieve_archive' => ['archive_ref'],
+        'dispose_archive' => ['archive_ref', 'governance_authorization_reference'],
+        'replicate' => ['source_type', 'source_ref'],
     ];
-
-    private const UNSUPPORTED_OPERATIONS = ['key_value_store', 'archive', 'replicate'];
 
     private PDO $database;
 
@@ -90,6 +97,9 @@ final class SqliteStorageManager
         private readonly ?SqliteBackupManager $backups = null,
         private readonly ?SqliteVersionManager $versions = null,
         private readonly ?SqliteDataGovernance $governance = null,
+        private readonly ?SqliteKeyValueStorage $keyValue = null,
+        private readonly ?SqliteArchiveStorage $archive = null,
+        private readonly ?SqliteStorageReplication $replication = null,
         private readonly ?EventBusInterface $events = null
     ) {
         $this->database = new PDO('sqlite:' . $databasePath, options: [
@@ -121,10 +131,6 @@ final class SqliteStorageManager
      */
     public function coordinate(string $operation, array $payload, array $options = []): array
     {
-        if (in_array($operation, self::UNSUPPORTED_OPERATIONS, true)) {
-            return $this->finish($operation, 'unsupported', $options, null, 'escalated', sprintf('Storage operation "%s" has no implemented component.', $operation));
-        }
-
         if (!isset(self::REQUIRED_FIELDS[$operation])) {
             return $this->finish($operation, 'unknown', $options, null, 'rejected', sprintf('Unknown storage operation "%s".', $operation));
         }
@@ -150,6 +156,14 @@ final class SqliteStorageManager
             'restore' => $this->coordinateRestore($payload, $options),
             'register_version' => $this->coordinateRegisterVersion($payload, $options),
             'governance_review' => $this->coordinateGovernanceReview($payload, $options),
+            'kv_store' => $this->coordinateKvStore($payload, $options),
+            'kv_update' => $this->coordinateKvUpdate($payload, $options),
+            'kv_retrieve' => $this->coordinateKvRetrieve($payload, $options),
+            'kv_delete' => $this->coordinateKvDelete($payload, $options),
+            'archive' => $this->coordinateArchive($payload, $options),
+            'retrieve_archive' => $this->coordinateRetrieveArchive($payload, $options),
+            'dispose_archive' => $this->coordinateDisposeArchive($payload),
+            'replicate' => $this->coordinateReplicate($payload),
         };
     }
 
@@ -321,6 +335,94 @@ final class SqliteStorageManager
         $result = $this->governance->review($payload);
 
         return $this->finish('governance_review', 'governance', $options, $result['governance_id'], $result['error'] === null ? 'reviewed' : 'rejected', $result['error'], $result, $result['decision']);
+    }
+
+    private function coordinateKvStore(array $payload, array $options): array
+    {
+        if ($this->keyValue === null) {
+            return $this->finish('kv_store', 'key_value', $options, null, 'rejected', 'Key-Value Storage is not configured.');
+        }
+
+        $result = $this->keyValue->store($payload['namespace'], $payload['key'], $payload['value'], $options);
+
+        return $this->finish('kv_store', 'key_value', $options, $payload['key'], $result['outcome'], $result['error'], $result);
+    }
+
+    private function coordinateKvUpdate(array $payload, array $options): array
+    {
+        if ($this->keyValue === null) {
+            return $this->finish('kv_update', 'key_value', $options, null, 'rejected', 'Key-Value Storage is not configured.');
+        }
+
+        $result = $this->keyValue->update($payload['namespace'], $payload['key'], $payload['value'], $options);
+
+        return $this->finish('kv_update', 'key_value', $options, $payload['key'], $result['outcome'], $result['error'], $result);
+    }
+
+    private function coordinateKvRetrieve(array $payload, array $options): array
+    {
+        if ($this->keyValue === null) {
+            return $this->finish('kv_retrieve', 'key_value', $options, null, 'rejected', 'Key-Value Storage is not configured.');
+        }
+
+        $result = $this->keyValue->retrieve($payload['namespace'], $payload['key'], $options);
+
+        return $this->finish('kv_retrieve', 'key_value', $options, $payload['key'], $result['found'] ? 'retrieved' : 'not_found', $result['error'], $result);
+    }
+
+    private function coordinateKvDelete(array $payload, array $options): array
+    {
+        if ($this->keyValue === null) {
+            return $this->finish('kv_delete', 'key_value', $options, null, 'rejected', 'Key-Value Storage is not configured.');
+        }
+
+        $result = $this->keyValue->delete($payload['namespace'], $payload['key'], $options);
+
+        return $this->finish('kv_delete', 'key_value', $options, $payload['key'], $result['outcome'], $result['error'], $result);
+    }
+
+    private function coordinateArchive(array $payload, array $options): array
+    {
+        if ($this->archive === null) {
+            return $this->finish('archive', 'archive', $options, null, 'rejected', 'Archive Storage is not configured.');
+        }
+
+        $result = $this->archive->archive($payload['source_type'], $payload['source_ref'], $payload['retention_days'], $options);
+
+        return $this->finish('archive', 'archive', $options, $result['archive_ref'], $result['outcome'], $result['error'], $result);
+    }
+
+    private function coordinateRetrieveArchive(array $payload, array $options): array
+    {
+        if ($this->archive === null) {
+            return $this->finish('retrieve_archive', 'archive', $options, null, 'rejected', 'Archive Storage is not configured.');
+        }
+
+        $result = $this->archive->retrieve($payload['archive_ref'], $options);
+
+        return $this->finish('retrieve_archive', 'archive', $options, $payload['archive_ref'], $result['found'] ? 'retrieved' : 'not_found', $result['error'], $result);
+    }
+
+    private function coordinateDisposeArchive(array $payload): array
+    {
+        if ($this->archive === null) {
+            return $this->finish('dispose_archive', 'archive', [], null, 'rejected', 'Archive Storage is not configured.');
+        }
+
+        $result = $this->archive->dispose($payload['archive_ref'], $payload['governance_authorization_reference']);
+
+        return $this->finish('dispose_archive', 'archive', [], $payload['archive_ref'], $result['outcome'], $result['error'], $result);
+    }
+
+    private function coordinateReplicate(array $payload): array
+    {
+        if ($this->replication === null) {
+            return $this->finish('replicate', 'replication', [], null, 'rejected', 'Storage Replication is not configured.');
+        }
+
+        $result = $this->replication->replicate($payload['source_type'], $payload['source_ref']);
+
+        return $this->finish('replicate', 'replication', [], $payload['source_ref'], $result['outcome'], $result['error'], $result);
     }
 
     /**

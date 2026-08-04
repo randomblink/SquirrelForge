@@ -9,11 +9,14 @@ use SquirrelForge\Automation\RuleEngine;
 use SquirrelForge\Governance\SqlitePolicyEngine;
 use SquirrelForge\Governance\SqliteVersionManager;
 use SquirrelForge\Storage\CacheManager;
+use SquirrelForge\Storage\SqliteArchiveStorage;
 use SquirrelForge\Storage\SqliteBackupManager;
 use SquirrelForge\Storage\SqliteDataGovernance;
 use SquirrelForge\Storage\SqliteDocumentStorage;
+use SquirrelForge\Storage\SqliteKeyValueStorage;
 use SquirrelForge\Storage\SqliteObjectStorage;
 use SquirrelForge\Storage\SqliteStorageManager;
+use SquirrelForge\Storage\SqliteStorageReplication;
 use SquirrelForge\Storage\SqliteVectorStorage;
 use SquirrelForge\Tools\LocalFileSystem;
 
@@ -87,21 +90,78 @@ final class SqliteStorageManagerTest extends TestCase
         $this->assertSame('rejected', $result['outcome']);
     }
 
-    public function testUnsupportedOperationIsEscalated(): void
+    public function testKvOperationsAreRejectedWithoutAConfiguredKeyValueStore(): void
     {
         $manager = new SqliteStorageManager($this->tempPath('manager'));
 
-        $result = $manager->coordinate('archive', []);
+        $result = $manager->coordinate('kv_store', ['namespace' => 'config', 'key' => 'flag', 'value' => true]);
 
-        $this->assertSame('escalated', $result['outcome']);
+        $this->assertSame('rejected', $result['outcome']);
+        $this->assertStringContainsString('Key-Value Storage', $result['error']);
     }
 
-    public function testKeyValueAndReplicateRemainUnsupported(): void
+    public function testKvStoreThenKvRetrieveRoundTripsThroughTheRealKeyValueStore(): void
+    {
+        $keyValue = new SqliteKeyValueStorage($this->tempPath('kv'));
+        $manager = new SqliteStorageManager($this->tempPath('manager'), keyValue: $keyValue);
+
+        $stored = $manager->coordinate('kv_store', ['namespace' => 'config', 'key' => 'flag', 'value' => true]);
+        $retrieved = $manager->coordinate('kv_retrieve', ['namespace' => 'config', 'key' => 'flag']);
+
+        $this->assertSame('stored', $stored['outcome']);
+        $this->assertSame('key_value', $stored['storage_type']);
+        $this->assertSame('retrieved', $retrieved['outcome']);
+        $this->assertTrue($retrieved['result']['value']);
+    }
+
+    public function testArchiveOperationsAreRejectedWithoutAConfiguredArchiveStorage(): void
     {
         $manager = new SqliteStorageManager($this->tempPath('manager'));
 
-        $this->assertSame('escalated', $manager->coordinate('key_value_store', [])['outcome']);
-        $this->assertSame('escalated', $manager->coordinate('replicate', [])['outcome']);
+        $result = $manager->coordinate('archive', ['source_type' => 'document', 'source_ref' => 'document_1', 'retention_days' => 30]);
+
+        $this->assertSame('rejected', $result['outcome']);
+        $this->assertStringContainsString('Archive Storage', $result['error']);
+    }
+
+    public function testArchiveThenRetrieveArchiveRoundTripsThroughTheRealArchiveStorage(): void
+    {
+        $documents = new SqliteDocumentStorage($this->tempPath('documents'));
+        $archiveStorage = new SqliteArchiveStorage($this->tempPath('archive'), $documents);
+        $manager = new SqliteStorageManager($this->tempPath('manager'), documents: $documents, archive: $archiveStorage);
+        $stored = $manager->coordinate('store_document', ['type' => 'policy', 'title' => 'Retention', 'content' => ['days' => 30]]);
+
+        $archived = $manager->coordinate('archive', ['source_type' => 'document', 'source_ref' => $stored['storage_destination'], 'retention_days' => 30]);
+        $retrieved = $manager->coordinate('retrieve_archive', ['archive_ref' => $archived['storage_destination']]);
+
+        $this->assertSame('archived', $archived['outcome']);
+        $this->assertSame('retrieved', $retrieved['outcome']);
+        $this->assertSame(['days' => 30], $retrieved['result']['content']);
+    }
+
+    public function testReplicateIsRejectedWithoutAConfiguredReplicationComponent(): void
+    {
+        $manager = new SqliteStorageManager($this->tempPath('manager'));
+
+        $result = $manager->coordinate('replicate', ['source_type' => 'document', 'source_ref' => 'document_1']);
+
+        $this->assertSame('rejected', $result['outcome']);
+        $this->assertStringContainsString('Storage Replication', $result['error']);
+    }
+
+    public function testReplicateRoutesToTheRealStorageReplicationComponent(): void
+    {
+        $documents = new SqliteDocumentStorage($this->tempPath('documents'));
+        $replica = new SqliteDocumentStorage($this->tempPath('replica'));
+        $replication = new SqliteStorageReplication($this->tempPath('replication'), $documents);
+        $replication->registerTarget('replica_1', 'document', $replica);
+        $manager = new SqliteStorageManager($this->tempPath('manager'), documents: $documents, replication: $replication);
+        $stored = $manager->coordinate('store_document', ['type' => 'policy', 'title' => 'Retention', 'content' => ['days' => 30]]);
+
+        $result = $manager->coordinate('replicate', ['source_type' => 'document', 'source_ref' => $stored['storage_destination']]);
+
+        $this->assertSame('replicated', $result['outcome']);
+        $this->assertSame('replicated', $result['result']['targets']['replica_1']['outcome']);
     }
 
     public function testGovernanceReviewIsRejectedWithoutAConfiguredGovernanceComponent(): void
