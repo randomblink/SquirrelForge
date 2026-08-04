@@ -25,6 +25,9 @@ Storage is responsible for persistence only. It does not define business meaning
 | `DATA-VALIDATOR.md` | Verifies the integrity, structure, and compliance of data moving through the Storage Layer. |
 | `DATA-GOVERNANCE.md` | Establishes and enforces data lifecycle, protection, classification, retention, and disposal policies. |
 | `BACKUP-MANAGER.md` | Coordinates backup creation, verification, and restoration. |
+| `KEY-VALUE-STORAGE.md` | Stores and retrieves durable key-value records addressed by namespaced key. |
+| `ARCHIVE-STORAGE.md` | Moves records whose active lifecycle has ended into governed long-term retention and retrieval. |
+| `STORAGE-REPLICATION.md` | Replicates stored records to registered targets and reports replica health and integrity. |
 
 The authoritative component roster must match files that actually exist in this directory.
 
