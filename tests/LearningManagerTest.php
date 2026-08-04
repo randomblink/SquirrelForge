@@ -9,6 +9,7 @@ use SquirrelForge\Contracts\EventInterface;
 use SquirrelForge\Events\CallbackEventListener;
 use SquirrelForge\Events\EventBus;
 use SquirrelForge\Learning\LearningManager;
+use SquirrelForge\Learning\LearningMonitor;
 use SquirrelForge\Learning\PatternDetector;
 use SquirrelForge\Learning\SqliteAdaptationManager;
 use SquirrelForge\Learning\SqliteEvaluationEngine;
@@ -51,8 +52,9 @@ final class LearningManagerTest extends TestCase
         $patterns = new PatternDetector($experiences);
         $governance = new SqliteLearningGovernance($this->tempPath('governance'));
         $adaptation = new SqliteAdaptationManager($this->tempPath('adaptation'), $governance);
+        $monitor = new LearningMonitor($experiences, $adaptation, $governance, $patterns);
 
-        $manager = new LearningManager($feedback, $experiences, $evaluation, $patterns, $governance, $adaptation, $events);
+        $manager = new LearningManager($feedback, $experiences, $evaluation, $patterns, $governance, $adaptation, $monitor, $events);
 
         return [$experiences, $adaptation, $manager];
     }
@@ -211,5 +213,57 @@ final class LearningManagerTest extends TestCase
 
         $this->assertCount(1, $captured);
         $this->assertSame('review_proposal', $captured[0]->getPayload()['operation']);
+    }
+
+    public function testMonitorHealthIsRejectedWithoutAConfiguredLearningMonitor(): void
+    {
+        $manager = new LearningManager();
+
+        $result = $manager->coordinate('monitor_health', []);
+
+        $this->assertSame('rejected', $result['outcome']);
+        $this->assertSame('learning_monitor', $result['target_component']);
+    }
+
+    public function testMonitorHealthRoutesToTheRealLearningMonitor(): void
+    {
+        [$experiences, $adaptation, $manager] = $this->fullyWiredManager();
+        $experiences->record('agent:1', 'timeout');
+
+        $result = $manager->coordinate('monitor_health', []);
+
+        $this->assertSame('analyzed', $result['outcome']);
+        $this->assertSame('learning_monitor', $result['target_component']);
+        $this->assertArrayHasKey('experience_status_counts', $result['result']);
+    }
+
+    public function testMonitorStalledAdaptationsRoutesToTheRealLearningMonitor(): void
+    {
+        [, , $manager] = $this->fullyWiredManager();
+
+        $result = $manager->coordinate('monitor_stalled_adaptations', []);
+
+        $this->assertSame('analyzed', $result['outcome']);
+        $this->assertSame([], $result['result']['stalled']);
+    }
+
+    public function testMonitorRepeatedFailuresRoutesToTheRealLearningMonitor(): void
+    {
+        [, , $manager] = $this->fullyWiredManager();
+
+        $result = $manager->coordinate('monitor_repeated_failures', []);
+
+        $this->assertSame('analyzed', $result['outcome']);
+        $this->assertSame([], $result['result']['repeated_failures']);
+    }
+
+    public function testMonitorUnauthorizedAdaptationsRoutesToTheRealLearningMonitor(): void
+    {
+        [, , $manager] = $this->fullyWiredManager();
+
+        $result = $manager->coordinate('monitor_unauthorized_adaptations', []);
+
+        $this->assertSame('analyzed', $result['outcome']);
+        $this->assertSame([], $result['result']['unauthorized']);
     }
 }

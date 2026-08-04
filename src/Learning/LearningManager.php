@@ -14,14 +14,23 @@ use SquirrelForge\Events\Event;
  * KnowledgeManager, and the other Sqlite*Manager coordinators route to
  * their own layer's real specialists.
  *
- * Six of the seven components the spec lists as dependencies are real:
+ * All seven components the spec lists as dependencies are real:
  * submit_feedback routes to Feedback Collector, record_experience to
  * Experience Store, evaluate_experience to Evaluation Engine,
  * detect_recurring_patterns/detect_trend/detect_anomalies to Pattern
- * Detector, review_proposal to Learning Governance, and
+ * Detector, review_proposal to Learning Governance,
  * create_adaptation_plan/execute_adaptation/validate_adaptation to
- * Adaptation Manager. Learning Monitor has no implementation, so there
- * is no operation routing to it -- this class doesn't invent one.
+ * Adaptation Manager, and monitor_health/monitor_stalled_adaptations/
+ * monitor_repeated_failures/monitor_unauthorized_adaptations to Learning
+ * Monitor -- the same "coordinator predates its own specialist"
+ * resolution this codebase's other coordinators have already gone
+ * through, except here the specialist was built the same session as
+ * this class ("eighth and final component, completes 30_LEARNING") and
+ * simply never got wired in afterward. LearningMonitor::detectTrend()
+ * is a genuine passthrough to the same Pattern Detector this class
+ * already routes detect_trend to directly, so it gets no separate
+ * monitor_trend operation -- that would just be the same real
+ * capability under a second name.
  *
  * This class never re-implements any specialist's logic, only forwards
  * payloads and passes back real results unmodified, upholding the
@@ -43,6 +52,10 @@ final class LearningManager
         'create_adaptation_plan' => ['proposal_id', 'plan'],
         'execute_adaptation' => ['plan_id', 'context'],
         'validate_adaptation' => ['plan_id', 'result'],
+        'monitor_health' => [],
+        'monitor_stalled_adaptations' => [],
+        'monitor_repeated_failures' => [],
+        'monitor_unauthorized_adaptations' => [],
     ];
 
     public function __construct(
@@ -52,6 +65,7 @@ final class LearningManager
         private readonly ?PatternDetector $patternDetector = null,
         private readonly ?SqliteLearningGovernance $governance = null,
         private readonly ?SqliteAdaptationManager $adaptationManager = null,
+        private readonly ?LearningMonitor $monitor = null,
         private readonly ?EventBusInterface $events = null
     ) {
     }
@@ -84,6 +98,10 @@ final class LearningManager
             'create_adaptation_plan' => $this->coordinateCreateAdaptationPlan($payload),
             'execute_adaptation' => $this->coordinateExecuteAdaptation($payload, $options),
             'validate_adaptation' => $this->coordinateValidateAdaptation($payload, $options),
+            'monitor_health' => $this->coordinateMonitorHealth(),
+            'monitor_stalled_adaptations' => $this->coordinateMonitorStalledAdaptations($options),
+            'monitor_repeated_failures' => $this->coordinateMonitorRepeatedFailures($options),
+            'monitor_unauthorized_adaptations' => $this->coordinateMonitorUnauthorizedAdaptations(),
         };
     }
 
@@ -209,6 +227,50 @@ final class LearningManager
         $result = $this->adaptationManager->requestValidation($payload['plan_id'], $payload['result'], $options);
 
         return $this->finish('validate_adaptation', 'adaptation_manager', $result['found'] ? $result['status'] : 'rejected', $result['error'], $result);
+    }
+
+    private function coordinateMonitorHealth(): array
+    {
+        if ($this->monitor === null) {
+            return $this->finish('monitor_health', 'learning_monitor', 'rejected', 'Learning Monitor is not configured.', null);
+        }
+
+        $result = $this->monitor->healthSummary();
+
+        return $this->finish('monitor_health', 'learning_monitor', $result['outcome'], $result['error'], $result);
+    }
+
+    private function coordinateMonitorStalledAdaptations(array $options): array
+    {
+        if ($this->monitor === null) {
+            return $this->finish('monitor_stalled_adaptations', 'learning_monitor', 'rejected', 'Learning Monitor is not configured.', null);
+        }
+
+        $result = $this->monitor->detectStalledAdaptations($options['threshold_seconds'] ?? 3600);
+
+        return $this->finish('monitor_stalled_adaptations', 'learning_monitor', $result['outcome'], $result['error'], $result);
+    }
+
+    private function coordinateMonitorRepeatedFailures(array $options): array
+    {
+        if ($this->monitor === null) {
+            return $this->finish('monitor_repeated_failures', 'learning_monitor', 'rejected', 'Learning Monitor is not configured.', null);
+        }
+
+        $result = $this->monitor->detectRepeatedAdaptationFailures($options['failure_threshold'] ?? 3);
+
+        return $this->finish('monitor_repeated_failures', 'learning_monitor', $result['outcome'], $result['error'], $result);
+    }
+
+    private function coordinateMonitorUnauthorizedAdaptations(): array
+    {
+        if ($this->monitor === null) {
+            return $this->finish('monitor_unauthorized_adaptations', 'learning_monitor', 'rejected', 'Learning Monitor is not configured.', null);
+        }
+
+        $result = $this->monitor->detectUnauthorizedAdaptations();
+
+        return $this->finish('monitor_unauthorized_adaptations', 'learning_monitor', $result['outcome'], $result['error'], $result);
     }
 
     private function finish(string $operation, string $targetComponent, string $outcome, ?string $error, mixed $result): array
