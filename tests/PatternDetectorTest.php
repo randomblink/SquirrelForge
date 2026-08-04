@@ -7,6 +7,7 @@ namespace SquirrelForge\Tests;
 use DateTimeImmutable;
 use PHPUnit\Framework\TestCase;
 use SquirrelForge\Learning\PatternDetector;
+use SquirrelForge\Learning\SqliteEvaluationEngine;
 use SquirrelForge\Learning\SqliteExperienceStore;
 
 final class PatternDetectorTest extends TestCase
@@ -194,5 +195,56 @@ final class PatternDetectorTest extends TestCase
 
         $this->assertSame([], $result['anomalies']);
         $this->assertSame('analyzed', $result['outcome']);
+    }
+
+    public function testFindRecurringPatternsWithoutAnEvaluationEngineIgnoresQualificationEntirely(): void
+    {
+        $store = $this->makeStore($this->ticks(3));
+        $store->record('agent:1', 'timeout');
+        $store->record('agent:1', 'timeout');
+        $store->record('agent:1', 'timeout');
+        $detector = new PatternDetector($store);
+
+        $result = $detector->findRecurringPatterns(minOccurrences: 3);
+
+        $this->assertCount(1, $result['findings']);
+    }
+
+    public function testFindRecurringPatternsWithAnEvaluationEngineExcludesUnqualifiedRecords(): void
+    {
+        $store = $this->makeStore($this->ticks(3));
+        $evaluations = new SqliteEvaluationEngine($this->tempPath('evaluations'), $store);
+        $qualified = $store->record('agent:1', 'timeout', ['evidence_references' => ['ev_1']]);
+        $store->record('agent:1', 'timeout', ['evidence_references' => ['ev_2']]);
+        $store->record('agent:1', 'timeout', ['evidence_references' => ['ev_3']]);
+        // Only one of the three records is ever actually evaluated as "qualified".
+        $evaluations->evaluate($qualified['experience_id']);
+        $detector = new PatternDetector($store, $evaluations);
+
+        $result = $detector->findRecurringPatterns(minOccurrences: 3);
+
+        $this->assertSame([], $result['findings'], 'Only one of three records was qualified, which is below the minimum occurrence count.');
+    }
+
+    public function testFindRecurringPatternsWithAnEvaluationEngineIncludesOnlyQualifiedRecords(): void
+    {
+        $store = $this->makeStore($this->ticks(4));
+        $evaluations = new SqliteEvaluationEngine($this->tempPath('evaluations'), $store);
+        $qualifiedIds = [];
+
+        for ($i = 0; $i < 3; $i++) {
+            $record = $store->record('agent:1', 'timeout', ['evidence_references' => ['ev_' . $i]]);
+            $evaluations->evaluate($record['experience_id']);
+            $qualifiedIds[] = $record['experience_id'];
+        }
+
+        // A fourth, unevaluated record must not count toward the total.
+        $store->record('agent:1', 'timeout', ['evidence_references' => ['ev_unevaluated']]);
+        $detector = new PatternDetector($store, $evaluations);
+
+        $result = $detector->findRecurringPatterns(minOccurrences: 3);
+
+        $this->assertCount(1, $result['findings']);
+        $this->assertSame(3, $result['findings'][0]['count']);
     }
 }

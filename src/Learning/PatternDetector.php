@@ -16,10 +16,14 @@ namespace SquirrelForge\Learning;
  * fabricated machine learning; it's arithmetic over real stored numbers,
  * scoped to match what's honestly computable without a real model.
  *
- * "Qualified... evaluation... references" from Evaluation Engine are not
- * consumed -- that component has no code yet to define "qualified" --
- * so detection operates over whatever experience records match the
- * caller's own filters, unfiltered by evaluation status. Correlation
+ * "Qualified... evaluation... references" from Evaluation Engine are a
+ * real, enforced filter when a SqliteEvaluationEngine is injected: every
+ * detector restricts its experience-record set to only those with a
+ * `qualified` evaluation record before computing anything, per
+ * `30_LEARNING/EVALUATION-ENGINE.md`'s own definition of that status --
+ * genuinely skipped, not silently treated as passing, when no
+ * Evaluation Engine is configured (the same optional-composition stance
+ * this codebase uses throughout). Correlation
  * detection (co-occurring event categories per workflow) is out of
  * scope for this pass: it would need querying experience records by
  * workflow_reference, which SqliteExperienceStore::list() doesn't
@@ -35,8 +39,26 @@ namespace SquirrelForge\Learning;
  */
 final class PatternDetector
 {
-    public function __construct(private readonly ?SqliteExperienceStore $experiences = null)
+    public function __construct(
+        private readonly ?SqliteExperienceStore $experiences = null,
+        private readonly ?SqliteEvaluationEngine $evaluations = null
+    ) {
+    }
+
+    /**
+     * @param array<int, array<string, mixed>> $records
+     * @return array<int, array<string, mixed>>
+     */
+    private function restrictToQualified(array $records): array
     {
+        if ($this->evaluations === null) {
+            return $records;
+        }
+
+        $qualifiedExperienceIds = array_column($this->evaluations->list(['qualification' => 'qualified']), 'experience_id');
+        $qualifiedExperienceIds = array_flip($qualifiedExperienceIds);
+
+        return array_values(array_filter($records, static fn(array $record): bool => isset($qualifiedExperienceIds[$record['experience_id']])));
     }
 
     /**
@@ -54,7 +76,7 @@ final class PatternDetector
 
         $groups = [];
 
-        foreach ($this->experiences->list($filters) as $record) {
+        foreach ($this->restrictToQualified($this->experiences->list($filters)) as $record) {
             $key = $record['source'] . '|' . $record['event_category'];
             $groups[$key] ??= ['source' => $record['source'], 'event_category' => $record['event_category'], 'count' => 0];
             $groups[$key]['count']++;
@@ -98,7 +120,7 @@ final class PatternDetector
             return ['direction' => null, 'magnitude' => null, 'sample_size' => 0, 'outcome' => 'not_configured', 'error' => 'Experience Store is not configured.'];
         }
 
-        $records = $this->experiences->list(['source' => $source, 'event_category' => $eventCategory]);
+        $records = $this->restrictToQualified($this->experiences->list(['source' => $source, 'event_category' => $eventCategory]));
         $confidences = $this->orderedConfidences($records);
 
         if (count($confidences) < 4) {
@@ -147,7 +169,7 @@ final class PatternDetector
             return ['anomalies' => [], 'outcome' => 'not_configured', 'error' => 'Experience Store is not configured.'];
         }
 
-        $records = array_values(array_filter($this->experiences->list($filters), static fn(array $r): bool => $r['confidence'] !== null));
+        $records = array_values(array_filter($this->restrictToQualified($this->experiences->list($filters)), static fn(array $r): bool => $r['confidence'] !== null));
 
         if (count($records) < 2) {
             return ['anomalies' => [], 'outcome' => 'insufficient_data', 'error' => 'At least 2 confidence-bearing records are required to detect anomalies.'];
