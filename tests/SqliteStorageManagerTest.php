@@ -5,9 +5,12 @@ declare(strict_types=1);
 namespace SquirrelForge\Tests;
 
 use PHPUnit\Framework\TestCase;
+use SquirrelForge\Automation\RuleEngine;
+use SquirrelForge\Governance\SqlitePolicyEngine;
 use SquirrelForge\Governance\SqliteVersionManager;
 use SquirrelForge\Storage\CacheManager;
 use SquirrelForge\Storage\SqliteBackupManager;
+use SquirrelForge\Storage\SqliteDataGovernance;
 use SquirrelForge\Storage\SqliteDocumentStorage;
 use SquirrelForge\Storage\SqliteObjectStorage;
 use SquirrelForge\Storage\SqliteStorageManager;
@@ -91,6 +94,42 @@ final class SqliteStorageManagerTest extends TestCase
         $result = $manager->coordinate('archive', []);
 
         $this->assertSame('escalated', $result['outcome']);
+    }
+
+    public function testKeyValueAndReplicateRemainUnsupported(): void
+    {
+        $manager = new SqliteStorageManager($this->tempPath('manager'));
+
+        $this->assertSame('escalated', $manager->coordinate('key_value_store', [])['outcome']);
+        $this->assertSame('escalated', $manager->coordinate('replicate', [])['outcome']);
+    }
+
+    public function testGovernanceReviewIsRejectedWithoutAConfiguredGovernanceComponent(): void
+    {
+        $manager = new SqliteStorageManager($this->tempPath('manager'));
+
+        $result = $manager->coordinate('governance_review', ['request_id' => 'req_1', 'data_classification' => 'confidential', 'policy_context' => ['ready' => true]]);
+
+        $this->assertSame('rejected', $result['outcome']);
+        $this->assertStringContainsString('Data Governance', $result['error']);
+    }
+
+    public function testGovernanceReviewRoutesToTheRealDataGovernanceAndRecordsItsDecision(): void
+    {
+        $policyEngine = new SqlitePolicyEngine($this->tempPath('policy'), new RuleEngine());
+        $policyEngine->registerPolicy('p1', ['category' => 'operational', 'priority' => 1, 'condition' => ['type' => 'boolean', 'field' => 'ready', 'equals' => true], 'effect' => 'allow']);
+        $governance = new SqliteDataGovernance($this->tempPath('gov'), $policyEngine);
+        $manager = new SqliteStorageManager(
+            $this->tempPath('manager'),
+            governance: $governance
+        );
+
+        $result = $manager->coordinate('governance_review', ['request_id' => 'req_1', 'data_classification' => 'confidential', 'policy_context' => ['ready' => true]]);
+        $record = $manager->operation($result['storage_operation_id']);
+
+        $this->assertSame('reviewed', $result['outcome']);
+        $this->assertSame('governance', $result['storage_type']);
+        $this->assertSame('Approved', $record['governance_status']);
     }
 
     public function testMissingRequiredFieldIsRejected(): void

@@ -36,18 +36,27 @@ use SquirrelForge\Governance\SqliteVersionManager;
  * every write would be a surprising, uninvited side effect.
  *
  * Of the ten components the spec's own "Coordination Responsibilities"
- * lists, four have no real implementation to route to (Key-Value
- * Storage, Archive Storage, Storage Replication, Storage Governance),
- * so operations that would need them are rejected as unsupported
- * rather than routed somewhere invented, matching SqliteDataManager's
- * own established precedent for the same situation.
+ * lists, three still have no real implementation to route to (Key-Value
+ * Storage, Archive Storage, Storage Replication), so operations that
+ * would need them are rejected as unsupported rather than routed
+ * somewhere invented, matching SqliteDataManager's own established
+ * precedent for the same situation. Storage Governance is no longer one
+ * of them: `37_STORAGE/DATA-GOVERNANCE.md` is real as
+ * `SqliteDataGovernance` and is composed directly for the
+ * `governance_review` operation, the same "coordinator predates its own
+ * specialist" resolution `SqliteSecurityManager` already went through
+ * for Threat Detector and Incident Manager.
  *
  * This class does not perform its own authorization check: each
  * coordinated component already has its own optional
  * AuthorizationManagerInterface wiring, and duplicating that check here
  * would be redundant, not more correct -- `permission_status` is
- * recorded as the fixed value `delegated`. Governance status is the
- * fixed constant `ungoverned` since Storage Governance has no code.
+ * recorded as the fixed value `delegated`. `governance_status` is the
+ * fixed constant `ungoverned` for every operation except
+ * `governance_review` itself, which records the real decision
+ * `SqliteDataGovernance::review()` returned -- this class does not
+ * retroactively gate store/retrieve/backup/etc. operations on a
+ * governance decision the spec never asked it to require inline.
  */
 final class SqliteStorageManager
 {
@@ -65,9 +74,10 @@ final class SqliteStorageManager
         'backup' => ['source_type', 'source_ref'],
         'restore' => ['backup_ref'],
         'register_version' => ['record_id', 'record_type', 'content'],
+        'governance_review' => ['request_id', 'data_classification', 'policy_context'],
     ];
 
-    private const UNSUPPORTED_OPERATIONS = ['key_value_store', 'archive', 'replicate', 'governance_review'];
+    private const UNSUPPORTED_OPERATIONS = ['key_value_store', 'archive', 'replicate'];
 
     private PDO $database;
 
@@ -79,6 +89,7 @@ final class SqliteStorageManager
         private readonly ?CacheManager $cache = null,
         private readonly ?SqliteBackupManager $backups = null,
         private readonly ?SqliteVersionManager $versions = null,
+        private readonly ?SqliteDataGovernance $governance = null,
         private readonly ?EventBusInterface $events = null
     ) {
         $this->database = new PDO('sqlite:' . $databasePath, options: [
@@ -138,6 +149,7 @@ final class SqliteStorageManager
             'backup' => $this->coordinateBackup($payload, $options),
             'restore' => $this->coordinateRestore($payload, $options),
             'register_version' => $this->coordinateRegisterVersion($payload, $options),
+            'governance_review' => $this->coordinateGovernanceReview($payload, $options),
         };
     }
 
@@ -300,6 +312,17 @@ final class SqliteStorageManager
         return $this->finish('register_version', 'version', $options, $result['version_id'], $result['outcome'], $result['error'], $result);
     }
 
+    private function coordinateGovernanceReview(array $payload, array $options): array
+    {
+        if ($this->governance === null) {
+            return $this->finish('governance_review', 'governance', $options, null, 'rejected', 'Data Governance is not configured.');
+        }
+
+        $result = $this->governance->review($payload);
+
+        return $this->finish('governance_review', 'governance', $options, $result['governance_id'], $result['error'] === null ? 'reviewed' : 'rejected', $result['error'], $result, $result['decision']);
+    }
+
     /**
      * @param array<string, mixed> $options
      * @return array{storage_operation_id: string, operation: string, storage_type: string, storage_destination: ?string, permission_status: string, governance_status: string, outcome: string, error: ?string, result: mixed}
@@ -311,9 +334,11 @@ final class SqliteStorageManager
         ?string $storageDestination,
         string $outcome,
         ?string $error,
-        mixed $result = null
+        mixed $result = null,
+        ?string $governanceStatus = null
     ): array {
         $operationId = 'storage_op_' . bin2hex(random_bytes(12));
+        $governanceStatus ??= 'ungoverned';
 
         $statement = $this->database->prepare(
             'INSERT INTO storage_operations (
@@ -331,7 +356,7 @@ final class SqliteStorageManager
             'requesting_component' => $options['requesting_component'] ?? null,
             'storage_destination' => $storageDestination,
             'permission_status' => 'delegated',
-            'governance_status' => 'ungoverned',
+            'governance_status' => $governanceStatus,
             'final_outcome' => $outcome,
             'error' => $error,
             'created_at' => gmdate(DATE_RFC3339),
@@ -351,7 +376,7 @@ final class SqliteStorageManager
             'storage_type' => $storageType,
             'storage_destination' => $storageDestination,
             'permission_status' => 'delegated',
-            'governance_status' => 'ungoverned',
+            'governance_status' => $governanceStatus,
             'outcome' => $outcome,
             'error' => $error,
             'result' => $result,
