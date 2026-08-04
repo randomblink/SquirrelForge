@@ -194,4 +194,31 @@ final class SqliteComplianceManagerTest extends TestCase
         $this->assertSame('Under Review', $history[0]['status']);
         $this->assertSame('Compliant', $history[1]['status']);
     }
+
+    public function testListRequirementsReturnsEveryRegisteredRequirement(): void
+    {
+        $manager = $this->manager();
+        $manager->registerRequirement('req_1', 'security', 'Requirement one.');
+        $manager->registerRequirement('req_2', 'privacy', 'Requirement two.');
+
+        $this->assertCount(2, $manager->listRequirements());
+    }
+
+    public function testLatestStatusReturnsTheMostRecentAssessment(): void
+    {
+        $manager = $this->manager();
+        $manager->registerRequirement('req_1', 'security', 'A requirement.');
+        $manager->assess('req_1', 'Under Review');
+        $manager->assess('req_1', 'Compliant');
+
+        $this->assertSame('Compliant', $manager->latestStatus('req_1'));
+    }
+
+    public function testLatestStatusIsNullWhenNeverAssessed(): void
+    {
+        $manager = $this->manager();
+        $manager->registerRequirement('req_1', 'security', 'A requirement.');
+
+        $this->assertNull($manager->latestStatus('req_1'));
+    }
 }

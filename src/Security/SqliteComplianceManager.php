@@ -250,7 +250,7 @@ final class SqliteComplianceManager
      */
     public function history(string $requirementId): array
     {
-        $statement = $this->database->prepare('SELECT * FROM compliance_assessments WHERE requirement_id = :requirement_id ORDER BY created_at ASC');
+        $statement = $this->database->prepare('SELECT * FROM compliance_assessments WHERE requirement_id = :requirement_id ORDER BY created_at ASC, rowid ASC');
         $statement->execute(['requirement_id' => $requirementId]);
 
         return array_map(
@@ -273,6 +273,32 @@ final class SqliteComplianceManager
         $statement->execute(['category' => $category]);
 
         return $statement->fetchAll();
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    public function listRequirements(): array
+    {
+        $statement = $this->database->prepare('SELECT * FROM compliance_requirements');
+        $statement->execute();
+
+        return $statement->fetchAll();
+    }
+
+    /**
+     * The most recent assess() outcome for a requirement, or null when it
+     * has never been assessed -- the real signal Security Monitor needs to
+     * aggregate compliance status without duplicating this class's own
+     * assessment history.
+     */
+    public function latestStatus(string $requirementId): ?string
+    {
+        $statement = $this->database->prepare('SELECT status FROM compliance_assessments WHERE requirement_id = :requirement_id ORDER BY created_at DESC, rowid DESC LIMIT 1');
+        $statement->execute(['requirement_id' => $requirementId]);
+        $row = $statement->fetch();
+
+        return $row === false ? null : $row['status'];
     }
 
     /**
