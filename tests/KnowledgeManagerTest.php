@@ -10,8 +10,13 @@ use SquirrelForge\Events\CallbackEventListener;
 use SquirrelForge\Events\EventBus;
 use SquirrelForge\Knowledge\KnowledgeManager;
 use SquirrelForge\Knowledge\SemanticSearchManager;
+use SquirrelForge\Knowledge\SqliteCitationManager;
 use SquirrelForge\Knowledge\SqliteDocumentRepository;
 use SquirrelForge\Knowledge\SqliteEmbeddingsManager;
+use SquirrelForge\Knowledge\SqliteKnowledgeGraph;
+use SquirrelForge\Knowledge\SqliteKnowledgeRegistry;
+use SquirrelForge\Knowledge\SqliteKnowledgeValidator;
+use SquirrelForge\Knowledge\SqliteKnowledgeVersioning;
 use SquirrelForge\Storage\SqliteVectorStorage;
 
 final class KnowledgeManagerTest extends TestCase
@@ -45,7 +50,18 @@ final class KnowledgeManagerTest extends TestCase
         $embeddings = new SqliteEmbeddingsManager($this->tempPath('embeddings'), $vectors, $documents);
         $search = new SemanticSearchManager($embeddings, $documents);
 
-        return new KnowledgeManager($documents, $embeddings, $search, $events);
+        return new KnowledgeManager($documents, $embeddings, $search, events: $events);
+    }
+
+    private function makeKnowledgeGraphManager(): KnowledgeManager
+    {
+        $registry = new SqliteKnowledgeRegistry($this->tempPath('registry'));
+        $citations = new SqliteCitationManager($this->tempPath('citations'), $registry);
+        $validator = new SqliteKnowledgeValidator($this->tempPath('validator'), $registry, $citations);
+        $versioning = new SqliteKnowledgeVersioning($this->tempPath('versioning'));
+        $graph = new SqliteKnowledgeGraph($this->tempPath('graph'));
+
+        return new KnowledgeManager(registry: $registry, validator: $validator, citations: $citations, versioning: $versioning, graph: $graph);
     }
 
     public function testRegisterRoutesToDocumentRepository(): void
@@ -103,14 +119,71 @@ final class KnowledgeManagerTest extends TestCase
         $this->assertNotEmpty($result['result']['results']);
     }
 
-    public function testUnsupportedOperationEscalatesWithoutTouchingAnyComponent(): void
+    public function testCatalogIsRejectedWithoutAConfiguredRegistry(): void
     {
         $manager = $this->makeManager();
 
-        $result = $manager->coordinate('validate', ['document_id' => 'anything']);
+        $result = $manager->coordinate('catalog', ['name' => 'Deploy Runbook', 'type' => 'document', 'source' => 'wiki', 'owner' => 'platform_team']);
 
-        $this->assertSame('escalated', $result['outcome']);
-        $this->assertSame('none', $result['target_component']);
+        $this->assertSame('rejected', $result['outcome']);
+        $this->assertSame('knowledge_registry', $result['target_component']);
+    }
+
+    public function testCatalogRoutesToTheRealKnowledgeRegistry(): void
+    {
+        $manager = $this->makeKnowledgeGraphManager();
+
+        $result = $manager->coordinate('catalog', ['name' => 'Deploy Runbook', 'type' => 'document', 'source' => 'wiki', 'owner' => 'platform_team']);
+
+        $this->assertSame('registered', $result['outcome']);
+        $this->assertNotNull($result['result']['knowledge_id']);
+    }
+
+    public function testValidateRoutesToTheRealKnowledgeValidator(): void
+    {
+        $manager = $this->makeKnowledgeGraphManager();
+        $catalogued = $manager->coordinate('catalog', ['name' => 'Deploy Runbook', 'type' => 'document', 'source' => 'wiki', 'owner' => 'platform_team']);
+
+        $result = $manager->coordinate('validate', ['knowledge_id' => $catalogued['result']['knowledge_id']]);
+
+        $this->assertSame('knowledge_validator', $result['target_component']);
+        $this->assertContains($result['outcome'], ['Valid', 'Warning', 'Failed', 'Rejected']);
+    }
+
+    public function testCiteRoutesToTheRealCitationManager(): void
+    {
+        $manager = $this->makeKnowledgeGraphManager();
+        $catalogued = $manager->coordinate('catalog', ['name' => 'Deploy Runbook', 'type' => 'document', 'source' => 'wiki', 'owner' => 'platform_team']);
+
+        $result = $manager->coordinate('cite', [
+            'knowledge_id' => $catalogued['result']['knowledge_id'],
+            'source_reference' => 'https://example.com',
+            'citation_type' => 'primary_source',
+        ]);
+
+        $this->assertSame('registered', $result['outcome']);
+        $this->assertSame('citation_manager', $result['target_component']);
+    }
+
+    public function testVersionRoutesToTheRealKnowledgeVersioning(): void
+    {
+        $manager = $this->makeKnowledgeGraphManager();
+        $catalogued = $manager->coordinate('catalog', ['name' => 'Deploy Runbook', 'type' => 'document', 'source' => 'wiki', 'owner' => 'platform_team']);
+
+        $result = $manager->coordinate('version', ['knowledge_id' => $catalogued['result']['knowledge_id'], 'content' => ['body' => 'v1']]);
+
+        $this->assertSame('created', $result['outcome']);
+        $this->assertSame('knowledge_versioning', $result['target_component']);
+    }
+
+    public function testRelateRoutesToTheRealKnowledgeGraph(): void
+    {
+        $manager = $this->makeKnowledgeGraphManager();
+
+        $result = $manager->coordinate('relate', ['source_entity' => 'a', 'relationship' => 'depends_on', 'target_entity' => 'b']);
+
+        $this->assertSame('unregistered_entity', $result['outcome'], 'Neither entity was registered in the Knowledge Graph directly, so this must fail the real registration gate rather than fabricate success.');
+        $this->assertSame('knowledge_graph', $result['target_component']);
     }
 
     public function testUnknownOperationIsRejected(): void

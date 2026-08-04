@@ -18,17 +18,30 @@ use SquirrelForge\Events\Event;
  * knowledge_operations table here, only an optional EventBusInterface
  * announcement per request.
  *
- * Of the eight components the spec lists under "Depends On", three have
- * real code to route to: Document Repository (register/read/update/
- * archive/restore a document-facing reference), Embeddings Manager
- * (generate a vector for a registered asset), and Semantic Search
- * (retrieve relevance-ranked references). Knowledge Registry, Knowledge
- * Validator, Citation Manager, Knowledge Versioning, and Knowledge
- * Graph have no implementation, so requests naming those operations
- * escalate rather than being routed somewhere invented -- this follows
- * directly from the spec's own rule that lifecycle transitions must be
- * "based on the authoritative result from the owning component": there
- * is no owning component for those operations to produce one.
+ * Of the eight components the spec lists under "Depends On", all eight
+ * now have real code to route to: Document Repository (register/read/
+ * update/archive/restore a document-facing reference), Embeddings
+ * Manager (generate a vector for a registered asset), Semantic Search
+ * (retrieve relevance-ranked references), Knowledge Registry (catalog
+ * metadata), Knowledge Validator (validate), Citation Manager (cite),
+ * Knowledge Versioning (version), and Knowledge Graph (relate).
+ *
+ * The last five were the last real gap in this codebase's "coordinator
+ * predates its own specialist" pattern -- unlike the security and
+ * storage instances of that same situation, these five specs
+ * (`25_KNOWLEDGE/KNOWLEDGE-REGISTRY.md`, `25_KNOWLEDGE/KNOWLEDGE-VALIDATOR.md`,
+ * `25_KNOWLEDGE/CITATION-MANAGER.md`, `25_KNOWLEDGE/KNOWLEDGE-VERSIONING.md`,
+ * `25_KNOWLEDGE/KNOWLEDGE-GRAPH.md`) already existed in full; only their
+ * implementations were missing.
+ *
+ * `catalog` is a deliberately separate operation from the pre-existing
+ * `register`, not a rename of it: `register` still means Document
+ * Repository's document-facing reference (where content lives),
+ * exactly as it always has, and `catalog` means a genuinely distinct
+ * concern -- Knowledge Registry's catalog entry (identifiers, trust,
+ * lifecycle, and references to version/citation/relationship records).
+ * A real knowledge asset plausibly needs both, and neither replaces
+ * the other.
  */
 final class KnowledgeManager
 {
@@ -40,14 +53,22 @@ final class KnowledgeManager
         'restore' => ['document_id'],
         'embed' => ['document_id', 'text'],
         'search' => ['query'],
+        'catalog' => ['name', 'type', 'source', 'owner'],
+        'validate' => ['knowledge_id'],
+        'cite' => ['knowledge_id', 'source_reference', 'citation_type'],
+        'version' => ['knowledge_id', 'content'],
+        'relate' => ['source_entity', 'relationship', 'target_entity'],
     ];
-
-    private const UNSUPPORTED_OPERATIONS = ['validate', 'cite', 'version', 'relate'];
 
     public function __construct(
         private readonly ?SqliteDocumentRepository $documents = null,
         private readonly ?SqliteEmbeddingsManager $embeddings = null,
         private readonly ?SemanticSearchManager $search = null,
+        private readonly ?SqliteKnowledgeRegistry $registry = null,
+        private readonly ?SqliteKnowledgeValidator $validator = null,
+        private readonly ?SqliteCitationManager $citations = null,
+        private readonly ?SqliteKnowledgeVersioning $versioning = null,
+        private readonly ?SqliteKnowledgeGraph $graph = null,
         private readonly ?EventBusInterface $events = null
     ) {
     }
@@ -59,10 +80,6 @@ final class KnowledgeManager
      */
     public function coordinate(string $operation, array $payload, array $options = []): array
     {
-        if (in_array($operation, self::UNSUPPORTED_OPERATIONS, true)) {
-            return $this->finish($operation, 'none', 'escalated', sprintf('Knowledge operation "%s" has no implemented owning component.', $operation), null);
-        }
-
         if (!isset(self::REQUIRED_FIELDS[$operation])) {
             return $this->finish($operation, 'none', 'rejected', sprintf('Unknown knowledge operation "%s".', $operation), null);
         }
@@ -81,6 +98,11 @@ final class KnowledgeManager
             'restore' => $this->coordinateRestore($payload),
             'embed' => $this->coordinateEmbed($payload, $options),
             'search' => $this->coordinateSearch($payload, $options),
+            'catalog' => $this->coordinateCatalog($payload),
+            'validate' => $this->coordinateValidate($payload, $options),
+            'cite' => $this->coordinateCite($payload, $options),
+            'version' => $this->coordinateVersion($payload, $options),
+            'relate' => $this->coordinateRelate($payload, $options),
         };
     }
 
@@ -198,6 +220,99 @@ final class KnowledgeManager
         $result = $this->search->search($payload['query'], $options);
 
         return $this->finish('search', 'semantic_search', $result['error'] === null ? 'searched' : 'rejected', $result['error'], $result);
+    }
+
+    /**
+     * @param array<string, mixed> $payload
+     */
+    private function coordinateCatalog(array $payload): array
+    {
+        if ($this->registry === null) {
+            return $this->finish('catalog', 'knowledge_registry', 'rejected', 'Knowledge Registry is not configured.', null);
+        }
+
+        $result = $this->registry->register($payload['name'], $payload['type'], $payload['source'], $payload['owner']);
+
+        return $this->finish('catalog', 'knowledge_registry', $result['outcome'], $result['error'], $result);
+    }
+
+    /**
+     * @param array<string, mixed> $payload
+     * @param array<string, mixed> $options
+     */
+    private function coordinateValidate(array $payload, array $options): array
+    {
+        if ($this->validator === null) {
+            return $this->finish('validate', 'knowledge_validator', 'rejected', 'Knowledge Validator is not configured.', null);
+        }
+
+        $result = $this->validator->validate($payload['knowledge_id'], $options);
+
+        return $this->finish('validate', 'knowledge_validator', $result['result'], $result['error'], $result);
+    }
+
+    /**
+     * @param array<string, mixed> $payload
+     * @param array<string, mixed> $options
+     */
+    private function coordinateCite(array $payload, array $options): array
+    {
+        if ($this->citations === null) {
+            return $this->finish('cite', 'citation_manager', 'rejected', 'Citation Manager is not configured.', null);
+        }
+
+        $result = $this->citations->registerCitation(
+            $payload['knowledge_id'],
+            $payload['source_reference'],
+            $payload['citation_type'],
+            $options['locator_metadata'] ?? [],
+            $options['source_version_reference'] ?? null
+        );
+
+        return $this->finish('cite', 'citation_manager', $result['outcome'], $result['error'], $result);
+    }
+
+    /**
+     * @param array<string, mixed> $payload
+     * @param array<string, mixed> $options
+     */
+    private function coordinateVersion(array $payload, array $options): array
+    {
+        if ($this->versioning === null) {
+            return $this->finish('version', 'knowledge_versioning', 'rejected', 'Knowledge Versioning is not configured.', null);
+        }
+
+        $result = $this->versioning->createVersion(
+            $payload['knowledge_id'],
+            $payload['content'],
+            $options['change_type'] ?? 'Create',
+            $options['parent_version_id'] ?? null,
+            $options['author'] ?? null,
+            $options['validation_reference'] ?? null
+        );
+
+        return $this->finish('version', 'knowledge_versioning', $result['outcome'], $result['error'], $result);
+    }
+
+    /**
+     * @param array<string, mixed> $payload
+     * @param array<string, mixed> $options
+     */
+    private function coordinateRelate(array $payload, array $options): array
+    {
+        if ($this->graph === null) {
+            return $this->finish('relate', 'knowledge_graph', 'rejected', 'Knowledge Graph is not configured.', null);
+        }
+
+        $result = $this->graph->defineRelationship(
+            $payload['source_entity'],
+            $payload['relationship'],
+            $payload['target_entity'],
+            $options['confidence'] ?? 1.0,
+            $options['evidence_reference'] ?? null
+        );
+
+        return $this->finish('relate', 'knowledge_graph', $result['outcome'], $result['error'], $result);
     }
 
     private function finish(string $operation, string $targetComponent, string $outcome, ?string $error, mixed $result): array
