@@ -15,7 +15,9 @@ Defines the knowledge references used by WordPress workflows, Skills, Roles, and
 - `38_WORDPRESS/KNOWLEDGE/CUSTOM-POST-TYPES.md`
 - `38_WORDPRESS/KNOWLEDGE/DATABASE.md`
 - `ERROR-CODES.md` — standardized WordPress engineering error classifications, diagnosis guidance, evidence requirements, and resolution verification.
+- `38_WORDPRESS/KNOWLEDGE/INTERNATIONALIZATION.md`
 - `38_WORDPRESS/KNOWLEDGE/KNOWLEDGE-MANAGER.md`
+- `38_WORDPRESS/KNOWLEDGE/MEDIA.md`
 - `PERFORMANCE.md`
 - `PLUGIN-HANDBOOK.md`
 - `38_WORDPRESS/KNOWLEDGE/REST-API.md`
@@ -24,6 +26,7 @@ Defines the knowledge references used by WordPress workflows, Skills, Roles, and
 - `SHORTCODES.md`
 - `38_WORDPRESS/KNOWLEDGE/TAXONOMIES.md`
 - `38_WORDPRESS/KNOWLEDGE/THEME-HANDBOOK.md`
+- `38_WORDPRESS/KNOWLEDGE/WOOCOMMERCE.md`
 - `38_WORDPRESS/KNOWLEDGE/WORDPRESS-CORE.md`
 
 ## Rule
