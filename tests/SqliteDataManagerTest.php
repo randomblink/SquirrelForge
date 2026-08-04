@@ -5,11 +5,15 @@ declare(strict_types=1);
 namespace SquirrelForge\Tests;
 
 use PHPUnit\Framework\TestCase;
+use SquirrelForge\Automation\RuleEngine;
+use SquirrelForge\Governance\SqlitePolicyEngine;
 use SquirrelForge\Storage\CacheManager;
 use SquirrelForge\Storage\SqliteBackupManager;
+use SquirrelForge\Storage\SqliteDataGovernance;
 use SquirrelForge\Storage\SqliteDataManager;
 use SquirrelForge\Storage\SqliteDataValidator;
 use SquirrelForge\Storage\SqliteDocumentStorage;
+use SquirrelForge\Storage\SqliteIndexManager;
 use SquirrelForge\Storage\SqliteObjectStorage;
 use SquirrelForge\Tools\LocalFileSystem;
 
@@ -196,10 +200,60 @@ final class SqliteDataManagerTest extends TestCase
     {
         $manager = $this->makeManager();
 
-        $result = $manager->coordinate('search_index', ['query' => 'anything']);
+        $result = $manager->coordinate('monitor_report', ['note' => 'anything']);
 
         $this->assertSame('escalated', $result['outcome']);
         $this->assertSame('none', $result['target_component']);
+    }
+
+    public function testSearchIndexIsRejectedWithoutAConfiguredIndexManager(): void
+    {
+        $manager = $this->makeManager();
+
+        $result = $manager->coordinate('search_index', ['query_terms' => ['deploy']]);
+
+        $this->assertSame('rejected', $result['outcome']);
+        $this->assertStringContainsString('Index Manager', $result['error']);
+    }
+
+    public function testIndexUpdateThenSearchIndexRoutesToTheRealIndexManager(): void
+    {
+        $index = new SqliteIndexManager($this->tempPath('index'));
+        $documents = new SqliteDocumentStorage($this->tempPath('documents'));
+        $objects = new SqliteObjectStorage($this->tempPath('objects'), $this->realFilesystem());
+        $manager = new SqliteDataManager($this->tempPath('manager'), $documents, $objects, index: $index);
+
+        $indexed = $manager->coordinate('index_update', ['source_type' => 'documents', 'record_id' => 'doc_1', 'attributes' => ['title' => 'Deploy Runbook']]);
+        $searched = $manager->coordinate('search_index', ['query_terms' => ['Deploy']]);
+
+        $this->assertSame('indexed', $indexed['outcome']);
+        $this->assertSame('index_manager', $indexed['target_component']);
+        $this->assertGreaterThanOrEqual(1, count($searched['result']['results']));
+    }
+
+    public function testGovernanceReviewIsRejectedWithoutAConfiguredGovernanceComponent(): void
+    {
+        $manager = $this->makeManager();
+
+        $result = $manager->coordinate('governance_review', ['request_id' => 'req_1', 'data_classification' => 'confidential', 'policy_context' => ['ready' => true]]);
+
+        $this->assertSame('rejected', $result['outcome']);
+        $this->assertStringContainsString('Data Governance', $result['error']);
+    }
+
+    public function testGovernanceReviewRoutesToTheRealDataGovernanceAndRecordsItsDecision(): void
+    {
+        $policyEngine = new SqlitePolicyEngine($this->tempPath('policy'), new RuleEngine());
+        $policyEngine->registerPolicy('p1', ['category' => 'operational', 'priority' => 1, 'condition' => ['type' => 'boolean', 'field' => 'ready', 'equals' => true], 'effect' => 'allow']);
+        $governance = new SqliteDataGovernance($this->tempPath('gov'), $policyEngine);
+        $documents = new SqliteDocumentStorage($this->tempPath('documents'));
+        $objects = new SqliteObjectStorage($this->tempPath('objects'), $this->realFilesystem());
+        $manager = new SqliteDataManager($this->tempPath('manager'), $documents, $objects, governance: $governance);
+
+        $result = $manager->coordinate('governance_review', ['request_id' => 'req_1', 'data_classification' => 'confidential', 'policy_context' => ['ready' => true]]);
+
+        $this->assertSame('reviewed', $result['outcome']);
+        $this->assertSame('Approved', $result['governance_status']);
     }
 
     public function testUnknownOperationIsRejected(): void

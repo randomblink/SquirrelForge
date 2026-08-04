@@ -15,18 +15,22 @@ use SquirrelForge\Events\Event;
  * SqliteCommunicationManager coordinate their own layers.
  *
  * Of the nine components the spec lists under "Coordination
- * Responsibilities", four have real code to route to: Data Validator
- * (validate), Document/Object Storage together standing in for Storage
- * Manager + Retrieval Manager + Version Manager (store/retrieve/
- * update_version, split by target since the two stores have different
- * shapes), Cache Manager (cache_put/cache_get/cache_forget), and Backup
- * Manager (backup/restore). Index Manager, Data Governance, and Data
- * Monitor have no implementation -- no real search index, no
- * 23_GOVERNANCE policy engine, no monitoring sink distinct from what
- * each component already logs on its own -- so operations that would
- * need them escalate rather than being routed somewhere invented, per
- * the spec's rule against bypassing governance or permitting
- * unauthorized access via an invented path.
+ * Responsibilities", seven now have real code to route to: Data
+ * Validator (validate), Document/Object Storage together standing in
+ * for Storage Manager + Retrieval Manager + Version Manager (store/
+ * retrieve/update_version, split by target since the two stores have
+ * different shapes), Cache Manager (cache_put/cache_get/cache_forget),
+ * Backup Manager (backup/restore), Index Manager (search_index/
+ * index_update), and Data Governance (governance_review) -- the last
+ * two went through the same "coordinator predates its own specialist"
+ * resolution `SqliteSecurityManager` and `SqliteStorageManager` already
+ * went through for their own newly-real components. Data Monitor
+ * remains the one genuine gap: no monitoring sink distinct from what
+ * each component already logs on its own exists anywhere in this
+ * codebase, and 37_STORAGE's own roster names no such component to
+ * build against -- so monitor_report still escalates rather than being
+ * routed somewhere invented, per the spec's rule against bypassing
+ * governance or permitting unauthorized access via an invented path.
  *
  * This class does not perform its own authorization check: each
  * coordinated component already has its own optional
@@ -36,7 +40,10 @@ use SquirrelForge\Events\Event;
  * redundant, not more correct -- authorization_status is recorded as
  * the fixed value `delegated` to make that explicit rather than
  * implying this layer enforces it itself. Governance status is the
- * fixed constant `ungoverned` since 23_GOVERNANCE has no code.
+ * fixed constant `ungoverned` for every operation except
+ * governance_review itself, which records the real decision
+ * SqliteDataGovernance::review() returned, the same split
+ * SqliteStorageManager already establishes.
  */
 final class SqliteDataManager
 {
@@ -53,9 +60,12 @@ final class SqliteDataManager
         'cache_put' => ['key', 'value', 'ttl_seconds'],
         'cache_get' => ['key'],
         'cache_forget' => ['key'],
+        'search_index' => ['query_terms'],
+        'index_update' => ['source_type', 'record_id'],
+        'governance_review' => ['request_id', 'data_classification', 'policy_context'],
     ];
 
-    private const UNSUPPORTED_OPERATIONS = ['search_index', 'index_update', 'governance_review', 'monitor_report'];
+    private const UNSUPPORTED_OPERATIONS = ['monitor_report'];
 
     private PDO $database;
 
@@ -66,6 +76,8 @@ final class SqliteDataManager
         private readonly ?CacheManager $cache = null,
         private readonly ?SqliteBackupManager $backups = null,
         private readonly ?SqliteDataValidator $validator = null,
+        private readonly ?SqliteIndexManager $index = null,
+        private readonly ?SqliteDataGovernance $governance = null,
         private readonly ?EventBusInterface $events = null
     ) {
         $this->database = new PDO('sqlite:' . $databasePath, options: [
@@ -124,6 +136,9 @@ final class SqliteDataManager
             'cache_put' => $this->coordinateCachePut($payload),
             'cache_get' => $this->coordinateCacheGet($payload),
             'cache_forget' => $this->coordinateCacheForget($payload),
+            'search_index' => $this->coordinateSearchIndex($payload, $options),
+            'index_update' => $this->coordinateIndexUpdate($payload, $options),
+            'governance_review' => $this->coordinateGovernanceReview($payload, $options),
         };
     }
 
@@ -320,6 +335,51 @@ final class SqliteDataManager
     }
 
     /**
+     * @param array<string, mixed> $payload
+     * @param array<string, mixed> $options
+     */
+    private function coordinateSearchIndex(array $payload, array $options): array
+    {
+        if ($this->index === null) {
+            return $this->persist('search_index', 'index_manager', 'not_applicable', 'rejected', 'Index Manager is not configured.', $options, null);
+        }
+
+        $result = $this->index->search($payload['query_terms'], $options);
+
+        return $this->persist('search_index', 'index_manager', 'validated', $result['outcome'], $result['error'], $options, $result);
+    }
+
+    /**
+     * @param array<string, mixed> $payload
+     * @param array<string, mixed> $options
+     */
+    private function coordinateIndexUpdate(array $payload, array $options): array
+    {
+        if ($this->index === null) {
+            return $this->persist('index_update', 'index_manager', 'not_applicable', 'rejected', 'Index Manager is not configured.', $options, null);
+        }
+
+        $result = $this->index->indexRecord($payload['source_type'], $payload['record_id'], $payload['attributes'] ?? []);
+
+        return $this->persist('index_update', 'index_manager', 'validated', $result['outcome'], $result['error'], $options, $result);
+    }
+
+    /**
+     * @param array<string, mixed> $payload
+     * @param array<string, mixed> $options
+     */
+    private function coordinateGovernanceReview(array $payload, array $options): array
+    {
+        if ($this->governance === null) {
+            return $this->persist('governance_review', 'data_governance', 'not_applicable', 'rejected', 'Data Governance is not configured.', $options, null);
+        }
+
+        $result = $this->governance->review($payload);
+
+        return $this->persist('governance_review', 'data_governance', 'validated', $result['error'] === null ? 'reviewed' : 'rejected', $result['error'], $options, $result, $result['decision']);
+    }
+
+    /**
      * @param array<string, mixed> $options
      */
     private function persist(
@@ -329,9 +389,11 @@ final class SqliteDataManager
         string $outcome,
         ?string $error,
         array $options,
-        mixed $result
+        mixed $result,
+        ?string $governanceStatus = null
     ): array {
         $operationRef = 'data_operation_' . bin2hex(random_bytes(12));
+        $governanceStatus ??= 'ungoverned';
 
         $statement = $this->database->prepare(
             'INSERT INTO data_operations (
@@ -348,7 +410,7 @@ final class SqliteDataManager
             'requesting_component' => $options['requesting_component'] ?? $options['identity_ref'] ?? null,
             'target_component' => $targetComponent,
             'authorization_status' => 'delegated',
-            'governance_status' => 'ungoverned',
+            'governance_status' => $governanceStatus,
             'validation_status' => $validationStatus,
             'outcome' => $outcome,
             'error' => $error,
@@ -368,7 +430,7 @@ final class SqliteDataManager
             'operation' => $operation,
             'target_component' => $targetComponent,
             'authorization_status' => 'delegated',
-            'governance_status' => 'ungoverned',
+            'governance_status' => $governanceStatus,
             'validation_status' => $validationStatus,
             'outcome' => $outcome,
             'error' => $error,
