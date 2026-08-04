@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SquirrelForge\Tests;
 
 use PHPUnit\Framework\TestCase;
+use SquirrelForge\Storage\SqliteArchiveStorage;
 use SquirrelForge\Storage\SqliteDocumentStorage;
 use SquirrelForge\Storage\SqliteIndexManager;
 use SquirrelForge\Storage\SqliteObjectStorage;
@@ -82,6 +83,29 @@ final class SqliteRetrievalManagerTest extends TestCase
         $result = $manager->retrieveByReference('astrology', 'ref_1');
 
         $this->assertSame('rejected', $result['outcome']);
+    }
+
+    public function testRetrieveByReferenceOfArchiveIsRejectedWithoutAConfiguredArchiveStorage(): void
+    {
+        [$manager] = $this->fullyWiredManager();
+
+        $result = $manager->retrieveByReference('archive', 'archive_1');
+
+        $this->assertSame('not_found', $result['outcome']);
+    }
+
+    public function testRetrieveByReferenceRoutesArchiveToTheRealArchiveStorage(): void
+    {
+        $documents = new SqliteDocumentStorage($this->tempPath('documents'));
+        $stored = $documents->store('policy', 'Retention', ['days' => 30]);
+        $archive = new SqliteArchiveStorage($this->tempPath('archive'), $documents);
+        $archived = $archive->archive('document', $stored['document_ref'], 30);
+        $manager = new SqliteRetrievalManager($this->tempPath('retrieval'), archive: $archive);
+
+        $result = $manager->retrieveByReference('archive', $archived['archive_ref']);
+
+        $this->assertSame('retrieved', $result['outcome']);
+        $this->assertSame(['days' => 30], $result['record']['content']);
     }
 
     public function testRetrieveByReferenceReturnsNotFoundForAnUnknownReference(): void

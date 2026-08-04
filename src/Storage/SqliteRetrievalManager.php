@@ -27,11 +27,12 @@ use SquirrelForge\Events\Event;
  * (retrieveBatch(), repeating the same real single-reference lookup for
  * many references rather than inventing a bulk-fetch mechanism).
  *
- * "Archive retrieval" is intentionally unsupported: no real Archive
- * Storage component exists in this codebase (the same gap
- * `SqliteStorageManager`'s own docblock already documents), so an
- * archived-record request is rejected rather than routed to Object or
- * Document Storage as if archival were the same thing as ordinary
+ * "Archive retrieval" routes to the real `SqliteArchiveStorage` --
+ * `37_STORAGE/ARCHIVE-STORAGE.md` did not even exist as a spec when
+ * this class's own docblock first documented the gap; it does now, and
+ * archived-record requests reach it the same way object/document/
+ * vector requests reach their own stores, rather than being rejected
+ * or misrouted to Object/Document Storage as if archival were ordinary
  * storage.
  *
  * "Verify data integrity" is not re-implemented here: Object Storage
@@ -46,8 +47,13 @@ use SquirrelForge\Events\Event;
  * precedent `SqliteDataManager` and `SqliteStorageManager` already
  * established: each coordinated store already has its own optional
  * `AuthorizationManagerInterface` wiring, and re-checking it here would
- * be redundant, not more correct. Governance status is the fixed
- * constant `ungoverned` since Storage Governance has no code.
+ * be redundant, not more correct. Governance status remains the fixed
+ * constant `ungoverned`: unlike `SqliteStorageManager`'s dedicated
+ * `governance_review` operation, this spec names no separate
+ * governance-decision request shape for a retrieval call to build --
+ * `37_STORAGE/DATA-GOVERNANCE.md` is real now, but wiring it here would
+ * mean inventing a per-retrieval governance request contract the spec
+ * itself never defines, not filling in a gap it names.
  *
  * Owns its own database (`Sqlite` prefix): the Audit Requirements name
  * a specific structured record shape every retrieval call records
@@ -56,7 +62,7 @@ use SquirrelForge\Events\Event;
  */
 final class SqliteRetrievalManager
 {
-    private const STORAGE_TYPES = ['object', 'document', 'vector'];
+    private const STORAGE_TYPES = ['object', 'document', 'vector', 'archive'];
 
     private PDO $database;
 
@@ -66,6 +72,7 @@ final class SqliteRetrievalManager
         private readonly ?SqliteDocumentStorage $documents = null,
         private readonly ?SqliteVectorStorage $vectors = null,
         private readonly ?SqliteIndexManager $index = null,
+        private readonly ?SqliteArchiveStorage $archive = null,
         private readonly ?EventBusInterface $events = null
     ) {
         $this->database = new PDO('sqlite:' . $databasePath, options: [
@@ -104,6 +111,7 @@ final class SqliteRetrievalManager
             'object' => $this->retrieveObject($reference, $version, $context),
             'document' => $this->retrieveDocument($reference, $version, $context),
             'vector' => $this->retrieveVector($reference, $context),
+            'archive' => $this->retrieveArchive($reference, $context),
         };
 
         return $this->finish($context, $reference, $version, $found ? 'verified' : 'not_applicable', $found ? 'retrieved' : 'not_found', $error, $result);
@@ -233,6 +241,21 @@ final class SqliteRetrievalManager
         }
 
         $result = $this->vectors->retrieve($reference, $context);
+
+        return [$result['found'], $result, $result['error']];
+    }
+
+    /**
+     * @param array<string, mixed> $context
+     * @return array{0: bool, 1: mixed, 2: ?string}
+     */
+    private function retrieveArchive(string $reference, array $context): array
+    {
+        if ($this->archive === null) {
+            return [false, null, 'Archive Storage is not configured.'];
+        }
+
+        $result = $this->archive->retrieve($reference, $context);
 
         return [$result['found'], $result, $result['error']];
     }
