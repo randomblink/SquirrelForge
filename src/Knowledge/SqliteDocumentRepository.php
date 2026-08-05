@@ -44,10 +44,19 @@ use SquirrelForge\Storage\SqliteDocumentStorage;
  *   owner), explicitly not semantic search, which the spec assigns to
  *   25_KNOWLEDGE/SEMANTIC-SEARCH.md.
  *
- * Citation references and version references are stored as opaque
- * caller-supplied strings: KNOWLEDGE-VERSIONING and CITATION-MANAGER
- * have no code yet to validate them against, so they're recorded, not
- * verified.
+ * Citation references and version references are verified, not just
+ * recorded, when a `SqliteKnowledgeVersioning` and/or
+ * `SqliteCitationManager` are injected: `25_KNOWLEDGE/KNOWLEDGE-VERSIONING.md`
+ * and `25_KNOWLEDGE/CITATION-MANAGER.md` had no implementation when this
+ * class was first written, so both were accepted as opaque strings --
+ * the same "coordinator predates its own specialist" resolution this
+ * codebase's other coordinators have already gone through. registerReference(),
+ * attachVersionReference(), and attachCitation() each check that the
+ * supplied reference actually resolves to a real version/citation
+ * record before accepting it, genuinely skipped (not silently treated
+ * as passing) when the corresponding component isn't configured -- the
+ * same optional-composition stance already established for
+ * storage_reference against SqliteDocumentStorage.
  */
 final class SqliteDocumentRepository
 {
@@ -61,6 +70,8 @@ final class SqliteDocumentRepository
     public function __construct(
         string $databasePath,
         private readonly ?SqliteDocumentStorage $documentStorage = null,
+        private readonly ?SqliteKnowledgeVersioning $versioning = null,
+        private readonly ?SqliteCitationManager $citations = null,
         private readonly ?EventBusInterface $events = null
     ) {
         $this->database = new PDO('sqlite:' . $databasePath, options: [
@@ -107,6 +118,12 @@ final class SqliteDocumentRepository
             }
         }
 
+        $versionReference = $options['version_reference'] ?? null;
+
+        if ($versionReference !== null && $this->versioning !== null && $this->versioning->get($versionReference) === null) {
+            return ['found' => false, 'document_id' => null, 'error' => sprintf('Version reference "%s" does not resolve to a known Knowledge Versioning record.', $versionReference)];
+        }
+
         $documentId = 'knowledge_document_' . bin2hex(random_bytes(12));
         $now = gmdate(DATE_RFC3339);
 
@@ -124,7 +141,7 @@ final class SqliteDocumentRepository
             'title' => $title,
             'type' => $type,
             'storage_reference' => $storageReference,
-            'version_reference' => $options['version_reference'] ?? null,
+            'version_reference' => $versionReference,
             'citation_references_json' => json_encode([], JSON_THROW_ON_ERROR),
             'status' => $storageReference !== null ? 'active' : 'draft',
             'owner' => $options['owner'] ?? null,
@@ -292,6 +309,10 @@ final class SqliteDocumentRepository
             return ['found' => false, 'error' => sprintf('Unknown document reference "%s".', $documentId)];
         }
 
+        if ($this->versioning !== null && $this->versioning->get($versionReference) === null) {
+            return ['found' => false, 'error' => sprintf('Version reference "%s" does not resolve to a known Knowledge Versioning record.', $versionReference)];
+        }
+
         $statement = $this->database->prepare('UPDATE knowledge_documents SET version_reference = :version_reference, updated_at = :updated_at WHERE document_id = :document_id');
         $statement->execute(['version_reference' => $versionReference, 'updated_at' => gmdate(DATE_RFC3339), 'document_id' => $documentId]);
 
@@ -309,6 +330,10 @@ final class SqliteDocumentRepository
 
         if ($record === null) {
             return ['found' => false, 'error' => sprintf('Unknown document reference "%s".', $documentId)];
+        }
+
+        if ($this->citations !== null && $this->citations->get($citationReference) === null) {
+            return ['found' => false, 'error' => sprintf('Citation reference "%s" does not resolve to a known Citation Manager record.', $citationReference)];
         }
 
         $citations = json_decode((string) $record['citation_references_json'], true, flags: JSON_THROW_ON_ERROR);

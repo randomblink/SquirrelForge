@@ -8,7 +8,9 @@ use PHPUnit\Framework\TestCase;
 use SquirrelForge\Contracts\EventInterface;
 use SquirrelForge\Events\CallbackEventListener;
 use SquirrelForge\Events\EventBus;
+use SquirrelForge\Knowledge\SqliteCitationManager;
 use SquirrelForge\Knowledge\SqliteDocumentRepository;
+use SquirrelForge\Knowledge\SqliteKnowledgeVersioning;
 use SquirrelForge\Storage\SqliteDocumentStorage;
 
 final class SqliteDocumentRepositoryTest extends TestCase
@@ -227,6 +229,42 @@ final class SqliteDocumentRepositoryTest extends TestCase
         $this->assertSame('version_ref_7', $repository->readMetadata($registered['document_id'])['version_reference']);
     }
 
+    public function testAttachVersionReferenceRejectsAnUnresolvableReferenceWhenVersioningIsConfigured(): void
+    {
+        $versioning = new SqliteKnowledgeVersioning($this->tempPath('versioning'));
+        $repository = new SqliteDocumentRepository($this->tempPath('main'), versioning: $versioning);
+        $registered = $repository->registerReference('Policy', 'policy');
+
+        $result = $repository->attachVersionReference($registered['document_id'], 'kversion_unknown');
+
+        $this->assertFalse($result['found']);
+        $this->assertNull($repository->readMetadata($registered['document_id'])['version_reference']);
+    }
+
+    public function testAttachVersionReferenceAcceptsARealVersionWhenVersioningIsConfigured(): void
+    {
+        $versioning = new SqliteKnowledgeVersioning($this->tempPath('versioning'));
+        $created = $versioning->createVersion('knowledge_1', ['body' => 'v1']);
+        $repository = new SqliteDocumentRepository($this->tempPath('main'), versioning: $versioning);
+        $registered = $repository->registerReference('Policy', 'policy');
+
+        $result = $repository->attachVersionReference($registered['document_id'], $created['version_id']);
+
+        $this->assertTrue($result['found']);
+        $this->assertSame($created['version_id'], $repository->readMetadata($registered['document_id'])['version_reference']);
+    }
+
+    public function testRegisterReferenceRejectsAnUnresolvableVersionReferenceWhenVersioningIsConfigured(): void
+    {
+        $versioning = new SqliteKnowledgeVersioning($this->tempPath('versioning'));
+        $repository = new SqliteDocumentRepository($this->tempPath('main'), versioning: $versioning);
+
+        $result = $repository->registerReference('Policy', 'policy', ['version_reference' => 'kversion_unknown']);
+
+        $this->assertFalse($result['found']);
+        $this->assertStringContainsString('Knowledge Versioning', $result['error']);
+    }
+
     public function testAttachCitationAppendsAndDeduplicates(): void
     {
         $repository = new SqliteDocumentRepository($this->tempPath('main'));
@@ -237,6 +275,31 @@ final class SqliteDocumentRepositoryTest extends TestCase
         $repository->attachCitation($registered['document_id'], 'citation_1');
 
         $this->assertSame(['citation_1', 'citation_2'], $repository->readMetadata($registered['document_id'])['citation_references']);
+    }
+
+    public function testAttachCitationRejectsAnUnresolvableReferenceWhenCitationManagerIsConfigured(): void
+    {
+        $citations = new SqliteCitationManager($this->tempPath('citations'));
+        $repository = new SqliteDocumentRepository($this->tempPath('main'), citations: $citations);
+        $registered = $repository->registerReference('Policy', 'policy');
+
+        $result = $repository->attachCitation($registered['document_id'], 'citation_unknown');
+
+        $this->assertFalse($result['found']);
+        $this->assertSame([], $repository->readMetadata($registered['document_id'])['citation_references']);
+    }
+
+    public function testAttachCitationAcceptsARealCitationWhenCitationManagerIsConfigured(): void
+    {
+        $citations = new SqliteCitationManager($this->tempPath('citations'));
+        $registeredCitation = $citations->registerCitation('knowledge_1', 'https://example.com', 'primary_source', ['url' => 'https://example.com']);
+        $repository = new SqliteDocumentRepository($this->tempPath('main'), citations: $citations);
+        $registered = $repository->registerReference('Policy', 'policy');
+
+        $result = $repository->attachCitation($registered['document_id'], $registeredCitation['citation_id']);
+
+        $this->assertTrue($result['found']);
+        $this->assertSame([$registeredCitation['citation_id']], $repository->readMetadata($registered['document_id'])['citation_references']);
     }
 
     public function testSearchFiltersByTypeStatusAndOwner(): void
