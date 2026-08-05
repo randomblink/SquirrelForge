@@ -8,8 +8,10 @@ use PHPUnit\Framework\TestCase;
 use SquirrelForge\Contracts\EventInterface;
 use SquirrelForge\Events\CallbackEventListener;
 use SquirrelForge\Events\EventBus;
+use SquirrelForge\Learning\SqliteAdaptationManager;
 use SquirrelForge\Learning\SqliteExperienceStore;
 use SquirrelForge\Learning\SqliteFeedbackCollector;
+use SquirrelForge\Learning\SqliteLearningGovernance;
 use SquirrelForge\Storage\SqliteDocumentStorage;
 
 final class SqliteExperienceStoreTest extends TestCase
@@ -160,6 +162,54 @@ final class SqliteExperienceStoreTest extends TestCase
         $result = $store->attachReference($recorded['experience_id'], 'telepathy', 'ref');
 
         $this->assertFalse($result['found']);
+    }
+
+    public function testAttachGovernanceReferenceRejectsAnUnresolvableProposalWhenGovernanceIsConfigured(): void
+    {
+        $governance = new SqliteLearningGovernance($this->tempPath('governance'));
+        $store = new SqliteExperienceStore($this->tempPath('main'), governance: $governance);
+        $recorded = $store->record('agent:1', 'timeout');
+
+        $result = $store->attachReference($recorded['experience_id'], 'governance', 'proposal_never_reviewed');
+
+        $this->assertFalse($result['found']);
+        $this->assertStringContainsString('Learning Governance', $result['error']);
+    }
+
+    public function testAttachGovernanceReferenceAcceptsARealProposalWhenGovernanceIsConfigured(): void
+    {
+        $governance = new SqliteLearningGovernance($this->tempPath('governance'));
+        $governance->review('proposal_1');
+        $store = new SqliteExperienceStore($this->tempPath('main'), governance: $governance);
+        $recorded = $store->record('agent:1', 'timeout');
+
+        $result = $store->attachReference($recorded['experience_id'], 'governance', 'proposal_1');
+
+        $this->assertTrue($result['found']);
+    }
+
+    public function testAttachAdaptationReferenceRejectsAnUnresolvablePlanWhenAdaptationManagerIsConfigured(): void
+    {
+        $adaptationManager = new SqliteAdaptationManager($this->tempPath('adaptation'));
+        $store = new SqliteExperienceStore($this->tempPath('main'), adaptationManager: $adaptationManager);
+        $recorded = $store->record('agent:1', 'timeout');
+
+        $result = $store->attachReference($recorded['experience_id'], 'adaptation', 'plan_unknown');
+
+        $this->assertFalse($result['found']);
+        $this->assertStringContainsString('Adaptation Manager', $result['error']);
+    }
+
+    public function testAttachAdaptationReferenceAcceptsARealPlanWhenAdaptationManagerIsConfigured(): void
+    {
+        $adaptationManager = new SqliteAdaptationManager($this->tempPath('adaptation'));
+        $plan = $adaptationManager->createPlan('proposal_1', ['rollback_plan' => 'revert_config']);
+        $store = new SqliteExperienceStore($this->tempPath('main'), adaptationManager: $adaptationManager);
+        $recorded = $store->record('agent:1', 'timeout');
+
+        $result = $store->attachReference($recorded['experience_id'], 'adaptation', $plan['plan_id']);
+
+        $this->assertTrue($result['found']);
     }
 
     public function testAttachReferenceRejectsUnknownExperience(): void

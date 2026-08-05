@@ -33,15 +33,32 @@ use SquirrelForge\Storage\SqliteDocumentStorage;
  * recorded as an informational note, not a reason to refuse an
  * otherwise-valid experience record.
  *
- * evaluation_reference, pattern_reference, governance_reference, and
- * adaptation_reference are recorded as opaque, unverified strings --
- * Evaluation Engine, Pattern Detector, Learning Governance, and
- * Adaptation Manager have no code yet to check them against.
- * attachReference() is the real, forward-compatible API those
- * components would call once built; it doesn't fabricate calling them
- * now. No general audit-trail infrastructure is owned, per the spec --
- * only the domain table itself and an optional EventBusInterface
- * announcement per operation.
+ * governance_reference and adaptation_reference are verified against
+ * SqliteLearningGovernance::currentStatus() and
+ * SqliteAdaptationManager::get() respectively when each is injected --
+ * both had no code yet to check them against when this class was first
+ * written, the same "coordinator predates its own specialist"
+ * resolution this codebase's other coordinators have already gone
+ * through; genuinely skipped, not silently treated as passing, when the
+ * corresponding component isn't configured.
+ *
+ * evaluation_reference and pattern_reference stay opaque and
+ * unverified, for two different real reasons rather than one shared
+ * excuse: SqliteEvaluationEngine already takes this class as its own
+ * constructor dependency (to read the experience being evaluated), so
+ * this class taking SqliteEvaluationEngine back would be a genuine
+ * circular composition, the same shape already documented for Capacity
+ * Planner/Cost Optimizer and Decision Engine/Confidence Scorer
+ * elsewhere in this codebase -- and in practice no verification gap
+ * exists there anyway, since EvaluationEngine::evaluate() already calls
+ * this class's own attachReference() with a freshly-created, trustworthy
+ * ID rather than an external caller supplying an unverified one.
+ * PatternDetector owns no database of its own (per its own docblock,
+ * "findings are pure output, never persisted here"), so there is no
+ * real record for a pattern_reference to ever resolve against, not
+ * merely an unbuilt one. No general audit-trail infrastructure is
+ * owned, per the spec -- only the domain table itself and an optional
+ * EventBusInterface announcement per operation.
  */
 final class SqliteExperienceStore
 {
@@ -53,6 +70,8 @@ final class SqliteExperienceStore
         string $databasePath,
         private readonly ?SqliteDocumentStorage $documentStorage = null,
         private readonly ?SqliteFeedbackCollector $feedbackCollector = null,
+        private readonly ?SqliteLearningGovernance $governance = null,
+        private readonly ?SqliteAdaptationManager $adaptationManager = null,
         private readonly ?EventBusInterface $events = null,
         private readonly ?Closure $clock = null
     ) {
@@ -175,6 +194,14 @@ final class SqliteExperienceStore
 
         if ($record === null) {
             return ['found' => false, 'error' => sprintf('Unknown experience record "%s".', $experienceId)];
+        }
+
+        if ($type === 'governance' && $this->governance !== null && $this->governance->currentStatus($reference) === null) {
+            return ['found' => false, 'error' => sprintf('Governance reference "%s" does not resolve to a known Learning Governance proposal.', $reference)];
+        }
+
+        if ($type === 'adaptation' && $this->adaptationManager !== null && $this->adaptationManager->get($reference) === null) {
+            return ['found' => false, 'error' => sprintf('Adaptation reference "%s" does not resolve to a known Adaptation Manager plan.', $reference)];
         }
 
         $column = $type . '_reference';
