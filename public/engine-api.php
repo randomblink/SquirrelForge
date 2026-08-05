@@ -38,7 +38,7 @@ use SquirrelForge\Security\SqliteAuthorizationManager;
 use SquirrelForge\Security\SqliteIdentityManager;
 use SquirrelForge\Security\SqliteSecurityEventSink;
 
-require dirname(__DIR__) . '/vendor/autoload.php';
+$autoloader = require dirname(__DIR__) . '/vendor/autoload.php';
 
 $databasePath = getenv('SQUIRRELFORGE_ENGINE_DB');
 
@@ -143,7 +143,7 @@ $memoryRetention = new SqliteMemoryRetention($databasePath, $memoryIndex);
 $memoryManager = new MemoryManager($workingMemory, $episodicMemory, $semanticMemory, $projectMemory, $memoryIndex, $memoryRetrieval, $memoryRetention);
 $memoryServer = new MemoryApiServer($memoryManager, $memoryRetrieval, $memoryRetention, $authorization, $authentication);
 
-$kernel = new Kernel();
+$kernel = new Kernel(autoloader: $autoloader);
 $kernel->boot();
 $agentServer = new AgentApiServer(
     new TaskRouter($kernel->app()->container()->make(AgentRegistry::class)),
