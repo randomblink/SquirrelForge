@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 use SquirrelForge\Engine\SqliteEngineRuntime;
 use SquirrelForge\Contracts\ProviderHealthInterface;
+use SquirrelForge\Agent\AgentRegistry;
+use SquirrelForge\Engine\TaskRouter;
+use SquirrelForge\Engine\WorkflowSelector;
+use SquirrelForge\Integration\Http\AgentApiServer;
 use SquirrelForge\Integration\Http\AuthenticationApiServer;
 use SquirrelForge\Integration\Http\CredentialAdministrationApiServer;
 use SquirrelForge\Integration\Http\DashboardApiServer;
@@ -11,6 +15,7 @@ use SquirrelForge\Integration\Http\EngineApiServer;
 use SquirrelForge\Integration\Http\MemoryApiServer;
 use SquirrelForge\Integration\Http\NativeHttpTransport;
 use SquirrelForge\Integration\Http\ProviderReadinessApiServer;
+use SquirrelForge\Integration\Http\WorkflowApiServer;
 use SquirrelForge\Memory\EpisodicMemory;
 use SquirrelForge\Memory\FileMemoryStore;
 use SquirrelForge\Memory\MemoryManager;
@@ -135,6 +140,9 @@ $memoryRetrieval = new MemoryRetrieval($memoryIndex, $workingMemory, $episodicMe
 $memoryRetention = new SqliteMemoryRetention($databasePath, $memoryIndex);
 $memoryManager = new MemoryManager($workingMemory, $episodicMemory, $semanticMemory, $projectMemory, $memoryIndex, $memoryRetrieval, $memoryRetention);
 $memoryServer = new MemoryApiServer($memoryManager, $memoryRetrieval, $memoryRetention, $authorization, $authentication);
+
+$agentServer = new AgentApiServer(new TaskRouter(new AgentRegistry()), $authorization);
+$workflowServer = new WorkflowApiServer(new WorkflowSelector(dirname(__DIR__) . '/02_WORKFLOWS'), $authorization);
 $headers = [];
 
 foreach (getallheaders() as $name => $value) {
@@ -157,6 +165,10 @@ $response = match (true) {
         $dashboardServer->handle($method, $path, $headers, $body),
     str_starts_with($path, '/v1/memory/') =>
         $memoryServer->handle($method, $path, $headers, $body),
+    str_starts_with($path, '/v1/agents/') =>
+        $agentServer->handle($method, $path, $headers, $body),
+    str_starts_with($path, '/v1/workflows/') =>
+        $workflowServer->handle($method, $path, $headers, $body),
     default => $server->handle($method, $path, $headers, $body),
 };
 

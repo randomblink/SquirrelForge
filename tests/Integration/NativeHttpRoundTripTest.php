@@ -85,6 +85,16 @@ final class NativeHttpRoundTripTest extends TestCase
         $memoryResponse = (new NativeHttpTransport())->request('POST', $baseUrl . '/v1/memory/records', ['Content-Type' => 'application/json'], '{}', 5.0);
         $this->assertSame(401, $memoryResponse->status);
         $this->assertStringContainsString('UNAUTHORIZED', $memoryResponse->body);
+
+        // Same confirmation for /v1/agents/* (Agent API Server) and
+        // /v1/workflows/* (Workflow API Server): a real 401 from their own
+        // requiredHeaders() check, not a 404 falling through to
+        // EngineApiServer's default route.
+        $agentResponse = (new NativeHttpTransport())->request('POST', $baseUrl . '/v1/agents/assignments', ['Content-Type' => 'application/json'], '{}', 5.0);
+        $this->assertSame(401, $agentResponse->status);
+
+        $workflowResponse = (new NativeHttpTransport())->request('POST', $baseUrl . '/v1/workflows/selection', ['Content-Type' => 'application/json'], '{}', 5.0);
+        $this->assertSame(401, $workflowResponse->status);
     }
 
     private function availablePort(): int
