@@ -31,6 +31,23 @@ use SquirrelForge\Events\Event;
  * escalated rather than silently dropped or routed somewhere invented,
  * per the spec's rule against routing unauthorized communication.
  *
+ * Beyond the ten spec-named "Communication Types", three more of this
+ * spec's own named Coordination Responsibilities -- Service Messenger,
+ * Message Archiver, and Conversation Manager -- were also real
+ * components this class never routed to at all (not even as an
+ * escalated/unsupported type; they simply had no operation name). All
+ * three predate this fix by anywhere from the same day
+ * (Conversation Manager) to a week (Service Messenger/Message
+ * Archiver), the same "coordinator predates its own specialist"
+ * situation, just discovered by auditing for real components with zero
+ * production consumers rather than a stale docblock claim.
+ * `service_messaging` deliberately does not reuse the existing
+ * `service_message` type name: that type is a generic message routed
+ * through Message Broker, a genuinely different, simpler mechanism than
+ * Service Messenger's own retry/queue-backed inter-service messaging --
+ * reusing the name would have silently changed `service_message`'s
+ * existing behavior for every current caller.
+ *
  * `event` dispatch is fire-and-forget by the real EventBus's own design
  * (it has no per-listener success/failure signal), so its delivery
  * status is always `dispatched` -- that is the accurate outcome, not an
@@ -49,6 +66,10 @@ final class SqliteCommunicationManager
         'integration_message' => ['source', 'destination', 'operation'],
         'event' => ['name'],
         'governance_message' => ['communication_component', 'policy_context', 'reviewer'],
+        'service_messaging' => ['source_service', 'destination_service', 'message_type'],
+        'message_archive' => ['archive_type', 'record', 'retention_classification'],
+        'start_conversation' => ['participants', 'conversation_type'],
+        'append_conversation_message' => ['conversation_ref', 'participant', 'content'],
     ];
 
     private const UNSUPPORTED_TYPES = ['system_message', 'audit_message'];
@@ -61,7 +82,10 @@ final class SqliteCommunicationManager
         private readonly SqliteNotificationManager $notifications,
         private readonly SqliteAgentCommunicator $agentCommunicator,
         private readonly EventBusInterface $events,
-        private readonly ?SqliteCommunicationGovernance $governance = null
+        private readonly ?SqliteCommunicationGovernance $governance = null,
+        private readonly ?SqliteServiceMessenger $serviceMessenger = null,
+        private readonly ?SqliteMessageArchiver $archiver = null,
+        private readonly ?SqliteConversationManager $conversations = null
     ) {
         $this->database = new PDO('sqlite:' . $databasePath, options: [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
@@ -110,6 +134,10 @@ final class SqliteCommunicationManager
             'notification' => $this->coordinateNotification($payload, $options),
             'event' => $this->coordinateEvent($payload),
             'governance_message' => $this->coordinateGovernanceMessage($payload),
+            'service_messaging' => $this->coordinateServiceMessaging($payload, $options),
+            'message_archive' => $this->coordinateMessageArchive($payload),
+            'start_conversation' => $this->coordinateStartConversation($payload),
+            'append_conversation_message' => $this->coordinateAppendConversationMessage($payload),
             default => $this->coordinateGenericMessage($type, $payload, $options),
         };
     }
@@ -190,6 +218,63 @@ final class SqliteCommunicationManager
         $result = $this->governance->review($payload);
 
         return $this->persist('governance_message', null, $payload['communication_component'], 'valid', 'reviewed', $result['error'], $result['decision']);
+    }
+
+    /**
+     * @param array<string, mixed> $payload
+     * @param array<string, mixed> $options
+     */
+    private function coordinateServiceMessaging(array $payload, array $options): array
+    {
+        if ($this->serviceMessenger === null) {
+            return $this->persist('service_messaging', $payload['source_service'] ?? null, $payload['destination_service'] ?? null, 'not_applicable', 'rejected', 'Service Messenger is not configured.');
+        }
+
+        $result = $this->serviceMessenger->send($payload, $options);
+
+        return $this->persist('service_messaging', $payload['source_service'], $payload['destination_service'], 'valid', $result['delivery_status'], $result['error']);
+    }
+
+    /**
+     * @param array<string, mixed> $payload
+     */
+    private function coordinateMessageArchive(array $payload): array
+    {
+        if ($this->archiver === null) {
+            return $this->persist('message_archive', null, null, 'not_applicable', 'rejected', 'Message Archiver is not configured.');
+        }
+
+        $result = $this->archiver->archive($payload['archive_type'], $payload['record'], $payload['retention_classification']);
+
+        return $this->persist('message_archive', $payload['record']['source'] ?? null, $result['archive_id'], 'valid', $result['outcome'], $result['error']);
+    }
+
+    /**
+     * @param array<string, mixed> $payload
+     */
+    private function coordinateStartConversation(array $payload): array
+    {
+        if ($this->conversations === null) {
+            return $this->persist('start_conversation', null, null, 'not_applicable', 'rejected', 'Conversation Manager is not configured.');
+        }
+
+        $result = $this->conversations->start($payload['participants'], $payload['conversation_type'], $payload['metadata'] ?? []);
+
+        return $this->persist('start_conversation', null, $result['conversation_ref'], 'valid', $result['state'], null);
+    }
+
+    /**
+     * @param array<string, mixed> $payload
+     */
+    private function coordinateAppendConversationMessage(array $payload): array
+    {
+        if ($this->conversations === null) {
+            return $this->persist('append_conversation_message', null, null, 'not_applicable', 'rejected', 'Conversation Manager is not configured.');
+        }
+
+        $result = $this->conversations->appendMessage($payload['conversation_ref'], $payload['participant'], $payload['content']);
+
+        return $this->persist('append_conversation_message', $payload['participant'], $payload['conversation_ref'], 'valid', $result['accepted'] ? 'appended' : 'rejected', $result['error']);
     }
 
     /**

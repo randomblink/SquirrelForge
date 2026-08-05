@@ -12,9 +12,13 @@ use SquirrelForge\Communication\NotificationChannelRegistry;
 use SquirrelForge\Communication\SqliteAgentCommunicator;
 use SquirrelForge\Communication\SqliteCommunicationGovernance;
 use SquirrelForge\Communication\SqliteCommunicationManager;
+use SquirrelForge\Communication\SqliteConversationManager;
+use SquirrelForge\Communication\SqliteMessageArchiver;
 use SquirrelForge\Communication\SqliteMessageBroker;
+use SquirrelForge\Communication\SqliteMessageQueueManager;
 use SquirrelForge\Communication\SqliteMessageValidator;
 use SquirrelForge\Communication\SqliteNotificationManager;
+use SquirrelForge\Communication\SqliteServiceMessenger;
 use SquirrelForge\Contracts\EventInterface;
 use SquirrelForge\Events\CallbackEventListener;
 use SquirrelForge\Events\EventBus;
@@ -178,6 +182,73 @@ final class SqliteCommunicationManagerTest extends TestCase
 
         $this->assertSame('reviewed', $result['delivery_status']);
         $this->assertSame('Approve', $result['governance_status']);
+    }
+
+    public function testServiceMessagingIsRejectedWithoutAConfiguredServiceMessenger(): void
+    {
+        [, , , , , $manager] = $this->makeManager();
+
+        $result = $manager->coordinate('service_messaging', ['source_service' => 'a', 'destination_service' => 'b', 'message_type' => 'request']);
+
+        $this->assertSame('rejected', $result['delivery_status']);
+        $this->assertStringContainsString('Service Messenger', $result['error']);
+    }
+
+    public function testServiceMessagingRoutesToTheRealServiceMessenger(): void
+    {
+        [$broker, $notifications, , $agentCommunicator, $events, $manager] = $this->makeManager();
+        $queue = new SqliteMessageQueueManager($this->tempPath('queue'));
+        $serviceMessenger = new SqliteServiceMessenger($this->tempPath('service-messenger'), queue: $queue);
+        $manager = new SqliteCommunicationManager($this->tempPath('manager'), $broker, $notifications, $agentCommunicator, $events, serviceMessenger: $serviceMessenger);
+
+        $result = $manager->coordinate('service_messaging', ['source_service' => 'a', 'destination_service' => 'b', 'message_type' => 'request']);
+
+        $this->assertSame('Queued', $result['delivery_status']);
+    }
+
+    public function testMessageArchiveIsRejectedWithoutAConfiguredArchiver(): void
+    {
+        [, , , , , $manager] = $this->makeManager();
+
+        $result = $manager->coordinate('message_archive', ['archive_type' => 'user_message', 'record' => ['source' => 'a'], 'retention_classification' => 'standard']);
+
+        $this->assertSame('rejected', $result['delivery_status']);
+        $this->assertStringContainsString('Message Archiver', $result['error']);
+    }
+
+    public function testMessageArchiveRoutesToTheRealMessageArchiver(): void
+    {
+        [$broker, $notifications, , $agentCommunicator, $events] = $this->makeManager();
+        $archiver = new SqliteMessageArchiver($this->tempPath('archiver'));
+        $manager = new SqliteCommunicationManager($this->tempPath('manager'), $broker, $notifications, $agentCommunicator, $events, archiver: $archiver);
+
+        $result = $manager->coordinate('message_archive', ['archive_type' => 'user_message', 'record' => ['source' => 'a'], 'retention_classification' => 'standard']);
+
+        $this->assertSame('archived', $result['delivery_status']);
+        $this->assertNotNull($result['destination']);
+    }
+
+    public function testStartConversationIsRejectedWithoutAConfiguredConversationManager(): void
+    {
+        [, , , , , $manager] = $this->makeManager();
+
+        $result = $manager->coordinate('start_conversation', ['participants' => ['agent_1', 'agent_2'], 'conversation_type' => 'workflow_coordination']);
+
+        $this->assertSame('rejected', $result['delivery_status']);
+        $this->assertStringContainsString('Conversation Manager', $result['error']);
+    }
+
+    public function testStartConversationThenAppendConversationMessageRouteToTheRealConversationManager(): void
+    {
+        [$broker, $notifications, , $agentCommunicator, $events] = $this->makeManager();
+        $conversations = new SqliteConversationManager($this->tempPath('conversations'));
+        $manager = new SqliteCommunicationManager($this->tempPath('manager'), $broker, $notifications, $agentCommunicator, $events, conversations: $conversations);
+
+        $started = $manager->coordinate('start_conversation', ['participants' => ['agent_1', 'agent_2'], 'conversation_type' => 'workflow_coordination']);
+        $appended = $manager->coordinate('append_conversation_message', ['conversation_ref' => $started['destination'], 'participant' => 'agent_1', 'content' => ['text' => 'hello']]);
+
+        $this->assertSame('active', $started['delivery_status']);
+        $this->assertSame('appended', $appended['delivery_status']);
     }
 
     public function testUnknownTypeIsRejected(): void
