@@ -24,11 +24,17 @@ use SquirrelForge\Events\Event;
  * anchor points and the requirement that risk never decreases as
  * likelihood or impact increases.
  *
- * This component's own listed dependencies -- Agent Security, Agent
- * Performance, Dependency Analyzer -- have no code yet, so likelihood
- * and impact are caller-supplied inputs, not computed here; that
- * matches the spec's own boundary that this produces a "preliminary,
- * decision-support" assessment, not a real security/performance review.
+ * Agent Security and Agent Performance -- two of this component's own
+ * listed dependencies -- have no code yet, so likelihood and impact are
+ * caller-supplied inputs, not computed here; that matches the spec's
+ * own boundary that this produces a "preliminary, decision-support"
+ * assessment, not a real security/performance review. `14_ENGINE/DEPENDENCY-ANALYZER.md`
+ * is real now as `DependencyAnalyzer`, but the spec's own text never
+ * actually describes a concrete likelihood/impact signal to derive from
+ * it (it appears only in the header's "Depends On" list, not in any
+ * responsibility or workflow step) -- the "caller-supplied, not
+ * computed" boundary is a genuine design choice grounded in this spec's
+ * own "preliminary" framing, not a placeholder for a missing component.
  *
  * "Critical risks must be mitigated or explicitly accepted, with the
  * acceptance recorded, before implementation proceeds" is a real,
