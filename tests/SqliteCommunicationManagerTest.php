@@ -7,8 +7,10 @@ namespace SquirrelForge\Tests;
 use PHPUnit\Framework\TestCase;
 use SquirrelForge\Agent\AgentRegistry;
 use SquirrelForge\Agent\CallbackAgent;
+use SquirrelForge\Automation\RuleEngine;
 use SquirrelForge\Communication\NotificationChannelRegistry;
 use SquirrelForge\Communication\SqliteAgentCommunicator;
+use SquirrelForge\Communication\SqliteCommunicationGovernance;
 use SquirrelForge\Communication\SqliteCommunicationManager;
 use SquirrelForge\Communication\SqliteMessageBroker;
 use SquirrelForge\Communication\SqliteMessageValidator;
@@ -16,6 +18,7 @@ use SquirrelForge\Communication\SqliteNotificationManager;
 use SquirrelForge\Contracts\EventInterface;
 use SquirrelForge\Events\CallbackEventListener;
 use SquirrelForge\Events\EventBus;
+use SquirrelForge\Governance\SqlitePolicyEngine;
 use SquirrelForge\Resilience\RetryManager;
 use SquirrelForge\Tests\Support\FakeNotificationChannel;
 
@@ -144,6 +147,37 @@ final class SqliteCommunicationManagerTest extends TestCase
 
         $this->assertSame('escalated', $result['delivery_status']);
         $this->assertFalse($handlerCalled);
+    }
+
+    public function testGovernanceMessageIsRejectedWithoutAConfiguredGovernanceComponent(): void
+    {
+        [, , , , , $manager] = $this->makeManager();
+
+        $result = $manager->coordinate('governance_message', ['communication_component' => 'agent_communication', 'policy_context' => ['ready' => true], 'reviewer' => 'operator_1']);
+
+        $this->assertSame('rejected', $result['delivery_status']);
+        $this->assertStringContainsString('Communication Governance', $result['error']);
+    }
+
+    public function testGovernanceMessageRoutesToTheRealCommunicationGovernanceAndRecordsItsDecision(): void
+    {
+        $validator = new SqliteMessageValidator($this->tempPath('validator'));
+        $broker = new SqliteMessageBroker($this->tempPath('broker'), $validator, new RetryManager(fn() => null));
+        $channels = new NotificationChannelRegistry();
+        $channels->register(new FakeNotificationChannel('test', [['delivered' => true]]));
+        $notifications = new SqliteNotificationManager($this->tempPath('notifications'), $channels);
+        $agents = new AgentRegistry();
+        $agentCommunicator = new SqliteAgentCommunicator($this->tempPath('agent-comm'), $agents, $broker);
+        $events = new EventBus();
+        $policyEngine = new SqlitePolicyEngine($this->tempPath('policy'), new RuleEngine());
+        $policyEngine->registerPolicy('p1', ['category' => 'operational', 'priority' => 1, 'condition' => ['type' => 'boolean', 'field' => 'ready', 'equals' => true], 'effect' => 'allow']);
+        $governance = new SqliteCommunicationGovernance($this->tempPath('governance'), $policyEngine);
+        $manager = new SqliteCommunicationManager($this->tempPath('manager'), $broker, $notifications, $agentCommunicator, $events, $governance);
+
+        $result = $manager->coordinate('governance_message', ['communication_component' => 'agent_communication', 'policy_context' => ['ready' => true], 'reviewer' => 'operator_1']);
+
+        $this->assertSame('reviewed', $result['delivery_status']);
+        $this->assertSame('Approve', $result['governance_status']);
     }
 
     public function testUnknownTypeIsRejected(): void

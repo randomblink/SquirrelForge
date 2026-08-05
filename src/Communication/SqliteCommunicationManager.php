@@ -14,25 +14,29 @@ use SquirrelForge\Events\Event;
  * 36_COMMUNICATION/COMMUNICATION-MANAGER.md, mirroring how
  * SqliteResilienceManager coordinates the Resilience Layer.
  *
- * Of the spec's ten "Communication Types", four route to real
+ * Of the spec's ten "Communication Types", five route to real
  * components: `agent_message` (SqliteAgentCommunicator), `notification`
  * (SqliteNotificationManager), `event` (the real EventBus, which is
  * always available since it's how this class dispatches its own audit
- * event too), and the generic `user_message`/`service_message`/
+ * event too), the generic `user_message`/`service_message`/
  * `workflow_message`/`integration_message` group (SqliteMessageBroker,
- * the general-purpose validated router). `system_message`,
- * `governance_message`, and `audit_message` have no real destination --
- * no System Message concept, no 23_GOVERNANCE code, and no audit pipe
- * distinct from what each component already writes on its own -- so
- * those, and any unrecognized type, are escalated rather than silently
- * dropped or routed somewhere invented, per the spec's rule against
- * routing unauthorized communication.
+ * the general-purpose validated router), and `governance_message`
+ * (SqliteCommunicationGovernance::review()) -- the same "coordinator
+ * predates its own specialist" resolution this codebase's other
+ * coordinators have already gone through (Communication Manager:
+ * 2026-07-28; Communication Governance: 2026-08-04). `system_message`
+ * and `audit_message` have no real destination -- no System Message
+ * concept and no audit pipe distinct from what each component already
+ * writes on its own -- so those, and any unrecognized type, are
+ * escalated rather than silently dropped or routed somewhere invented,
+ * per the spec's rule against routing unauthorized communication.
  *
  * `event` dispatch is fire-and-forget by the real EventBus's own design
  * (it has no per-listener success/failure signal), so its delivery
  * status is always `dispatched` -- that is the accurate outcome, not an
  * optimistic guess. Governance status is the fixed constant `ungoverned`
- * since 23_GOVERNANCE has no code.
+ * for every type except `governance_message` itself, which records the
+ * real decision `SqliteCommunicationGovernance::review()` returned.
  */
 final class SqliteCommunicationManager
 {
@@ -44,9 +48,10 @@ final class SqliteCommunicationManager
         'workflow_message' => ['source', 'destination', 'operation'],
         'integration_message' => ['source', 'destination', 'operation'],
         'event' => ['name'],
+        'governance_message' => ['communication_component', 'policy_context', 'reviewer'],
     ];
 
-    private const UNSUPPORTED_TYPES = ['system_message', 'governance_message', 'audit_message'];
+    private const UNSUPPORTED_TYPES = ['system_message', 'audit_message'];
 
     private PDO $database;
 
@@ -55,7 +60,8 @@ final class SqliteCommunicationManager
         private readonly SqliteMessageBroker $broker,
         private readonly SqliteNotificationManager $notifications,
         private readonly SqliteAgentCommunicator $agentCommunicator,
-        private readonly EventBusInterface $events
+        private readonly EventBusInterface $events,
+        private readonly ?SqliteCommunicationGovernance $governance = null
     ) {
         $this->database = new PDO('sqlite:' . $databasePath, options: [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
@@ -103,6 +109,7 @@ final class SqliteCommunicationManager
             'agent_message' => $this->coordinateAgentMessage($payload, $options),
             'notification' => $this->coordinateNotification($payload, $options),
             'event' => $this->coordinateEvent($payload),
+            'governance_message' => $this->coordinateGovernanceMessage($payload),
             default => $this->coordinateGenericMessage($type, $payload, $options),
         };
     }
@@ -173,6 +180,20 @@ final class SqliteCommunicationManager
 
     /**
      * @param array<string, mixed> $payload
+     */
+    private function coordinateGovernanceMessage(array $payload): array
+    {
+        if ($this->governance === null) {
+            return $this->persist('governance_message', null, null, 'not_applicable', 'rejected', 'Communication Governance is not configured.');
+        }
+
+        $result = $this->governance->review($payload);
+
+        return $this->persist('governance_message', null, $payload['communication_component'], 'valid', 'reviewed', $result['error'], $result['decision']);
+    }
+
+    /**
+     * @param array<string, mixed> $payload
      * @param array<string, mixed> $options
      */
     private function coordinateGenericMessage(string $type, array $payload, array $options): array
@@ -198,11 +219,11 @@ final class SqliteCommunicationManager
         ?string $destination,
         string $validationStatus,
         string $deliveryStatus,
-        ?string $error
+        ?string $error,
+        string $governanceStatus = 'ungoverned'
     ): array {
         $communicationRef = 'communication_' . bin2hex(random_bytes(12));
         $createdAt = gmdate(DATE_RFC3339);
-        $governanceStatus = 'ungoverned';
 
         $statement = $this->database->prepare(
             'INSERT INTO communication_operations (
