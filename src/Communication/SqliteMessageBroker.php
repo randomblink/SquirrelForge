@@ -30,8 +30,12 @@ use SquirrelForge\Resilience\RetryManager;
  * persisted `routing_rule` is always the fixed value `direct`.
  * Retry-on-delivery-failure delegates to RetryManager, the same real
  * component Recovery Manager and Self-Healing Engine already use, per
- * the spec's "Support retry behavior" responsibility. Governance status
- * is the fixed constant `ungoverned` since 23_GOVERNANCE has no code.
+ * the spec's "Support retry behavior" responsibility. Governance status is
+ * the fixed constant `ungoverned`: `36_COMMUNICATION/COMMUNICATION-GOVERNANCE.md`
+ * is real now as `SqliteCommunicationGovernance` (reachable through
+ * `SqliteCommunicationManager`'s `governance_message` type), but this
+ * spec names no per-route governance-decision request shape for
+ * route() to build inline.
  */
 final class SqliteMessageBroker
 {

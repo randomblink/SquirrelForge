@@ -37,8 +37,12 @@ use SquirrelForge\Events\Event;
  * conversation's history: it didn't happen to the conversation, so it
  * isn't a historical event. This mirrors SqliteRecoveryManager and
  * SqliteSelfHealingEngine's stance rather than the validator's.
- * Governance status is the fixed constant `ungoverned` since
- * 23_GOVERNANCE has no code.
+ * Governance status is the fixed constant `ungoverned`:
+ * `36_COMMUNICATION/COMMUNICATION-GOVERNANCE.md` is real now as
+ * `SqliteCommunicationGovernance` (reachable through
+ * `SqliteCommunicationManager`'s `governance_message` type), but this
+ * spec names no per-conversation governance-decision request shape to
+ * build inline here.
  */
 final class SqliteConversationManager
 {

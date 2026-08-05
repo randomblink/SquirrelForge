@@ -42,7 +42,11 @@ use SquirrelForge\Resilience\RetryManager;
  * points exist as real components yet; "Detect errors and anomalies"
  * beyond status-code classification would require a real anomaly
  * detector this framework doesn't have. Governance status is the fixed
- * constant `ungoverned` since 23_GOVERNANCE has no code.
+ * constant `ungoverned`: `36_COMMUNICATION/COMMUNICATION-GOVERNANCE.md`
+ * is real now as `SqliteCommunicationGovernance` (reachable through
+ * `SqliteCommunicationManager`'s `governance_message` type), but this
+ * spec names no per-response governance-decision request shape for
+ * this class to build inline.
  */
 final class SqliteResponseHandler
 {

@@ -34,8 +34,12 @@ use SquirrelForge\Events\Event;
  * SqliteMessageValidator and SqliteMessageBroker, every send() call is
  * persisted regardless of outcome, since recording agent communication
  * activity -- including rejected and unauthorized attempts -- is this
- * component's actual audit job, not an afterthought. Governance status
- * is the fixed constant `ungoverned` since 23_GOVERNANCE has no code.
+ * component's actual audit job, not an afterthought. Governance status is
+ * the fixed constant `ungoverned`: `36_COMMUNICATION/COMMUNICATION-GOVERNANCE.md`
+ * is real now as `SqliteCommunicationGovernance` (reachable through
+ * `SqliteCommunicationManager`'s `governance_message` type), but this
+ * spec names no per-send governance-decision request shape for send()
+ * to build inline.
  */
 final class SqliteAgentCommunicator
 {

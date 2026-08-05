@@ -44,8 +44,13 @@ use SquirrelForge\Events\Event;
  * the same identity/authorization gate `SqliteMessageBroker` already
  * uses for its own routing.
  *
- * Governance status is the fixed constant `ungoverned` since
- * Communication Governance has no code yet.
+ * Governance status is the fixed constant `ungoverned`:
+ * `36_COMMUNICATION/COMMUNICATION-GOVERNANCE.md` is real now as
+ * `SqliteCommunicationGovernance` (reachable through
+ * `SqliteCommunicationManager`'s `governance_message` type), but this
+ * spec names no per-send governance-decision request shape for send()
+ * to build inline -- wiring it here would mean inventing a contract the
+ * spec itself never defines, not filling in a gap it names.
  *
  * Owns its own database (`Sqlite` prefix): the Audit Requirements name
  * a specific structured record shape every send() call records

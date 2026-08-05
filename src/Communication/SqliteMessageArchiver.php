@@ -51,8 +51,13 @@ use SquirrelForge\Events\Event;
  * upholding "Audit evidence is preserved" and "Disposal is fully
  * recorded."
  *
- * Governance status is the fixed constant `ungoverned` since
- * Communication Governance has no code yet.
+ * Governance status is the fixed constant `ungoverned`:
+ * `36_COMMUNICATION/COMMUNICATION-GOVERNANCE.md` is real now as
+ * `SqliteCommunicationGovernance` (reachable through
+ * `SqliteCommunicationManager`'s `governance_message` type), but this
+ * spec names no per-archive governance-decision request shape to build
+ * inline here -- `dispose()`'s own caller-supplied `governance_approved`
+ * evidence is the real gate this spec actually names.
  *
  * Owns two tables: `archived_messages` holds the immutable archived
  * record itself, and `archive_operations` is the append-only audit log

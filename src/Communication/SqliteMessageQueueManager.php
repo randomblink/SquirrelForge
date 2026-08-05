@@ -55,8 +55,12 @@ use SquirrelForge\Events\Event;
  * into this class -- so a caller observing any of those conditions
  * calls deadLetter() directly with the real reason.
  *
- * Governance status is the fixed constant `ungoverned` since
- * Communication Governance has no code yet.
+ * Governance status is the fixed constant `ungoverned`:
+ * `36_COMMUNICATION/COMMUNICATION-GOVERNANCE.md` is real now as
+ * `SqliteCommunicationGovernance` (reachable through
+ * `SqliteCommunicationManager`'s `governance_message` type), but this
+ * spec names no per-enqueue governance-decision request shape for this
+ * class to build inline.
  *
  * Owns two tables: `queued_messages` holds one current-state row per
  * message -- the live queue -- and `queue_operations` is the
