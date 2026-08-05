@@ -5,6 +5,7 @@ declare(strict_types=1);
 use SquirrelForge\Engine\SqliteEngineRuntime;
 use SquirrelForge\Contracts\ProviderHealthInterface;
 use SquirrelForge\Agent\AgentRegistry;
+use SquirrelForge\Core\Kernel;
 use SquirrelForge\Engine\TaskRouter;
 use SquirrelForge\Engine\WorkflowSelector;
 use SquirrelForge\Integration\Http\AgentApiServer;
@@ -98,6 +99,7 @@ if ($environment->allowsBootstrapProvisioning()
             'security.credentials.revoke',
             'security.sessions.revoke',
             'observability.dashboard.read',
+            'agent.assign',
         ]
     );
 }
@@ -141,7 +143,12 @@ $memoryRetention = new SqliteMemoryRetention($databasePath, $memoryIndex);
 $memoryManager = new MemoryManager($workingMemory, $episodicMemory, $semanticMemory, $projectMemory, $memoryIndex, $memoryRetrieval, $memoryRetention);
 $memoryServer = new MemoryApiServer($memoryManager, $memoryRetrieval, $memoryRetention, $authorization, $authentication);
 
-$agentServer = new AgentApiServer(new TaskRouter(new AgentRegistry()), $authorization);
+$kernel = new Kernel();
+$kernel->boot();
+$agentServer = new AgentApiServer(
+    new TaskRouter($kernel->app()->container()->make(AgentRegistry::class)),
+    $authorization
+);
 $workflowServer = new WorkflowApiServer(new WorkflowSelector(dirname(__DIR__) . '/02_WORKFLOWS'), $authorization);
 $headers = [];
 

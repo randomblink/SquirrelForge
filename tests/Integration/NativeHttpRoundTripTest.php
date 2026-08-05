@@ -95,6 +95,32 @@ final class NativeHttpRoundTripTest extends TestCase
 
         $workflowResponse = (new NativeHttpTransport())->request('POST', $baseUrl . '/v1/workflows/selection', ['Content-Type' => 'application/json'], '{}', 5.0);
         $this->assertSame(401, $workflowResponse->status);
+
+        // Confirms the production Agent API now routes to a real agent:
+        // engine-api.php boots the real Kernel, AgentPipelineModule
+        // discovers and registers the Architect..Release pipeline into
+        // AgentRegistry, and TaskRouter finds a genuine eligible candidate
+        // instead of the previous always-empty registry.
+        $assignResponse = (new NativeHttpTransport())->request(
+            'POST',
+            $baseUrl . '/v1/agents/assignments',
+            [
+                'Content-Type' => 'application/json',
+                'x-squirrelforge-identity-ref' => 'identity_1',
+                'x-squirrelforge-permission-ref' => 'permission:allowed',
+                'x-correlation-id' => 'agent_assign_correlation_1',
+            ],
+            json_encode([
+                'task' => ['task_id' => 'task_1'],
+                'requirements' => ['required_capability' => 'architect'],
+            ]),
+            5.0
+        );
+        $assignBody = json_decode($assignResponse->body, true);
+
+        $this->assertSame(200, $assignResponse->status);
+        $this->assertSame('ROUTED', $assignBody['result']['status']);
+        $this->assertSame('architect', $assignBody['result']['owner']);
     }
 
     private function availablePort(): int
