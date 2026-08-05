@@ -10,8 +10,15 @@ use SquirrelForge\Contracts\EventBusInterface;
 use SquirrelForge\Contracts\EventInterface;
 use SquirrelForge\Events\CallbackEventListener;
 use SquirrelForge\Events\EventBus;
+use SquirrelForge\Automation\RuleEngine;
+use SquirrelForge\Governance\SqlitePolicyEngine;
 use SquirrelForge\Resilience\RetryManager;
+use SquirrelForge\Resilience\SqliteBusinessContinuity;
+use SquirrelForge\Resilience\SqliteDisasterRecovery;
+use SquirrelForge\Resilience\SqliteFailoverCoordinator;
 use SquirrelForge\Resilience\SqliteRecoveryManager;
+use SquirrelForge\Resilience\SqliteRedundancyManager;
+use SquirrelForge\Resilience\SqliteResilienceGovernance;
 use SquirrelForge\Resilience\SqliteResilienceManager;
 use SquirrelForge\Resilience\SqliteSelfHealingEngine;
 use SquirrelForge\Workflow\CallbackStep;
@@ -47,7 +54,7 @@ final class SqliteResilienceManagerTest extends TestCase
     {
         $selfHealing = new SqliteSelfHealingEngine($this->tempPath('healing'), new RetryManager(fn() => null));
         $recovery = new SqliteRecoveryManager($this->tempPath('recovery'), new RetryManager(fn() => null));
-        $resilience = new SqliteResilienceManager($this->tempPath('resilience'), $selfHealing, $recovery, $events);
+        $resilience = new SqliteResilienceManager($this->tempPath('resilience'), $selfHealing, $recovery, events: $events);
 
         return [$selfHealing, $recovery, $resilience];
     }
@@ -166,7 +173,7 @@ final class SqliteResilienceManagerTest extends TestCase
 
         $this->assertSame('escalated', $result['outcome']);
         $this->assertSame('none', $result['coordinated_component']);
-        $this->assertStringContainsString('Redundancy Manager', $result['notes'][0]);
+        $this->assertStringContainsString('No self-healing action', $result['notes'][0]);
     }
 
     public function testFinishedCoordinationDispatchesEvent(): void
@@ -221,5 +228,108 @@ final class SqliteResilienceManagerTest extends TestCase
 
         $this->assertCount(1, $recent);
         $this->assertSame('failure_detection_b', $recent[0]['failure_ref']);
+    }
+
+    public function testFailoverRequestWithoutAConfiguredFailoverCoordinatorFallsThroughToEscalation(): void
+    {
+        [, , $resilience] = $this->makeManagers();
+
+        $result = $resilience->coordinate(
+            ['detection_ref' => 'failure_detection_10'],
+            ['failover_request' => ['affected_service' => 'svc', 'failover_type' => 'service', 'authorized' => true]]
+        );
+
+        $this->assertSame('escalated', $result['outcome']);
+        $this->assertStringContainsString('Failover Coordinator is not configured', $result['notes'][0]);
+    }
+
+    public function testFailoverRequestRoutesToTheRealFailoverCoordinatorAndResolvesTheFailure(): void
+    {
+        $selfHealing = new SqliteSelfHealingEngine($this->tempPath('healing'), new RetryManager(fn() => null));
+        $recovery = new SqliteRecoveryManager($this->tempPath('recovery'), new RetryManager(fn() => null));
+        $redundancy = new SqliteRedundancyManager($this->tempPath('redundancy'));
+        $redundancy->register('standby_1', 'service');
+        $redundancy->updateSynchronization('standby_1', true);
+        $failover = new SqliteFailoverCoordinator($this->tempPath('failover'), $redundancy);
+        $resilience = new SqliteResilienceManager($this->tempPath('resilience'), $selfHealing, $recovery, $failover);
+
+        $result = $resilience->coordinate(
+            ['detection_ref' => 'failure_detection_11'],
+            ['failover_request' => [
+                'affected_service' => 'svc',
+                'failover_type' => 'service',
+                'authorized' => true,
+                'action' => static fn(): string => 'transitioned',
+            ]]
+        );
+
+        $this->assertSame('completed', $result['outcome']);
+        $this->assertSame('failover', $result['coordinated_component']);
+    }
+
+    public function testDisasterRecoveryRequestRoutesToTheRealDisasterRecoveryComponent(): void
+    {
+        $selfHealing = new SqliteSelfHealingEngine($this->tempPath('healing'), new RetryManager(fn() => null));
+        $recovery = new SqliteRecoveryManager($this->tempPath('recovery'), new RetryManager(fn() => null));
+        $disasterRecovery = new SqliteDisasterRecovery($this->tempPath('disaster'));
+        $resilience = new SqliteResilienceManager($this->tempPath('resilience'), $selfHealing, $recovery, null, $disasterRecovery);
+
+        $result = $resilience->coordinate(
+            ['detection_ref' => 'failure_detection_12'],
+            ['disaster_recovery' => ['classification' => 'regional_outage', 'affected_services' => ['api' => 'core_platform_services']]]
+        );
+
+        $this->assertSame('declared', $result['outcome']);
+        $this->assertSame('disaster_recovery', $result['coordinated_component']);
+    }
+
+    public function testBusinessContinuityRequestRoutesToTheRealBusinessContinuityComponent(): void
+    {
+        $selfHealing = new SqliteSelfHealingEngine($this->tempPath('healing'), new RetryManager(fn() => null));
+        $recovery = new SqliteRecoveryManager($this->tempPath('recovery'), new RetryManager(fn() => null));
+        $businessContinuity = new SqliteBusinessContinuity($this->tempPath('continuity'));
+        $resilience = new SqliteResilienceManager($this->tempPath('resilience'), $selfHealing, $recovery, null, null, $businessContinuity);
+
+        $result = $resilience->coordinate(
+            ['detection_ref' => 'failure_detection_13'],
+            ['business_continuity' => [
+                'operating_mode' => 'reduced_capacity',
+                'critical_services' => ['api' => 'core_ai_driver_services'],
+                'strategy' => 'graceful_degradation',
+                'evidence' => ['security_controls_active' => true],
+            ]]
+        );
+
+        $this->assertSame('activated', $result['outcome']);
+        $this->assertSame('business_continuity', $result['coordinated_component']);
+    }
+
+    public function testGovernanceRequestWithoutAConfiguredGovernanceComponentStaysUngoverned(): void
+    {
+        [, , $resilience] = $this->makeManagers();
+
+        $result = $resilience->coordinate(
+            ['detection_ref' => 'failure_detection_14'],
+            ['governance_request' => ['resilience_component' => 'failover', 'policy_context' => ['ready' => true]]]
+        );
+
+        $this->assertSame('ungoverned', $result['governance_status']);
+    }
+
+    public function testGovernanceRequestRecordsTheRealGovernanceDecision(): void
+    {
+        $selfHealing = new SqliteSelfHealingEngine($this->tempPath('healing'), new RetryManager(fn() => null));
+        $recovery = new SqliteRecoveryManager($this->tempPath('recovery'), new RetryManager(fn() => null));
+        $policyEngine = new SqlitePolicyEngine($this->tempPath('policy'), new RuleEngine());
+        $policyEngine->registerPolicy('p1', ['category' => 'operational', 'priority' => 1, 'condition' => ['type' => 'boolean', 'field' => 'ready', 'equals' => true], 'effect' => 'allow']);
+        $governance = new SqliteResilienceGovernance($this->tempPath('governance'), $policyEngine);
+        $resilience = new SqliteResilienceManager($this->tempPath('resilience'), $selfHealing, $recovery, null, null, null, $governance);
+
+        $result = $resilience->coordinate(
+            ['detection_ref' => 'failure_detection_15'],
+            ['governance_request' => ['resilience_component' => 'failover_coordination', 'policy_context' => ['ready' => true], 'risk_classification' => 'low', 'reviewer' => 'operator_1']]
+        );
+
+        $this->assertSame('Approve', $result['governance_status']);
     }
 }
