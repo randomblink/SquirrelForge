@@ -15,22 +15,32 @@ use SquirrelForge\Events\Event;
  * SqliteCommunicationManager coordinate their own layers.
  *
  * Of the nine components the spec lists under "Coordination
- * Responsibilities", seven now have real code to route to: Data
- * Validator (validate), Document/Object Storage together standing in
- * for Storage Manager + Retrieval Manager + Version Manager (store/
- * retrieve/update_version, split by target since the two stores have
- * different shapes), Cache Manager (cache_put/cache_get/cache_forget),
- * Backup Manager (backup/restore), Index Manager (search_index/
- * index_update), and Data Governance (governance_review) -- the last
- * two went through the same "coordinator predates its own specialist"
- * resolution `SqliteSecurityManager` and `SqliteStorageManager` already
- * went through for their own newly-real components. Data Monitor
- * remains the one genuine gap: no monitoring sink distinct from what
- * each component already logs on its own exists anywhere in this
- * codebase, and 37_STORAGE's own roster names no such component to
- * build against -- so monitor_report still escalates rather than being
- * routed somewhere invented, per the spec's rule against bypassing
- * governance or permitting unauthorized access via an invented path.
+ * Responsibilities", eight now have real code to route to: Data
+ * Validator (validate), Document/Object Storage directly for basic
+ * identifier-lookup store/retrieve/update_version (split by target
+ * since the two stores have different shapes), Cache Manager
+ * (cache_put/cache_get/cache_forget), Backup Manager (backup/restore),
+ * Index Manager (search_index/index_update), Data Governance
+ * (governance_review), and now Retrieval Manager itself for its own
+ * genuinely distinct capabilities beyond direct lookup --
+ * retrieve_by_index/retrieve_history/retrieve_batch. Document/Object
+ * Storage's docblock once described themselves as "standing in" for
+ * Retrieval Manager entirely; that was accurate before Retrieval
+ * Manager had any code, but basic retrieve_document/retrieve_object
+ * still go straight to Document/Object Storage rather than through
+ * Retrieval Manager -- the two were never actually duplicates, and
+ * Retrieval Manager's own indexed/historical/batch operations are new
+ * capability this class had no route to before, not a replacement for
+ * the simple lookup path. The same "coordinator predates its own
+ * specialist" resolution `SqliteSecurityManager` and
+ * `SqliteStorageManager` already went through for their own newly-real
+ * components. Data Monitor remains the one genuine gap: no monitoring
+ * sink distinct from what each component already logs on its own
+ * exists anywhere in this codebase, and 37_STORAGE's own roster names
+ * no such component to build against -- so monitor_report still
+ * escalates rather than being routed somewhere invented, per the
+ * spec's rule against bypassing governance or permitting unauthorized
+ * access via an invented path.
  *
  * This class does not perform its own authorization check: each
  * coordinated component already has its own optional
@@ -63,6 +73,9 @@ final class SqliteDataManager
         'search_index' => ['query_terms'],
         'index_update' => ['source_type', 'record_id'],
         'governance_review' => ['request_id', 'data_classification', 'policy_context'],
+        'retrieve_by_index' => ['query_terms'],
+        'retrieve_history' => ['storage_type', 'reference'],
+        'retrieve_batch' => ['storage_type', 'references'],
     ];
 
     private const UNSUPPORTED_OPERATIONS = ['monitor_report'];
@@ -78,6 +91,7 @@ final class SqliteDataManager
         private readonly ?SqliteDataValidator $validator = null,
         private readonly ?SqliteIndexManager $index = null,
         private readonly ?SqliteDataGovernance $governance = null,
+        private readonly ?SqliteRetrievalManager $retrieval = null,
         private readonly ?EventBusInterface $events = null
     ) {
         $this->database = new PDO('sqlite:' . $databasePath, options: [
@@ -139,6 +153,9 @@ final class SqliteDataManager
             'search_index' => $this->coordinateSearchIndex($payload, $options),
             'index_update' => $this->coordinateIndexUpdate($payload, $options),
             'governance_review' => $this->coordinateGovernanceReview($payload, $options),
+            'retrieve_by_index' => $this->coordinateRetrieveByIndex($payload, $options),
+            'retrieve_history' => $this->coordinateRetrieveHistory($payload),
+            'retrieve_batch' => $this->coordinateRetrieveBatch($payload, $options),
         };
     }
 
@@ -377,6 +394,50 @@ final class SqliteDataManager
         $result = $this->governance->review($payload);
 
         return $this->persist('governance_review', 'data_governance', 'validated', $result['error'] === null ? 'reviewed' : 'rejected', $result['error'], $options, $result, $result['decision']);
+    }
+
+    /**
+     * @param array<string, mixed> $payload
+     * @param array<string, mixed> $options
+     */
+    private function coordinateRetrieveByIndex(array $payload, array $options): array
+    {
+        if ($this->retrieval === null) {
+            return $this->persist('retrieve_by_index', 'retrieval_manager', 'not_applicable', 'rejected', 'Retrieval Manager is not configured.', $options, null);
+        }
+
+        $result = $this->retrieval->retrieveByIndex($payload['query_terms'], $options);
+
+        return $this->persist('retrieve_by_index', 'retrieval_manager', 'validated', $result['outcome'], $result['error'], $options, $result);
+    }
+
+    /**
+     * @param array<string, mixed> $payload
+     */
+    private function coordinateRetrieveHistory(array $payload): array
+    {
+        if ($this->retrieval === null) {
+            return $this->persist('retrieve_history', 'retrieval_manager', 'not_applicable', 'rejected', 'Retrieval Manager is not configured.', [], null);
+        }
+
+        $result = $this->retrieval->retrieveHistory($payload['storage_type'], $payload['reference']);
+
+        return $this->persist('retrieve_history', 'retrieval_manager', 'validated', $result['outcome'], $result['error'], [], $result);
+    }
+
+    /**
+     * @param array<string, mixed> $payload
+     * @param array<string, mixed> $options
+     */
+    private function coordinateRetrieveBatch(array $payload, array $options): array
+    {
+        if ($this->retrieval === null) {
+            return $this->persist('retrieve_batch', 'retrieval_manager', 'not_applicable', 'rejected', 'Retrieval Manager is not configured.', $options, null);
+        }
+
+        $result = $this->retrieval->retrieveBatch($payload['storage_type'], $payload['references'], $options);
+
+        return $this->persist('retrieve_batch', 'retrieval_manager', 'validated', $result['not_found'] === [] ? 'retrieved' : 'partial', null, $options, $result);
     }
 
     /**

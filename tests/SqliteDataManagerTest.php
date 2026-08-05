@@ -15,6 +15,7 @@ use SquirrelForge\Storage\SqliteDataValidator;
 use SquirrelForge\Storage\SqliteDocumentStorage;
 use SquirrelForge\Storage\SqliteIndexManager;
 use SquirrelForge\Storage\SqliteObjectStorage;
+use SquirrelForge\Storage\SqliteRetrievalManager;
 use SquirrelForge\Tools\LocalFileSystem;
 
 final class SqliteDataManagerTest extends TestCase
@@ -286,5 +287,56 @@ final class SqliteDataManagerTest extends TestCase
 
         $this->assertNotNull($fetched);
         $this->assertSame('cached', $fetched['outcome']);
+    }
+
+    public function testRetrieveHistoryIsRejectedWithoutAConfiguredRetrievalManager(): void
+    {
+        $manager = $this->makeManager();
+
+        $result = $manager->coordinate('retrieve_history', ['storage_type' => 'document', 'reference' => 'document_1']);
+
+        $this->assertSame('rejected', $result['outcome']);
+        $this->assertStringContainsString('Retrieval Manager', $result['error']);
+    }
+
+    public function testRetrieveHistoryRoutesToTheRealRetrievalManager(): void
+    {
+        $documents = new SqliteDocumentStorage($this->tempPath('documents'));
+        $stored = $documents->store('policy', 'Retention', ['days' => 30]);
+        $documents->updateVersion($stored['document_ref'], ['days' => 60]);
+        $retrieval = new SqliteRetrievalManager($this->tempPath('retrieval'), null, $documents);
+        $manager = new SqliteDataManager($this->tempPath('manager'), documents: $documents, retrieval: $retrieval);
+
+        $result = $manager->coordinate('retrieve_history', ['storage_type' => 'document', 'reference' => $stored['document_ref']]);
+
+        $this->assertSame('retrieved', $result['outcome']);
+        $this->assertCount(2, $result['result']['versions']);
+    }
+
+    public function testRetrieveBatchRoutesToTheRealRetrievalManager(): void
+    {
+        $documents = new SqliteDocumentStorage($this->tempPath('documents'));
+        $a = $documents->store('policy', 'A', ['n' => 1]);
+        $b = $documents->store('policy', 'B', ['n' => 2]);
+        $retrieval = new SqliteRetrievalManager($this->tempPath('retrieval'), null, $documents);
+        $manager = new SqliteDataManager($this->tempPath('manager'), documents: $documents, retrieval: $retrieval);
+
+        $result = $manager->coordinate('retrieve_batch', ['storage_type' => 'document', 'references' => [$a['document_ref'], $b['document_ref']]]);
+
+        $this->assertSame('retrieved', $result['outcome']);
+        $this->assertCount(2, $result['result']['retrieved']);
+    }
+
+    public function testRetrieveByIndexRoutesToTheRealRetrievalManager(): void
+    {
+        $index = new SqliteIndexManager($this->tempPath('index'));
+        $index->indexRecord('documents', 'document_1', ['title' => 'Deploy Runbook']);
+        $retrieval = new SqliteRetrievalManager($this->tempPath('retrieval'), index: $index);
+        $manager = new SqliteDataManager($this->tempPath('manager'), retrieval: $retrieval);
+
+        $result = $manager->coordinate('retrieve_by_index', ['query_terms' => ['Deploy']]);
+
+        $this->assertSame('searched', $result['outcome']);
+        $this->assertGreaterThanOrEqual(1, count($result['result']['results']));
     }
 }
