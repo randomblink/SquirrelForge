@@ -8,8 +8,18 @@ use SquirrelForge\Integration\Http\AuthenticationApiServer;
 use SquirrelForge\Integration\Http\CredentialAdministrationApiServer;
 use SquirrelForge\Integration\Http\DashboardApiServer;
 use SquirrelForge\Integration\Http\EngineApiServer;
+use SquirrelForge\Integration\Http\MemoryApiServer;
 use SquirrelForge\Integration\Http\NativeHttpTransport;
 use SquirrelForge\Integration\Http\ProviderReadinessApiServer;
+use SquirrelForge\Memory\EpisodicMemory;
+use SquirrelForge\Memory\FileMemoryStore;
+use SquirrelForge\Memory\MemoryManager;
+use SquirrelForge\Memory\MemoryRetrieval;
+use SquirrelForge\Memory\ProjectMemory;
+use SquirrelForge\Memory\SemanticMemory;
+use SquirrelForge\Memory\SqliteMemoryIndex;
+use SquirrelForge\Memory\SqliteMemoryRetention;
+use SquirrelForge\Memory\WorkingMemory;
 use SquirrelForge\RuntimeConfig\CredentialProviderLoader;
 use SquirrelForge\RuntimeConfig\RuntimeEnvironmentPolicy;
 use SquirrelForge\RuntimeConfig\ProviderStartupValidator;
@@ -108,6 +118,23 @@ $dashboardServer = new DashboardApiServer(
     $authorization,
     $authentication
 );
+
+$memoryVarDirectory = dirname($databasePath) . '/memory';
+$episodicStore = new FileMemoryStore($memoryVarDirectory . '/episodic.json');
+$episodicStore->boot();
+$semanticStore = new FileMemoryStore($memoryVarDirectory . '/semantic.json');
+$semanticStore->boot();
+$projectStore = new FileMemoryStore($memoryVarDirectory . '/project.json');
+$projectStore->boot();
+$episodicMemory = new EpisodicMemory($episodicStore);
+$semanticMemory = new SemanticMemory($semanticStore);
+$projectMemory = new ProjectMemory($projectStore);
+$workingMemory = new WorkingMemory($episodicMemory);
+$memoryIndex = new SqliteMemoryIndex($databasePath);
+$memoryRetrieval = new MemoryRetrieval($memoryIndex, $workingMemory, $episodicMemory, $semanticMemory, $projectMemory);
+$memoryRetention = new SqliteMemoryRetention($databasePath, $memoryIndex);
+$memoryManager = new MemoryManager($workingMemory, $episodicMemory, $semanticMemory, $projectMemory, $memoryIndex, $memoryRetrieval, $memoryRetention);
+$memoryServer = new MemoryApiServer($memoryManager, $memoryRetrieval, $memoryRetention, $authorization, $authentication);
 $headers = [];
 
 foreach (getallheaders() as $name => $value) {
@@ -128,6 +155,8 @@ $response = match (true) {
         $providerReadinessServer->handle($method, $path),
     $path === '/v1/admin/dashboard' =>
         $dashboardServer->handle($method, $path, $headers, $body),
+    str_starts_with($path, '/v1/memory/') =>
+        $memoryServer->handle($method, $path, $headers, $body),
     default => $server->handle($method, $path, $headers, $body),
 };
 

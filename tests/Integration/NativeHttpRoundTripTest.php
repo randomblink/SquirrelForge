@@ -77,6 +77,14 @@ final class NativeHttpRoundTripTest extends TestCase
         $this->assertSame('COMPLETE', $result['status']);
         $this->assertSame('ACCEPTED', $result['validation_decision']);
         $this->assertFileExists($this->databasePath);
+
+        // Confirms /v1/memory/* really dispatches to the real Memory API
+        // server (401 "missing identity header" from MemoryApiServer's own
+        // requiredHeaders() check) rather than falling through to
+        // EngineApiServer's default 404 "unknown route".
+        $memoryResponse = (new NativeHttpTransport())->request('POST', $baseUrl . '/v1/memory/records', ['Content-Type' => 'application/json'], '{}', 5.0);
+        $this->assertSame(401, $memoryResponse->status);
+        $this->assertStringContainsString('UNAUTHORIZED', $memoryResponse->body);
     }
 
     private function availablePort(): int
