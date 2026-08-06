@@ -16,13 +16,24 @@ use SquirrelForge\Events\Event;
  * This is a deliberately scoped subset of that spec: it consumes a single
  * caller-reported signal per call rather than continuously monitoring
  * health reports/telemetry/traces (Observability's telemetry/tracing
- * pieces don't exist yet), and it does not notify a Resilience Manager,
- * Alert Manager, or Diagnostics Engine -- none of those exist. It also
- * never triggers recovery itself, which matches the spec's own safety
- * rule ("must never ... trigger recovery directly"), so that omission is
- * not a scoping gap. Governance status is recorded as the fixed constant
- * `ungoverned` since 23_GOVERNANCE has no code to enforce a real policy
- * against.
+ * pieces don't exist yet), and it does not itself notify a Resilience
+ * Manager, Alert Manager, or Diagnostics Engine -- all three are real now,
+ * but only Resilience Manager has a concrete contract shaped to consume
+ * this class's output: `SqliteResilienceManager::coordinate()` takes the
+ * `detection_ref`-bearing array `detect()` returns as its own
+ * `$failureDetection` argument, so "Notify the Resilience Manager" is
+ * fulfilled at the caller-orchestration level (the caller passes one
+ * result into the other), the same "consume, don't compute" composition
+ * used throughout this codebase, not a direct call from inside this
+ * class. Alert Manager's `create()` and Diagnostics Engine's trace/metric
+ * methods are real but generic -- neither names a detection-shaped
+ * contract to build against, so wiring either in here would mean
+ * inventing one. It also never triggers recovery itself, which matches
+ * the spec's own safety rule ("must never ... trigger recovery
+ * directly"), so that omission is not a scoping gap. Governance status is
+ * recorded as the fixed constant `ungoverned`: `23_GOVERNANCE/POLICY-ENGINE.md`
+ * is real now as `SqlitePolicyEngine`, but this spec names no per-signal
+ * policy category or context shape to evaluate against.
  *
  * Severity classification is conservative by design, per the spec's
  * failure-handling rule to "return conservative failure status when

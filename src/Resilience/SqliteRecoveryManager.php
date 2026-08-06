@@ -24,11 +24,23 @@ use Throwable;
  * given the caller's already-completed steps), `direct` (execute the
  * caller-supplied action once), and `manual` (records an escalation
  * without executing anything -- correct behavior for a strategy that by
- * definition requires a human, not a scoping gap). Failover, disaster
- * recovery escalation, and resource reallocation have no real
- * Failover Coordinator/Disaster Recovery/optimizer to delegate to yet.
- * Governance status is the fixed constant `ungoverned` since
- * 23_GOVERNANCE has no code to enforce a real policy against.
+ * definition requires a human, not a scoping gap). Resource reallocation
+ * still has nothing real to delegate to: `ResourceOptimizer` is real now,
+ * but its methods (`analyzeUtilizationBand()`, `analyzeAnomalies()`,
+ * `analyzeConstraints()`) are advisory analysis, not a reallocation
+ * actuator. Failover and disaster recovery escalation are different:
+ * `SqliteFailoverCoordinator` and `SqliteDisasterRecovery` are both real
+ * now, and Failover Coordinator's own spec names Recovery Manager as one
+ * of the two components allowed to authorize it -- so wiring `failover`
+ * through to `SqliteFailoverCoordinator::failover()` is a real, spec-backed
+ * option, not an invented contract, just not done here yet; deciding what
+ * this class's own recover() should treat as sufficient authorization
+ * evidence for that call is a separate, bigger decision left for a future
+ * pass, the same boundary ModelRouter draws around its own unwired
+ * integrations. Governance status is the fixed constant `ungoverned`:
+ * `23_GOVERNANCE/POLICY-ENGINE.md` is real now as `SqlitePolicyEngine`,
+ * but this spec names no per-recovery policy category or context shape to
+ * evaluate against.
  *
  * Per the spec's safety rule to never "restore unstable services without
  * verification": when the caller supplies a verifier, its result is

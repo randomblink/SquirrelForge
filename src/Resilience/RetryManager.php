@@ -16,11 +16,16 @@ use Throwable;
  * with an API Gateway/Connector Manager/Service Discovery/Request Router/
  * Response Handler as failure sources (none of those components exist --
  * the caller supplies the operation directly), no governance-gated
- * eligibility check (23_GOVERNANCE has no code; authentication validity is
- * the caller operation's own concern), no failover triggering or
- * "Integration Monitor" notification (Failover Coordinator and Integration
- * Monitor don't exist), and no circuit-breaker-recovery or failover-retry
- * strategy (circuit-breaking already has a real, working home in
+ * eligibility check (`23_GOVERNANCE/POLICY-ENGINE.md` is real now as
+ * `SqlitePolicyEngine`, but this spec names no per-retry policy category
+ * or context shape to evaluate against; authentication validity is the
+ * caller operation's own concern), no failover triggering or "Integration
+ * Monitor" notification (Integration Monitor still doesn't exist; Failover
+ * Coordinator is real now as `SqliteFailoverCoordinator`, but its own spec
+ * requires failover to already be authorized by the Resilience Manager or
+ * Recovery Manager -- deciding that isn't this operation-agnostic class's
+ * job), and no circuit-breaker-recovery or failover-retry strategy
+ * (circuit-breaking already has a real, working home in
  * src/RuntimeConfig/ResilientHttpTransport.php; not duplicated here).
  *
  * Retry states are a real subset of the spec's eight
