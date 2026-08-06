@@ -12,14 +12,22 @@ use SquirrelForge\Tools\ToolRegistry;
  * 34_AIDRIVER/TOOL-SELECTOR.md.
  *
  * This is a deliberately scoped subset of that spec: no permission/
- * authorization check (21_CONFIGURATION/PERMISSIONS.md has no code), no
- * governance policy compliance (23_GOVERNANCE has no code), no cost/
- * latency/performance-based ranking (no per-tool telemetry exists to rank
- * on -- ordering among healthy candidates is registration order only), no
- * coordination with a Model Router (34_AIDRIVER/MODEL-ROUTER.md isn't
- * built), and no handoff to a separate Action Dispatcher -- tools are still
- * executed exactly where they are today, via ToolRegistry::get()->execute()
- * inside SquirrelForge\Llm\Reasoner's own tool-use loop, since
+ * authorization check (21_CONFIGURATION/PERMISSIONS.md is a declarative
+ * policy document by its own spec's design, "not a decision engine" --
+ * it has no code to check against, and none is expected). No governance
+ * policy compliance either: `23_GOVERNANCE/POLICY-ENGINE.md` is real now
+ * as `SqlitePolicyEngine`, and the spec does name it as a governance
+ * input here, but wiring its generic `evaluate()` in is a separate,
+ * future decision, not bundled into this pass. No cost/latency/
+ * performance-based ranking (no per-tool telemetry exists to rank on --
+ * ordering among healthy candidates is registration order only). No
+ * coordination with a Model Router either: `ModelRouter` is real now,
+ * but its own docblock is explicit that it has no per-model availability/
+ * health tracking, so it still can't supply the "AI model availability"
+ * signal this spec's own selection criteria ask for. And no handoff to a
+ * separate Action Dispatcher -- tools are still executed exactly where
+ * they are today, via ToolRegistry::get()->execute() inside
+ * SquirrelForge\Llm\Reasoner's own tool-use loop, since
  * 20_EXECUTION/ACTION-DISPATCHER.md doesn't exist as a distinct component.
  *
  * What is real and enforced: capability-tag matching, and the spec's own

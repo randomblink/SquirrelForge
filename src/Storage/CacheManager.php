@@ -10,7 +10,12 @@ use Closure;
  * An in-memory, single-process TTL cache, per 37_STORAGE/CACHE-MANAGER.md.
  *
  * This is a deliberately scoped subset of that spec: no governance/
- * authorization gate on cache eligibility (23_GOVERNANCE has no code), no
+ * authorization gate on cache eligibility. `23_GOVERNANCE/POLICY-ENGINE.md`
+ * is real now as `SqlitePolicyEngine`, but its `evaluate()` takes a
+ * request context and an optional policy category -- this spec names no
+ * concrete "cache eligibility" policy category or per-key context shape
+ * for a cache read/write to build one from, so wiring it in here would
+ * mean inventing a contract the spec never defines. No
  * "Data Monitor" notification (no such component exists), no write-through/
  * write-behind policy (remember()'s resolver closure already covers
  * read-through without inventing a synchronous write-back target), and no

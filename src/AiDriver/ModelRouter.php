@@ -9,17 +9,26 @@ namespace SquirrelForge\AiDriver;
  * 34_AIDRIVER/MODEL-ROUTER.md.
  *
  * This is a deliberately scoped subset of that spec: no governance/privacy
- * policy gate (23_GOVERNANCE has no code), no coordination with a Cost
- * Optimizer (32_OPTIMIZATION/COST-OPTIMIZER.md has no code), no model
- * availability/health tracking (no per-model telemetry exists -- unlike
- * ToolSelector, which has a real isHealthy() to check), and no declarative
- * 21_CONFIGURATION/MODEL-CONFIG.md-style external configuration -- the
- * registry below is a fixed, in-code table for the four current Claude 5
- * models. It is also not wired into Reasoner/LlmClientResolver/
- * AgentPipelineModule: Reasoner takes one LlmClientInterface fixed at
- * construction per agent, and making model selection dynamic per-call
- * would mean changing that already-shipped constructor/loop -- a separate,
- * bigger decision left for a future pass.
+ * policy gate. `23_GOVERNANCE/POLICY-ENGINE.md` is real now as
+ * `SqlitePolicyEngine`, and its `evaluate(requestId, context, category)`
+ * is a closer fit here than most of this codebase's other unwired
+ * governance references -- the spec names a concrete step ("Evaluate
+ * privacy and governance constraints via POLICY-ENGINE.md") for it to
+ * satisfy -- but wiring it in is still a separate, future decision, not
+ * bundled into this pass. No coordination with a Cost Optimizer either:
+ * `CostOptimizer` is real now too, but its methods
+ * (`identifyReductionFromUtilization()`, `forecastBudgetImpact()`) analyze
+ * aggregate utilization and budget trends, not a single route's cost --
+ * there's no per-call "does this model fit the budget" method to call. No
+ * model availability/health tracking (no per-model telemetry exists --
+ * unlike ToolSelector, which has a real isHealthy() to check), and no
+ * declarative 21_CONFIGURATION/MODEL-CONFIG.md-style external
+ * configuration -- the registry below is a fixed, in-code table for the
+ * four current Claude 5 models. It is also not wired into
+ * Reasoner/LlmClientResolver/AgentPipelineModule: Reasoner takes one
+ * LlmClientInterface fixed at construction per agent, and making model
+ * selection dynamic per-call would mean changing that already-shipped
+ * constructor/loop -- a separate, bigger decision left for a future pass.
  *
  * Routing strategies are limited to the two dimensions this class can
  * actually decide: 'lowest_cost' (by published input token price) and

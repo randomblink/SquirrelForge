@@ -13,11 +13,16 @@ namespace SquirrelForge\Reasoning;
  * despite the spec's own header listing them: both are documented
  * *consumers* of Decision Matrix's scores elsewhere in this category
  * (Tradeoff Analyzer's own spec: "reference Decision Matrix's weighted
- * scores as supporting evidence"), and Decision Engine has no code yet
- * regardless. The two dependencies this class actually needs to compute
- * anything real are Rule Evaluator (just built) and the already-real
- * Risk Assessor -- the same kind of cycle-breaking substitution
- * CapacityPlanner already made for Cost Optimizer.
+ * scores as supporting evidence"). Decision Engine is real now too
+ * (src/Reasoning/DecisionEngine.php), but its own spec's Depends On
+ * list still names Rule Evaluator, Risk Assessor, Tradeoff Analyzer,
+ * and Confidence Scorer -- not Decision Matrix directly -- so it reaches
+ * this class's scores the same indirect way, through Tradeoff Analyzer's
+ * already-real `matrix_score` input. The two dependencies this class
+ * actually needs to compute anything real are Rule Evaluator (just
+ * built) and the already-real Risk Assessor -- the same kind of
+ * cycle-breaking substitution CapacityPlanner already made for Cost
+ * Optimizer.
  *
  * Two of the eight scoring criteria are real, deterministic
  * compositions, not fabricated judgment: `rule_compliance` comes from
