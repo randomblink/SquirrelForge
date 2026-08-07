@@ -229,6 +229,56 @@ final class SqliteServiceDiscoveryTest extends TestCase
         $this->assertSame('Degraded', $result['discovery_status']);
     }
 
+    public function testRecordAvailabilityRestoringToAvailableRequiresAGovernanceReference(): void
+    {
+        // Same governance-evidence invariant markAvailable() enforces,
+        // exercised through the other path into Available: Degraded (or
+        // Unavailable) with governance_ref cleared out from under it via
+        // updateReferences() must not be restorable to Available through
+        // recordAvailability() either.
+        $discovery = new SqliteServiceDiscovery($this->dbPath);
+        $discovered = $discovery->discover($this->fullDefinition());
+        $discovery->checkReferences($discovered['service_id']);
+        $discovery->markAvailable($discovered['service_id']);
+        $discovery->recordAvailability($discovered['service_id'], 'availability_ref_1', 'Degraded');
+        $discovery->updateReferences($discovered['service_id'], ['governance_ref' => null]);
+
+        $result = $discovery->recordAvailability($discovered['service_id'], 'availability_ref_2', 'Available');
+
+        $this->assertSame('missing_governance_reference', $result['outcome']);
+        $this->assertSame('Degraded', $result['discovery_status']);
+    }
+
+    public function testRecordAvailabilityStillRecordsTheReferenceWhenGovernanceCheckBlocksTheTransition(): void
+    {
+        $discovery = new SqliteServiceDiscovery($this->dbPath);
+        $discovered = $discovery->discover($this->fullDefinition());
+        $discovery->checkReferences($discovered['service_id']);
+        $discovery->markAvailable($discovered['service_id']);
+        $discovery->recordAvailability($discovered['service_id'], 'availability_ref_1', 'Unavailable');
+        $discovery->updateReferences($discovered['service_id'], ['governance_ref' => null]);
+        $discovery->recordAvailability($discovered['service_id'], 'availability_ref_2', 'Available');
+
+        $record = $discovery->get($discovered['service_id']);
+
+        $this->assertSame('Unavailable', $record['discovery_status']);
+        $this->assertSame('availability_ref_2', $record['availability_ref']);
+    }
+
+    public function testRecordAvailabilityRestoringToAvailableSucceedsWithAGovernanceReference(): void
+    {
+        $discovery = new SqliteServiceDiscovery($this->dbPath);
+        $discovered = $discovery->discover($this->fullDefinition());
+        $discovery->checkReferences($discovered['service_id']);
+        $discovery->markAvailable($discovered['service_id']);
+        $discovery->recordAvailability($discovered['service_id'], 'availability_ref_1', 'Unavailable');
+
+        $result = $discovery->recordAvailability($discovered['service_id'], 'availability_ref_2', 'Available');
+
+        $this->assertSame('recorded', $result['outcome']);
+        $this->assertSame('Available', $result['discovery_status']);
+    }
+
     public function testRecordAvailabilityOnANonAvailabilityTierServiceOnlyRecordsTheReference(): void
     {
         $discovery = new SqliteServiceDiscovery($this->dbPath);

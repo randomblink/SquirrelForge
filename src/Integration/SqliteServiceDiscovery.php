@@ -56,7 +56,11 @@ use SquirrelForge\Events\Event;
  * Connector Manager's binary degraded flag, this spec's own three
  * availability-tier states (Available/Degraded/Unavailable) are all
  * caller-supplied outcomes this class only ever records and transitions
- * into, never decides between.
+ * into, never decides between -- with one exception: restoring into
+ * `Available` from `Degraded`/`Unavailable` re-checks `governance_ref`
+ * for the same reason `markAvailable()` does. Without that check this
+ * method would be a second, ungated path into `Available` that bypasses
+ * the approval-evidence invariant `markAvailable()` exists to enforce.
  *
  * Deprecated has no Connector Manager equivalent: it is reachable from
  * any non-Retired status (a service can be scheduled for removal
@@ -298,6 +302,16 @@ final class SqliteServiceDiscovery
      * when the record is already in the Available/Degraded/Unavailable
      * tier; otherwise the reference is recorded without a transition.
      *
+     * Restoring into `Available` from `Degraded`/`Unavailable` requires a
+     * non-empty `governance_ref`, the same caller-supplied approval
+     * evidence `markAvailable()` requires -- without this, an operator
+     * could bypass that invariant by clearing `governance_ref` via
+     * updateReferences() while `Degraded`/`Unavailable` and then calling
+     * this method instead of markAvailable() to reach `Available` anyway.
+     * The reference is still recorded even when this guard blocks the
+     * transition, since it's real evidence regardless of the resulting
+     * status.
+     *
      * @return array{outcome: string, discovery_status: ?string, error: ?string}
      */
     public function recordAvailability(string $serviceId, string $availabilityRef, string $availabilityStatus): array
@@ -313,7 +327,20 @@ final class SqliteServiceDiscovery
         }
 
         $currentStatus = $record['discovery_status'];
-        $nextStatus = in_array($currentStatus, self::AVAILABILITY_STATUSES, true) ? $availabilityStatus : $currentStatus;
+        $inAvailabilityTier = in_array($currentStatus, self::AVAILABILITY_STATUSES, true);
+        $restoringToAvailable = $inAvailabilityTier && $availabilityStatus === 'Available' && $currentStatus !== 'Available';
+
+        if ($restoringToAvailable && (($record['governance_ref'] ?? '') === '' || $record['governance_ref'] === null)) {
+            $this->setStatus($serviceId, $currentStatus, ['availability_ref' => $availabilityRef]);
+
+            return [
+                'outcome' => 'missing_governance_reference',
+                'discovery_status' => $currentStatus,
+                'error' => 'Restoring a service to available requires a governance approval reference.',
+            ];
+        }
+
+        $nextStatus = $inAvailabilityTier ? $availabilityStatus : $currentStatus;
 
         $this->setStatus($serviceId, $nextStatus, ['availability_ref' => $availabilityRef]);
 
