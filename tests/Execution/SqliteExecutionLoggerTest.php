@@ -181,6 +181,18 @@ final class SqliteExecutionLoggerTest extends TestCase
         $this->assertSame($second, $history[1]['log_ref']);
     }
 
+    public function testSearchFiltersByActionType(): void
+    {
+        $logger = $this->logger();
+        $logger->record($this->minimalEntry(['action_type' => 'dispatch']));
+        $tick = $logger->record($this->minimalEntry(['action_type' => 'monitor_tick']))['log_ref'];
+
+        $results = $logger->search(['action_type' => 'monitor_tick']);
+
+        $this->assertCount(1, $results);
+        $this->assertSame($tick, $results[0]['log_ref']);
+    }
+
     public function testSearchFiltersByOutcome(): void
     {
         $logger = $this->logger();

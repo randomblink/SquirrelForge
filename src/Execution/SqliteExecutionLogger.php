@@ -161,7 +161,7 @@ final class SqliteExecutionLogger
     }
 
     /**
-     * @param array{execution_id?: string, task_id?: string, outcome?: string, error_category?: string} $filters
+     * @param array{execution_id?: string, task_id?: string, action_type?: string, outcome?: string, error_category?: string} $filters
      * @return array<int, array<string, mixed>>
      */
     public function search(array $filters = []): array
@@ -169,7 +169,7 @@ final class SqliteExecutionLogger
         $clauses = [];
         $parameters = [];
 
-        foreach (['execution_id', 'task_id', 'outcome', 'error_category'] as $field) {
+        foreach (['execution_id', 'task_id', 'action_type', 'outcome', 'error_category'] as $field) {
             if (isset($filters[$field])) {
                 $clauses[] = "{$field} = :{$field}";
                 $parameters[$field] = $filters[$field];
