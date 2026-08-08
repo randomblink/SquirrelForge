@@ -226,6 +226,27 @@ final class SqliteResultCollectorTest extends TestCase
         $this->assertCount(1, $set['included_result_references']);
     }
 
+    // --- forExecution() ---
+
+    public function testForExecutionSpansEveryWorkflowStep(): void
+    {
+        $collector = $this->collector();
+        $collector->collect($this->minimalEntry(['workflow_step_ref' => 'step_1']));
+        $collector->collect($this->minimalEntry(['workflow_step_ref' => 'step_2']));
+        $collector->collect($this->minimalEntry(['execution_ref' => 'exec_2', 'workflow_step_ref' => 'step_1']));
+
+        $results = $collector->forExecution('exec_1');
+
+        $this->assertCount(2, $results);
+    }
+
+    public function testForExecutionWithNothingCollectedReturnsEmpty(): void
+    {
+        $collector = $this->collector();
+
+        $this->assertSame([], $collector->forExecution('ghost_exec'));
+    }
+
     // --- get() ---
 
     public function testGetUnknownReferenceReturnsNull(): void

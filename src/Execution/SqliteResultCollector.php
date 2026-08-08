@@ -259,6 +259,22 @@ final class SqliteResultCollector
     }
 
     /**
+     * Every result reference collected for an execution, across every
+     * workflow step -- what `EXECUTION-REPORTER.md`'s own "Changed
+     * Artifact References" field needs, since `assemble()` only scopes
+     * to one step at a time.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function forExecution(string $executionRef): array
+    {
+        $statement = $this->database->prepare('SELECT * FROM result_references WHERE execution_ref = :execution_ref ORDER BY rowid ASC');
+        $statement->execute(['execution_ref' => $executionRef]);
+
+        return $statement->fetchAll();
+    }
+
+    /**
      * @return array<int, array<string, mixed>>
      */
     private function forStep(string $workflowStepRef): array
