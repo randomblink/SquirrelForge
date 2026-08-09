@@ -87,7 +87,7 @@ final class SqliteSmokeTestsTest extends TestCase
         $plannerPath = $this->tempPath('planner');
         $planner = $this->testPlanner($plannerPath);
         $database = new PDO('sqlite:' . $plannerPath);
-        $database->exec("INSERT INTO test_plans (plan_id, subject_ref, acceptance_criteria_json, categories_json, risk_driven_coverage_json, entry_criteria_json, exit_criteria_json, blocking_risks_json, created_at) VALUES ('plan_no_smoke', 'release_candidate_1', '[\"x\"]', '[\"Unit\"]', '[]', '[]', '[]', '[]', '2026-01-01T00:00:00+00:00')");
+        $database->exec("INSERT INTO test_plans (plan_id, subject_ref, acceptance_criteria_json, interface_contracts_json, categories_json, risk_driven_coverage_json, entry_criteria_json, exit_criteria_json, blocking_risks_json, created_at) VALUES ('plan_no_smoke', 'release_candidate_1', '[\"x\"]', '[]', '[\"Unit\"]', '[]', '[]', '[]', '[]', '2026-01-01T00:00:00+00:00')");
         $smokeTests = $this->smokeTests($planner);
 
         $result = $smokeTests->run($this->minimalRequest(['plan_id' => 'plan_no_smoke']));

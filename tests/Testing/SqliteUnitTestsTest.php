@@ -55,13 +55,14 @@ final class SqliteUnitTestsTest extends TestCase
     {
         $database = new PDO('sqlite:' . $path);
         $statement = $database->prepare(
-            'INSERT INTO test_plans (plan_id, subject_ref, acceptance_criteria_json, categories_json, risk_driven_coverage_json, entry_criteria_json, exit_criteria_json, blocking_risks_json, created_at)
-             VALUES (:plan_id, :subject_ref, :ac, :categories, :rdc, :entry, :exit, :blocking, :created_at)'
+            'INSERT INTO test_plans (plan_id, subject_ref, acceptance_criteria_json, interface_contracts_json, categories_json, risk_driven_coverage_json, entry_criteria_json, exit_criteria_json, blocking_risks_json, created_at)
+             VALUES (:plan_id, :subject_ref, :ac, :ic, :categories, :rdc, :entry, :exit, :blocking, :created_at)'
         );
         $statement->execute([
             'plan_id' => $planId,
             'subject_ref' => $subjectRef,
             'ac' => '["x"]',
+            'ic' => '[]',
             'categories' => '["Integration"]',
             'rdc' => '[]',
             'entry' => '[]',

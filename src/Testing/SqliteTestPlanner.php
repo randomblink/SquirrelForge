@@ -76,6 +76,7 @@ final class SqliteTestPlanner
                 plan_id TEXT PRIMARY KEY,
                 subject_ref TEXT NOT NULL,
                 acceptance_criteria_json TEXT NOT NULL,
+                interface_contracts_json TEXT NOT NULL,
                 categories_json TEXT NOT NULL,
                 risk_driven_coverage_json TEXT NOT NULL,
                 entry_criteria_json TEXT NOT NULL,
@@ -101,6 +102,7 @@ final class SqliteTestPlanner
      *     outcome: string,
      *     plan_id: ?string,
      *     subject_ref: ?string,
+     *     interface_contracts: array<int, string>,
      *     categories: array<int, string>,
      *     risk_driven_coverage: array<int, string>,
      *     entry_criteria: array<int, string>,
@@ -113,18 +115,19 @@ final class SqliteTestPlanner
     {
         $subjectRef = $request['subject_ref'] ?? null;
         $acceptanceCriteria = $request['acceptance_criteria'] ?? [];
+        $interfaceContracts = $request['interface_contracts'] ?? [];
 
         if (!is_string($subjectRef) || $subjectRef === '') {
-            return $this->outcome('invalid', null, $subjectRef, [], [], [], [], [], 'A test plan requires a non-empty subject_ref.');
+            return $this->outcome('invalid', null, $subjectRef, [], [], [], [], [], [], 'A test plan requires a non-empty subject_ref.');
         }
 
         if ($acceptanceCriteria === []) {
-            return $this->outcome('invalid', null, $subjectRef, [], [], [], [], [], 'A test plan requires at least one acceptance criterion.');
+            return $this->outcome('invalid', null, $subjectRef, [], [], [], [], [], [], 'A test plan requires at least one acceptance criterion.');
         }
 
         $categories = ['Unit'];
 
-        if (($request['interface_contracts'] ?? []) !== []) {
+        if ($interfaceContracts !== []) {
             $categories[] = 'Integration';
         }
 
@@ -166,9 +169,9 @@ final class SqliteTestPlanner
         $entryCriteria = $this->entryCriteria($request);
         $exitCriteria = $this->exitCriteria($categories, $blockingRisks);
 
-        $planId = $this->record($subjectRef, $acceptanceCriteria, $categories, $riskDrivenCoverage, $entryCriteria, $exitCriteria, $blockingRisks);
+        $planId = $this->record($subjectRef, $acceptanceCriteria, $interfaceContracts, $categories, $riskDrivenCoverage, $entryCriteria, $exitCriteria, $blockingRisks);
 
-        return $this->outcome('planned', $planId, $subjectRef, $categories, $riskDrivenCoverage, $entryCriteria, $exitCriteria, $blockingRisks, null);
+        return $this->outcome('planned', $planId, $subjectRef, $interfaceContracts, $categories, $riskDrivenCoverage, $entryCriteria, $exitCriteria, $blockingRisks, null);
     }
 
     /**
@@ -210,6 +213,7 @@ final class SqliteTestPlanner
 
     /**
      * @param array<int, string> $acceptanceCriteria
+     * @param array<int, string> $interfaceContracts
      * @param array<int, string> $categories
      * @param array<int, string> $riskDrivenCoverage
      * @param array<int, string> $entryCriteria
@@ -219,6 +223,7 @@ final class SqliteTestPlanner
     private function record(
         string $subjectRef,
         array $acceptanceCriteria,
+        array $interfaceContracts,
         array $categories,
         array $riskDrivenCoverage,
         array $entryCriteria,
@@ -229,14 +234,15 @@ final class SqliteTestPlanner
 
         $statement = $this->database->prepare(
             'INSERT INTO test_plans
-                (plan_id, subject_ref, acceptance_criteria_json, categories_json, risk_driven_coverage_json, entry_criteria_json, exit_criteria_json, blocking_risks_json, created_at)
+                (plan_id, subject_ref, acceptance_criteria_json, interface_contracts_json, categories_json, risk_driven_coverage_json, entry_criteria_json, exit_criteria_json, blocking_risks_json, created_at)
              VALUES
-                (:plan_id, :subject_ref, :acceptance_criteria_json, :categories_json, :risk_driven_coverage_json, :entry_criteria_json, :exit_criteria_json, :blocking_risks_json, :created_at)'
+                (:plan_id, :subject_ref, :acceptance_criteria_json, :interface_contracts_json, :categories_json, :risk_driven_coverage_json, :entry_criteria_json, :exit_criteria_json, :blocking_risks_json, :created_at)'
         );
         $statement->execute([
             'plan_id' => $planId,
             'subject_ref' => $subjectRef,
             'acceptance_criteria_json' => json_encode($acceptanceCriteria, JSON_THROW_ON_ERROR),
+            'interface_contracts_json' => json_encode($interfaceContracts, JSON_THROW_ON_ERROR),
             'categories_json' => json_encode($categories, JSON_THROW_ON_ERROR),
             'risk_driven_coverage_json' => json_encode($riskDrivenCoverage, JSON_THROW_ON_ERROR),
             'entry_criteria_json' => json_encode($entryCriteria, JSON_THROW_ON_ERROR),
@@ -277,7 +283,7 @@ final class SqliteTestPlanner
      */
     private function hydrate(array $row): array
     {
-        foreach (['acceptance_criteria', 'categories', 'risk_driven_coverage', 'entry_criteria', 'exit_criteria', 'blocking_risks'] as $field) {
+        foreach (['acceptance_criteria', 'interface_contracts', 'categories', 'risk_driven_coverage', 'entry_criteria', 'exit_criteria', 'blocking_risks'] as $field) {
             $row[$field] = json_decode($row[$field . '_json'], true, flags: JSON_THROW_ON_ERROR);
             unset($row[$field . '_json']);
         }
@@ -286,6 +292,7 @@ final class SqliteTestPlanner
     }
 
     /**
+     * @param array<int, string> $interfaceContracts
      * @param array<int, string> $categories
      * @param array<int, string> $riskDrivenCoverage
      * @param array<int, string> $entryCriteria
@@ -295,6 +302,7 @@ final class SqliteTestPlanner
      *     outcome: string,
      *     plan_id: ?string,
      *     subject_ref: ?string,
+     *     interface_contracts: array<int, string>,
      *     categories: array<int, string>,
      *     risk_driven_coverage: array<int, string>,
      *     entry_criteria: array<int, string>,
@@ -307,6 +315,7 @@ final class SqliteTestPlanner
         string $outcome,
         ?string $planId,
         ?string $subjectRef,
+        array $interfaceContracts,
         array $categories,
         array $riskDrivenCoverage,
         array $entryCriteria,
@@ -318,6 +327,7 @@ final class SqliteTestPlanner
             'outcome' => $outcome,
             'plan_id' => $planId,
             'subject_ref' => $subjectRef,
+            'interface_contracts' => $interfaceContracts,
             'categories' => $categories,
             'risk_driven_coverage' => $riskDrivenCoverage,
             'entry_criteria' => $entryCriteria,

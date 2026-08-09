@@ -96,6 +96,24 @@ final class SqliteTestPlannerTest extends TestCase
         $this->assertSame(['Unit', 'Integration'], $result['categories']);
     }
 
+    public function testInterfaceContractsArePersistedAndReturned(): void
+    {
+        $planner = $this->planner();
+        $planned = $planner->plan($this->minimalRequest(['interface_contracts' => ['ExportApi', 'ReportingApi']]));
+
+        $this->assertSame(['ExportApi', 'ReportingApi'], $planned['interface_contracts']);
+        $this->assertSame(['ExportApi', 'ReportingApi'], $planner->get($planned['plan_id'])['interface_contracts']);
+    }
+
+    public function testInterfaceContractsDefaultToEmpty(): void
+    {
+        $planner = $this->planner();
+
+        $result = $planner->plan($this->minimalRequest());
+
+        $this->assertSame([], $result['interface_contracts']);
+    }
+
     public function testIsChangeFlagAddsRegression(): void
     {
         $planner = $this->planner();
