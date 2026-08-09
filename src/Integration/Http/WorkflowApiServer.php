@@ -6,26 +6,41 @@ namespace SquirrelForge\Integration\Http;
 
 use JsonException;
 use SquirrelForge\Contracts\AuthorizationManagerInterface;
+use SquirrelForge\Engine\SqliteStateManager;
 use SquirrelForge\Engine\WorkflowSelector;
 
 /**
  * HTTP transport contract for workflow-facing operations, per
  * 22_INTERFACES/WORKFLOW-API.md.
  *
- * Only `select` is real. The spec's other four operations each need a
- * component this codebase does not have: `initialize` and `terminate`
- * both require `14_ENGINE/STATE-MANAGER.md` to own run state (this
- * class's own Permission Boundary explicitly forbids it from owning run
- * state itself), and `next`/`completePhase` require a genuinely
- * resumable, per-run execution model this codebase doesn't have either
- * -- `SquirrelForge\Workflow\WorkflowEngine::execute()` runs a
- * registered workflow synchronously to completion in one call, it does
- * not expose "give me the next action for an already-in-progress run"
- * the way this spec's `next()` requires. Rather than fabricate a
- * resumable-run store or a state owner this class has no authority to
- * be, those four routes return a real, typed `NOT_IMPLEMENTED` error
- * naming the missing owning component, the same honest-gap convention
- * this codebase uses throughout.
+ * `initialize` and `terminate` now compose `14_ENGINE/STATE-MANAGER.md`
+ * (as `SqliteStateManager`, commit `4d497c8`), the component a second,
+ * independent audit pass found this codebase had built but never wired
+ * in here -- it landed after this class's own `NOT_IMPLEMENTED`
+ * responses were written. When it is omitted, both routes still return
+ * the same real, typed `NOT_IMPLEMENTED` error this class always has.
+ *
+ * `next`/`completePhase` remain genuinely unimplemented: this codebase's
+ * `WorkflowEngine::execute()` runs a registered workflow synchronously
+ * to completion in one call, it does not expose "give me the next
+ * action for an already-in-progress run" the way this spec's `next()`
+ * requires -- that is a real, still-missing resumable-execution model,
+ * not something composing `SqliteStateManager` alone can answer.
+ *
+ * `initialize()`'s idempotency requirement ("supplying the same
+ * idempotencyKey twice returns the original runRef rather than
+ * creating a duplicate run") is upheld by using the idempotency key
+ * itself as the run reference `SqliteStateManager::initialize()`
+ * tracks: a repeat call hits that method's own real "already
+ * initialized" duplicate detection, and this class returns the
+ * existing `runRef` rather than treating the duplicate as an error.
+ *
+ * `terminate()` stays inside this spec's own explicit boundary --
+ * "does not decide whether termination is permitted or perform it...
+ * returns a result acknowledging the request was received and
+ * correlated, not that termination occurred" -- by recording a real
+ * blocker via `SqliteStateManager::recordBlocker()`, never transitioning
+ * run state to a terminal one itself.
  *
  * select() is a genuine composition, not a re-derivation: it forwards
  * directly to the injected `WorkflowSelector::selectWorkflow()` and
@@ -40,7 +55,8 @@ final class WorkflowApiServer
 {
     public function __construct(
         private readonly ?WorkflowSelector $workflowSelector = null,
-        private readonly ?AuthorizationManagerInterface $authorization = null
+        private readonly ?AuthorizationManagerInterface $authorization = null,
+        private readonly ?SqliteStateManager $stateManager = null
     ) {
     }
 
@@ -57,14 +73,16 @@ final class WorkflowApiServer
         }
 
         if ($path === '/v1/workflows/runs' && $method === 'POST') {
-            return $this->notImplemented('initialize', '14_ENGINE/STATE-MANAGER.md');
+            return $this->initialize($headers, $body);
         }
 
         if (preg_match('#^/v1/workflows/runs/([^/]+)/(next|phase-completion|terminate)$#', $path, $matches) === 1) {
+            $runRef = rawurldecode($matches[1]);
+
             return match ($matches[2]) {
                 'next' => $this->notImplemented('next', '20_EXECUTION/WORKFLOW-EXECUTOR.md'),
                 'phase-completion' => $this->notImplemented('completePhase', '20_EXECUTION/WORKFLOW-EXECUTOR.md'),
-                'terminate' => $this->notImplemented('terminate', '14_ENGINE/STATE-MANAGER.md'),
+                'terminate' => $this->terminate($runRef, $headers, $body),
             };
         }
 
@@ -114,6 +132,111 @@ final class WorkflowApiServer
                 'limitations' => $result['limitations'],
             ],
             'error' => $result['error'],
+            'correlation_id' => $headers['x-correlation-id'],
+        ]), $authorization);
+    }
+
+    /**
+     * "Does not create run state itself -- STATE-MANAGER.md owns the
+     * resulting run record." Idempotency: repeating the same
+     * `idempotency_key` returns the original `runRef`.
+     *
+     * @param array<string, string> $headers
+     */
+    private function initialize(array $headers, ?string $body): HttpTransportResponse
+    {
+        $required = $this->requiredHeaders($headers);
+
+        if ($required !== null) {
+            return $required;
+        }
+
+        $payload = $this->decode($body);
+
+        if ($payload instanceof HttpTransportResponse) {
+            return $payload;
+        }
+
+        if (!isset($payload['workflow_ref'], $payload['goal'], $payload['idempotency_key'])
+            || !is_string($payload['workflow_ref']) || !is_array($payload['goal']) || !is_string($payload['idempotency_key'])
+            || $payload['workflow_ref'] === '' || $payload['idempotency_key'] === '') {
+            return $this->error(422, 'INVALID_RUN_REQUEST', 'workflow_ref, goal, and idempotency_key are required.');
+        }
+
+        $authorization = $this->authorize($headers, 'workflow.initialize', $payload['workflow_ref']);
+
+        if ($authorization instanceof HttpTransportResponse) {
+            return $authorization;
+        }
+
+        if ($this->stateManager === null) {
+            return $this->withAuthorization($this->notImplemented('initialize', '14_ENGINE/STATE-MANAGER.md'), $authorization);
+        }
+
+        $runRef = $payload['idempotency_key'];
+        $goalId = $payload['goal']['goal_id'] ?? $payload['workflow_ref'];
+        $result = $this->stateManager->initialize($runRef, $goalId);
+
+        if ($result['outcome'] === 'invalid' && $this->stateManager->currentState($runRef) !== null) {
+            // The idempotency key was already used -- return the original run reference, not an error.
+            return $this->withAuthorization($this->json(200, [
+                'result' => ['run_ref' => $runRef, 'idempotent_replay' => true],
+                'error' => null,
+                'correlation_id' => $headers['x-correlation-id'],
+            ]), $authorization);
+        }
+
+        if ($result['outcome'] !== 'initialized') {
+            return $this->withAuthorization($this->error(409, 'RUN_INITIALIZATION_REJECTED', $result['error'] ?? 'The run could not be initialized.'), $authorization);
+        }
+
+        return $this->withAuthorization($this->json(200, [
+            'result' => ['run_ref' => $runRef, 'idempotent_replay' => false],
+            'error' => null,
+            'correlation_id' => $headers['x-correlation-id'],
+        ]), $authorization);
+    }
+
+    /**
+     * "Does not decide whether termination is permitted or perform
+     * it... returns a result acknowledging the request was received
+     * and correlated, not that termination occurred." Records a real
+     * blocker, never a terminal state transition.
+     *
+     * @param array<string, string> $headers
+     */
+    private function terminate(string $runRef, array $headers, ?string $body): HttpTransportResponse
+    {
+        $required = $this->requiredHeaders($headers);
+
+        if ($required !== null) {
+            return $required;
+        }
+
+        $authorization = $this->authorize($headers, 'workflow.terminate', $runRef);
+
+        if ($authorization instanceof HttpTransportResponse) {
+            return $authorization;
+        }
+
+        if ($this->stateManager === null) {
+            return $this->withAuthorization($this->notImplemented('terminate', '14_ENGINE/STATE-MANAGER.md'), $authorization);
+        }
+
+        if ($this->stateManager->currentState($runRef) === null) {
+            return $this->withAuthorization($this->error(404, 'UNKNOWN_RUN', sprintf('"%s" is not a known run reference.', $runRef)), $authorization);
+        }
+
+        $payload = $this->decode($body);
+        $reason = (!($payload instanceof HttpTransportResponse) && is_string($payload['reason'] ?? null))
+            ? $payload['reason']
+            : 'Termination requested via Workflow API.';
+
+        $this->stateManager->recordBlocker($runRef, $reason, 'Awaiting termination disposition from the Execution Engine under lifecycle or governance control.');
+
+        return $this->withAuthorization($this->json(200, [
+            'result' => ['run_ref' => $runRef, 'acknowledged' => true, 'terminated' => false],
+            'error' => null,
             'correlation_id' => $headers['x-correlation-id'],
         ]), $authorization);
     }

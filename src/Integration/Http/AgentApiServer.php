@@ -6,48 +6,52 @@ namespace SquirrelForge\Integration\Http;
 
 use JsonException;
 use SquirrelForge\Contracts\AuthorizationManagerInterface;
+use SquirrelForge\Coordination\SqliteHandoffProtocol;
+use SquirrelForge\Engine\SqliteStateManager;
 use SquirrelForge\Engine\TaskRouter;
 
 /**
  * HTTP transport contract for agent-facing operations, per
  * 22_INTERFACES/AGENT-API.md.
  *
- * Only `assign` is real. The spec's other three operations each name a
- * component this codebase does not have: `status` and `cancel` both
- * require `14_ENGINE/STATE-MANAGER.md` to own assignment lifecycle
- * state, and `handoff` requires `17_COORDINATION/HANDOFF-PROTOCOL.md`
- * -- neither exists anywhere in this codebase (17_COORDINATION has zero
- * src/ implementation at all). Rather than invent a lifecycle-state
- * store here that this spec's own Permission Boundary explicitly
- * forbids this class from owning ("must not... own assignment lifecycle
- * state"), those three routes return a real, typed `NOT_IMPLEMENTED`
- * error naming the missing owning component, the same honest-gap
- * convention this codebase uses throughout rather than fabricating a
- * store this class has no authority to own.
+ * `status`, `cancel`, and `handoff` compose the two components a
+ * second, independent audit pass found this codebase had built but
+ * never wired in here: `14_ENGINE/STATE-MANAGER.md` (as
+ * `SqliteStateManager`, commit `4d497c8`) and
+ * `17_COORDINATION/HANDOFF-PROTOCOL.md` (as `SqliteHandoffProtocol`,
+ * commit `b30fdf2`) -- both landed after this class's own `NOT_IMPLEMENTED`
+ * responses were written, and neither had been connected since. When
+ * either dependency is omitted, the route still returns the same real,
+ * typed `NOT_IMPLEMENTED` error this class always has -- composing
+ * them is additive, never a required upgrade for existing callers.
  *
- * assign() is a genuine composition, not a re-derivation: it forwards
- * directly to the injected `TaskRouter::route()` and returns exactly
- * what routing decided (`ROUTED`/`BLOCKED`, the selected owner, and
- * rejected candidates) -- this class never selects an agent or performs
- * capability matching itself, upholding "does not select the agent or
- * task owner." `assignmentRequestId` is a fresh per-call correlation
- * identifier, not a durable assignment record: since no component here
- * owns assignment lifecycle state to persist one against, minting an ID
- * that `status()` could later resolve would silently make this class
- * the de facto state owner the spec forbids it from being.
+ * `assign()` now genuinely initializes a state record for a successful
+ * route (`SqliteStateManager::initialize()` + `assignOwner()` +
+ * `recordTaskState('ROUTED')`), keyed by the same
+ * `assignment_request_id` the caller already receives -- this is what
+ * gives `status()` something real to answer from. A `BLOCKED` route
+ * never initializes state, since nothing was actually assigned.
  *
- * Every request requires identity, a permission reference, and a
- * correlation ID per the spec's own Request Requirements, verified via
- * the real injected `AuthorizationManagerInterface::authorize()` --
- * this class never decides authorization itself, only checks that the
- * caller's permission reference is one Authorization Manager actually
- * granted.
+ * `status()` is genuinely read-only, per "never mutates state": it
+ * only calls `SqliteStateManager::currentState()`, never a mutating
+ * method.
+ *
+ * `cancel()` and `handoff()` both stay inside this spec's own explicit
+ * boundary that a request "acknowledg[es]... not that cancellation
+ * occurred" / does not "execute handoff mechanics" itself: `cancel()`
+ * records a real blocker via `SqliteStateManager::recordBlocker()`
+ * rather than ever transitioning task state to a cancelled/terminal
+ * one, and `handoff()` hands the request to the real
+ * `SqliteHandoffProtocol::initiate()` and returns exactly what that
+ * component decided, never deciding acceptance itself.
  */
 final class AgentApiServer
 {
     public function __construct(
         private readonly ?TaskRouter $taskRouter = null,
-        private readonly ?AuthorizationManagerInterface $authorization = null
+        private readonly ?AuthorizationManagerInterface $authorization = null,
+        private readonly ?SqliteStateManager $stateManager = null,
+        private readonly ?SqliteHandoffProtocol $handoffProtocol = null
     ) {
     }
 
@@ -67,13 +71,19 @@ final class AgentApiServer
             $assignmentRequestId = rawurldecode($matches[1]);
             $action = $matches[2] ?? null;
 
-            return match ($action) {
-                'handoff' => $this->notImplemented('handoff', '17_COORDINATION/HANDOFF-PROTOCOL.md'),
-                'cancel' => $this->notImplemented('cancel', '14_ENGINE/STATE-MANAGER.md'),
-                default => $method === 'GET'
-                    ? $this->notImplemented('status', '14_ENGINE/STATE-MANAGER.md')
-                    : $this->error(405, 'METHOD_NOT_ALLOWED', 'The method is not allowed for this Agent API route.'),
-            };
+            if ($action === 'handoff' && $method === 'POST') {
+                return $this->handoff($assignmentRequestId, $headers, $body);
+            }
+
+            if ($action === 'cancel' && $method === 'POST') {
+                return $this->cancel($assignmentRequestId, $headers, $body);
+            }
+
+            if ($action === null && $method === 'GET') {
+                return $this->status($assignmentRequestId, $headers);
+            }
+
+            return $this->error(405, 'METHOD_NOT_ALLOWED', 'The method is not allowed for this Agent API route.');
         }
 
         return $this->error(404, 'UNKNOWN_ROUTE', 'The Agent API route is unknown.');
@@ -113,10 +123,18 @@ final class AgentApiServer
         }
 
         $route = $this->taskRouter->route($payload['task'], $payload['requirements'], $payload['context'] ?? []);
+        $assignmentRequestId = 'assignment_request_' . bin2hex(random_bytes(12));
+        $taskId = $payload['task']['task_id'];
+
+        if ($route['status'] === 'ROUTED' && $route['owner'] !== null && $this->stateManager !== null) {
+            $this->stateManager->initialize($assignmentRequestId, $taskId);
+            $this->stateManager->assignOwner($assignmentRequestId, $taskId, $route['owner']);
+            $this->stateManager->recordTaskState($assignmentRequestId, $taskId, 'ROUTED');
+        }
 
         return $this->withAuthorization($this->json(200, [
             'result' => [
-                'assignment_request_id' => 'assignment_request_' . bin2hex(random_bytes(12)),
+                'assignment_request_id' => $assignmentRequestId,
                 'task_id' => $route['task_id'],
                 'status' => $route['status'],
                 'owner' => $route['owner'],
@@ -124,6 +142,160 @@ final class AgentApiServer
                 'rationale' => $route['rationale'],
             ],
             'error' => null,
+            'correlation_id' => $headers['x-correlation-id'],
+        ]), $authorization);
+    }
+
+    /**
+     * Read-only: "Returns the current assignment state as tracked by
+     * TASK-ROUTER.md's routing states and STATE-MANAGER.md... never
+     * mutates state."
+     *
+     * @param array<string, string> $headers
+     */
+    private function status(string $assignmentRequestId, array $headers): HttpTransportResponse
+    {
+        $required = $this->requiredHeaders($headers);
+
+        if ($required !== null) {
+            return $required;
+        }
+
+        $authorization = $this->authorize($headers, 'agent.status', $assignmentRequestId);
+
+        if ($authorization instanceof HttpTransportResponse) {
+            return $authorization;
+        }
+
+        if ($this->stateManager === null) {
+            return $this->notImplemented('status', '14_ENGINE/STATE-MANAGER.md');
+        }
+
+        $state = $this->stateManager->currentState($assignmentRequestId);
+
+        if ($state === null) {
+            return $this->withAuthorization($this->error(404, 'UNKNOWN_ASSIGNMENT', sprintf('"%s" is not a known assignment request.', $assignmentRequestId)), $authorization);
+        }
+
+        return $this->withAuthorization($this->json(200, [
+            'result' => [
+                'assignment_request_id' => $assignmentRequestId,
+                'lifecycle_phase' => $state['lifecycle_phase'],
+                'tasks' => $state['tasks'],
+                'blocker_reason' => $state['blocker_reason'],
+                'next_safe_action' => $state['next_safe_action'],
+            ],
+            'error' => null,
+            'correlation_id' => $headers['x-correlation-id'],
+        ]), $authorization);
+    }
+
+    /**
+     * "Does not decide whether cancellation is permitted or perform
+     * it... returns a result acknowledging the request was received
+     * and correlated, not that cancellation occurred." Records a real
+     * blocker, never a cancelled/terminal state transition.
+     *
+     * @param array<string, string> $headers
+     */
+    private function cancel(string $assignmentRequestId, array $headers, ?string $body): HttpTransportResponse
+    {
+        $required = $this->requiredHeaders($headers);
+
+        if ($required !== null) {
+            return $required;
+        }
+
+        $authorization = $this->authorize($headers, 'agent.cancel', $assignmentRequestId);
+
+        if ($authorization instanceof HttpTransportResponse) {
+            return $authorization;
+        }
+
+        if ($this->stateManager === null) {
+            return $this->notImplemented('cancel', '14_ENGINE/STATE-MANAGER.md');
+        }
+
+        if ($this->stateManager->currentState($assignmentRequestId) === null) {
+            return $this->withAuthorization($this->error(404, 'UNKNOWN_ASSIGNMENT', sprintf('"%s" is not a known assignment request.', $assignmentRequestId)), $authorization);
+        }
+
+        $payload = $this->decode($body);
+        $reason = (!($payload instanceof HttpTransportResponse) && is_string($payload['reason'] ?? null))
+            ? $payload['reason']
+            : 'Cancellation requested via Agent API.';
+
+        $this->stateManager->recordBlocker($assignmentRequestId, $reason, 'Awaiting cancellation disposition from Task Router lifecycle or governance control.');
+
+        return $this->withAuthorization($this->json(200, [
+            'result' => [
+                'assignment_request_id' => $assignmentRequestId,
+                'acknowledged' => true,
+                'cancelled' => false,
+            ],
+            'error' => null,
+            'correlation_id' => $headers['x-correlation-id'],
+        ]), $authorization);
+    }
+
+    /**
+     * "Does not execute handoff mechanics -- the request is routed to
+     * 17_COORDINATION/HANDOFF-PROTOCOL.md."
+     *
+     * @param array<string, string> $headers
+     */
+    private function handoff(string $assignmentRequestId, array $headers, ?string $body): HttpTransportResponse
+    {
+        $required = $this->requiredHeaders($headers);
+
+        if ($required !== null) {
+            return $required;
+        }
+
+        $payload = $this->decode($body);
+
+        if ($payload instanceof HttpTransportResponse) {
+            return $payload;
+        }
+
+        if (!isset($payload['target']) || !is_string($payload['target']) || $payload['target'] === '') {
+            return $this->error(422, 'INVALID_HANDOFF_REQUEST', 'target is required.');
+        }
+
+        $authorization = $this->authorize($headers, 'agent.handoff', $assignmentRequestId);
+
+        if ($authorization instanceof HttpTransportResponse) {
+            return $authorization;
+        }
+
+        if ($this->stateManager === null || $this->handoffProtocol === null) {
+            return $this->notImplemented('handoff', '17_COORDINATION/HANDOFF-PROTOCOL.md');
+        }
+
+        $state = $this->stateManager->currentState($assignmentRequestId);
+
+        if ($state === null || $state['tasks'] === []) {
+            return $this->withAuthorization($this->error(404, 'UNKNOWN_ASSIGNMENT', sprintf('"%s" is not a known assignment request.', $assignmentRequestId)), $authorization);
+        }
+
+        $task = $state['tasks'][0];
+        $package = is_array($payload['package'] ?? null) ? $payload['package'] : [];
+
+        $handoffResult = $this->handoffProtocol->initiate([
+            'task_id' => $task['task_id'],
+            'current_agent' => $task['owner'],
+            'next_agent' => $payload['target'],
+            'artifacts' => $package['artifacts'] ?? [],
+            'notes' => $package['notes'] ?? null,
+        ]);
+
+        return $this->withAuthorization($this->json(200, [
+            'result' => [
+                'assignment_request_id' => $assignmentRequestId,
+                'handoff_id' => $handoffResult['handoff_id'],
+                'status' => $handoffResult['outcome'],
+            ],
+            'error' => $handoffResult['error'],
             'correlation_id' => $headers['x-correlation-id'],
         ]), $authorization);
     }
