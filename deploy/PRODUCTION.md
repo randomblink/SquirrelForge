@@ -15,6 +15,8 @@ Production startup requires:
 - a provider token containing at least 32 characters
 - a healthy external provider response
 
+See `deploy/CREDENTIAL-PROVIDER-CONTRACT.md` for the exact request/response contract the external provider must implement.
+
 Bootstrap identity, key, and permission variables are ignored in production.
 
 ## Startup sequence

@@ -98,7 +98,7 @@ Reusable provider conformance test cases define the minimum behavioral contract 
 
 The HTTP provider requires `SQUIRRELFORGE_CREDENTIAL_PROVIDER_URL` and `SQUIRRELFORGE_CREDENTIAL_PROVIDER_TOKEN`. Production readiness additionally requires an HTTPS URL and a provider token of at least 32 characters. The token is carried only in the provider request's Authorization header and must never enter payloads, errors, events, or application logs.
 
-The external gateway contract exposes protected JSON operations for secret registration, verification, rotation, and revocation; MFA verification; and security-event persistence. Non-success responses and invalid response schemas fail closed through safe local errors.
+The external gateway contract exposes protected JSON operations for secret registration, verification, rotation, and revocation; MFA verification; and security-event persistence. Non-success responses and invalid response schemas fail closed through safe local errors. The full request/response contract a provider must implement is specified in `deploy/CREDENTIAL-PROVIDER-CONTRACT.md`.
 
 ### Provider Resilience
 
