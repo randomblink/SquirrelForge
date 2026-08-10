@@ -220,6 +220,24 @@ These are requirements on the *server* you build, inferred from how the client i
 
 ---
 
+## Reference: the real, standalone server implementation of this contract
+
+`src/CredentialProvider/CredentialProviderRouter.php` implements every endpoint above and is meant to be run as its own deployed service (a different process/host than the SquirrelForge instance configured with `SQUIRRELFORGE_CREDENTIAL_PROVIDER=http-json` that calls it) — `deploy/mock-provider/` is a throwaway smoke-test double for CI; this is the genuine implementation.
+
+It composes already-real, already-tested pieces rather than reimplementing them: `SqliteSecretsManager` for `secrets/*` (the same class used as the `local` in-process provider), `SqliteSecurityEventSink` for `security-events`, and a new `MfaSecretStore`/`TotpVerifier` pair for `mfa/verify` — real RFC 6238 TOTP, since that role has no prior implementation to reuse (API-key material only ever needs one-way `password_hash()`; TOTP verification genuinely needs the secret back, so it is encrypted at rest via `SqliteEncryptionManager` rather than hashed).
+
+`CredentialProviderRouter` itself is transport-agnostic (`handle()` takes plain PHP values, returns `[httpStatus, responseBody]`); `public/credential-provider.php` is the HTTP entry point, following the same superglobals-only-at-the-edge pattern as `public/engine-api.php`. It is configured entirely by environment variables:
+
+| Variable | Required | Notes |
+|---|---|---|
+| `SQUIRRELFORGE_CREDENTIAL_PROVIDER_TOKEN` | yes | The Bearer token this server expects — the same value the calling SquirrelForge instance sets as its own `SQUIRRELFORGE_CREDENTIAL_PROVIDER_TOKEN`. Compared with `hash_equals()`. |
+| `SQUIRRELFORGE_CREDENTIAL_PROVIDER_MFA_MASTER_KEY` | yes | Base64-encoded 32-byte AES-256-GCM key used to encrypt TOTP secrets at rest. Missing, non-base64, or wrong-length values make the server refuse every request with `500 {"error": "server_misconfigured"}` (fail closed, never fall back to a default key). |
+| `SQUIRRELFORGE_CREDENTIAL_PROVIDER_DB` | no | SQLite database path for secrets, security events, and encryption audit records. Defaults to `var/credential-provider.sqlite`. |
+
+Run it the same way `deploy/entrypoint.sh` runs the main API — as the PHP built-in server's router script, not a docroot, so `REQUEST_URI` reaches the router unmodified: `php -S 0.0.0.0:8080 public/credential-provider.php`. Behind a real webserver instead, rewrite every path to this one script rather than serving it as a static docroot target.
+
+---
+
 ## Reference: the local (non-production) implementations this contract replaces
 
 `SqliteSecretsManager`, `StaticMfaVerifier`, `DenyHumanMfaVerifier`, and `SqliteSecurityEventSink` (`src/RuntimeConfig/` and `src/Security/`) are the in-process reference implementations of the same interfaces, used only in `local`/`test` environments (`RuntimeEnvironmentPolicy::allowsLocalProviders()`). Their behavior is the de facto specification for response *shape* used throughout this document; this contract is what an external service needs to implement to be a drop-in, production-ready replacement for all four at once.
