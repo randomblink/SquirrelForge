@@ -40,6 +40,28 @@ final class DeploymentPackagingTest extends TestCase
         $this->assertStringContainsString('exec php -S 0.0.0.0:8080', $entrypoint);
     }
 
+    public function testCredentialProviderContainerRunsPreflightAsNonRootAndUsesAuthenticatedHealthCheck(): void
+    {
+        $dockerfile = $this->contents('deploy/Dockerfile.credential-provider');
+        $entrypoint = $this->contents('deploy/entrypoint-credential-provider.sh');
+
+        $this->assertStringContainsString('USER www-data', $dockerfile);
+        $this->assertStringContainsString('apk upgrade --no-cache', $dockerfile);
+        $this->assertStringContainsString('/v1/provider/health', $dockerfile);
+        $this->assertStringContainsString('Authorization: Bearer', $dockerfile);
+        $this->assertStringContainsString(
+            'SQUIRRELFORGE_CREDENTIAL_PROVIDER_TOKEN',
+            $dockerfile
+        );
+        $this->assertStringContainsString(
+            'ENTRYPOINT ["/app/deploy/entrypoint-credential-provider.sh"]',
+            $dockerfile
+        );
+        $this->assertStringContainsString('php /app/bin/credential-provider-preflight.php', $entrypoint);
+        $this->assertStringContainsString('exec php -S 0.0.0.0:8080', $entrypoint);
+        $this->assertStringContainsString('/app/public/credential-provider.php', $entrypoint);
+    }
+
     public function testSmokeTestCoversReadinessAuthenticationSubmissionAndResult(): void
     {
         $smoke = $this->contents('bin/production-smoke-test.php');

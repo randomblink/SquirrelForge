@@ -15,7 +15,7 @@ Production startup requires:
 - a provider token containing at least 32 characters
 - a healthy external provider response
 
-See `deploy/CREDENTIAL-PROVIDER-CONTRACT.md` for the exact request/response contract the external provider must implement.
+See `deploy/CREDENTIAL-PROVIDER-CONTRACT.md` for the exact request/response contract the external provider must implement, and for its own reference server image (`deploy/Dockerfile.credential-provider`) if you don't already have a compliant provider — that image, its entrypoint, and its health check are separate from everything else in this document, which covers the Engine API image only.
 
 Bootstrap identity, key, and permission variables are ignored in production.
 

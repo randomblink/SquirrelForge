@@ -236,6 +236,25 @@ It composes already-real, already-tested pieces rather than reimplementing them:
 
 Run it the same way `deploy/entrypoint.sh` runs the main API — as the PHP built-in server's router script, not a docroot, so `REQUEST_URI` reaches the router unmodified: `php -S 0.0.0.0:8080 public/credential-provider.php`. Behind a real webserver instead, rewrite every path to this one script rather than serving it as a static docroot target.
 
+### Container image
+
+`deploy/Dockerfile.credential-provider` builds this service as its own image, independent of the main Engine API image (`deploy/Dockerfile`) — same base (`php:8.3-cli-alpine` + `pdo_sqlite`), same non-root `www-data` user and `/app/var` runtime volume convention, different entrypoint and health check:
+
+- `deploy/entrypoint-credential-provider.sh` runs `bin/credential-provider-preflight.php` before accepting traffic — the counterpart to `bin/runtime-preflight.php`, validating this server's own token/master-key/database configuration and booting every real component once (fails fast on a missing/malformed env var or an unwritable database directory, the same fail-fast intent as the main image's preflight) — then `exec php -S 0.0.0.0:8080 public/credential-provider.php`.
+- The image's `HEALTHCHECK` calls `GET /v1/provider/health` with the container's own `SQUIRRELFORGE_CREDENTIAL_PROVIDER_TOKEN` as its Bearer credential, read from the container's own environment — never logged, embedded in the image, or passed as a command argument. This differs from the main image's health check (`GET /v1/health/providers`, unauthenticated by design) because this router's authorization check deliberately runs before any route match, health included.
+
+Build and run standalone for local testing:
+
+```bash
+docker build -f deploy/Dockerfile.credential-provider -t squirrelforge-credential-provider .
+docker run --rm -p 8080:8080 \
+  -e SQUIRRELFORGE_CREDENTIAL_PROVIDER_TOKEN="$(openssl rand -base64 32)" \
+  -e SQUIRRELFORGE_CREDENTIAL_PROVIDER_MFA_MASTER_KEY="$(openssl rand -base64 32)" \
+  squirrelforge-credential-provider
+```
+
+There is deliberately no CI deployment gate, SBOM, signing, or staged-rollout pipeline for this image yet — `deploy/PRODUCTION.md`'s CI/supply-chain sections cover the main Engine API image only. Extending that pipeline to this image is a separate decision, not assumed here.
+
 ---
 
 ## Reference: the local (non-production) implementations this contract replaces
