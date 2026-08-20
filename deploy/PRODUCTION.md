@@ -55,6 +55,8 @@ The fixture provisioner requires `SQUIRRELFORGE_ALLOW_SMOKE_PROVISIONING=1`, cre
 
 Image publication or deployment jobs must depend on the successful `deployment-gate` job rather than rebuilding an unverified source revision independently.
 
+The credential-provider image (`deploy/Dockerfile.credential-provider`) has its own equivalent, independent gate: `credential-provider-gate`. It builds the image, provisions a single fixture TOTP secret via the gated `bin/provision-smoke-mfa.php` (mirroring `provision-smoke-identity.php`'s discipline, scoped to only that one secret), starts the container on its own isolated Docker network, waits for its authenticated health check, and runs `bin/credential-provider-smoke-test.php` against the register/verify/rotate/MFA-verify/security-event/revoke round trip. Unlike the main gate, no second mock-provider container is needed — this image has no outbound provider dependency of its own.
+
 ## Supply-chain publication
 
 Version tags matching `v*` activate the `publish` job only after `deployment-gate` succeeds. The gate:
@@ -78,6 +80,8 @@ The executable policy and operator procedure are defined in `deploy/ADMISSION.md
 Staged promotion and verified-digest rollback are defined in `deploy/ROLLOUT.md`. `composer rollout:release` verifies candidate and rollback admission, soaks a canary against readiness and error-rate thresholds, promotes stable only after success, and automatically restores the prior digest if stable degrades.
 
 Release-tag publication continues into an approval-gated GitHub `production` environment on a governed deployment runner. Configure required reviewers in repository environment settings; workflow YAML selects the protected environment but cannot define its reviewers. A release is successful only after promotion and the post-deployment observation window pass without rollback.
+
+`publish-credential-provider` applies the identical SBOM, vulnerability-gate, evidence, checksum-verification, GHCR push, Cosign signing, and provenance/SBOM attestation treatment to the credential-provider image independently, publishing it as its own package (`ghcr.io/<owner>/<repo>/credential-provider:<tag>`) rather than a second tag on the main image. It does not continue into `protected-rollout` — that job promotes only the main Engine API image, since no Kubernetes manifest, environment, or secrets exist yet for the credential-provider service.
 
 ## Backup and recovery
 

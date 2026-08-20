@@ -51,7 +51,7 @@ The success receipt contains candidate and rollback digests only. Preserve deplo
 
 ## Protected release job
 
-Release tags continue from publication into the `protected-rollout` job. The job targets the GitHub `production` environment; configure that environment with required reviewers, deployment-branch or tag protections, and the minimum Kubernetes credential secret. Workflow concurrency permits only one production release and never cancels an active rollout.
+Release tags continue from publication into the `protected-rollout` job. The job targets the GitHub `production` environment; configure that environment with required reviewers, deployment-branch or tag protections, and the minimum Kubernetes credential secret. Workflow concurrency permits only one production release and never cancels an active rollout. This job promotes only the main Engine API image (`needs: publish`); the credential-provider image is built, scanned, and published by its own independent `credential-provider-gate`/`publish-credential-provider` jobs but has no staged-rollout counterpart yet — see `deploy/CREDENTIAL-PROVIDER-CONTRACT.md`.
 
 The production runner is deliberately self-hosted and labeled `squirrelforge-production`. Its governed image must already contain reviewed versions of PHP, Kubernetes CLI, Curl, Awk, Cosign, GitHub CLI with attestation support, and Trivy. The job does not download mutable deployment tools.
 

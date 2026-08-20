@@ -31,6 +31,7 @@
     "rollback:release": "sh bin/rollback-release.sh",
     "rollout:release": "sh bin/rollout-release.sh",
     "runtime:preflight": "php bin/runtime-preflight.php",
+    "smoke:credential-provider": "php bin/credential-provider-smoke-test.php",
     "smoke:production": "php bin/production-smoke-test.php",
     "test": "phpunit",
     "test:coverage": "phpunit --coverage-text",

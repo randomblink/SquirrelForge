@@ -62,6 +62,85 @@ final class DeploymentPackagingTest extends TestCase
         $this->assertStringContainsString('/app/public/credential-provider.php', $entrypoint);
     }
 
+    public function testCredentialProviderGateBuildsSelfContainedTopologyAndBlocksOnSmokeFailure(): void
+    {
+        $workflow = $this->contents('.github/workflows/flock-deployment-gate.yml');
+        $provisioning = $this->contents('bin/provision-smoke-mfa.php');
+
+        foreach ([
+            'credential-provider-gate:',
+            'docker build --file deploy/Dockerfile.credential-provider',
+            'squirrelforge-credential-provider-ci-network',
+            'Authorization: Bearer $PROVIDER_TOKEN',
+            'http://squirrelforge-ci-credential-provider:8080/v1/provider/health',
+            '/app/bin/provision-smoke-mfa.php',
+            '/app/bin/credential-provider-smoke-test.php',
+        ] as $required) {
+            $this->assertStringContainsString($required, $workflow);
+        }
+
+        $this->assertStringContainsString(
+            "getenv('SQUIRRELFORGE_ALLOW_SMOKE_PROVISIONING') !== '1'",
+            $provisioning
+        );
+        $this->assertStringContainsString('MfaSecretStore', $provisioning);
+        $this->assertStringNotContainsString('SqliteIdentityManager', $provisioning);
+    }
+
+    public function testCredentialProviderSmokeTestCoversRegisterVerifyRotateMfaAndRevoke(): void
+    {
+        $smoke = $this->contents('bin/credential-provider-smoke-test.php');
+
+        foreach ([
+            '/v1/provider/health',
+            '/v1/provider/secrets/register',
+            '/v1/provider/secrets/verify',
+            '/v1/provider/secrets/rotate',
+            '/v1/provider/mfa/verify',
+            '/v1/provider/security-events',
+            '/v1/provider/secrets/revoke',
+            'TotpVerifier',
+        ] as $required) {
+            $this->assertStringContainsString($required, $smoke);
+        }
+
+        $this->assertStringNotContainsString('fwrite(STDOUT, $apiKey', $smoke);
+        $this->assertStringNotContainsString('fwrite(STDOUT, $mfaSecret', $smoke);
+        $this->assertStringNotContainsString('fwrite(STDOUT, $providerToken', $smoke);
+    }
+
+    public function testCredentialProviderPublicationUsesVerifiedDigestAndStaysOutOfProtectedRollout(): void
+    {
+        $workflow = $this->contents('.github/workflows/flock-deployment-gate.yml');
+
+        foreach ([
+            'publish-credential-provider:',
+            'needs: credential-provider-gate',
+            'ghcr.io/${REPOSITORY,,}/credential-provider',
+            'sbom-path: squirrelforge-credential-provider.cdx.json',
+        ] as $required) {
+            $this->assertStringContainsString($required, $workflow);
+        }
+
+        $this->assertSame(
+            4,
+            substr_count($workflow, 'aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25')
+        );
+        $this->assertSame(
+            2,
+            substr_count($workflow, 'sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6')
+        );
+        $this->assertSame(
+            4,
+            substr_count($workflow, 'actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26')
+        );
+
+        $rolloutStart = (int) strpos($workflow, 'protected-rollout:');
+        $rolloutEnd = (int) strpos($workflow, 'credential-provider-gate:');
+        $protectedRolloutSection = substr($workflow, $rolloutStart, $rolloutEnd - $rolloutStart);
+        $this->assertStringNotContainsString('credential-provider', $protectedRolloutSection);
+    }
+
     public function testSmokeTestCoversReadinessAuthenticationSubmissionAndResult(): void
     {
         $smoke = $this->contents('bin/production-smoke-test.php');
@@ -90,6 +169,7 @@ final class DeploymentPackagingTest extends TestCase
         );
 
         $this->assertSame('php bin/runtime-preflight.php', $composer['scripts']['runtime:preflight']);
+        $this->assertSame('php bin/credential-provider-smoke-test.php', $composer['scripts']['smoke:credential-provider']);
         $this->assertSame('php bin/production-smoke-test.php', $composer['scripts']['smoke:production']);
         $this->assertSame('sh bin/verify-release-image.sh', $composer['scripts']['admission:verify']);
         $this->assertSame('php bin/backup-engine.php', $composer['scripts']['backup:engine']);

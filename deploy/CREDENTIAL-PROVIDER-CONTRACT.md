@@ -253,7 +253,7 @@ docker run --rm -p 8080:8080 \
   squirrelforge-credential-provider
 ```
 
-There is deliberately no CI deployment gate, SBOM, signing, or staged-rollout pipeline for this image yet — `deploy/PRODUCTION.md`'s CI/supply-chain sections cover the main Engine API image only. Extending that pipeline to this image is a separate decision, not assumed here.
+`.github/workflows/flock-deployment-gate.yml` now builds, smoke-tests, SBOMs, vulnerability-scans, and — on a `v*` tag — publishes and Cosign-signs this image with build-provenance and CycloneDX SBOM attestations, via its own `credential-provider-gate`/`publish-credential-provider` jobs mirroring the main Engine API image's `deployment-gate`/`publish` (see `deploy/PRODUCTION.md`). There is deliberately still no staged-rollout pipeline for this image: `protected-rollout` promotes only the main Engine API image through canary/stable Kubernetes deployments. Standing up an equivalent Kubernetes topology, environment, and secrets for this second service is a separate decision, not assumed here.
 
 ---
 
