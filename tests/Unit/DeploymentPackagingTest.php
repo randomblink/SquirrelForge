@@ -109,7 +109,7 @@ final class DeploymentPackagingTest extends TestCase
         $this->assertStringNotContainsString('fwrite(STDOUT, $providerToken', $smoke);
     }
 
-    public function testCredentialProviderPublicationUsesVerifiedDigestAndStaysOutOfProtectedRollout(): void
+    public function testCredentialProviderPublicationUsesVerifiedDigestWithSupplyChainEvidence(): void
     {
         $workflow = $this->contents('.github/workflows/flock-deployment-gate.yml');
 
@@ -135,10 +135,83 @@ final class DeploymentPackagingTest extends TestCase
             substr_count($workflow, 'actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26')
         );
 
+        // The original protected-rollout job (main Engine API image only)
+        // must still never reference the credential-provider image or its
+        // distinctly-named vars/secrets -- the two releases stay fully
+        // independent even though both now have a staged-rollout job.
         $rolloutStart = (int) strpos($workflow, 'protected-rollout:');
         $rolloutEnd = (int) strpos($workflow, 'credential-provider-gate:');
         $protectedRolloutSection = substr($workflow, $rolloutStart, $rolloutEnd - $rolloutStart);
         $this->assertStringNotContainsString('credential-provider', $protectedRolloutSection);
+    }
+
+    public function testCredentialProviderProtectedRolloutPromotesIndependentlyOfMainImage(): void
+    {
+        $workflow = $this->contents('.github/workflows/flock-deployment-gate.yml');
+
+        foreach ([
+            'protected-rollout-credential-provider:',
+            'needs: publish-credential-provider',
+            'environment: production',
+            'squirrelforge-credential-provider-production-release',
+            'cancel-in-progress: false',
+            'runs-on: [self-hosted, linux, squirrelforge-production]',
+            'secrets.SQUIRRELFORGE_KUBECONFIG_BASE64',
+            'bin/verify-release-image.sh',
+            'bin/rollout-release.sh',
+            'bin/observe-release.sh',
+            'bin/rollback-release.sh',
+            'SQUIRRELFORGE_ADMISSION_RECEIPT_PATH: credential-provider-admission-receipt.json',
+            'SQUIRRELFORGE_ROLLOUT_RECEIPT_PATH: credential-provider-rollout-receipt.json',
+            'SQUIRRELFORGE_OBSERVE_RECEIPT_PATH: credential-provider-observation-receipt.json',
+            'SQUIRRELFORGE_ROLLBACK_RECEIPT_PATH: credential-provider-rollback-receipt.json',
+            'credential-provider-admission-receipt.json',
+            'credential-provider-rollout-receipt.json',
+            'credential-provider-observation-receipt.json',
+            'credential-provider-rollback-receipt.json',
+            'squirrelforge-credential-provider-production-rollout-',
+            "if: steps.observation.outcome == 'failure'",
+            'retention-days: 90',
+        ] as $required) {
+            $this->assertStringContainsString($required, $workflow);
+        }
+
+        // Every rollout/observe var it feeds bin/rollout-release.sh and
+        // bin/observe-release.sh with must come from the distinctly
+        // prefixed vars/secrets, never the main image's own unprefixed
+        // SQUIRRELFORGE_ROLLOUT_*/SQUIRRELFORGE_OBSERVE_* GitHub names --
+        // otherwise the two releases could silently collide.
+        $sectionStart = (int) strpos($workflow, 'protected-rollout-credential-provider:');
+        $this->assertGreaterThan(0, $sectionStart);
+        $section = substr($workflow, $sectionStart);
+
+        foreach ([
+            'vars.SQUIRRELFORGE_CREDENTIAL_PROVIDER_ROLLOUT_NAMESPACE',
+            'vars.SQUIRRELFORGE_CREDENTIAL_PROVIDER_ROLLOUT_STABLE_DEPLOYMENT',
+            'vars.SQUIRRELFORGE_CREDENTIAL_PROVIDER_ROLLOUT_CANARY_DEPLOYMENT',
+            'vars.SQUIRRELFORGE_CREDENTIAL_PROVIDER_ROLLOUT_CONTAINER',
+            'secrets.SQUIRRELFORGE_CREDENTIAL_PROVIDER_ROLLOUT_CANARY_READINESS_URL',
+            'secrets.SQUIRRELFORGE_CREDENTIAL_PROVIDER_ROLLOUT_STABLE_READINESS_URL',
+            'secrets.SQUIRRELFORGE_CREDENTIAL_PROVIDER_ROLLOUT_CANARY_ERROR_RATE_URL',
+            'secrets.SQUIRRELFORGE_CREDENTIAL_PROVIDER_ROLLOUT_STABLE_ERROR_RATE_URL',
+            'vars.SQUIRRELFORGE_CREDENTIAL_PROVIDER_ROLLOUT_MAXIMUM_ERROR_RATE_PERCENT',
+            'vars.SQUIRRELFORGE_CREDENTIAL_PROVIDER_OBSERVE_SAMPLE_COUNT',
+            'vars.SQUIRRELFORGE_CREDENTIAL_PROVIDER_OBSERVE_INTERVAL_SECONDS',
+        ] as $required) {
+            $this->assertStringContainsString($required, $section);
+        }
+
+        foreach ([
+            'vars.SQUIRRELFORGE_ROLLOUT_NAMESPACE',
+            'vars.SQUIRRELFORGE_ROLLOUT_STABLE_DEPLOYMENT',
+            'vars.SQUIRRELFORGE_ROLLOUT_CANARY_DEPLOYMENT',
+            'vars.SQUIRRELFORGE_ROLLOUT_CONTAINER',
+            'vars.SQUIRRELFORGE_ROLLOUT_MAXIMUM_ERROR_RATE_PERCENT',
+            'vars.SQUIRRELFORGE_OBSERVE_SAMPLE_COUNT',
+            'vars.SQUIRRELFORGE_OBSERVE_INTERVAL_SECONDS',
+        ] as $forbidden) {
+            $this->assertStringNotContainsString($forbidden, $section);
+        }
     }
 
     public function testSmokeTestCoversReadinessAuthenticationSubmissionAndResult(): void
