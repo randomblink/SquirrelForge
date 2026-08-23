@@ -77,6 +77,8 @@ Consumers must deploy by digest and verify the expected repository identity, Cos
 
 The executable policy and operator procedure are defined in `deploy/ADMISSION.md`. `composer admission:verify` must pass before rollout, and the orchestrator must receive the exact verified digest rather than the release tag.
 
+Neither the GitHub `production` environment nor any Kubernetes resource for either image exists yet; `deploy/PRODUCTION-STANDUP.md` is the one-time operator runbook for creating both before the first real release.
+
 Staged promotion and verified-digest rollback are defined in `deploy/ROLLOUT.md`. `composer rollout:release` verifies candidate and rollback admission, soaks a canary against readiness and error-rate thresholds, promotes stable only after success, and automatically restores the prior digest if stable degrades.
 
 Release-tag publication continues into an approval-gated GitHub `production` environment on a governed deployment runner. Configure required reviewers in repository environment settings; workflow YAML selects the protected environment but cannot define its reviewers. A release is successful only after promotion and the post-deployment observation window pass without rollback.
